@@ -1,6 +1,6 @@
 // Espelhos de Vendas — service worker (app offline + notificações)
-const V = 'espelhos-202609262033';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/badge-96.png', './icons/favicon-64.png'];
+const V = 'espelhos-202609262042';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png', './favicon-64.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -36,8 +36,8 @@ self.addEventListener('push', e => {
   e.waitUntil((async () => {
     await self.registration.showNotification(d.title || 'Espelhos de Vendas', {
       body: d.body || '',
-      icon: './icons/icon-192.png',
-      badge: './icons/badge-96.png',
+      icon: './icon-192.png',
+      badge: './badge-96.png',
       tag: d.tag || undefined,
       renotify: !!d.tag,
       data: { url: d.url || './', projeto: d.projeto || null },
