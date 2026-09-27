@@ -524,6 +524,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const plural = l => String(l||'').replace(/^Disponível/,'Disponíveis').replace(/^Reservada/,'Reservadas').replace(/^Vendida/,'Vendidas');
   const fmtBRL = v => 'R$ '+Math.round(v).toLocaleString('pt-BR');
   const fmtMil = v => v >= 1e6 ? 'R$ '+(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2})+' mi' : 'R$ '+Math.round(v/1000).toLocaleString('pt-BR')+' mil';
+  const M2 = v => v==null ? '' : (Number.isInteger(v) ? String(v) : Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));
   const fmtArea = a => a==null ? null : a.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' m²';
   const PC_DEFAULT = [{k:'pp',label:'Parcelado'},{k:'pv',label:'À vista'}];
   const PC = () => (P && Array.isArray(P.precos_campos) && P.precos_campos.length) ? P.precos_campos : PC_DEFAULT;
@@ -636,7 +637,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       else if(k==='final') vals = [...new Set(U.map(u=>u.final).filter(Boolean))].sort();
       else vals = [];
       for(const v of vals){
-        const lbl = k==='m2' ? v+' m²' : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
+        const lbl = k==='m2' ? M2(v)+' m²' : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
         const c = countDisp(u => u[k]===v && others(k)(u));
         box.appendChild(chip(lbl, state[k]===v, c, ()=>{ state[k] = (state[k]===v? null : v); if(k==='m2' && state.tipo!==null && tipoM2.get(state.tipo)!==state.m2) state.tipo=null; if(k==='tipo' && state.tipo!==null) state.m2 = tipoM2.get(state.tipo); update(); }));
       }
@@ -674,7 +675,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(G.barra_base){ const yb = TOP+FLS.length*PY+2; const g = el('g', {class:'gar'}); g.appendChild(el('rect', {x:colX(0), y:yb, width:COLS*PX-2, height:BAR_H, rx:3})); g.appendChild(el('text', {x:colX(0)+(COLS*PX-2)/2, y:yb+BAR_H-5.5}, G.barra_base)); svg.appendChild(g); }
     for(const u of U){
       if(!rowIndex.has(String(u.andar))) continue;
-      const l2 = u.tipo ? u.tipo+' · '+u.m2+'m²' : (u.m2 ? u.m2+' m² · '+catShort(u.cat) : catShort(u.cat));
+      const l2 = u.tipo ? u.tipo+' · '+M2(u.m2)+'m²' : (u.m2 ? M2(u.m2)+'m² · '+catShort(u.cat) : catShort(u.cat));
       const g = el('g', {class:'u st-'+u.st, transform:`translate(${colX(u.col)},${rowY(u.andar)})`, 'data-n':u.key, tabindex:'0', role:'button'});
       g.appendChild(el('rect', {class:'ring', x:-2, y:-2, width:CW+4, height:CH+4}));
       g.appendChild(el('rect', {class:'c', width:CW, height:CH}));
@@ -682,7 +683,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       g.appendChild(el('text', {class:'num', x:CW/2, y:11.5}, u.key));
       g.appendChild(el('text', {class:'tp', x:CW/2, y:19.5}, l2));
       g.appendChild(el('text', {class:'ct', x:CW/2, y:27}, ''));   // 3ª linha: preço ou categoria (definido em relayout)
-      if(!hasHover) g.appendChild(el('title', {}, `Unidade ${u.key} · ${[u.tipo, u.m2?u.m2+' m²':null, catName(u.cat)].filter(Boolean).join(' · ')} · ${floorLabel(u.andar)} · ${P.status[u.st]||u.st}`));
+      if(!hasHover) g.appendChild(el('title', {}, `Unidade ${u.key} · ${[u.tipo, u.m2?M2(u.m2)+' m²':null, catName(u.cat)].filter(Boolean).join(' · ')} · ${floorLabel(u.andar)} · ${P.status[u.st]||u.st}`));
       g.addEventListener('click', ()=>select(u.key, false));
       g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(u.key,false);} });
       svg.appendChild(g); cells.set(u.key, g);
@@ -701,9 +702,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     // 3ª linha da célula: preço (conforme o seletor) quando existe, senão a categoria (quando a 2ª linha é tipo/metragem)
     for(const u of U){ const g = cells.get(u.key); if(!g) continue; const t3 = g.querySelector('text.ct'), t2 = g.querySelector('text.tp'); const pr = priceOf(u, state.pm);
       if(pr!=null){ t3.textContent = fmtMil(pr); t3.setAttribute('class','ct pr');
-        if(u.tipo){ t2.textContent = u.tipo.replace('TIPO ','T')+' · '+u.m2+'m² · '+catShort(u.cat); t2.setAttribute('class','tp cmp'); } }
+        if(u.tipo){ t2.textContent = u.tipo.replace('TIPO ','T')+' · '+M2(u.m2)+'m² · '+catShort(u.cat); t2.setAttribute('class','tp cmp'); } }
       else { t3.textContent = u.tipo ? catShort(u.cat) : ''; t3.setAttribute('class','ct');
-        if(u.tipo){ t2.textContent = u.tipo+' · '+u.m2+'m²'; t2.setAttribute('class','tp'); } }
+        if(u.tipo){ t2.textContent = u.tipo+' · '+M2(u.m2)+'m²'; t2.setAttribute('class','tp'); } }
       const two = !t3.textContent; g.classList.toggle('two', two);
       g.querySelector('text.num').setAttribute('y', two ? 13.5 : 11.5); g.querySelector('text.tp').setAttribute('y', two ? 23 : 19.5);
     }
@@ -716,7 +717,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(pp!=null && pv!=null && pp){ const d = Math.round((1-pv/pp)*1000)/10; const c = cols.find(x=>x.k==='pv'); if(c && d>0) c.label += ' · −'+d.toLocaleString('pt-BR')+'%'; }
     return cols;
   }
-  function metaOf(u){ return [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2 ? u.m2+' m²' : null), catName(u.cat), floorLabel(u.andar), u.final ? 'Final '+u.final : null].filter(Boolean).join(' · '); }
+  function metaOf(u){ return [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2 ? M2(u.m2)+' m²' : null), catName(u.cat), floorLabel(u.andar), u.final ? 'Final '+u.final : null].filter(Boolean).join(' · '); }
   function tipHTML(u){
     const cols = priceCols(u);
     let h = '<div class="n"></div><div class="s"></div>';
@@ -743,7 +744,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     state.sel = key; const u = byN.get(key); const g = cells.get(key); if(g) g.classList.add('sel');
     document.querySelectorAll('.uc[data-n="'+CSS.escape(key)+'"]').forEach(x=>x.classList.add('sel'));
     $('s-num').textContent = u.key; $('s-num').className = 'big st-'+u.st;
-    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?u.m2+' m²':null), catName(u.cat)].filter(Boolean).join(' · ');
+    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat)].filter(Boolean).join(' · ');
     const pos = u.final ? 'Final '+u.final : 'posição '+(u.col+1)+' de '+P.grade.colunas;
     const vista = u.vista ? (P.vistas.find(v=>v.id===u.vista)||{}).label : null;
     $('s-s').textContent = [floorLabel(u.andar), vista, pos].filter(Boolean).join(' · ');
@@ -784,7 +785,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const vv = single ? ST_VAR[state.st] : null; const rect=b.g.querySelector('rect');
       rect.style.fill = vv ? `var(--${vv})` : ''; rect.style.stroke = vv ? `var(--${vv}-line)` : ''; b.t.style.fill = vv ? `var(--${vv}-ink)` : '';
     }
-    const parts=[]; if(state.m2!==null) parts.push(state.m2+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(single) parts.push((P.status[state.st]||'').toLowerCase());
+    const parts=[]; if(state.m2!==null) parts.push(M2(state.m2)+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(single) parts.push((P.status[state.st]||'').toLowerCase());
     $('f-resumo').textContent = parts.length ? 'Mostrando: '+parts.join(' · ') : 'Mostrando todas as '+U.length+' unidades';
     $('map-title').textContent = parts.length ? 'Mapa · '+parts.join(' · ') : 'Mapa de unidades';
     // per-floor list
@@ -798,7 +799,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const row = document.createElement('div'); row.className='floor';
       const fn = document.createElement('div'); fn.className='fn'; fn.innerHTML='<span></span><small></small>'; fn.firstChild.textContent = floorShort(f); fn.lastChild.textContent = us.length+' unid.';
       const units = document.createElement('div'); units.className='units';
-      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pr = priceOf(u, pmk); c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.m2?u.m2+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), pr!=null ? fmtMil(pr)+(pmk!==PC()[0].k?' '+pcLabel(pmk).toLowerCase():'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
+      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pr = priceOf(u, pmk); c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.m2?M2(u.m2)+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), pr!=null ? fmtMil(pr)+(pmk!==PC()[0].k?' '+pcLabel(pmk).toLowerCase():'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
       row.appendChild(fn); row.appendChild(units); floorsBox.appendChild(row);
     }
     if(!total){ const e=document.createElement('div'); e.className='empty'; e.textContent = 'Nenhuma unidade '+(P.status[listSt]||listSt).toLowerCase()+' com esses filtros.'; floorsBox.appendChild(e); }
@@ -815,7 +816,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       if(!rows.length) continue;
       const c={}; sts.forEach(s=>c[s]=0); rows.forEach(u=>{ if(c[u.st]!==undefined){ c[u.st]++; T[u.st]++; } });
       const tr=document.createElement('tr'); if(state[grp]===kv) tr.classList.add('on');
-      const lbl = grp==='tipo' ? `${kv} · ${tipoM2.get(kv)} m²` : grp==='final' ? 'Final '+kv : grp==='m2' ? kv+' m²' : catName(kv);
+      const lbl = grp==='tipo' ? `${kv} · ${tipoM2.get(kv)} m²` : grp==='final' ? 'Final '+kv : grp==='m2' ? M2(kv)+' m²' : catName(kv);
       tr.innerHTML = '<td></td>'+sts.map(s=>'<td class="c-'+s+'">'+c[s]+'</td>').join('')+'<td><b>'+rows.length+'</b></td>'; tr.firstChild.textContent=lbl;
       tr.addEventListener('click', ()=>{ state[grp] = (state[grp]===kv? null : kv); if(grp==='tipo') state.m2 = state.tipo ? tipoM2.get(kv) : state.m2; update(); });
       tb.appendChild(tr);
