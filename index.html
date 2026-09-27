@@ -72,6 +72,9 @@ button{font:inherit;color:inherit}
 
 /* project tabs */
 .tabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.app-link{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2);font-size:13px;text-decoration:none}
+.app-link:hover{border-color:var(--disp-line)}
+.app-link .go{margin-left:auto;color:var(--ink);white-space:nowrap}
 .tabs .tab{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 16px 8px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);cursor:pointer;text-align:left;min-width:180px}
 .tabs .tab b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:19px;font-weight:700;line-height:1.05}
 .tabs .tab small{font-size:11.5px;color:var(--muted)}
@@ -385,8 +388,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       <div class="hint" id="h-hint">Toque num filtro para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.</div>
     </div>
     <div class="meta">
-      <span><span class="dot"></span>Última mudança em <strong id="m-atualizado">—</strong></span>
-      <span id="m-conferido" class="muted"></span>
+      <span><span class="dot"></span><span id="m-conf-lbl">Conferido no sistema em</span> <strong id="m-conferido">—</strong><span id="m-conf-extra"></span></span>
+      <span class="muted">Última mudança de situação: <strong id="m-atualizado">—</strong></span>
       <span class="muted" id="m-total">—</span>
     </div>
   </header>
@@ -583,7 +586,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     // header
     $('h-nome').textContent = P.nome; $('h-sub').textContent = P.subtitulo || '';
     $('m-atualizado').textContent = fmtDate(P.atualizado_em);
-    $('m-conferido').textContent = P.conferido_em ? 'Conferido no sistema em '+fmtDate(P.conferido_em) : '';
+    $('m-conferido').textContent = fmtDate(P.conferido_em || P.atualizado_em);
     const nAnd = P.grade.andares.filter(f=>f!=='T').length, hasT = P.grade.andares.includes('T'); $('m-total').innerHTML = '<strong></strong> unidades · '+nAnd+' andares'+(hasT?' + térreo':'')+((P.grade.topo||[]).length?' + '+P.grade.topo.map(t=>t.texto.toLowerCase()).join(', '):''); $('m-total').querySelector('strong').textContent = U.length;
     $('m-fonte').textContent = (P.fonte || 'PDF do espelho') + (P.tabela ? (P.tabela.regra ? ' · preços: '+P.tabela.nome+' × metragem da planta (regra definida em '+fmtDate(P.tabela.atualizado_em)+')' : ' · preços: tabela '+P.tabela.nome+' (importada em '+fmtDate(P.tabela.atualizado_em)+')') : ''); $('m-nota').textContent = P.nota || '';
     const first = (P.campos||[])[0]; $('h-hint').innerHTML = first==='m2' ? 'Toque numa metragem para ver <b>só ela</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : first==='final' ? 'Toque num final (coluna) para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : 'Toque num filtro para ver <b>só ele</b> no prédio.';
@@ -899,16 +902,19 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const pid = window.ESPELHO && ESPELHO.current();
     const f = pid && CFG.fonte[pid];
     el.className = 'live';
+    { const p0 = pid && dados && dados.projetos.find(x=>x.id===pid); if(p0 && p0.conferido_em) confEm(p0.conferido_em, ''); }
     if(!navigator.onLine){ el.classList.add('off'); t.textContent = 'Sem internet'; el.title = 'Mostrando a última versão salva no aparelho.'; return; }
-    if(pid && !f){ const p = dados && dados.projetos.find(x=>x.id===pid); const c = $('m-conferido'); if(c) c.textContent = 'Atualização manual: último PDF do espelho importado em ' + (p && p.atualizado_em ? quando(p.atualizado_em) : '—'); el.classList.add('manual'); t.textContent = 'Atualização manual'; el.title = 'Este projeto é atualizado pelo PDF' + (p && p.atualizado_em ? ' · última em '+quando(p.atualizado_em) : ''); return; }
+    if(pid && !f){ const p = dados && dados.projetos.find(x=>x.id===pid); confLinha('Atualizado pelo PDF do espelho em', p && p.atualizado_em ? quando(p.atualizado_em) : '—', ''); el.classList.add('manual'); t.textContent = 'Atualização manual'; el.title = 'Este projeto é atualizado pelo PDF' + (p && p.atualizado_em ? ' · última em '+quando(p.atualizado_em) : ''); return; }
     const r = f && robo[f];
     if(!r){ el.classList.add('atraso'); t.textContent = 'Aguardando robô'; el.title = 'O robô de atualização ainda não enviou leitura.'; return; }
     const min = (Date.now() - new Date(r.visto_em)) / 60000;
     const em = r.info && r.info[pid] && r.info[pid].em;
-    if(em){ const c = $('m-conferido'); if(c) c.textContent = 'Conferido no sistema às ' + hora(em) + (min <= 4 ? ' · ao vivo, o robô confere a cada minuto' : ''); }
+    if(em) confEm(em, min <= 4 ? ' · ao vivo' : ' · robô parado');
     if(min <= 4){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(r.visto_em)+'</span>'; el.title = 'Conferido no sistema às '+hora(r.visto_em)+'. O espelho se atualiza sozinho.'; }
     else { el.classList.add('atraso'); t.textContent = 'Parado desde '+quando(r.visto_em); el.title = 'O robô de atualização não lê o sistema desde '+quando(r.visto_em)+'. Os dados podem estar desatualizados.'; }
   }
+  function confEm(iso, extra){ const hoje = new Date(iso).toDateString() === new Date().toDateString(); confLinha(hoje ? 'Conferido no sistema hoje às' : 'Conferido no sistema em', quando(iso), extra); }
+  function confLinha(lbl, val, extra){ const a=$('m-conf-lbl'), b=$('m-conferido'), c=$('m-conf-extra'); if(a) a.textContent = lbl; if(b) b.textContent = val; if(c) c.textContent = extra; }
   window.__onProjeto = () => renderLive();
 
   // ---------- dados ----------
@@ -1025,7 +1031,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       if(!r){ partes.push('<b>'+CFG.fonteNome[f]+':</b> aguardando a primeira leitura.'); continue; }
       const min = (Date.now() - new Date(r.visto_em)) / 60000;
       let s = '<b>'+CFG.fonteNome[f]+':</b> ' + (min <= 4 ? 'ao vivo, conferido às '+hora(r.visto_em) : 'parado desde '+quando(r.visto_em));
-      if(r.info && r.info.alerta && r.info.alerta_quando && (Date.now() - new Date(r.info.alerta_quando)) < 6*3600000) s += ' · <span style="color:var(--vend-text)">'+String(r.info.alerta).replace(/</g,'&lt;')+'</span>';
+      const leuDepois = r.info && Object.values(r.info).some(v => v && v.em && r.info.alerta_quando && new Date(v.em) > new Date(r.info.alerta_quando));
+      if(r.info && r.info.alerta && r.info.alerta_quando && !leuDepois && (Date.now() - new Date(r.info.alerta_quando)) < 6*3600000) s += ' · <span style="color:var(--vend-text)">'+String(r.info.alerta).replace(/</g,'&lt;')+'</span>';
       partes.push(s);
     }
     partes.push('<b>NEX Bela Cintra:</b> atualizado pelo PDF do espelho.');
