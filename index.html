@@ -433,6 +433,26 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 .seg2 button{white-space:nowrap}
 @media (max-width:560px){ #pn-buscas h2, #pn-prop h2, #pn-resumo h2{font-size:21px} }
 .painel .dica{font-size:12.5px;color:var(--muted);margin:-4px 0 0}
+
+/* ===== proposta com fluxo ===== */
+.pp-grid{display:flex;flex-direction:column;gap:14px}
+@media (min-width:900px){ .painel.painel-largo{width:min(1000px,100%)} .pp-grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start} .pp-prev{position:sticky;top:0;z-index:0} }
+.pp-form{display:flex;flex-direction:column;gap:12px}
+.pp-prev .pp-canvas{max-width:100%;width:100%;aspect-ratio:auto}
+@media (max-width:899px){ .pp-prev .pp-canvas{max-width:320px;margin:0 auto;display:block} }
+.seg2.seg-full{display:flex;width:100%}
+.seg2.seg-full button{flex:1}
+.fluxo{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:12px;padding:12px;background:color-mix(in srgb,var(--surface-2) 45%,var(--surface))}
+.fx-linha{display:flex;gap:8px;flex-wrap:wrap}
+.fx-linha .campo{flex:1 1 140px}
+.fx-linha .campo.curto{flex:0 1 110px}
+.painel .campo select{height:42px;border:1px solid var(--line-2);border-radius:10px;padding:0 10px;font:inherit;font-size:15px;font-weight:500;letter-spacing:0;text-transform:none;background:var(--surface);color:var(--ink);width:100%}
+.fx-resumo{font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:3px}
+.fx-resumo .l{display:flex;justify-content:space-between;gap:10px}
+.fx-resumo .l b{color:var(--ink)}
+.fx-resumo .ok{color:var(--disp-text);font-weight:600}
+.fx-resumo .erro{color:var(--vend-text);font-weight:600}
+#fx-an-c .campo:last-child{flex:0 1 150px}
 </style>
 </head>
 <body>
@@ -607,26 +627,53 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   </div>
 </div>
 
-<!-- Proposta em 10 segundos -->
+<!-- Proposta com fluxo de pagamento -->
 <div class="painel-fundo" id="pn-prop" hidden>
-  <div class="painel" role="dialog" aria-label="Enviar proposta">
-    <div class="top"><h2>Proposta da unidade <span id="pp-num"></span></h2><button class="xbtn" type="button" data-fechar aria-label="Fechar">×</button></div>
+  <div class="painel painel-largo" role="dialog" aria-label="Enviar proposta">
+    <div class="top"><h2>Proposta · unidade <span id="pp-num"></span></h2><button class="xbtn" type="button" data-fechar aria-label="Fechar">×</button></div>
     <div id="pp-alerta" class="aviso bad" hidden></div>
-    <canvas id="pp-canvas" width="1080" height="1350" class="pp-canvas" aria-label="Prévia do cartão da proposta"></canvas>
-    <label class="campo"><span>Cliente (opcional)</span><input id="pp-cli" maxlength="50" placeholder="Ex.: Maria"></label>
-    <div class="campo" id="pp-cond-c"><span>Condição</span><div class="seg2" id="pp-cond"></div></div>
-    <div class="duo2">
-      <label class="campo"><span>Válida até</span><input id="pp-val" type="date"></label>
-      <label class="campo"><span>Observação (opcional)</span><input id="pp-obs" maxlength="70" placeholder="Ex.: sinal facilitado"></label>
-    </div>
-    <div class="duo2">
-      <label class="campo"><span>Seu nome</span><input id="pp-cor" maxlength="40" placeholder="Corretor"></label>
-      <label class="campo"><span>Seu WhatsApp</span><input id="pp-tel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
-    </div>
-    <div class="row">
-      <button class="abtn primary" type="button" id="pp-enviar">Enviar no WhatsApp</button>
-      <button class="abtn" type="button" id="pp-copiar">Copiar texto</button>
-      <button class="abtn" type="button" id="pp-baixar">Baixar imagem</button>
+    <div class="pp-grid">
+      <div class="pp-prev"><canvas id="pp-canvas" width="1080" height="1350" class="pp-canvas" aria-label="Prévia do cartão da proposta"></canvas></div>
+      <div class="pp-form">
+        <div class="campo"><span>Tipo de proposta</span><div class="seg2 seg-full" id="pp-modo"></div></div>
+
+        <div id="pp-fluxo" class="fluxo">
+          <label class="campo"><span>Valor do imóvel</span><input id="fx-total" inputmode="decimal" placeholder="R$"></label>
+          <div class="fx-linha">
+            <label class="campo"><span>Entrada (R$ ou %)</span><input id="fx-ent" placeholder="Ex.: 13.600 ou 10%"></label>
+            <label class="campo curto"><span>Em quantas vezes</span><input id="fx-entq" inputmode="numeric" placeholder="1"></label>
+          </div>
+          <div class="fx-linha">
+            <label class="campo curto"><span>Mensais</span><input id="fx-mq" inputmode="numeric" placeholder="Qtd."></label>
+            <label class="campo"><span>Valor da mensal</span><input id="fx-mv" inputmode="decimal" placeholder="R$"></label>
+            <label class="campo curto"><span>1ª mensal</span><input id="fx-mi" type="month"></label>
+          </div>
+          <label class="ck"><input type="checkbox" id="fx-an"> Intermediárias anuais (balões)</label>
+          <div class="fx-linha" id="fx-an-c" hidden>
+            <label class="campo curto"><span>Anuais</span><input id="fx-aq" inputmode="numeric" placeholder="Qtd."></label>
+            <label class="campo"><span>Valor da anual</span><input id="fx-av" inputmode="decimal" placeholder="R$"></label>
+            <label class="campo curto"><span>Mês</span><select id="fx-am"></select></label>
+          </div>
+          <label class="campo"><span>O que sobrar vai para</span><select id="fx-sl"><option value="fin">Financiamento bancário</option><option value="chaves">Pagamento nas chaves</option></select></label>
+          <div class="fx-resumo" id="fx-resumo"></div>
+          <div class="row"><button class="abtn" type="button" id="fx-fechar">Distribuir o restante nas mensais</button></div>
+        </div>
+
+        <div class="duo2">
+          <label class="campo"><span>Cliente</span><input id="pp-cli" maxlength="50" placeholder="Ex.: Maria"></label>
+          <label class="campo"><span>Válida até</span><input id="pp-val" type="date"></label>
+        </div>
+        <label class="campo"><span>Observação (opcional)</span><input id="pp-obs" maxlength="90" placeholder="Ex.: parcelas corrigidas conforme contrato"></label>
+        <div class="duo2">
+          <label class="campo"><span>Seu nome</span><input id="pp-cor" maxlength="40" placeholder="Corretor"></label>
+          <label class="campo"><span>Seu WhatsApp</span><input id="pp-tel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
+        </div>
+        <div class="row">
+          <button class="abtn primary" type="button" id="pp-enviar">Enviar no WhatsApp</button>
+          <button class="abtn" type="button" id="pp-copiar">Copiar texto</button>
+          <button class="abtn" type="button" id="pp-baixar">Baixar imagem</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1375,9 +1422,16 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   $('btn-buscas').addEventListener('click', abrirBuscas);
 
   // =====================================================================
-  // 2) Proposta em 10 segundos
+  // 2) Proposta com fluxo de pagamento
   // =====================================================================
-  let ppInfo = null, ppCond = 'ambas', ppBtn = null;
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const MES3 = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const BRLc = v => 'R$ ' + (Math.round(v * 100) / 100).toLocaleString('pt-BR', {minimumFractionDigits: Math.round(v * 100) % 100 ? 2 : 0, maximumFractionDigits: 2});
+  const numBRL = s => { let t = String(s || '').trim().replace(/[R$\s]/g, ''); if(!t) return null; if(/,\d{1,2}$/.test(t)) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(/[.,]/g, ''); const n = Number(t); return isFinite(n) && n >= 0 ? n : null; };
+  const pct = (v, t) => t > 0 ? (Math.round(v / t * 1000) / 10).toLocaleString('pt-BR') + '%' : '';
+  const mesAno = ym => { if(!ym) return ''; const [y, m] = ym.split('-'); return MES3[+m - 1] + '/' + y; };
+  let ppInfo = null, ppModo = 'fluxo', ppBtn = null;
+  (function(){ const s = $('fx-am'); MESES.forEach((m, i) => { const o = document.createElement('option'); o.value = i + 1; o.textContent = m.charAt(0).toUpperCase() + m.slice(1); s.appendChild(o); }); s.value = '12'; })();
   window.__onUnidade = u => {
     if(!ppBtn){
       ppBtn = document.createElement('button'); ppBtn.type = 'button'; ppBtn.className = 'abtn primary pp-btn';
@@ -1393,100 +1447,197 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const p = dados.projetos.find(x => x.id === ppInfo.P.id); if(!p) return null;
     return p.unidades.find(a => String(a[0]) === String(ppInfo.u.n)) || null;
   }
+  const precoK = k => ppInfo && ppInfo.u.extra && ppInfo.u.extra[k] != null ? ppInfo.u.extra[k] : null;
+  function rotuloPreco(k){ const pc = (ppInfo.P.precos_campos || []).find(x => x.k === k); return pc ? pc.label : (k === 'pv' ? 'À vista' : k === 'pp' ? 'Parcelado' : k); }
+  function precoBase(){ return precoK('pp') != null ? precoK('pp') : (ppInfo.precos[0] ? ppInfo.precos[0].v : null); }
+  const K_FX = pid => 'espelhos-fluxo-' + pid;
+  function carregarFluxo(){
+    let f = {}; try{ f = JSON.parse(LS.get(K_FX(ppInfo.P.id)) || '{}'); }catch(e){}
+    const base = precoBase();
+    $('fx-total').value = base != null ? Math.round(base).toLocaleString('pt-BR') : '';
+    $('fx-ent').value = f.ent || '10%'; $('fx-entq').value = f.entq || '';
+    $('fx-mq').value = f.mq || ''; $('fx-mv').value = f.mv || '';
+    const hj = hojeSP(); const [y, m] = hj.split('-').map(Number); const prox = (m === 12 ? (y + 1) + '-01' : y + '-' + String(m + 1).padStart(2, '0'));
+    $('fx-mi').value = prox;
+    $('fx-an').checked = !!f.an; $('fx-an-c').hidden = !f.an; $('fx-aq').value = f.aq || ''; $('fx-av').value = f.av || ''; $('fx-am').value = f.am || '12';
+    $('fx-sl').value = f.sl || 'fin';
+  }
+  function guardarFluxo(){ LS.set(K_FX(ppInfo.P.id), JSON.stringify({ent: $('fx-ent').value, entq: $('fx-entq').value, mq: $('fx-mq').value, mv: $('fx-mv').value, an: $('fx-an').checked, aq: $('fx-aq').value, av: $('fx-av').value, am: $('fx-am').value, sl: $('fx-sl').value})); }
+  function calcFluxo(){
+    const total = numBRL($('fx-total').value) || 0;
+    const es = String($('fx-ent').value || '').trim();
+    let ent = 0; if(/%$/.test(es)){ const p = Number(es.replace('%', '').replace(',', '.')); ent = isFinite(p) ? Math.round(total * p) / 100 : 0; } else ent = numBRL(es) || 0;
+    const entq = Math.max(1, parseInt($('fx-entq').value, 10) || 1);
+    const mq = Math.max(0, parseInt($('fx-mq').value, 10) || 0), mv = numBRL($('fx-mv').value) || 0;
+    const an = $('fx-an').checked, aq = an ? Math.max(0, parseInt($('fx-aq').value, 10) || 0) : 0, av = an ? (numBRL($('fx-av').value) || 0) : 0;
+    const mi = $('fx-mi').value, am = +$('fx-am').value || 12;
+    const soma = ent + mq * mv + aq * av, resto = Math.round((total - soma) * 100) / 100;
+    const linhas = [];
+    if(ent > 0) linhas.push(entq > 1 ? {t: 'Entrada', d: entq + 'x de ' + BRLc(ent / entq), v: ent, parc: true} : {t: 'Entrada', d: 'Pagamento no ato', nota: 'no ato', v: ent});
+    if(mq > 0 && mv > 0) linhas.push({t: 'Mensais', d: mq + 'x de ' + BRLc(mv) + (mi ? ' · a partir de ' + mesAno(mi) : ''), v: mq * mv, parc: true});
+    if(aq > 0 && av > 0) linhas.push({t: 'Intermediárias anuais', d: aq + 'x de ' + BRLc(av) + ' · todo mês de ' + MESES[am - 1], v: aq * av, parc: true});
+    if(resto > 0.5) linhas.push({t: $('fx-sl').value === 'chaves' ? 'Nas chaves' : 'Financiamento bancário', d: $('fx-sl').value === 'chaves' ? 'Saldo na entrega das chaves' : 'Saldo financiado', v: resto});
+    return {total, ent, entq, mq, mv, aq, av, resto, linhas};
+  }
+  function renderFluxoResumo(){
+    const f = calcFluxo(), box = $('fx-resumo'); box.replaceChildren();
+    for(const l of f.linhas){ const d = document.createElement('div'); d.className = 'l'; d.innerHTML = '<span></span><b></b>'; d.firstChild.textContent = l.t + ' · ' + l.d; d.lastChild.textContent = BRLc(l.v) + ' (' + pct(l.v, f.total) + ')'; box.appendChild(d); }
+    const st = document.createElement('div');
+    if(!f.total) { st.className = 'erro'; st.textContent = 'Informe o valor do imóvel.'; }
+    else if(f.resto < -0.5){ st.className = 'erro'; st.textContent = 'O fluxo passou do valor do imóvel em ' + BRLc(-f.resto) + '. Ajuste as parcelas.'; }
+    else { st.className = 'ok'; st.textContent = 'Fluxo fecha em ' + BRLc(f.total) + ' (100%).'; }
+    box.appendChild(st);
+    $('fx-fechar').disabled = !(f.mq > 0 && f.total > 0);
+  }
+  $('fx-fechar').addEventListener('click', () => {
+    const f = calcFluxo(); if(!f.mq) return;
+    const mv = Math.max(0, (f.total - f.ent - f.aq * f.av) / f.mq);
+    $('fx-mv').value = (Math.round(mv * 100) / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    atualizarProposta();
+  });
+  $('fx-an').addEventListener('change', () => { $('fx-an-c').hidden = !$('fx-an').checked; atualizarProposta(); });
+  function montarModos(){
+    const seg = $('pp-modo'); seg.replaceChildren();
+    const ops = [['fluxo', 'Fluxo de pagamento']];
+    if(precoK('pv') != null) ops.push(['avista', 'À vista']);
+    if(ppInfo.precos.length) ops.push(['tabela', 'Valores da tabela']);
+    ppModo = 'fluxo';
+    for(const [v, l] of ops){ const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = l; if(v === ppModo) b.classList.add('on');
+      b.addEventListener('click', () => { ppModo = v; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === v)); $('pp-fluxo').hidden = v !== 'fluxo'; atualizarProposta(); }); seg.appendChild(b); }
+    $('pp-fluxo').hidden = false;
+  }
   async function abrirProposta(){
     ppInfo = window.ESPELHO && ESPELHO.unidade(); if(!ppInfo) return;
-    const {P, u, precos} = ppInfo;
+    const {P, u} = ppInfo;
     $('pp-num').textContent = u.key;
     const c = corretor(); $('pp-cor').value = c.nome || ''; $('pp-tel').value = c.tel || '';
     $('pp-cli').value = ''; $('pp-obs').value = '';
     $('pp-val').value = somaDias(hojeSP(), 3);
-    const seg = $('pp-cond'); seg.replaceChildren();
-    const ks = precos.map(x => x.k);
-    const ops = [];
-    if(ks.includes('pv')) ops.push(['pv', 'À vista']);
-    if(ks.includes('pp')) ops.push(['pp', 'Parcelado']);
-    for(const x of precos) if(x.k !== 'pv' && x.k !== 'pp') ops.push([x.k, x.label.replace(/ ·.*$/, '')]);
-    if(ops.length > 1) ops.push(['ambas', 'Todas']);
-    ppCond = ops.length > 1 ? 'ambas' : (ops[0] ? ops[0][0] : 'ambas');
-    for(const [v, l] of ops){ const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = l; if(v === ppCond) b.classList.add('on');
-      b.addEventListener('click', () => { ppCond = v; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === v)); desenhar(); }); seg.appendChild(b); }
-    $('pp-cond-c').hidden = !ops.length;
+    montarModos(); carregarFluxo();
     $('pp-alerta').hidden = true; $('pp-enviar').disabled = false;
     abrirJanela('pn-prop');
-    desenhar();
+    atualizarProposta();
     try{ await carregar(true); }catch(e){}
     const a = unidadeAtual();
     if(a && a[6] !== 'disponivel'){ const al = $('pp-alerta'); al.textContent = 'Atenção: esta unidade acabou de mudar para "' + (P.status[a[6]] || a[6]) + '" no sistema. Confira antes de enviar.'; al.hidden = false; $('pp-enviar').disabled = true; }
   }
-  ['pp-cli', 'pp-val', 'pp-obs', 'pp-cor', 'pp-tel'].forEach(id => $(id).addEventListener('input', () => {
-    if(id === 'pp-cor' || id === 'pp-tel') LS.set(K_COR, JSON.stringify({nome: $('pp-cor').value.trim(), tel: $('pp-tel').value.trim()}));
-    desenhar();
-  }));
-  function precosEscolhidos(){
-    const pr = ppInfo ? ppInfo.precos : [];
-    const lbl = x => x.k === 'pv' ? 'À vista' : x.k === 'pp' ? 'Parcelado' : x.label.replace(/ ·.*$/, '');
-    const lista = (ppCond === 'ambas' ? pr : pr.filter(x => x.k === ppCond)).map(x => ({k: x.k, label: lbl(x), v: x.v}));
-    return lista.sort((a, b) => (a.k === 'pv' ? 0 : 1) - (b.k === 'pv' ? 0 : 1));
-  }
+  function atualizarProposta(){ if(!ppInfo) return; if(ppModo === 'fluxo') renderFluxoResumo(); desenhar(); }
+  ['pp-cli', 'pp-val', 'pp-obs', 'pp-cor', 'pp-tel', 'fx-total', 'fx-ent', 'fx-entq', 'fx-mq', 'fx-mv', 'fx-mi', 'fx-aq', 'fx-av', 'fx-am', 'fx-sl'].forEach(id => {
+    const h = () => {
+      if(id === 'pp-cor' || id === 'pp-tel') LS.set(K_COR, JSON.stringify({nome: $('pp-cor').value.trim(), tel: $('pp-tel').value.trim()}));
+      if(id.startsWith('fx-') && ppInfo) guardarFluxo();
+      atualizarProposta();
+    };
+    $(id).addEventListener('input', h); $(id).addEventListener('change', h);
+  });
   const dataBR = iso => iso ? iso.split('-').reverse().join('/') : '';
   function endereco(P){ const s = P.subtitulo || ''; const i = s.indexOf(' · '); return i >= 0 ? s.slice(i + 3) : s; }
+  function detalheUnidade(sep){ const {u, area, andar} = ppInfo; return [u.tipo ? u.tipo.replace(/^TIPO /, 'Tipo ') : null, area, andar === 'Térreo' ? 'Térreo' : andar + ' andar'].filter(Boolean).join(sep); }
+  function precosModo(){
+    if(ppModo === 'avista') return precoK('pv') != null ? [{label: 'À vista', v: precoK('pv')}] : [];
+    const pr = ppInfo.precos.map(x => ({k: x.k, label: rotuloPreco(x.k), v: x.v}));
+    return pr.sort((a, b) => (a.k === 'pv' ? 0 : 1) - (b.k === 'pv' ? 0 : 1));
+  }
   function textoProposta(){
-    const {P, u, area, andar} = ppInfo; const pr = precosEscolhidos();
-    const linhas = ['*' + P.nome + '* — Unidade ' + u.key, [u.tipo ? u.tipo.replace(/^TIPO /, 'Tipo ') : null, area, andar === 'Térreo' ? 'térreo' : andar + ' andar'].filter(Boolean).join(' · ')];
-    if(pr.length) for(const x of pr) linhas.push(x.label + ': *' + BRL(x.v) + '*');
-    else linhas.push('Valores e condições sob consulta.');
+    const {P, u} = ppInfo;
+    const L = ['*' + P.nome + '* — Unidade ' + u.key, detalheUnidade(' · ')];
+    if(ppModo === 'fluxo'){
+      const f = calcFluxo();
+      L.push('Valor do imóvel: *' + BRLc(f.total) + '*', '', '*Fluxo de pagamento*');
+      for(const l of f.linhas) L.push(l.parc ? '• ' + l.t + ': ' + l.d + ' — total ' + BRLc(l.v) + ' (' + pct(l.v, f.total) + ')' : '• ' + l.t + (l.nota ? ' (' + l.nota + ')' : '') + ': ' + BRLc(l.v) + ' (' + pct(l.v, f.total) + ')');
+    } else {
+      const pr = precosModo();
+      if(pr.length) for(const x of pr) L.push(x.label + ': *' + BRLc(x.v) + '*'); else L.push('Valores e condições sob consulta.');
+    }
+    L.push('');
     const cli = $('pp-cli').value.trim(), obs = $('pp-obs').value.trim(), val = $('pp-val').value;
-    if(obs) linhas.push(obs);
-    linhas.push((cli ? 'Proposta para ' + cli + ' · ' : '') + (val ? 'válida até ' + dataBR(val) + '.' : ''));
-    linhas.push('Sujeito à disponibilidade no momento da reserva.');
-    const c = corretor(); if(c.nome || c.tel) linhas.push('— ' + [c.nome, c.tel].filter(Boolean).join(' · '));
-    return linhas.filter(Boolean).join('\n');
+    if(obs) L.push(obs);
+    if(cli || val) L.push((cli ? 'Proposta para ' + cli : 'Proposta') + (val ? ' · válida até ' + dataBR(val) : '') + '.');
+    L.push('Sujeito à disponibilidade no momento da reserva.');
+    const c = corretor(); if(c.nome || c.tel) L.push('— ' + [c.nome, c.tel].filter(Boolean).join(' · '));
+    return L.join('\n').replace(/\n{3,}/g, '\n\n');
   }
   function rrect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
-  function caber(g, txt, max, px, peso, fam){ let s = px; g.font = peso + ' ' + s + 'px ' + fam; while(g.measureText(txt).width > max && s > 20){ s -= 2; g.font = peso + ' ' + s + 'px ' + fam; } return s; }
+  function caber(g, txt, max, px, peso, fam){ let s = px; g.font = peso + ' ' + s + 'px ' + fam; while(g.measureText(txt).width > max && s > 16){ s -= 2; g.font = peso + ' ' + s + 'px ' + fam; } return s; }
   let fontesOk = false;
   async function desenhar(){
     if(!ppInfo) return;
-    if(!fontesOk){ try{ await Promise.all(['700 100px "Barlow Condensed"', '600 40px "Barlow Condensed"', '500 40px "IBM Plex Sans"', '600 40px "IBM Plex Sans"'].map(f => document.fonts.load(f))); }catch(e){} fontesOk = true; }
-    const {P, u, area, andar} = ppInfo; const cv = $('pp-canvas'), g = cv.getContext('2d'), W = 1080, H = 1350;
+    if(!fontesOk){ try{ await Promise.all(['700 100px "Barlow Condensed"', '600 40px "Barlow Condensed"', '500 40px "IBM Plex Sans"', '600 40px "IBM Plex Sans"', '700 40px "IBM Plex Sans"'].map(f => document.fonts.load(f))); }catch(e){} fontesOk = true; }
+    const {P, u} = ppInfo; const cv = $('pp-canvas'), W = 1080;
     const BC = '"Barlow Condensed","Arial Narrow",sans-serif', PX = '"IBM Plex Sans",system-ui,-apple-system,sans-serif';
+    const AZ = '#2447c9', TX = '#182030', T2 = '#4b5566', MU = '#7b8494', LN = '#e3e6ec';
+    const fl = ppModo === 'fluxo' ? calcFluxo() : null;
+    const cli = $('pp-cli').value.trim(), obs = $('pp-obs').value.trim(), val = $('pp-val').value;
+    const extra = (cli ? 1 : 0) + (obs ? 1 : 0);
+    const H = fl ? Math.max(1350, 1230 + fl.linhas.length * 112 + extra * 56) : 1350;
+    if(cv.height !== H) cv.height = H;
+    const g = cv.getContext('2d');
     g.clearRect(0, 0, W, H); g.textBaseline = 'alphabetic'; g.textAlign = 'left';
     g.fillStyle = '#eef1f6'; g.fillRect(0, 0, W, H);
-    g.fillStyle = '#2447c9'; g.fillRect(0, 0, W, 360);
-    g.fillStyle = '#ffffff'; caber(g, P.nome, W - 160, 104, '700', BC); g.fillText(P.nome, 80, 150);
-    g.fillStyle = 'rgba(255,255,255,.86)'; caber(g, endereco(P), W - 160, 34, '500', PX); g.fillText(endereco(P), 80, 206);
-    g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '600 24px ' + PX; g.fillText('PROPOSTA DE UNIDADE', 80, 266);
-    g.save(); g.shadowColor = 'rgba(24,32,48,.16)'; g.shadowBlur = 40; g.shadowOffsetY = 12; g.fillStyle = '#ffffff'; rrect(g, 60, 300, W - 120, 860, 36); g.fill(); g.restore();
-    g.fillStyle = '#7b8494'; g.font = '600 26px ' + PX; g.fillText('UNIDADE', 110, 380);
-    g.fillStyle = '#182030'; caber(g, String(u.key), 560, 210, '700', BC); g.fillText(String(u.key), 104, 560);
-    g.font = '700 28px ' + PX; const stx = 'DISPONÍVEL', sw = g.measureText(stx).width + 44;
-    g.fillStyle = '#cdf3a4'; rrect(g, W - 110 - sw, 348, sw, 54, 27); g.fill(); g.fillStyle = '#1e5a22'; g.fillText(stx, W - 110 - sw + 22, 385);
-    const det = [u.tipo ? u.tipo.replace(/^TIPO /, 'Tipo ') : null, area, andar === 'Térreo' ? 'Térreo' : andar + ' andar'].filter(Boolean).join('  ·  ');
-    g.fillStyle = '#4b5566'; caber(g, det, W - 220, 40, '500', PX); g.fillText(det, 110, 630);
-    g.strokeStyle = '#dcdfe6'; g.lineWidth = 2; g.beginPath(); g.moveTo(110, 680); g.lineTo(W - 110, 680); g.stroke();
-    const pr = precosEscolhidos();
-    if(!pr.length){ g.fillStyle = '#182030'; g.font = '600 46px ' + PX; g.fillText('Valores e condições sob consulta', 110, 790); }
-    else if(pr.length === 1){ g.fillStyle = '#7b8494'; g.font = '600 28px ' + PX; g.fillText(pr[0].label.toUpperCase(), 110, 745); g.fillStyle = '#182030'; caber(g, BRL(pr[0].v), W - 220, 150, '700', BC); g.fillText(BRL(pr[0].v), 104, 880); }
-    else { const col = (W - 220) / Math.min(pr.length, 2);
-      pr.slice(0, 2).forEach((x, i) => { const x0 = 110 + i * col; g.fillStyle = '#7b8494'; g.font = '600 26px ' + PX; g.fillText(x.label.toUpperCase(), x0, 745);
-        g.fillStyle = i === 0 ? '#2447c9' : '#182030'; caber(g, BRL(x.v), col - 30, 104, '700', BC); g.fillText(BRL(x.v), x0 - 4, 850); });
-      const pv = pr.find(x => x.k === 'pv'), pp = pr.find(x => x.k === 'pp');
-      if(pv && pp && pp.v > pv.v){ const d = Math.round((1 - pv.v / pp.v) * 1000) / 10; g.fillStyle = '#2b7a30'; g.font = '600 28px ' + PX; g.fillText('−' + d.toLocaleString('pt-BR') + '% à vista', 110, 900); } }
-    const cli = $('pp-cli').value.trim(), obs = $('pp-obs').value.trim(), val = $('pp-val').value;
-    let y = 985;
-    if(cli){ g.fillStyle = '#182030'; caber(g, 'Proposta para ' + cli, W - 220, 40, '600', PX); g.fillText('Proposta para ' + cli, 110, y); y += 56; }
-    if(obs){ g.fillStyle = '#4b5566'; caber(g, obs, W - 220, 32, '500', PX); g.fillText(obs, 110, y); y += 50; }
+    // cabeçalho
+    g.fillStyle = AZ; g.fillRect(0, 0, W, 330);
+    g.fillStyle = 'rgba(255,255,255,.72)'; g.font = '600 24px ' + PX; g.fillText('PROPOSTA COMERCIAL', 80, 92);
+    g.textAlign = 'right'; g.fillText(dataBR(hojeSP()), W - 80, 92); g.textAlign = 'left';
+    g.fillStyle = '#fff'; caber(g, P.nome, W - 160, 96, '700', BC); g.fillText(P.nome, 78, 188);
+    g.fillStyle = 'rgba(255,255,255,.86)'; caber(g, endereco(P), W - 160, 32, '500', PX); g.fillText(endereco(P), 80, 238);
+    // cartão
+    const cy = 280, ch = H - cy - 190;
+    g.save(); g.shadowColor = 'rgba(24,32,48,.16)'; g.shadowBlur = 40; g.shadowOffsetY = 12; g.fillStyle = '#fff'; rrect(g, 60, cy, W - 120, ch, 34); g.fill(); g.restore();
+    const X = 110, XR = W - 110;
+    g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('UNIDADE', X, cy + 70);
+    g.fillStyle = TX; caber(g, String(u.key), 380, 150, '700', BC); g.fillText(String(u.key), X - 4, cy + 205);
+    g.font = '700 24px ' + PX; const stx = 'DISPONÍVEL', sw = g.measureText(stx).width + 40;
+    g.fillStyle = '#cdf3a4'; rrect(g, XR - sw, cy + 40, sw, 48, 24); g.fill(); g.fillStyle = '#1e5a22'; g.fillText(stx, XR - sw + 20, cy + 73);
+    g.fillStyle = T2; const det = detalheUnidade('  ·  '); caber(g, det, XR - X, 36, '500', PX); g.fillText(det, X, cy + 262);
+    g.strokeStyle = LN; g.lineWidth = 2; g.beginPath(); g.moveTo(X, cy + 300); g.lineTo(XR, cy + 300); g.stroke();
+    let y = cy + 300;
+    if(fl){
+      g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('VALOR DO IMÓVEL', X, y + 58);
+      g.fillStyle = AZ; caber(g, BRLc(fl.total), XR - X, 88, '700', BC); g.fillText(BRLc(fl.total), X - 3, y + 142);
+      y += 190;
+      g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('FLUXO DE PAGAMENTO', X, y);
+      y += 22;
+      fl.linhas.forEach((l, i) => {
+        const ry = y + i * 112, rh = 100;
+        g.fillStyle = i % 2 ? '#fff' : '#f4f6fa'; rrect(g, X - 16, ry, XR - X + 32, rh, 16); g.fill();
+        g.fillStyle = TX; caber(g, l.t, 520, 34, '700', PX); g.fillText(l.t, X + 6, ry + 44);
+        g.fillStyle = T2; caber(g, l.d, 560, 26, '500', PX); g.fillText(l.d, X + 6, ry + 80);
+        g.textAlign = 'right'; g.fillStyle = TX; g.font = '700 34px ' + PX; g.fillText(BRLc(l.v), XR - 6, ry + 46);
+        g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText(pct(l.v, fl.total), XR - 6, ry + 80); g.textAlign = 'left';
+      });
+      y += fl.linhas.length * 112 + 18;
+      g.strokeStyle = TX; g.lineWidth = 3; g.beginPath(); g.moveTo(X, y); g.lineTo(XR, y); g.stroke();
+      const fecha = Math.abs(fl.resto) <= 0.5 || fl.resto > 0.5;
+      g.fillStyle = TX; g.font = '700 32px ' + PX; g.fillText('Total', X + 6, y + 50);
+      g.textAlign = 'right'; g.fillText(BRLc(fecha ? fl.total : fl.total - fl.resto) + (fecha ? '  ·  100%' : ''), XR - 6, y + 50); g.textAlign = 'left';
+      y += 110;
+    } else {
+      const pr = precosModo();
+      if(!pr.length){ g.fillStyle = TX; g.font = '600 44px ' + PX; g.fillText('Valores e condições sob consulta', X, y + 120); }
+      else if(pr.length === 1){ g.fillStyle = MU; g.font = '600 26px ' + PX; g.fillText(pr[0].label.toUpperCase(), X, y + 70); g.fillStyle = AZ; caber(g, BRLc(pr[0].v), XR - X, 150, '700', BC); g.fillText(BRLc(pr[0].v), X - 4, y + 210); }
+      else { const col = (XR - X) / 2;
+        pr.slice(0, 2).forEach((x, i) => { const x0 = X + i * col; g.fillStyle = MU; g.font = '600 26px ' + PX; g.fillText(x.label.toUpperCase(), x0, y + 70);
+          g.fillStyle = i === 0 ? AZ : TX; caber(g, BRLc(x.v), col - 30, 100, '700', BC); g.fillText(BRLc(x.v), x0 - 4, y + 170); });
+        const pv = pr.find(x => x.k === 'pv'), pp = pr.find(x => x.k === 'pp');
+        if(pv && pp && pp.v > pv.v){ const d = Math.round((1 - pv.v / pp.v) * 1000) / 10; g.fillStyle = '#2b7a30'; g.font = '600 28px ' + PX; g.fillText('−' + d.toLocaleString('pt-BR') + '% à vista', X, y + 218); } }
+      y += 260;
+    }
+    if(cli){ g.fillStyle = TX; caber(g, 'Proposta para ' + cli, XR - X, 38, '600', PX); g.fillText('Proposta para ' + cli, X, y + 20); y += 52; }
+    if(obs){ g.fillStyle = T2; caber(g, obs, XR - X, 30, '500', PX); g.fillText(obs, X, y + 20); y += 52; }
     const rod = (val ? 'Válida até ' + dataBR(val) + ' · ' : '') + 'sujeito à disponibilidade no momento da reserva';
-    g.fillStyle = '#7b8494'; caber(g, rod, W - 220, 26, '500', PX); g.fillText(rod, 110, 1118);
-    const c = corretor();
-    g.fillStyle = '#182030'; g.font = '600 40px ' + PX; if(c.nome) g.fillText(c.nome, 80, 1240);
-    g.fillStyle = '#4b5566'; g.font = '500 34px ' + PX; if(c.tel) g.fillText(c.tel, 80, c.nome ? 1290 : 1240);
-    g.fillStyle = '#7b8494'; g.font = '500 22px ' + PX; g.textAlign = 'right'; g.fillText('Valores da tabela vigente em ' + dataBR(hojeSP()), W - 80, 1290); g.textAlign = 'left';
+    g.fillStyle = MU; caber(g, rod, XR - X, 24, '500', PX); g.fillText(rod, X, cy + ch - 44);
+    // rodapé
+    const c = corretor(), fy = H - 110;
+    if(c.nome){ g.fillStyle = TX; g.font = '700 38px ' + PX; g.fillText(c.nome, 80, fy); }
+    if(c.tel){ g.fillStyle = T2; g.font = '500 32px ' + PX; g.fillText(c.tel, 80, c.nome ? fy + 46 : fy); }
+    g.fillStyle = MU; g.font = '500 22px ' + PX; g.textAlign = 'right'; g.fillText('Valores da tabela vigente em ' + dataBR(hojeSP()), W - 80, fy + 46); g.textAlign = 'left';
   }
   function arquivoProposta(){ return new Promise(res => $('pp-canvas').toBlob(b => res(new File([b], 'proposta-' + ppInfo.P.id + '-' + ppInfo.u.key + '.png', {type: 'image/png'})), 'image/png')); }
   function baixar(f){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+  function fluxoInvalido(){ if(ppModo !== 'fluxo') return null; const f = calcFluxo(); if(!f.total) return 'Informe o valor do imóvel.'; if(f.resto < -0.5) return 'O fluxo passou do valor do imóvel. Ajuste antes de enviar.'; return null; }
   $('pp-enviar').addEventListener('click', async () => {
-    if(!ppInfo) return; await desenhar(); const f = await arquivoProposta(), txt = textoProposta();
+    if(!ppInfo) return; const inv = fluxoInvalido(); if(inv){ toast(inv, 4500); return; }
+    await desenhar(); const f = await arquivoProposta(), txt = textoProposta();
     try{
       if(navigator.canShare && navigator.canShare({files: [f]})){ await navigator.share({files: [f], text: txt, title: ppInfo.P.nome + ' · unidade ' + ppInfo.u.key}); return; }
     }catch(e){ if(e && e.name === 'AbortError') return; }
