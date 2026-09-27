@@ -1,5 +1,5 @@
 // Espelhos de Vendas — service worker (app offline + notificações)
-const V = 'espelhos-202609271907';
+const V = 'espelhos-202609272026';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png', './favicon-64.png'];
 
 self.addEventListener('install', e => {
@@ -9,12 +9,17 @@ self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('espelhos-') && k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
+const ESCOPO = new URL('./', self.location).pathname;
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const u = new URL(req.url);
   if (u.origin === self.location.origin) {
+    const rel = u.pathname.startsWith(ESCOPO) ? u.pathname.slice(ESCOPO.length) : u.pathname;
+    if (rel.includes('/')) return;                       // subpastas (ex.: nex/) não são do app: não guarda nem intercepta
     if (req.mode === 'navigate') {
+      if (rel !== '' && rel !== 'index.html') return;
       e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(V).then(c => c.put('./index.html', cp)); return r; })
         .catch(() => caches.match('./index.html')));
       return;
@@ -49,12 +54,13 @@ self.addEventListener('push', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const alvo = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  const alvo = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope);
+  const raiz = new URL('./', self.registration.scope).pathname;
+  const doApp = p => p === raiz || p === raiz + 'index.html';
   e.waitUntil((async () => {
     const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const c of cs) {
-      if (c.url.startsWith(self.registration.scope)) { await c.focus(); c.postMessage({ tipo: 'abrir', url: alvo }); return; }
-    }
-    await self.clients.openWindow(alvo);
+    const mesma = cs.find(c => { const p = new URL(c.url).pathname; return p === alvo.pathname || (doApp(p) && doApp(alvo.pathname)); });
+    if (mesma) { await mesma.focus(); mesma.postMessage({ tipo: 'abrir', url: alvo.href }); return; }
+    await self.clients.openWindow(alvo.href);
   })());
 });
