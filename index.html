@@ -874,7 +874,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     key: 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP',
     vapid: 'BI8mWAmkgfYL1lUm7gPdQ3JYK-YmFS_drWs7PfvbsU50oBFJKtbULXwWKp3BSE0cnWyAeBBIlXErynB_oQ6QmZo',
     fonte: {'raj-mendes':'bll', 'consolacao':'cv', 'sumare':'cv', 'nex-bela-cintra':'one'},
-    fonteNome: {bll:'BLL (RAJ MENDES)', cv:'CV CRM (Nurban Consolação e Sumaré)', one:'Portal da ONE (NEX Bela Cintra)'}
+    fonteNome: {bll:'BLL', cv:'CV CRM', one:'Portal da ONE'}
   };
   const $ = id => document.getElementById(id);
   const LS = {
@@ -900,7 +900,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function renderLive(){
     const el = $('live'), t = $('live-t');
     const pid = window.ESPELHO && ESPELHO.current();
-    const f = pid && CFG.fonte[pid];
+    const f = pid && fonteDe(pid);
     el.className = 'live';
     { const p0 = pid && dados && dados.projetos.find(x=>x.id===pid); if(p0 && p0.conferido_em) confEm(p0.conferido_em, ''); }
     if(!navigator.onLine){ el.classList.add('off'); t.textContent = 'Sem internet'; el.title = 'Mostrando a última versão salva no aparelho.'; return; }
@@ -918,6 +918,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   window.__onProjeto = () => renderLive();
 
   // ---------- dados ----------
+  function fonteDe(pid){ const p = dados && dados.projetos.find(x=>x.id===pid); return (p && p.robo) || CFG.fonte[pid] || null; }
+  function nomeFonte(f){ const ps = dados ? dados.projetos.filter(p=>fonteDe(p.id)===f).map(p=>p.nome) : []; return CFG.fonteNome[f] + (ps.length ? ' ('+ps.join(', ')+')' : ''); }
   function aplicar(d){ dados = d; nivel = d.nivel || nivel; robo = d.robo || robo; ESPELHO.setData(d); }
   async function carregar(forcar){
     if(!codigo || carregando) return; carregando = true;
@@ -1003,7 +1005,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const l = document.createElement('label'); l.className = 'ck';
       const i = document.createElement('input'); i.type = 'checkbox'; i.value = p.id; i.checked = pref ? pref.projs.includes(p.id) : true;
       i.addEventListener('change', salvarPrefs);
-      l.appendChild(i); l.appendChild(document.createTextNode(p.nome + (CFG.fonte[p.id] ? '' : ' (atualização manual)'))); box.appendChild(l);
+      l.appendChild(i); l.appendChild(document.createTextNode(p.nome + (fonteDe(p.id) ? '' : ' (atualização manual)'))); box.appendChild(l);
     }
     const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
     const sub = suportaPush ? await assinatura().catch(()=>null) : null;
@@ -1028,9 +1030,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const box = $('robo-det'); const partes = [];
     for(const f of ['bll','cv','one']){
       const r = robo[f];
-      if(!r){ partes.push('<b>'+CFG.fonteNome[f]+':</b> aguardando a primeira leitura.'); continue; }
+      if(!r){ partes.push('<b>'+nomeFonte(f)+':</b> aguardando a primeira leitura.'); continue; }
       const min = (Date.now() - new Date(r.visto_em)) / 60000;
-      let s = '<b>'+CFG.fonteNome[f]+':</b> ' + (min <= 4 ? 'ao vivo, conferido às '+hora(r.visto_em) : 'parado desde '+quando(r.visto_em));
+      let s = '<b>'+nomeFonte(f)+':</b> ' + (min <= 4 ? 'ao vivo, conferido às '+hora(r.visto_em) : 'parado desde '+quando(r.visto_em));
       const leuDepois = r.info && Object.values(r.info).some(v => v && v.em && r.info.alerta_quando && new Date(v.em) > new Date(r.info.alerta_quando));
       if(r.info && r.info.alerta && r.info.alerta_quando && !leuDepois && (Date.now() - new Date(r.info.alerta_quando)) < 6*3600000) s += ' · <span style="color:var(--vend-text)">'+String(r.info.alerta).replace(/</g,'&lt;')+'</span>';
       partes.push(s);

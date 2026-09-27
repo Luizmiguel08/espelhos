@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.2.0
-// @description  Lê a disponibilidade na BLL (RAJ MENDES), no CV CRM (Nurban Consolação e Sumaré) e no portal da ONE (NEX Bela Cintra) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas.
+// @version      1.3.0
+// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas.
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
@@ -20,7 +20,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.2.0';
+  const VERSAO = '1.3.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -100,21 +100,32 @@
   const MAPA_CV = { disponivel: 'disponivel', reservada: 'reservada', vendida: 'vendida', processo_final: 'processo_final', emprocesso: 'processo_final' };
   class Sessao extends Error {}
 
+  let cfgFonte = null;
+  async function lerConfigFonte() {
+    try { const c = await rpc('robo_config', { p_chave: chave(), p_fonte: FONTE }); if (c && typeof c === 'object') cfgFonte = c; }
+    catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
+  }
   async function lerBLL() {
     let tok = '';
     try { tok = localStorage.getItem('@BLL:token') || ''; const p = JSON.parse(tok); if (typeof p === 'string') tok = p; } catch (e) {}
     if (!tok) throw new Sessao('sem login');
-    const r = await fetch('/api/unidades/empreendimento/14', { headers: { Authorization: 'Bearer ' + tok }, cache: 'no-store' });
-    if (r.status === 401 || r.status === 403) throw new Sessao('401');
-    if (!r.ok) throw new Error('BLL respondeu ' + r.status);
-    const lista = await r.json();
-    const s = {};
-    for (const u of lista) { const v = MAPA_BLL[u.status]; if (v && u.numero != null) s[String(u.numero).trim()] = v; }
-    return [{ projeto: 'raj-mendes', status: s }];
+    const lista = (cfgFonte && Array.isArray(cfgFonte.empreendimentos) && cfgFonte.empreendimentos.length) ? cfgFonte.empreendimentos : [{ id: 14, projeto: 'raj-mendes' }];
+    const out = [];
+    for (const e of lista) {
+      const r = await fetch('/api/unidades/empreendimento/' + encodeURIComponent(e.id), { headers: { Authorization: 'Bearer ' + tok }, cache: 'no-store' });
+      if (r.status === 401 || r.status === 403) throw new Sessao('401');
+      if (!r.ok) { out.push({ projeto: e.projeto, erro: 'BLL respondeu ' + r.status }); continue; }
+      const us = await r.json();
+      const s = {};
+      for (const u of us) { const v = MAPA_BLL[u.status]; if (v && u.numero != null) s[String(u.numero).trim()] = v; }
+      out.push({ projeto: e.projeto, status: s });
+    }
+    return out;
   }
   async function lerCV() {
     const out = [];
-    for (const [id, projeto] of [['23', 'consolacao'], ['28', 'sumare']]) {
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto]) : [['23', 'consolacao'], ['28', 'sumare']];
+    for (const [id, projeto] of mapas) {
       const r = await fetch('/imobiliaria/comercial/mapadisponibilidade/' + id, { credentials: 'include', cache: 'no-store' });
       const html = await r.text();
       const d = new DOMParser().parseFromString(html, 'text/html');
@@ -213,7 +224,7 @@
     }
     return { status, amostra, dup, hist, semNumero, cruas, coloridos: coloridos.length };
   }
-  const ehNex = doc => /bela\s*c[iy]ntra|\bnex\b/i.test((doc.title || '') + ' ' + ((doc.body && doc.body.textContent) || '').slice(0, 20000) + ' ' + [...doc.querySelectorAll('select')].map(s => s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : '').join(' '));
+  const ehNex = doc => (cfg && cfg.nome ? new RegExp(cfg.nome, 'i') : /bela\s*c[iy]ntra|\bnex\b/i).test((doc.title || '') + ' ' + ((doc.body && doc.body.textContent) || '').slice(0, 20000) + ' ' + [...doc.querySelectorAll('select')].map(s => s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : '').join(' '));
 
   function retrato(doc, leitura) {                // o que o robô enxerga neste quadro (para ajustar a leitura)
     const txt = s => String(s || '').replace(/\s+/g, ' ').trim();
@@ -300,7 +311,7 @@
     if (cfg.recarregar === 'nenhum' && jaSincronizado) return;   // sem recarregar, a tela não muda: não finge conferência nova
     if (outroVivo()) { st.fase = 'espera'; return; }
     batimento(); st.fase = 'lendo';
-    const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: 'nex-bela-cintra', p_status: leitura.status, p_fonte: 'one' });
+    const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: cfg.projeto || 'nex-bela-cintra', p_status: leitura.status, p_fonte: 'one' });
     if (res && res.ok === false) throw new Error('leitura incompleta (' + res.lidos + ' de ' + res.total + ')');
     st.ultimo = Date.now(); st.mudancas = res && res.mudancas ? res.mudancas.length : 0; st.fase = 'ok'; jaSincronizado = true;
     batimento();
@@ -321,14 +332,20 @@
       }
       if (outroVivo()) { st.fase = 'espera'; return; }
       batimento(); st.fase = 'lendo';
+      await lerConfigFonte();
       const leituras = FONTE === 'bll' ? await lerBLL() : await lerCV();
-      let m = 0;
+      let m = 0; const falhas = [];
       for (const l of leituras) {
-        const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: l.projeto, p_status: l.status, p_fonte: FONTE });
-        if (res && res.ok === false) throw new Error('leitura incompleta de ' + l.projeto);
-        m += (res && res.mudancas ? res.mudancas.length : 0);
+        if (l.erro) { falhas.push(l.projeto); continue; }
+        try {
+          const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: l.projeto, p_status: l.status, p_fonte: FONTE });
+          if (res && res.ok === false) { falhas.push(l.projeto); continue; }
+          m += (res && res.mudancas ? res.mudancas.length : 0);
+        } catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; falhas.push(l.projeto); }
       }
+      if (falhas.length === leituras.length && leituras.length) throw new Error('não consegui ler ' + falhas.join(', '));
       st.ultimo = Date.now(); st.mudancas = m; st.erro = null; st.sessao = false; st.fase = 'ok';
+      st.aviso = falhas.length ? 'não consegui ler ' + falhas.join(', ') : null;
       batimento();
     } catch (e) {
       if (e instanceof Sessao) {
