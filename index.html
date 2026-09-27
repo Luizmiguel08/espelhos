@@ -411,6 +411,10 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 .vazio{font-size:13.5px;color:var(--muted);text-align:center;padding:14px;border:1px dashed var(--line-2);border-radius:10px}
 .pp-canvas{width:100%;max-width:320px;aspect-ratio:1080/1350;height:auto;align-self:center;border-radius:12px;box-shadow:0 6px 24px rgba(24,32,48,.18);background:#fff}
 .sheet .pp-btn{grid-column:1/-1;justify-self:start;height:36px;margin-top:2px}
+.sheet .sheet-acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.sheet .sheet-acoes .abtn{height:36px;margin-top:0;text-decoration:none}
+.sheet .sheet-acoes a.abtn{color:var(--ink)}
+.sheet .sheet-acoes .abtn[hidden]{display:none}
 .rs-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .rs-nav b{font-size:15px}
 .rs-nav .abtn{width:40px;justify-content:center;font-size:18px}
@@ -1431,14 +1435,24 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const mesAno = ym => { if(!ym) return ''; const [y, m] = ym.split('-'); return MES3[+m - 1] + '/' + y; };
   let ppInfo = null, ppModo = 'fluxo', ppBtn = null;
   (function(){ const s = $('fx-am'); MESES.forEach((m, i) => { const o = document.createElement('option'); o.value = i + 1; o.textContent = m.charAt(0).toUpperCase() + m.slice(1); s.appendChild(o); }); s.value = '12'; })();
+  // projetos com central de produto (ficha completa, página do cliente)
+  const CENTRAL = {'nex-bela-cintra': 'nex/'};
+  let fcBtn = null;
   window.__onUnidade = u => {
     if(!ppBtn){
+      const acoes = document.createElement('div'); acoes.className = 'sheet-acoes';
       ppBtn = document.createElement('button'); ppBtn.type = 'button'; ppBtn.className = 'abtn primary pp-btn';
       ppBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>Enviar proposta';
       ppBtn.addEventListener('click', abrirProposta);
-      const info = document.querySelector('#sheet .info'); (info || $('sheet')).appendChild(ppBtn);
+      fcBtn = document.createElement('a'); fcBtn.className = 'abtn fc-btn';
+      fcBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>Ficha completa';
+      acoes.append(ppBtn, fcBtn);
+      const info = document.querySelector('#sheet .info'); (info || $('sheet')).appendChild(acoes);
     }
     ppBtn.hidden = !(u && u.st === 'disponivel');
+    const pid = window.ESPELHO && ESPELHO.current(), base = u && pid && CENTRAL[pid];
+    fcBtn.hidden = !base;
+    if(base) fcBtn.href = base + '#u' + encodeURIComponent(u.key);
   };
   function corretor(){ try{ return JSON.parse(LS.get(K_COR) || '{}'); }catch(e){ return {}; } }
   function unidadeAtual(){
