@@ -589,7 +589,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     <div class="top"><h2>Avisar quando aparecer</h2><button class="xbtn" type="button" data-fechar aria-label="Fechar">×</button></div>
     <div id="bs-lista-v">
       <p class="txt">Cadastre o que o seu cliente procura. Quando uma unidade assim <b>ficar disponível em qualquer projeto</b> (reserva que caiu, distrato ou liberação), você recebe um aviso na hora, com o nome do cliente.</p>
-      <div id="bs-sem-push" class="aviso" hidden>Para receber esses avisos, ative primeiro as notificações neste aparelho. <button class="abtn" type="button" id="bs-ir-avisos" style="margin-top:8px">Ativar notificações</button></div>
+      <div id="bs-sem-push" class="aviso" hidden>Este aparelho ainda não recebe avisos. Pode cadastrar a busca normalmente: na hora de salvar, o app pede para ligar as notificações aqui. O aviso chega no aparelho onde a busca foi salva.</div>
       <div class="row"><button class="abtn primary" type="button" id="bs-nova">+ Nova busca</button></div>
       <div id="bs-lista" class="bs-lista"></div>
     </div>
@@ -1097,29 +1097,37 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function b64u(s){ const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from(b, c => c.charCodeAt(0)); }
   async function reg(){ if(swReg) return swReg; if(!('serviceWorker' in navigator)) return null; swReg = await navigator.serviceWorker.ready; return swReg; }
   async function assinatura(){ const r = await reg(); return r && r.pushManager ? r.pushManager.getSubscription() : null; }
-  const escolhidos = () => [...document.querySelectorAll('#av-projs input:checked')].map(i => i.value);
+  const escolhidos = () => {
+    if(document.querySelector('#av-projs input')) return [...document.querySelectorAll('#av-projs input:checked')].map(i => i.value);
+    let pref = null; try{ pref = JSON.parse(LS.get(K_AV) || 'null'); }catch(e){}
+    return pref && pref.projs && pref.projs.length ? pref.projs : (dados ? dados.projetos.map(p => p.id) : []);
+  };
+  async function ligarAvisos(){   // pede permissão, assina e registra este aparelho; devolve o endereço ou lança erro com texto amigável
+    if(!suportaPush) throw new Error(isIOS ? 'No iPhone, primeiro adicione o app à Tela de Início (Compartilhar → Adicionar à Tela de Início) e abra por lá.' : 'Este navegador não aceita notificações. Use o Chrome.');
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted') throw new Error('As notificações ficaram bloqueadas. Libere nas configurações do navegador para este site e tente de novo.');
+    const r = await reg();
+    let sub = await r.pushManager.getSubscription();
+    if(!sub) sub = await r.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(CFG.vapid)});
+    const res = await inscrever(sub);
+    LS.set(K_AV, JSON.stringify({projs: escolhidos()}));
+    return {sub, res};
+  }
   function msgAv(txt, tipo){ const m = $('av-msg'); m.textContent = txt; m.className = 'aviso' + (tipo ? ' '+tipo : ''); m.hidden = !txt; }
   async function inscrever(sub){
     const j = sub.toJSON();
     return rpc('inscrever', {p_codigo: codigo, p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_projetos: escolhidos(), p_apelido: null});
   }
   $('av-ativar').addEventListener('click', async () => {
-    if(!suportaPush){ msgAv(isIOS ? 'No iPhone, primeiro adicione o app à Tela de Início (iOS 16.4 ou mais novo) e ative por lá.' : 'Este navegador não aceita notificações. Use o Chrome.', 'bad'); return; }
     if(!escolhidos().length){ msgAv('Marque pelo menos um projeto.', 'bad'); return; }
     $('av-ativar').disabled = true;
     try{
-      const perm = await Notification.requestPermission();
-      if(perm !== 'granted'){ msgAv('As notificações ficaram bloqueadas. Libere nas configurações do navegador para este site e tente de novo.', 'bad'); return; }
-      const r = await reg();
-      let sub = await r.pushManager.getSubscription();
-      if(!sub) sub = await r.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(CFG.vapid)});
-      const res = await inscrever(sub);
-      LS.set(K_AV, JSON.stringify({projs: escolhidos()}));
+      const {sub, res} = await ligarAvisos();
       await meuEndpoint();
       await rpc('testar_aviso', {p_codigo: codigo, p_endpoint: sub.endpoint}).catch(()=>{});
       msgAv('Notificações ativadas' + (res && res.admin ? ' (você também recebe os alertas do robô)' : '') + '. Enviamos um aviso de teste para este aparelho.', 'good');
       renderAvisos();
-    }catch(e){ msgAv('Não deu certo agora: ' + (e && e.message ? e.message.slice(0,120) : 'erro') , 'bad'); }
+    }catch(e){ msgAv(e && e.message ? e.message.slice(0,200) : 'Não deu certo agora.', 'bad'); }
     finally{ $('av-ativar').disabled = false; }
   });
   $('av-testar').addEventListener('click', async () => { const s = await assinatura(); if(!s) return; await rpc('testar_aviso', {p_codigo: codigo, p_endpoint: s.endpoint}).catch(()=>{}); msgAv('Teste enviado. Deve chegar em alguns segundos.', 'good'); });
@@ -1266,14 +1274,14 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
   async function carregarBuscas(){
     bsEp = await meuEndpoint();
-    $('bs-sem-push').hidden = !!bsEp; $('bs-nova').disabled = !bsEp;
+    $('bs-sem-push').hidden = !!bsEp;
     if(!bsEp || !codigo){ buscas = []; renderBuscas(); return; }
     try{ const r = await rpc('meus_avisos', {p_codigo: codigo, p_endpoint: bsEp}); buscas = r.buscas || []; }catch(e){}
     renderBuscas();
   }
   function renderBuscas(){
     const box = $('bs-lista'); box.replaceChildren();
-    if(!buscas.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = bsEp ? 'Nenhuma busca ainda. Toque em "+ Nova busca" para cadastrar a primeira.' : 'Ative as notificações para cadastrar buscas.'; box.appendChild(v); atualizarContador(); return; }
+    if(!buscas.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhuma busca neste aparelho ainda. Toque em "+ Nova busca" para cadastrar a primeira.'; box.appendChild(v); atualizarContador(); return; }
     for(const b of buscas){
       const achou = encontrados(b.criterios);
       const card = document.createElement('div'); card.className = 'bs-card';
@@ -1335,7 +1343,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     $('bf-preco').value = c.preco_max != null ? Math.round(c.preco_max).toLocaleString('pt-BR') : '';
     $('bf-andar').value = c.andar_min != null ? c.andar_min : '';
     setModoBusca(c.modo || 'pv');
-    $('bf-msg').hidden = true; $('bf-salvar').textContent = b ? 'Salvar alterações' : 'Salvar busca';
+    $('bf-msg').hidden = true; $('bf-salvar').textContent = b ? 'Salvar alterações' : (bsEp ? 'Salvar busca' : 'Ligar avisos e salvar');
     renderChipsProjs(); previaBusca();
     $('bs-lista-v').hidden = true; $('bs-form').hidden = false; setTimeout(() => $('bf-cli').focus(), 60);
   }
@@ -1343,13 +1351,17 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   ['bf-m2a', 'bf-m2b', 'bf-preco', 'bf-andar'].forEach(id => $(id).addEventListener('input', previaBusca));
   $('bf-cancelar').addEventListener('click', voltarLista);
   $('bs-nova').addEventListener('click', () => abrirFormBusca(null));
-  $('bs-ir-avisos').addEventListener('click', () => { fecharJanela('pn-buscas'); abrirPainel(); });
   $('bs-form').addEventListener('submit', async e => {
     e.preventDefault();
     const cli = $('bf-cli').value.trim(); const m = $('bf-msg');
     if(!cli){ m.textContent = 'Escreva o nome do cliente.'; m.className = 'aviso bad'; m.hidden = false; return; }
-    if(!bsEp){ m.textContent = 'Ative as notificações neste aparelho primeiro.'; m.className = 'aviso bad'; m.hidden = false; return; }
     $('bf-salvar').disabled = true;
+    if(!bsEp){
+      try{ await ligarAvisos(); bsEp = await meuEndpoint(); }
+      catch(err){ m.textContent = (err && err.message) || 'Não consegui ligar as notificações.'; m.className = 'aviso bad'; m.hidden = false; $('bf-salvar').disabled = false; return; }
+      if(!bsEp){ m.textContent = 'Não consegui ligar as notificações neste aparelho.'; m.className = 'aviso bad'; m.hidden = false; $('bf-salvar').disabled = false; return; }
+      $('bs-sem-push').hidden = true;
+    }
     try{
       await rpc('busca_salvar', {p_codigo: codigo, p_endpoint: bsEp, p_cliente: cli, p_criterios: critDoForm(), p_id: bsEditando ? bsEditando.id : null});
       toast(bsEditando ? 'Busca de ' + cli + ' atualizada.' : 'Pronto! Você será avisado quando aparecer unidade para ' + cli + '.', 4500);
