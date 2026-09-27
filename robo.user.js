@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.1.0
+// @version      1.2.0
 // @description  Lê a disponibilidade na BLL (RAJ MENDES), no CV CRM (Nurban Consolação e Sumaré) e no portal da ONE (NEX Bela Cintra) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas.
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -9,6 +9,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
 // @connect      dptchfjbotmddaniuzvr.supabase.co
 // @run-at       document-idle
 // @updateURL    https://luizmiguel08.github.io/espelhos/robo.user.js
@@ -19,7 +20,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.1.0';
+  const VERSAO = '1.2.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -165,35 +166,52 @@
     })(el);
     quebra(); return out;
   }
-  const RE_UNID = /^(\d{1,4})(?:\s+[A-Z0-9]{2,4})?$/i;
+  const RE_UNID = /^(?:apto\.?|apartamento|unid(?:ade)?\.?|ap\.?|loja|sala)?\s*(\d{1,4})(?:\s*[-–]?\s*[A-Z][A-Z0-9]{1,3})?$/i;
+  function acharNumero(ls) {
+    for (const l of ls) {
+      if (/m²|m2\b|R\$/i.test(l) || /\d[.,]\d/.test(l)) continue;
+      const m = l.match(RE_UNID); if (m) return String(parseInt(m[1], 10));
+    }
+    return null;
+  }
+  function linhasVis(el) {                        // texto visível (innerText); se o quadro estiver oculto, cai no texto bruto
+    const it = (el.innerText || '').split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    return it.length ? it : linhas(el);
+  }
+  const semValores = h => h.replace(/="[^"]{40,}"/g, '="…"').replace(/='[^']{40,}'/g, "='…'");
   function lerCelulasONE(doc) {
-    const cand = [];
-    const hist = {};
-    for (const el of doc.querySelectorAll('td,div,span,a,li')) {
-      const k = cor(el); if (k) hist[k] = (hist[k] || 0) + 1;
-      const tx = el.textContent || '';
-      if (tx.length > 400 || tx.length < 2) continue;
-      const ls = linhas(el); if (!ls.length || ls.length > 12) continue;
-      let stt = null, num = null;
-      for (const l of ls) {
-        if (!stt) stt = stTexto(l);
-        if (!num && !/m²|m2|R\$|,/.test(l)) { const m = l.match(RE_UNID); if (m) num = String(parseInt(m[1], 10)); }
-      }
-      if (!stt && k && PALETA[k]) stt = PALETA[k];
-      if (stt && num) cand.push({ el, num, st: stt, k, ls });
+    const hist = {}, coloridos = [];
+    for (const el of doc.querySelectorAll('td,div,span,a,li,button,section,article,p')) {
+      const k = cor(el); if (!k) continue;
+      hist[k] = (hist[k] || 0) + 1;
+      if (PALETA[k]) coloridos.push({ el, k });
     }
-    // fica só com as células mais internas
-    const set = new Set(cand.map(c => c.el));
-    const temFilho = new Set();
-    for (const c of cand) { let p = c.el.parentElement; while (p) { if (set.has(p)) temFilho.add(p); p = p.parentElement; } }
-    const status = {}; const amostra = []; let dup = 0;
-    for (const c of cand) {
-      if (temFilho.has(c.el)) continue;
-      if (status[c.num]) { dup++; continue; }
-      status[c.num] = c.st;
-      if (amostra.length < 10 || (c.st !== 'disponivel' && amostra.length < 16)) amostra.push({ tag: c.el.tagName, cls: String(c.el.className || '').slice(0, 60), id: (c.el.id || '').slice(0, 40), cor: c.k, st: c.st, n: c.num, linhas: c.ls.slice(0, 7).map(x => x.slice(0, 40)), attrs: [...c.el.attributes].map(a => a.name).slice(0, 12) });
+    // quantos quadradinhos coloridos cada ancestral contém (para não pegar número do vizinho)
+    const conta = new Map();
+    for (const c of coloridos) { let p = c.el.parentElement, i = 0; while (p && i < 4) { conta.set(p, (conta.get(p) || 0) + 1); p = p.parentElement; i++; } }
+    const status = {}, amostra = [], semNumero = []; let dup = 0;
+    const dentro = new Set(coloridos.map(c => c.el));
+    for (const c of coloridos) {
+      // se um colorido está dentro de outro colorido da mesma cor, fica com o mais interno
+      let p = c.el.parentElement, aninhado = false; for (let i = 0; p && i < 3; i++, p = p.parentElement) if (dentro.has(p)) { aninhado = true; break; }
+      let ls = linhasVis(c.el), num = acharNumero(ls), stt = null;
+      for (const l of ls) { stt = stTexto(l); if (stt) break; }
+      if (!num) { let q = c.el.parentElement; for (let i = 0; q && i < 3 && (conta.get(q) || 0) <= 1; i++, q = q.parentElement) { const l2 = linhasVis(q); num = acharNumero(l2); if (num) { if (!stt) for (const l of l2) { stt = stTexto(l); if (stt) break; } break; } } }
+      if (!stt) stt = PALETA[c.k];
+      if (!num) { if (semNumero.length < 4) semNumero.push({ tag: c.el.tagName, cor: c.k, linhas: ls.slice(0, 6).map(x => x.slice(0, 40)), html: semValores(c.el.outerHTML).slice(0, 500) }); continue; }
+      if (status[num]) { if (!aninhado) dup++; continue; }
+      status[num] = stt;
+      if (amostra.length < 6 || (stt !== 'disponivel' && amostra.length < 12)) amostra.push({ tag: c.el.tagName, cls: String(c.el.className || '').slice(0, 60), cor: c.k, st: stt, n: num, linhas: ls.slice(0, 7).map(x => x.slice(0, 40)) });
     }
-    return { status, amostra, dup, hist };
+    // amostras cruas por cor (para ajustar a leitura se precisar)
+    const cruas = [];
+    for (const k of Object.keys(PALETA)) {
+      coloridos.filter(c => c.k === k).slice(0, 2).forEach(c => {
+        const pais = []; let q = c.el.parentElement; for (let i = 0; q && i < 4; i++, q = q.parentElement) pais.push(q.tagName + '.' + String(q.className || '').slice(0, 30) + ' [' + (q.textContent || '').length + ']');
+        cruas.push({ cor: k, tag: c.el.tagName, texto: (c.el.innerText || '').slice(0, 160), tamTexto: (c.el.textContent || '').length, html: semValores(c.el.outerHTML).slice(0, 700), pais });
+      });
+    }
+    return { status, amostra, dup, hist, semNumero, cruas, coloridos: coloridos.length };
   }
   const ehNex = doc => /bela\s*c[iy]ntra|\bnex\b/i.test((doc.title || '') + ' ' + ((doc.body && doc.body.textContent) || '').slice(0, 20000) + ' ' + [...doc.querySelectorAll('select')].map(s => s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : '').join(' '));
 
@@ -217,7 +235,8 @@
       referencia: (document.referrer || '').replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''),
       nex: ehNex(doc), celulas: Object.keys(leitura.status).length, contagem: cont, duplicadas: leitura.dup,
       mapa: Object.entries(leitura.status).map(([n, s]) => n + ':' + s[0]).join(','),
-      amostra: leitura.amostra, cores: hist,
+      amostra: leitura.amostra, cores: hist, coloridos: leitura.coloridos, semNumero: leitura.semNumero, cruas: leitura.cruas,
+      funcoes: funcoesPagina(), controles: controlesDX(),
       forms: [...doc.forms].map(f => ({ id: f.id || f.name, acao: (f.getAttribute('action') || '').replace(/\?.*$/, ''), metodo: f.method, campos: f.elements.length, ocultos: [...f.querySelectorAll('input[type=hidden]')].map(i => i.name || i.id).slice(0, 25) })),
       botoes: [...doc.querySelectorAll('input[type=submit],input[type=button],input[type=image],button,a[href^="javascript"],a[onclick],img[onclick]')].slice(0, 40).map(b => ({ tag: b.tagName, id: (b.id || b.name || '').slice(0, 50), txt: txt(b.value || b.textContent || b.title || b.alt).slice(0, 40), js: txt(b.getAttribute('onclick') || (b.getAttribute('href') || '').replace(/^javascript:/, '')).slice(0, 140) })),
       selects: [...doc.querySelectorAll('select')].slice(0, 10).map(s => ({ id: (s.id || s.name || '').slice(0, 50), sel: s.options[s.selectedIndex] ? txt(s.options[s.selectedIndex].text).slice(0, 60) : null, n: s.options.length, ops: [...s.options].slice(0, 25).map(o => txt(o.text).slice(0, 50)), js: txt(s.getAttribute('onchange')).slice(0, 120) })),
@@ -226,6 +245,17 @@
       scripts: trechos, elementos: doc.getElementsByTagName('*').length,
       inicio: txt(doc.body ? doc.body.textContent : '').slice(0, 700),
     };
+  }
+  const W = (typeof unsafeWindow !== 'undefined' && unsafeWindow) || window;
+  function funcoesPagina() {
+    const out = [];
+    try { for (const k of Object.keys(W)) { if (out.length >= 30) break; if (!/espelho|atualiz|pesquis|refresh|recarreg|callback|mapa|filtr/i.test(k)) continue; const f = W[k]; if (typeof f === 'function') out.push(k + ': ' + String(f).replace(/\s+/g, ' ').slice(0, 220)); } } catch (e) {}
+    return out;
+  }
+  function controlesDX() {
+    const out = [];
+    try { const col = W.ASPxClientControl && W.ASPxClientControl.GetControlCollection(); if (col && col.ForEachControl) col.ForEachControl(c => { if (out.length < 40 && /espelho|cbp|callback|grid|mapa/i.test(c.name || '')) out.push((c.name || '').replace(/^ctl00_RoundPanelConteudo_cphConteudo_/, '…') + ' :: ' + (c.constructor && c.constructor.name || typeof c) + (typeof c.PerformCallback === 'function' ? ' [callback]' : '')); }); } catch (e) { out.push('erro: ' + String(e).slice(0, 80)); }
+    return out;
   }
   let ultRetrato = 0, ultAssinatura = '';
   async function enviarRetrato(doc, leitura, forcar) {
@@ -244,6 +274,8 @@
     if (!cfg || recarregado) return;
     if (cfg.recarregar === 'quadro') { recarregado = true; location.replace(location.href); }
     else if (cfg.recarregar === 'botao' && cfg.seletor) { const b = document.querySelector(cfg.seletor); if (b) { recarregado = true; b.click(); } }
+    else if (cfg.recarregar === 'callback' && cfg.controle) { try { const c = W.ASPxClientControl.GetControlCollection().GetByName(cfg.controle); if (c && c.PerformCallback) { recarregado = true; c.PerformCallback(cfg.arg || ''); } } catch (e) {} }
+    else if (cfg.recarregar === 'funcao' && cfg.funcao && typeof W[cfg.funcao] === 'function') { recarregado = true; try { W[cfg.funcao](); } catch (e) {} }
   }
   async function cicloONE() {
     if (/Sair\.aspx/i.test(location.pathname)) {
@@ -313,5 +345,13 @@
   }
   pintar();
   setTimeout(ciclo, FONTE === 'one' ? 4000 : 3000);
+  if (FONTE === 'one' && document.body && document.body.tagName === 'BODY') {
+    let tMut = null, ultMut = 0;
+    new MutationObserver(() => {
+      clearTimeout(tMut);
+      tMut = setTimeout(() => { if (Date.now() - ultMut < 15000) return; ultMut = Date.now(); jaSincronizado = false; recarregado = false; ciclo(); }, 4000);
+    }).observe(document.body, { childList: true, subtree: true });
+    [15000, 35000].forEach(t => setTimeout(() => { if (!st.ultimo) ciclo(); }, t));
+  }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && st.ultimo && Date.now() - st.ultimo > INTERVALO) ciclo(); });
 })();
