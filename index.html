@@ -654,9 +654,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
             <label class="campo"><span>Valor da anual</span><input id="fx-av" inputmode="decimal" placeholder="R$"></label>
             <label class="campo curto"><span>Mês</span><select id="fx-am"></select></label>
           </div>
-          <label class="campo"><span>O que sobrar vai para</span><select id="fx-sl"><option value="fin">Financiamento bancário</option><option value="chaves">Pagamento nas chaves</option></select></label>
+          <label class="campo"><span>Saldo final</span><select id="fx-sl"><option value="fin">Financiamento bancário</option><option value="construtora">Direto com a construtora (saldo zero)</option><option value="chaves">Na entrega das chaves</option></select></label>
           <div class="fx-resumo" id="fx-resumo"></div>
-          <div class="row"><button class="abtn" type="button" id="fx-fechar">Distribuir o restante nas mensais</button></div>
         </div>
 
         <div class="duo2">
@@ -1463,38 +1462,42 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     $('fx-sl').value = f.sl || 'fin';
   }
   function guardarFluxo(){ LS.set(K_FX(ppInfo.P.id), JSON.stringify({ent: $('fx-ent').value, entq: $('fx-entq').value, mq: $('fx-mq').value, mv: $('fx-mv').value, an: $('fx-an').checked, aq: $('fx-aq').value, av: $('fx-av').value, am: $('fx-am').value, sl: $('fx-sl').value})); }
+  const SALDO = {fin: 'Financiamento bancário', construtora: 'Direto com a construtora', chaves: 'Na entrega das chaves'};
   function calcFluxo(){
     const total = numBRL($('fx-total').value) || 0;
     const es = String($('fx-ent').value || '').trim();
     let ent = 0; if(/%$/.test(es)){ const p = Number(es.replace('%', '').replace(',', '.')); ent = isFinite(p) ? Math.round(total * p) / 100 : 0; } else ent = numBRL(es) || 0;
     const entq = Math.max(1, parseInt($('fx-entq').value, 10) || 1);
-    const mq = Math.max(0, parseInt($('fx-mq').value, 10) || 0), mv = numBRL($('fx-mv').value) || 0;
+    const mq = Math.max(0, parseInt($('fx-mq').value, 10) || 0);
     const an = $('fx-an').checked, aq = an ? Math.max(0, parseInt($('fx-aq').value, 10) || 0) : 0, av = an ? (numBRL($('fx-av').value) || 0) : 0;
+    const sl = $('fx-sl').value, direto = sl === 'construtora';
+    let mv = numBRL($('fx-mv').value) || 0;
+    if(direto && mq > 0){ mv = Math.max(0, Math.floor((total - ent - aq * av) / mq * 100) / 100); }
     const mi = $('fx-mi').value, am = +$('fx-am').value || 12;
-    const soma = ent + mq * mv + aq * av, resto = Math.round((total - soma) * 100) / 100;
+    let resto = Math.round((total - ent - mq * mv - aq * av) * 100) / 100;
+    if(Math.abs(resto) < 1) resto = 0;
     const linhas = [];
-    if(ent > 0) linhas.push(entq > 1 ? {t: 'Entrada', d: entq + 'x de ' + BRLc(ent / entq), v: ent, parc: true} : {t: 'Entrada', d: 'Pagamento no ato', nota: 'no ato', v: ent});
-    if(mq > 0 && mv > 0) linhas.push({t: 'Mensais', d: mq + 'x de ' + BRLc(mv) + (mi ? ' · a partir de ' + mesAno(mi) : ''), v: mq * mv, parc: true});
-    if(aq > 0 && av > 0) linhas.push({t: 'Intermediárias anuais', d: aq + 'x de ' + BRLc(av) + ' · todo mês de ' + MESES[am - 1], v: aq * av, parc: true});
-    if(resto > 0.5) linhas.push({t: $('fx-sl').value === 'chaves' ? 'Nas chaves' : 'Financiamento bancário', d: $('fx-sl').value === 'chaves' ? 'Saldo na entrega das chaves' : 'Saldo financiado', v: resto});
-    return {total, ent, entq, mq, mv, aq, av, resto, linhas};
+    if(ent > 0) linhas.push({t: 'Entrada', dir: entq > 1 ? entq + 'x de ' + BRLc(ent / entq) : BRLc(ent), sub: entq > 1 ? 'total de ' + BRLc(ent) : '', txt: entq > 1 ? 'Entrada: ' + entq + 'x de ' + BRLc(ent / entq) : 'Entrada: ' + BRLc(ent)});
+    if(mq > 0 && mv > 0) linhas.push({t: 'Mensais', dir: mq + 'x de ' + BRLc(mv), sub: mi ? 'a partir de ' + mesAno(mi) : '', txt: mq + ' mensais de ' + BRLc(mv) + (mi ? ' (a partir de ' + mesAno(mi) + ')' : '')});
+    if(aq > 0 && av > 0) linhas.push({t: 'Intermediárias anuais', dir: aq + 'x de ' + BRLc(av), sub: 'todo mês de ' + MESES[am - 1], txt: aq + (aq > 1 ? ' intermediárias anuais' : ' intermediária anual') + ' de ' + BRLc(av) + ' (' + MESES[am - 1] + ')'});
+    const saldo = Math.max(0, resto);
+    linhas.push({t: 'Saldo final', dir: BRLc(saldo), sub: SALDO[sl] || '', txt: 'Saldo final: ' + BRLc(saldo) + ' (' + (SALDO[sl] || '').toLowerCase() + ')', saldo: true});
+    return {total, ent, entq, mq, mv, aq, av, resto, direto, linhas};
   }
   function renderFluxoResumo(){
     const f = calcFluxo(), box = $('fx-resumo'); box.replaceChildren();
-    for(const l of f.linhas){ const d = document.createElement('div'); d.className = 'l'; d.innerHTML = '<span></span><b></b>'; d.firstChild.textContent = l.t + ' · ' + l.d; d.lastChild.textContent = BRLc(l.v) + ' (' + pct(l.v, f.total) + ')'; box.appendChild(d); }
+    const mvIn = $('fx-mv');
+    mvIn.readOnly = f.direto; mvIn.title = f.direto ? 'Calculado sozinho para o saldo final ficar zero' : '';
+    if(f.direto && f.mq > 0) mvIn.value = f.mv.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    for(const l of f.linhas){ const d = document.createElement('div'); d.className = 'l'; d.innerHTML = '<span></span><b></b>'; d.firstChild.textContent = l.t + (l.sub ? ' · ' + l.sub : ''); d.lastChild.textContent = l.dir; box.appendChild(d); }
     const st = document.createElement('div');
-    if(!f.total) { st.className = 'erro'; st.textContent = 'Informe o valor do imóvel.'; }
-    else if(f.resto < -0.5){ st.className = 'erro'; st.textContent = 'O fluxo passou do valor do imóvel em ' + BRLc(-f.resto) + '. Ajuste as parcelas.'; }
-    else { st.className = 'ok'; st.textContent = 'Fluxo fecha em ' + BRLc(f.total) + ' (100%).'; }
+    if(!f.total){ st.className = 'erro'; st.textContent = 'Informe o valor do imóvel.'; }
+    else if(f.resto < 0){ st.className = 'erro'; st.textContent = 'As parcelas passaram do valor do imóvel em ' + BRLc(-f.resto) + '. Ajuste antes de enviar.'; }
+    else if(f.direto && !f.mq){ st.className = 'erro'; st.textContent = 'Direto com a construtora: informe a quantidade de mensais que o app calcula o valor.'; }
+    else if(f.direto && f.resto > 0){ st.className = 'erro'; st.textContent = 'Ainda sobram ' + BRLc(f.resto) + '. Aumente as mensais ou as anuais.'; }
+    else { st.className = 'ok'; st.textContent = 'Conferido: o fluxo soma ' + BRLc(f.total) + '.'; }
     box.appendChild(st);
-    $('fx-fechar').disabled = !(f.mq > 0 && f.total > 0);
   }
-  $('fx-fechar').addEventListener('click', () => {
-    const f = calcFluxo(); if(!f.mq) return;
-    const mv = Math.max(0, (f.total - f.ent - f.aq * f.av) / f.mq);
-    $('fx-mv').value = (Math.round(mv * 100) / 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    atualizarProposta();
-  });
   $('fx-an').addEventListener('change', () => { $('fx-an-c').hidden = !$('fx-an').checked; atualizarProposta(); });
   function montarModos(){
     const seg = $('pp-modo'); seg.replaceChildren();
@@ -1544,7 +1547,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(ppModo === 'fluxo'){
       const f = calcFluxo();
       L.push('Valor do imóvel: *' + BRLc(f.total) + '*', '', '*Fluxo de pagamento*');
-      for(const l of f.linhas) L.push(l.parc ? '• ' + l.t + ': ' + l.d + ' — total ' + BRLc(l.v) + ' (' + pct(l.v, f.total) + ')' : '• ' + l.t + (l.nota ? ' (' + l.nota + ')' : '') + ': ' + BRLc(l.v) + ' (' + pct(l.v, f.total) + ')');
+      for(const l of f.linhas) L.push('• ' + l.txt);
     } else {
       const pr = precosModo();
       if(pr.length) for(const x of pr) L.push(x.label + ': *' + BRLc(x.v) + '*'); else L.push('Valores e condições sob consulta.');
@@ -1569,7 +1572,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const fl = ppModo === 'fluxo' ? calcFluxo() : null;
     const cli = $('pp-cli').value.trim(), obs = $('pp-obs').value.trim(), val = $('pp-val').value;
     const extra = (cli ? 1 : 0) + (obs ? 1 : 0);
-    const H = fl ? Math.max(1350, 1230 + fl.linhas.length * 112 + extra * 56) : 1350;
+    const H = fl ? Math.max(1350, 1140 + fl.linhas.length * 112 + extra * 56) : 1350;
     if(cv.height !== H) cv.height = H;
     const g = cv.getContext('2d');
     g.clearRect(0, 0, W, H); g.textBaseline = 'alphabetic'; g.textAlign = 'left';
@@ -1598,19 +1601,13 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('FLUXO DE PAGAMENTO', X, y);
       y += 22;
       fl.linhas.forEach((l, i) => {
-        const ry = y + i * 112, rh = 100;
-        g.fillStyle = i % 2 ? '#fff' : '#f4f6fa'; rrect(g, X - 16, ry, XR - X + 32, rh, 16); g.fill();
-        g.fillStyle = TX; caber(g, l.t, 520, 34, '700', PX); g.fillText(l.t, X + 6, ry + 44);
-        g.fillStyle = T2; caber(g, l.d, 560, 26, '500', PX); g.fillText(l.d, X + 6, ry + 80);
-        g.textAlign = 'right'; g.fillStyle = TX; g.font = '700 34px ' + PX; g.fillText(BRLc(l.v), XR - 6, ry + 46);
-        g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText(pct(l.v, fl.total), XR - 6, ry + 80); g.textAlign = 'left';
+        const ry = y + i * 112, rh = 100, dest = l.saldo;
+        g.fillStyle = dest ? '#e3e9fb' : (i % 2 ? '#fff' : '#f4f6fa'); rrect(g, X - 16, ry, XR - X + 32, rh, 16); g.fill();
+        g.fillStyle = TX; caber(g, l.t, 440, 34, '700', PX); g.fillText(l.t, X + 6, ry + (l.sub ? 44 : 62));
+        if(l.sub){ g.fillStyle = T2; caber(g, l.sub, 440, 26, '500', PX); g.fillText(l.sub, X + 6, ry + 80); }
+        g.textAlign = 'right'; g.fillStyle = dest ? AZ : TX; caber(g, l.dir, 400, 38, '700', PX); g.fillText(l.dir, XR - 6, ry + 63); g.textAlign = 'left';
       });
-      y += fl.linhas.length * 112 + 18;
-      g.strokeStyle = TX; g.lineWidth = 3; g.beginPath(); g.moveTo(X, y); g.lineTo(XR, y); g.stroke();
-      const fecha = Math.abs(fl.resto) <= 0.5 || fl.resto > 0.5;
-      g.fillStyle = TX; g.font = '700 32px ' + PX; g.fillText('Total', X + 6, y + 50);
-      g.textAlign = 'right'; g.fillText(BRLc(fecha ? fl.total : fl.total - fl.resto) + (fecha ? '  ·  100%' : ''), XR - 6, y + 50); g.textAlign = 'left';
-      y += 110;
+      y += fl.linhas.length * 112 + 40;
     } else {
       const pr = precosModo();
       if(!pr.length){ g.fillStyle = TX; g.font = '600 44px ' + PX; g.fillText('Valores e condições sob consulta', X, y + 120); }
@@ -1634,7 +1631,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
   function arquivoProposta(){ return new Promise(res => $('pp-canvas').toBlob(b => res(new File([b], 'proposta-' + ppInfo.P.id + '-' + ppInfo.u.key + '.png', {type: 'image/png'})), 'image/png')); }
   function baixar(f){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
-  function fluxoInvalido(){ if(ppModo !== 'fluxo') return null; const f = calcFluxo(); if(!f.total) return 'Informe o valor do imóvel.'; if(f.resto < -0.5) return 'O fluxo passou do valor do imóvel. Ajuste antes de enviar.'; return null; }
+  function fluxoInvalido(){ if(ppModo !== 'fluxo') return null; const f = calcFluxo(); if(!f.total) return 'Informe o valor do imóvel.'; if(f.resto < 0) return 'As parcelas passaram do valor do imóvel. Ajuste antes de enviar.'; if(f.direto && f.resto > 0) return 'Direto com a construtora: o saldo final precisa ficar zero.'; return null; }
   $('pp-enviar').addEventListener('click', async () => {
     if(!ppInfo) return; const inv = fluxoInvalido(); if(inv){ toast(inv, 4500); return; }
     await desenhar(); const f = await arquivoProposta(), txt = textoProposta();
