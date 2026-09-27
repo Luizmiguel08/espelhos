@@ -385,7 +385,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       <div class="hint" id="h-hint">Toque num filtro para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.</div>
     </div>
     <div class="meta">
-      <span><span class="dot"></span>Espelho atualizado em <strong id="m-atualizado">—</strong></span>
+      <span><span class="dot"></span>Última mudança em <strong id="m-atualizado">—</strong></span>
       <span id="m-conferido" class="muted"></span>
       <span class="muted" id="m-total">—</span>
     </div>
@@ -582,7 +582,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     // header
     $('h-nome').textContent = P.nome; $('h-sub').textContent = P.subtitulo || '';
     $('m-atualizado').textContent = fmtDate(P.atualizado_em);
-    $('m-conferido').textContent = P.conferido_em && P.conferido_em !== P.atualizado_em ? 'Conferido sem mudanças em '+fmtDate(P.conferido_em) : '';
+    $('m-conferido').textContent = P.conferido_em ? 'Conferido no sistema em '+fmtDate(P.conferido_em) : '';
     const nAnd = P.grade.andares.filter(f=>f!=='T').length, hasT = P.grade.andares.includes('T'); $('m-total').innerHTML = '<strong></strong> unidades · '+nAnd+' andares'+(hasT?' + térreo':'')+((P.grade.topo||[]).length?' + '+P.grade.topo.map(t=>t.texto.toLowerCase()).join(', '):''); $('m-total').querySelector('strong').textContent = U.length;
     $('m-fonte').textContent = (P.fonte || 'PDF do espelho') + (P.tabela ? (P.tabela.regra ? ' · preços: '+P.tabela.nome+' × metragem da planta (regra definida em '+fmtDate(P.tabela.atualizado_em)+')' : ' · preços: tabela '+P.tabela.nome+' (importada em '+fmtDate(P.tabela.atualizado_em)+')') : ''); $('m-nota').textContent = P.nota || '';
     const first = (P.campos||[])[0]; $('h-hint').innerHTML = first==='m2' ? 'Toque numa metragem para ver <b>só ela</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : first==='final' ? 'Toque num final (coluna) para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : 'Toque num filtro para ver <b>só ele</b> no prédio.';
@@ -899,10 +899,12 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const f = pid && CFG.fonte[pid];
     el.className = 'live';
     if(!navigator.onLine){ el.classList.add('off'); t.textContent = 'Sem internet'; el.title = 'Mostrando a última versão salva no aparelho.'; return; }
-    if(pid && !f){ const p = dados && dados.projetos.find(x=>x.id===pid); el.classList.add('manual'); t.textContent = 'Atualização manual'; el.title = 'Este projeto é atualizado pelo PDF' + (p && p.atualizado_em ? ' · última em '+quando(p.atualizado_em) : ''); return; }
+    if(pid && !f){ const p = dados && dados.projetos.find(x=>x.id===pid); const c = $('m-conferido'); if(c) c.textContent = 'Atualização manual: último PDF do espelho importado em ' + (p && p.atualizado_em ? quando(p.atualizado_em) : '—'); el.classList.add('manual'); t.textContent = 'Atualização manual'; el.title = 'Este projeto é atualizado pelo PDF' + (p && p.atualizado_em ? ' · última em '+quando(p.atualizado_em) : ''); return; }
     const r = f && robo[f];
     if(!r){ el.classList.add('atraso'); t.textContent = 'Aguardando robô'; el.title = 'O robô de atualização ainda não enviou leitura.'; return; }
     const min = (Date.now() - new Date(r.visto_em)) / 60000;
+    const em = r.info && r.info[pid] && r.info[pid].em;
+    if(em){ const c = $('m-conferido'); if(c) c.textContent = 'Conferido no sistema às ' + hora(em) + (min <= 4 ? ' · ao vivo, o robô confere a cada minuto' : ''); }
     if(min <= 4){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(r.visto_em)+'</span>'; el.title = 'Conferido no sistema às '+hora(r.visto_em)+'. O espelho se atualiza sozinho.'; }
     else { el.classList.add('atraso'); t.textContent = 'Parado desde '+quando(r.visto_em); el.title = 'O robô de atualização não lê o sistema desde '+quando(r.visto_em)+'. Os dados podem estar desatualizados.'; }
   }
