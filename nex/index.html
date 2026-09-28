@@ -60,61 +60,84 @@ img{display:block;max-width:100%}
 .vivo.ok i{background:#39b54a;box-shadow:0 0 0 3px rgba(57,181,74,.2)}
 
 .wrap{max-width:1180px;margin:0 auto;padding:16px}
-.topo{display:grid;grid-template-columns:1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.topo-img{position:relative;aspect-ratio:16/9;background:var(--surface-2);overflow:hidden}
-.topo-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
-.topo-txt{padding:16px}
-.topo h1{font-size:30px;line-height:1.05}
-.topo .end{margin:4px 0 0;color:var(--ink-2);font-size:14px}
-.topo .cham{margin:10px 0 0;color:var(--ink-2)}
-.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.stat{flex:1 1 120px;background:var(--surface-2);border-radius:12px;padding:9px 11px;min-width:0}
-.stat b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;line-height:1}
-.stat span{display:block;font-size:12.5px;color:var(--ink-2);margin-top:3px}
-.stat small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+/* topo compacto: foto pequena, nome, endereço e o resumo do estoque */
+.topo{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.topo-foto{width:62px;height:62px;flex:none;border-radius:10px;object-fit:cover;object-position:center 30%;background:var(--surface-2);cursor:zoom-in}
+.topo-txt{min-width:0;flex:1}
+.topo h1{font-size:25px;line-height:1.05}
+.topo .end{margin:2px 0 0;color:var(--muted);font-size:12.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.topo .resumo{margin:5px 0 0;font-size:13.5px;color:var(--ink-2)}
+.topo .resumo b{color:var(--ink);font-weight:600}
 @media (min-width:860px){
-  .topo{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
-  .topo-img{aspect-ratio:auto;min-height:320px}
-  .topo-txt{padding:22px 24px}
-  .topo h1{font-size:40px}
+  .topo{padding:12px 16px;gap:16px}
+  .topo-foto{width:84px;height:84px}
+  .topo h1{font-size:32px}
+  .topo .end{font-size:13.5px}
+  .topo .resumo{font-size:14.5px}
 }
 
-.abas{display:flex;gap:6px;margin:16px 0 12px;overflow-x:auto;scrollbar-width:none}
+/* abas da seção: sublinhadas e presas no alto ao rolar */
+.abas{position:sticky;top:var(--barra-h,57px);z-index:20;display:flex;gap:24px;margin:10px -16px 12px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .abas::-webkit-scrollbar{display:none}
-.abas button{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:8px 15px;font-weight:600;font-size:14px;white-space:nowrap;display:flex;align-items:center;gap:7px}
-.abas button.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
-.cont{background:var(--accent);color:var(--accent-ink);border-radius:99px;font-size:11.5px;padding:1px 7px;font-weight:700}
+.abas button{border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;border-radius:0;padding:11px 0 9px;font-weight:600;font-size:14.5px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:7px}
+.abas button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.cont{background:var(--accent);color:var(--accent-ink);border-radius:99px;font-size:11.5px;padding:1px 7px;font-weight:700;line-height:1.4}
 
-.filtros{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
-.fgrupo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.fgrupo>span{font-size:12.5px;color:var(--muted);min-width:72px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.fgrupo.linha{gap:12px}
+/* metragens: também filtram a lista */
+.faixas{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:1px 16px 2px}
+.faixas::-webkit-scrollbar{display:none}
+.fx{flex:none;min-width:104px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px 7px;line-height:1.3}
+.fx .fx-t{display:block;font-weight:600;font-size:14px;white-space:nowrap;color:var(--ink)}
+.fx small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;margin-top:1px}
+.fx small b{color:var(--ink-2);font-weight:600}
+.fx.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.fx.on small{color:var(--ink-2)}
+
+/* busca: preço máximo + botão de filtros */
+.busca{display:flex;gap:8px;align-items:stretch}
+.preco-ate{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);border-radius:11px;padding:0 12px;cursor:text}
+.preco-ate span{font-size:13px;color:var(--muted);white-space:nowrap}
+.preco-ate input{border:0;background:transparent;outline:0;min-width:0;flex:1;padding:10px 0;font-size:15px}
+.preco-ate:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+#f-abrir{flex:none;padding:9px 13px}
+@media (min-width:720px){.preco-ate{flex:0 1 340px}}
+#f-abrir.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+#f-abrir .cont{margin-left:1px}
+.painel{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:12px}
+.fgrupo{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.fgrupo>span{font-size:12px;color:var(--muted);min-width:78px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.fgrupo.linha{gap:10px 16px}
 .fgrupo.linha label{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink-2)}
-.fgrupo select,.fgrupo input{border:1px solid var(--line-2);background:var(--surface);border-radius:9px;padding:7px 9px;min-width:0}
-.fgrupo input{width:120px}
+.fgrupo select{border:1px solid var(--line-2);background:var(--surface);border-radius:9px;padding:7px 9px;min-width:0}
+.limpar{border:0;background:transparent;color:var(--accent);font-weight:600;font-size:14px;padding:4px 0;margin-left:auto}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:6px 12px;font-size:13.5px;font-weight:500}
 .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:99px;overflow:hidden}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-2);border-radius:12px;overflow:hidden}
 .seg button{border:0;background:transparent;padding:6px 12px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
 .seg button.on{background:var(--ink);color:var(--surface)}
 .ck{display:flex;align-items:center;gap:7px;cursor:pointer}
 .ck input{width:18px;height:18px;accent-color:var(--accent)}
 
 .res-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 2px 8px}
-.res-top b{font-size:14px}
-.res-top select{border:1px solid var(--line-2);background:var(--surface);border-radius:9px;padding:6px 8px;font-size:13.5px}
+.res-top>div{min-width:0}
+.res-top b{font-size:14px;display:block}
+#res-base{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#res-base:empty{display:none}
+#f-ord{flex:none;border:1px solid var(--line-2);background:var(--surface);border-radius:99px;font-size:13.5px;font-weight:600;color:var(--ink-2);padding:6px 10px;cursor:pointer;max-width:55%}
 .lista{display:grid;gap:8px;grid-template-columns:1fr}
 @media (min-width:720px){.lista{grid-template-columns:1fr 1fr}}
 @media (min-width:1100px){.lista{grid-template-columns:1fr 1fr 1fr}}
-.card{display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:9px;width:100%}
+.card{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 12px 8px 8px;width:100%}
 .card:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
-.card img{width:74px;height:82px;object-fit:contain;background:#fff;border-radius:8px}
-.card .l1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.card .num{font-family:"Barlow Condensed",sans-serif;font-size:23px;font-weight:700;line-height:1}
+.card img{width:70px;height:76px;object-fit:contain;background:#fff;border-radius:8px}
+.card .l1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card .num{font-family:"Barlow Condensed",sans-serif;font-size:23px;font-weight:700;line-height:1;margin-right:2px}
 .card .l2{font-size:13px;color:var(--ink-2);margin-top:3px}
-.card .l3{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:6px}
-.card .preco{font-weight:600;font-size:15px}
+.card .l3{display:flex;align-items:baseline;gap:6px;margin-top:5px;min-width:0}
+.card .preco{font-weight:600;font-size:15.5px;white-space:nowrap}
+.card .alt{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.card .face{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:50%;padding-left:6px}
 .pill{display:inline-block;font-size:11.5px;font-weight:600;border-radius:99px;padding:2px 8px;white-space:nowrap}
 .pill.disp{background:var(--good-soft);color:var(--good)}
 .pill.res{background:var(--warn-soft);color:var(--warn)}
@@ -141,16 +164,22 @@ img{display:block;max-width:100%}
 .xbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);font-size:20px;line-height:1;flex:none}
 .folha-corpo{overflow:auto;padding:14px 16px 18px;-webkit-overflow-scrolling:touch}
 .folha-pe{padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
-.folha-pe .abtn{flex:1 1 160px}
+.folha-pe .abtn{flex:1 1 0;min-width:0}
+.folha-pe .abtn.primary{flex:1.6 1 0}
+.t-sm{display:none}
+@media (max-width:520px){.t-lg{display:none}.t-sm{display:inline}}
 
 .fx-grid{display:grid;gap:14px;grid-template-columns:1fr}
 @media (min-width:860px){.fx-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
+.col{display:grid;gap:14px;min-width:0;align-content:start}
+.fi-tags{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
 .bloco{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
 .bloco h3{font-size:19px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .bloco h3 .acao{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;border:0;background:transparent;color:var(--accent);padding:0;text-decoration:none;cursor:pointer}
 .bloco h3 .acoes-h{display:inline-flex;gap:14px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
 .bloco .leg{font-size:12.5px;color:var(--muted);margin-top:6px}
 .img-planta{display:block;width:100%;height:auto;max-height:72vh;background:#fff;border-radius:10px;cursor:zoom-in;object-fit:contain}
+@media (max-width:859px){#fi-corpo .img-planta{max-height:50vh}}
 .img-vista{width:100%;border-radius:10px;cursor:zoom-in;aspect-ratio:2000/940;object-fit:cover;background:var(--surface-2)}
 .sem-vista{padding:18px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -169,10 +198,17 @@ img{display:block;max-width:100%}
 .legenda{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:6px}
 .legenda i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 
-.precos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.precos div{background:var(--surface-2);border-radius:10px;padding:8px 10px}
-.precos b{display:block;font-size:17px}
-.precos span{display:block;font-size:12px;color:var(--ink-2)}
+/* valores: um preço em destaque; os outros ao lado, um toque troca */
+.pr-main{display:grid;gap:1px;margin:0 0 10px}
+.pr-main span{font-size:13px;color:var(--ink-2);font-weight:500}
+.pr-main b{font-family:"Barlow Condensed",sans-serif;font-size:36px;line-height:1.02;font-weight:700;letter-spacing:.3px}
+.pr-main small{font-size:12.5px;color:var(--good);font-weight:600}
+.pr-alts{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.pr-alts button{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 10px;text-align:left;line-height:1.25}
+.pr-alts button:hover{border-color:var(--accent)}
+.pr-alts span{display:block;font-size:12px;color:var(--muted)}
+.pr-alts b{font-size:14px;font-weight:600}
+.pr-alts i{font-style:normal;font-size:12px;color:var(--good);font-weight:600;margin-left:5px}
 .fluxo{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .fluxo .ln{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-top:1px solid var(--line);align-items:baseline}
 .fluxo .ln:first-child{border-top:0}
@@ -182,8 +218,9 @@ img{display:block;max-width:100%}
 .notas{font-size:12px;color:var(--muted);margin:8px 0 0;padding-left:16px}
 details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;color:var(--ink-2)}
 .nota-cor{font-size:12.5px;background:var(--warn-soft);color:var(--warn);border-radius:9px;padding:7px 9px;margin-top:8px}
-.parecidas{display:flex;gap:6px;flex-wrap:wrap}
-.parecidas button{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 9px;font-size:13px;text-align:left;line-height:1.25}
+.parecidas{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px}
+.parecidas button{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 10px;font-size:13px;text-align:left;line-height:1.25;color:var(--ink-2)}
+.parecidas button:hover{border-color:var(--accent)}
 .parecidas button b{display:block;font-size:14px}
 
 /* formulários */
@@ -246,9 +283,9 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 .carregando{padding:40px;text-align:center;color:var(--muted)}
 
 /* seletor de projeto */
-.projs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding-bottom:2px}
+.projs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:0 16px 2px}
 .projs::-webkit-scrollbar{display:none}
-.proj{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 13px;font-weight:600;font-size:14px;white-space:nowrap;color:var(--ink-2)}
+.proj{flex:none;border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:600;font-size:14px;white-space:nowrap;color:var(--ink-2)}
 .proj.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 /* planta real do andar com marcação */
 .andar-img{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
@@ -276,7 +313,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 <body>
 <header class="barra">
   <a class="volta" href="../">‹ Espelhos</a>
-  <div class="marca"><b>Central de produto</b><span>piloto</span></div>
+  <div class="marca"><b>Central de produto</b></div>
   <span class="vivo" id="vivo" title="Situação das unidades"><i></i><span id="vivo-t">…</span></span>
 </header>
 
@@ -293,12 +330,11 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 <main class="wrap" id="app" hidden>
   <nav class="projs" id="projs" aria-label="Projetos" hidden></nav>
   <section class="topo">
-    <div class="topo-img"><img id="hero" alt="" fetchpriority="high"></div>
+    <img id="hero" class="topo-foto" alt="">
     <div class="topo-txt">
       <h1 id="p-nome">—</h1>
       <p class="end" id="p-end"></p>
-      <p class="cham" id="p-cham"></p>
-      <div class="stats" id="p-stats"></div>
+      <p class="resumo" id="p-resumo"></p>
     </div>
   </section>
 
@@ -309,20 +345,23 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
   </nav>
 
   <section class="aba" id="aba-unid">
-    <div class="filtros">
-      <div class="fgrupo"><span>Metragem</span><div class="chips" id="f-tip"></div></div>
+    <div class="faixas" id="f-tip" role="group" aria-label="Metragem"></div>
+    <div class="busca">
+      <label class="preco-ate"><span>Preço até</span><input id="f-preco" inputmode="numeric" placeholder="ex.: 450 mil"></label>
+      <button type="button" class="abtn" id="f-abrir" aria-expanded="false" aria-controls="painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtros<span class="cont" id="f-n" hidden></span></button>
+    </div>
+    <div class="painel" id="painel" hidden>
       <div class="fgrupo"><span>Vista para</span><div class="chips" id="f-face"></div></div>
       <div class="fgrupo"><span>Categoria</span><div class="chips" id="f-cat"></div></div>
+      <div class="fgrupo"><span>Preço pela</span><div class="chips" id="f-base" role="group" aria-label="Preço usado na lista"></div></div>
       <div class="fgrupo linha">
         <label>Andar a partir do <select id="f-andar"></select></label>
-        <label>Preço até <input id="f-preco" inputmode="numeric" placeholder="Ex.: 450 mil"></label>
-        <span class="seg" id="f-base" role="group" aria-label="Preço usado"></span>
         <label class="ck"><input type="checkbox" id="f-disp" checked> Só disponíveis</label>
+        <button type="button" class="limpar" id="f-limpar">Limpar filtros</button>
       </div>
     </div>
-    <div class="res-top"><b id="res-n" aria-live="polite"></b>
-      <select id="f-ord" aria-label="Ordenar"><option value="preco">Menor preço</option><option value="preco-">Maior preço</option><option value="andar-">Andar mais alto</option><option value="m2-">Maior metragem</option><option value="n">Número da unidade</option></select>
-    </div>
+    <div class="res-top"><div><b id="res-n" aria-live="polite"></b><span id="res-base"></span></div>
+      <select id="f-ord" aria-label="Ordenar"><option value="preco">Menor preço</option><option value="preco-">Maior preço</option><option value="andar-">Andar mais alto</option><option value="m2-">Maior metragem</option><option value="n">Número da unidade</option></select></div>
     <div class="lista" id="lista"><div class="carregando">Carregando unidades…</div></div>
     <button class="abtn mais" type="button" id="mais" hidden>Mostrar mais</button>
   </section>
@@ -354,7 +393,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
     <div class="folha-corpo" id="fi-corpo"></div>
     <div class="folha-pe">
       <button class="abtn primary" type="button" id="fi-enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>Enviar ao cliente</button>
-      <button class="abtn" type="button" id="fi-imgs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>Compartilhar imagens</button>
+      <button class="abtn" type="button" id="fi-imgs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="t-lg">Compartilhar imagens</span><span class="t-sm">Imagens</span></button>
     </div>
   </div>
 </div>
@@ -391,7 +430,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202609272230
+// versão 202609272308
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -682,11 +721,11 @@ window.NEX = (function(){
   const {$, LS, esc, BRL, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
   // projetos com central (a ordem é a das abas)
   const PROJETOS = [
-    {id: 'nex-bela-cintra', nome: 'NEX One Bela Cintra'},
+    {id: 'nex-bela-cintra', nome: 'NEX Bela Cintra'},
+    {id: 'consolacao', nome: 'Consolação'},
     {id: 'raj-mendes', nome: 'RAJ Mendes'},
     {id: 'raj-2', nome: 'RAJ 2'},
-    {id: 'consolacao', nome: 'Nurban Consolação'},
-    {id: 'sumare', nome: 'Nurban Sumaré'}
+    {id: 'sumare', nome: 'Sumaré'}
   ];
   const K_COD = 'espelhos-codigo', K_EP = 'espelhos-endpoint', K_COR = 'espelhos-corretor', K_DONO = 'espelhos-dono', K_AV = 'espelhos-avisos', K_PROJ = 'nex-projeto', K_FILTRO = 'nex-filtro-';
   const BASE_URL = new URL('./', location.href).href;
@@ -798,22 +837,37 @@ window.NEX = (function(){
     }
     box.hidden = box.children.length < 2;
   }
+  // as abas ficam presas logo abaixo da barra do alto
+  const ajustarBarra = () => document.documentElement.style.setProperty('--barra-h', document.querySelector('.barra').offsetHeight + 'px');
+  ajustarBarra(); window.addEventListener('resize', ajustarBarra);
+  $('hero').addEventListener('click', () => { if(P && P.renders && P.renders.length) visualizador(P.renders.map(r => ({src: img(P, r.id), t: r.t, nome: r.id + '.jpg'})), 0, {acoes: acoesImg}); });
   function renderTopo(){
     document.title = 'Central de produto · ' + P.nome;
-    $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva do ' + P.nome;
+    $('hero').src = thumb(P, P.hero); $('hero').alt = 'Fachada do ' + P.nome;
     $('p-nome').textContent = P.nome;
-    $('p-end').textContent = P.endereco + (P.entrega ? ' · ' + P.entrega : '');
-    $('p-cham').textContent = P.chamada || '';
+    // endereço sem a cidade e a entrega abreviada (ex.: "entrega set/2029"), para caber em duas linhas no celular
+    const ent = /(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro) de (\d{4})/i.exec(P.entrega || '');
+    $('p-end').textContent = String(P.endereco || '').replace(/,\s*São Paulo\s*$/i, '') + (ent ? ' · entrega ' + ent[1].slice(0, 3).toLowerCase() + '/' + ent[2] : P.entrega ? ' · ' + P.entrega : '');
+    $('p-end').title = P.endereco + (P.entrega ? ' · ' + P.entrega : '');
   }
+  const milTxt = v => 'R$\u00a0' + Math.round(v / 1000).toLocaleString('pt-BR') + '\u00a0mil';
+  const minPreco = g => { const ps = g.map(x => precoDe(x)).filter(Boolean); return ps.length ? Math.min.apply(null, ps) : null; };
+  // resumo do topo + blocos de metragem (que também filtram a lista)
   function renderStats(){
-    const box = $('p-stats'); box.innerHTML = '';
-    const disp = U.filter(x => x.st === 'disponivel');
-    const add = (b, s, sm) => { const d = document.createElement('div'); d.className = 'stat'; d.innerHTML = '<b></b><span></span>' + (sm ? '<small></small>' : ''); d.children[0].textContent = b; d.children[1].textContent = s; if(sm) d.children[2].textContent = sm; box.appendChild(d); };
-    add(String(disp.length), 'disponíveis de ' + U.length, null);
-    for(const [, lbl] of (P.faixas || [])){
-      const g = disp.filter(x => x.faixa === lbl); if(!g.length) continue;
-      const ps = g.map(x => precoDe(x)).filter(Boolean);
-      add(String(g.length), lbl, ps.length ? 'a partir de R$ ' + Math.round(Math.min.apply(null, ps) / 1000).toLocaleString('pt-BR') + ' mil' : null);
+    const disp = U.filter(x => x.st === 'disponivel'), mn = minPreco(disp);
+    $('p-resumo').innerHTML = '<b>' + disp.length + '</b> disponíveis de ' + U.length + (mn ? ' · desde <b>' + milTxt(mn) + '</b>' : '');
+    const box = $('f-tip'); box.innerHTML = '';
+    const itens = [['todas', 'Todas', disp]];
+    for(const [, lbl] of (P.faixas || [])){ const g = disp.filter(x => x.faixa === lbl); if(g.length || F.faixa === lbl) itens.push([lbl, lbl, g]); }
+    box.hidden = itens.length < 3;
+    for(const [v, lbl, g] of itens){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'fx' + (F.faixa === v ? ' on' : ''); b.setAttribute('aria-pressed', F.faixa === v ? 'true' : 'false');
+      const m = minPreco(g);
+      b.innerHTML = '<span class="fx-t"></span><small><b></b></small>';
+      b.querySelector('.fx-t').textContent = lbl; b.querySelector('b').textContent = g.length;
+      b.querySelector('small').append(m ? ' · desde ' + milTxt(m) : ' · sem preço');
+      b.addEventListener('click', () => { F.faixa = v; salvarFiltro(); mostrando = 30; renderStats(); renderLista(); });
+      box.appendChild(b);
     }
   }
 
@@ -824,12 +878,11 @@ window.NEX = (function(){
     box.closest('.fgrupo').hidden = itens.length < 3;
     for(const [v, lbl] of itens){
       const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (String(F[chave]) === String(v) ? ' on' : ''); b.textContent = lbl;
-      b.addEventListener('click', () => { F[chave] = v; salvarFiltro(); chips(id, itens, chave); mostrando = 30; renderLista(); });
+      b.addEventListener('click', () => { F[chave] = v; salvarFiltro(); chips(id, itens, chave); mostrando = 30; renderLista(); contarFiltros(); });
       box.appendChild(b);
     }
   }
   function montarFiltros(){
-    chips('f-tip', [['todas', 'Todas']].concat((P.faixas || []).map(f => [f[1], f[1]])), 'faixa');
     chips('f-face', [['todas', 'Todas']].concat((P.faces || []).map(f => [f.id, f.curto || f.nome.replace('Rua ', 'R. ')])), 'face');
     const sel = $('f-andar'); sel.innerHTML = '';
     const ands = ((E && E.grade && E.grade.andares) || []).map(a => NEX.andarN(a)).sort((a, b) => a - b);
@@ -838,7 +891,17 @@ window.NEX = (function(){
     $('f-preco').value = F.preco ? (F.preco / 1000).toLocaleString('pt-BR') + ' mil' : '';
     $('f-disp').checked = F.disp !== false;
     $('f-ord').value = F.ord || 'preco';
+    contarFiltros();
   }
+  // quantos filtros extras estão ligados (o número aparece no botão "Filtros")
+  function andarMin(){ const a = ((E && E.grade && E.grade.andares) || []).map(z => NEX.andarN(z)); return a.length ? Math.min.apply(null, a) : 0; }
+  function contarFiltros(){
+    const n = (F.face !== 'todas' ? 1 : 0) + (F.cat !== 'todas' ? 1 : 0) + ((F.andar || 0) > andarMin() ? 1 : 0) + (F.disp === false ? 1 : 0);
+    $('f-n').hidden = !n; $('f-n').textContent = String(n);
+    $('f-limpar').hidden = !n;
+  }
+  $('f-abrir').addEventListener('click', () => { const p = $('painel'); p.hidden = !p.hidden; $('f-abrir').setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); $('f-abrir').classList.toggle('on', !p.hidden); });
+  $('f-limpar').addEventListener('click', () => { Object.assign(F, {face: 'todas', cat: 'todas', andar: 0, disp: true}); salvarFiltro(); montarFiltros(); montarCats(); mostrando = 30; renderLista(); });
   function montarCats(){
     const cats = [...new Set(U.filter(x => x.st === 'disponivel' && x.cat).map(x => x.cat))].sort();
     const nomes = (E && E.cat_nome) || {};
@@ -846,17 +909,17 @@ window.NEX = (function(){
   }
   function montarBase(){
     const box = $('f-base'); box.innerHTML = '';
-    const bs = BASES; box.hidden = bs.length < 2;
+    const bs = BASES; box.closest('.fgrupo').hidden = bs.length < 2;
     for(const b of bs){
-      const el = document.createElement('button'); el.type = 'button'; el.dataset.v = b.k; el.textContent = b.rotulo; el.className = b.k === F.base ? 'on' : '';
+      const el = document.createElement('button'); el.type = 'button'; el.dataset.v = b.k; el.textContent = b.rotulo; el.className = 'chip' + (b.k === F.base ? ' on' : '');
       el.addEventListener('click', () => { F.base = b.k; salvarFiltro(); montarBase(); renderStats(); renderLista(); });
       box.appendChild(el);
     }
     montarCats();
   }
-  $('f-andar').addEventListener('change', () => { F.andar = +$('f-andar').value; salvarFiltro(); mostrando = 30; renderLista(); });
+  $('f-andar').addEventListener('change', () => { F.andar = +$('f-andar').value; salvarFiltro(); mostrando = 30; renderLista(); contarFiltros(); });
   $('f-preco').addEventListener('input', () => { F.preco = numPreco($('f-preco').value); salvarFiltro(); mostrando = 30; renderLista(); });
-  $('f-disp').addEventListener('change', () => { F.disp = $('f-disp').checked; salvarFiltro(); mostrando = 30; renderLista(); });
+  $('f-disp').addEventListener('change', () => { F.disp = $('f-disp').checked; salvarFiltro(); mostrando = 30; renderLista(); contarFiltros(); });
   $('f-ord').addEventListener('change', () => { F.ord = $('f-ord').value; salvarFiltro(); renderLista(); });
   $('mais').addEventListener('click', () => { mostrando += 30; renderLista(); });
 
@@ -882,6 +945,7 @@ window.NEX = (function(){
     if(!U.length){ box.innerHTML = '<div class="carregando">Carregando unidades…</div>'; $('res-n').textContent = ''; $('mais').hidden = true; return; }
     const r = filtrados();
     $('res-n').textContent = r.length ? r.length + (r.length === 1 ? ' unidade' : ' unidades') : 'Nenhuma unidade com esses filtros';
+    const bb = BASES.find(z => z.k === F.base); $('res-base').textContent = BASES.length > 1 && bb ? 'preços: ' + bb.rotulo : '';
     box.innerHTML = '';
     if(!r.length){ box.innerHTML = '<div class="vazio">Nenhuma unidade com esses filtros. Tente tirar um deles.</div>'; $('mais').hidden = true; return; }
     for(const x of r.slice(0, mostrando)) box.appendChild(cardUnidade(x));
@@ -891,51 +955,61 @@ window.NEX = (function(){
     const b = document.createElement('button'); b.type = 'button'; b.className = 'card';
     const st = ST[x.st] || [x.st, 'cat'], pr = precoDe(x);
     b.innerHTML = '<img alt="" loading="lazy"><div><div class="l1"><span class="num"></span><span class="pill"></span><span class="pill cat"></span></div>' +
-      '<div class="l2"></div><div class="l3"><span class="preco"></span><span class="l2 face"></span></div></div>';
+      '<div class="l2"></div><div class="l3"><span class="preco"></span><small class="alt"></small><span class="face"></span></div></div>';
     const im = b.querySelector('img'); if(x.pl) im.src = thumb(P, x.pl.p.id); else im.style.visibility = 'hidden';
     b.querySelector('.num').textContent = x.n;
-    const p1 = b.querySelectorAll('.pill')[0]; p1.textContent = st[0]; p1.classList.add(st[1]);
-    const pc = b.querySelectorAll('.pill')[1]; if(x.cat && !/RESERVA|CONVERS/i.test(x.cat)) pc.textContent = x.cat; else pc.remove();
+    const [p1, pc] = b.querySelectorAll('.pill');
+    if(x.st === 'disponivel') p1.remove(); else { p1.textContent = st[0]; p1.classList.add(st[1]); }
+    if(x.cat && !/RESERVA|CONVERS/i.test(x.cat)) pc.textContent = x.cat; else pc.remove();
     b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · ' + posTxt(x) + (x.ex && x.ex.tl ? ' · ' + x.ex.tl : '') + (x.a ? ' · ' + m2(x.a) : '');
     const op = opLista(x);
-    b.querySelector('.preco').textContent = op ? BRL(op.total) + (op.k !== F.base && BASES.length > 1 ? ' · ' + op.rotulo.toLowerCase() : '') : 'sem preço';
+    b.querySelector('.preco').textContent = op ? BRL(op.total) : 'sem preço';
+    b.querySelector('.alt').textContent = op && op.k !== F.base && BASES.length > 1 ? op.rotulo.toLowerCase() : '';
     b.querySelector('.face').textContent = x.face ? (x.face.lado || 'vista ' + x.face.nome.replace('Rua ', 'R. ')) : '';
     b.addEventListener('click', () => abrirFicha(x.n));
     return b;
   }
 
   // ---------------- ficha da unidade ----------------
+  // no computador: planta, andar e vista à esquerda; valores e parecidas à direita. No celular: planta e valores primeiro.
+  const telaLarga = window.matchMedia('(min-width:860px)');
+  const aoMudarTela = () => { if(atual && !$('ficha').hidden) renderFicha(); };
+  if(telaLarga.addEventListener) telaLarga.addEventListener('change', aoMudarTela); else if(telaLarga.addListener) telaLarga.addListener(aoMudarTela);
   function abrirFicha(n){
     const x = porN.get(String(n)); if(!x) return;
     atual = x;
-    const fl = x.ops.filter(o => o.linhas && o.linhas.length);
-    baseFicha = (fl.find(o => o.k === F.base) || fl[0] || {}).k || null;
+    baseFicha = (x.ops.find(o => o.k === F.base) || x.ops[0] || {}).k || null;
     renderFicha(); $('ficha').hidden = false; document.body.classList.add('sem-rolagem');
     $('fi-corpo').scrollTop = 0; NEX.centrarAndar($('fi-corpo'));
     try{ history.replaceState(null, '', location.pathname + location.search + '#u' + x.n); }catch(e){}
   }
   function fecharFicha(){ $('ficha').hidden = true; document.body.classList.remove('sem-rolagem'); try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
+  const pctAbaixo = (o, tab) => tab && o !== tab && o.total < tab.total ? (Math.round((1 - o.total / tab.total) * 1000) / 10).toLocaleString('pt-BR') + '%' : '';
+  const listaNotas = cs => '<ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
+  function notaCat(x){
+    const ci = (P.cat_info || {})[x.cat], nc = T && T.nota_corretor && /HIS|HMP/.test(x.cat || '') ? T.nota_corretor : '';
+    return ci || nc ? '<div class="nota-cor">' + esc(ci || '') + (ci && nc ? ' ' : '') + esc(nc) + '</div>' : '';
+  }
+  // um preço em destaque (o da lista, ou o que o corretor tocar) e os demais como botões ao lado
   function blocoValores(x){
-    let h = '<h3>Valores';
-    const fl = x.ops.filter(o => o.linhas && o.linhas.length);
-    if(fl.length > 1) h += ' <span class="seg" id="fi-base" role="group" aria-label="Base do fluxo">' + fl.map(o => '<button type="button" data-v="' + esc(o.k) + '"' + (o.k === baseFicha ? ' class="on"' : '') + '>' + esc(o.rotulo) + '</button>').join('') + '</span>';
-    h += '</h3>';
-    if(!x.ops.length) return h + '<div class="sem-vista">Sem preço cadastrado para esta unidade.</div>';
-    const tab = x.ops.find(o => o.k === 'tabela');
-    h += '<div class="precos">' + x.ops.map(o => '<div><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' +
-      (tab && o !== tab && o.total < tab.total ? '<span>' + (Math.round((1 - o.total / tab.total) * 1000) / 10).toLocaleString('pt-BR') + '% abaixo da tabela</span>' : '') + '</div>').join('') + '</div>';
+    let h = '<div class="bloco"><h3>Valores</h3>';
+    if(!x.ops.length) return h + '<div class="sem-vista">Sem preço cadastrado para esta unidade.</div>' + notaCat(x) + '</div>';
+    const o = x.ops.find(z => z.k === baseFicha) || x.ops[0];
+    const tab = x.ops.find(z => z.k === 'tabela'), pc = pctAbaixo(o, tab);
+    h += '<div class="pr-main"><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' + (pc ? '<small>' + pc + ' abaixo da tabela</small>' : '') + '</div>';
+    const alts = x.ops.filter(z => z !== o);
+    if(alts.length) h += '<div class="pr-alts" role="group" aria-label="Outros preços desta unidade">' + alts.map(z => '<button type="button" data-v="' + esc(z.k) + '" title="Ver este preço"><span>' + esc(z.rotulo) + '</span><b>' + BRL(z.total) + '</b>' + (pctAbaixo(z, tab) ? '<i>−' + pctAbaixo(z, tab) + '</i>' : '') + '</button>').join('') + '</div>';
     if(x.ex && x.ex.aj) h += '<div class="nota-aj">★ ' + esc(x.ex.aj) + '</div>';
-    const o = fl.find(z => z.k === baseFicha) || fl[0];
-    if(o){
+    const fluxo = !!(o.linhas && o.linhas.length);
+    if(fluxo){
       h += '<div class="fluxo">' + o.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
            '<div class="ln tot"><span>Valor total</span><b>' + BRL(o.total) + '</b></div></div>';
-      if(o.k === 'tabela' && T && T.notas && T.notas.length) h += '<ul class="notas">' + T.notas.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>';
+      if(o.k === 'tabela' && T && T.notas && T.notas.length) h += listaNotas(T.notas);
     }
-    // condições do espelho (quando não há fluxo, ou como referência ao lado da tabela)
+    // condições do espelho: abertas quando o preço é do espelho; recolhidas quando o destaque é a tabela da incorporadora
     const cs = condEspelho(x);
-    if(cs.length) h += o ? '<details class="cond"><summary>Condições do espelho</summary><ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>'
-                         : '<ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
-    return h;
+    if(cs.length) h += fluxo && o.k === 'tabela' ? '<details class="cond"><summary>Condições do espelho</summary>' + listaNotas(cs) + '</details>' : listaNotas(cs);
+    return h + notaCat(x) + '</div>';
   }
   function condEspelho(x){
     const tb = E && E.tabela, cs = [];
@@ -952,55 +1026,52 @@ window.NEX = (function(){
     const st = ST[x.st] || [x.st, 'cat'];
     $('fi-tit').innerHTML = 'Unidade ' + esc(x.n) + '<small>' + esc(andarTxt(x.andar)) + ' · ' + esc(posTxt(x)) + (x.ex && x.ex.tl ? ' · ' + esc(x.ex.tl) : '') + (x.a ? ' · ' + esc(m2(x.a)) : '') + '</small>';
     const pl = x.pl, vi = vista(P, x);
-    let h = '<div class="fx-grid"><div style="display:grid;gap:14px;min-width:0">';
+    const tags = '<div class="fi-tags"><span class="pill ' + st[1] + '">' + esc(st[0]) + '</span>' + (x.cat && !/RESERVA|CONVERS/i.test(x.cat) ? '<span class="pill cat">' + esc(x.cat) + '</span>' : '') +
+         (x.face ? '<span class="pill cat">' + esc(x.face.lado || 'vista ' + x.face.nome) + '</span>' : '') + '</div>';
     // planta
-    h += '<div class="bloco"><h3>Planta<span class="acoes-h">' + (pl && pl.p.decorado ? '<button class="acao" type="button" id="fi-dec">Ver decorado</button>' : '') +
+    let bPl = '<div class="bloco"><h3>Planta<span class="acoes-h">' + (pl && pl.p.decorado ? '<button class="acao" type="button" id="fi-dec">Ver decorado</button>' : '') +
          (pl && pl.exata && pl.p.tour ? '<a class="acao" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour 360°</a>' : '') + '</span></h3>';
     if(pl){
-      h += '<img class="img-planta" id="fi-pl" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + ' alt="' + esc(pl.p.t) + '">';
+      bPl += '<img class="img-planta" id="fi-pl" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + ' alt="' + esc(pl.p.t) + '">';
       const base = pl.p.finais ? 'final ' + pl.p.finais.map(pad2).join(', ') : (pl.p.tipos || []).map(t => NEX.tipoTxt(t)).join(', ');
-      h += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + (base ? ' · ' + esc(base) : '') + (pl.p.andares ? ' (' + esc(pl.p.andares) + ')' : '')
+      bPl += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + (base ? ' · ' + esc(base) : '') + (pl.p.andares ? ' (' + esc(pl.p.andares) + ')' : '')
             : 'Planta de referência: ' + esc(pl.p.t) + (base ? ', ' + esc(base) : '') + '. Mesma tipologia; esta unidade pode ser espelhada ou ter pequenas diferenças.') +
            (P.nota_planta_andar && P.nota_planta_andar[String(x.an)] ? ' ' + esc(P.nota_planta_andar[String(x.an)]) : '') + '</div>';
-    } else h += '<div class="sem-vista">A incorporadora não divulgou a planta humanizada desta unidade.</div>';
-    h += '</div>';
+    } else bPl += '<div class="sem-vista">A incorporadora não divulgou a planta humanizada desta unidade.</div>';
+    bPl += '</div>';
     // vista
+    let bVi = '';
     if((vi && !vi.sem) || (P.vistas_rooftop && P.vistas_rooftop.length)){
-      h += '<div class="bloco"><h3>' + (vi && !vi.sem ? 'Vista do andar' : 'Vistas') + '<span class="acoes-h">' + (P.vistas_rooftop && P.vistas_rooftop.length ? '<button class="acao" type="button" id="fi-roof">' + esc(P.vistas_rooftop_rotulo || 'Vistas do rooftop') + '</button>' : '') +
+      bVi = '<div class="bloco"><h3>' + (vi && !vi.sem ? 'Vista do andar' : 'Vistas') + '<span class="acoes-h">' + (P.vistas_rooftop && P.vistas_rooftop.length ? '<button class="acao" type="button" id="fi-roof">' + esc(P.vistas_rooftop_rotulo || 'Vistas do rooftop') + '</button>' : '') +
            (P.tour_rooftop ? '<a class="acao" href="' + esc(P.tour_rooftop) + '" target="_blank" rel="noopener">360° do rooftop</a>' : '') + '</span></h3>';
       if(vi && vi.img){
-        h += '<img class="img-vista" id="fi-vi" src="' + esc(img(P, vi.img)) + '" alt="Simulação de vista">';
-        h += '<div class="leg">Simulação · sentido ' + esc(vi.face.nome) + ' · ' + vi.andar + 'º pavimento' + (vi.andar !== x.an ? ' (a mais próxima abaixo do ' + x.an + 'º)' : '') + '</div>';
+        bVi += '<img class="img-vista" id="fi-vi" src="' + esc(img(P, vi.img)) + '" alt="Simulação de vista">';
+        bVi += '<div class="leg">Simulação · sentido ' + esc(vi.face.nome) + ' · ' + vi.andar + 'º pavimento' + (vi.andar !== x.an ? ' (a mais próxima abaixo do ' + x.an + 'º)' : '') + '</div>';
       } else if(vi && !vi.sem){
-        h += '<div class="sem-vista">Andar baixo: a incorporadora não fez simulação de vista para este andar na face ' + esc(vi.face.nome) + '.</div>';
+        bVi += '<div class="sem-vista">Andar baixo: a incorporadora não fez simulação de vista para este andar na face ' + esc(vi.face.nome) + '.</div>';
       } else {
         const r0 = P.vistas_rooftop[0];
-        h += '<img class="img-vista" id="fi-vr" src="' + esc(img(P, r0.id)) + '" alt="' + esc(r0.t) + '"><div class="leg">' + esc(r0.t) + '</div>';
+        bVi += '<img class="img-vista" id="fi-vr" src="' + esc(img(P, r0.id)) + '" alt="' + esc(r0.t) + '"><div class="leg">' + esc(r0.t) + '</div>';
       }
-      h += '</div>';
+      bVi += '</div>';
     }
-    h += '</div><div style="display:grid;gap:14px;min-width:0">';
-    // resumo + valores
-    h += '<div class="bloco"><div class="tags"><span class="pill ' + st[1] + '">' + esc(st[0]) + '</span>' + (x.cat && !/RESERVA|CONVERS/i.test(x.cat) ? '<span class="pill cat">' + esc(x.cat) + '</span>' : '') +
-         (x.face ? '<span class="pill cat">' + esc(x.face.lado || 'vista ' + x.face.nome) + '</span>' : '') + '</div>';
-    h += blocoValores(x);
-    const ci = (P.cat_info || {})[x.cat];
-    if(ci || (T && T.nota_corretor && /HIS|HMP/.test(x.cat || ''))) h += '<div class="nota-cor">' + esc(ci || '') + ' ' + esc(T && T.nota_corretor && /HIS|HMP/.test(x.cat || '') ? T.nota_corretor : '') + '</div>';
-    h += '</div>';
     // onde fica
+    let bAnd = '';
     const doAndar = U.filter(z => z.an === x.an), sitFin = {}, sitCol = {}, numCol = {};
     for(const z of doAndar){ sitFin[z.fin] = z.st; sitCol[z.col] = z.st; numCol[z.col] = z.n; }
     const svg = svgAndar(P, x, {existe: new Set(doAndar.map(z => z.fin)), sit: sitFin, existeCol: new Set(doAndar.map(z => z.col)), sitCol, numCol});
     if(svg){
-      h += '<div class="bloco"><h3>Onde fica no andar</h3>' + svg +
+      bAnd = '<div class="bloco"><h3>Onde fica no andar</h3>' + svg +
            '<div class="legenda"><span><i style="background:var(--svg-alvo)"></i>esta unidade</span><span><i style="background:var(--svg-disp)"></i>disponível</span><span><i style="background:var(--svg-res)"></i>reservada</span><span><i style="background:var(--svg-vend)"></i>vendida</span>' + (P.andar_tipo ? '<span><i style="background:#f6b73c;border-radius:50%"></i>sol ao longo do dia</span>' : '') + '</div>' +
            '<div class="leg">' + esc(P.andar_legenda || (P.andar_tipo ? 'Sol conforme o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar, como no espelho de vendas.')) + (x.face ? ' ' + esc(x.face.frase || ('Janela voltada para a ' + x.face.nome + '.')) : '') + '</div></div>';
     }
     // parecidas
     const par = pl ? U.filter(z => z.n !== x.n && z.st === 'disponivel' && z.pl && z.pl.p.id === pl.p.id).sort((a, b) => Math.abs(a.an - x.an) - Math.abs(b.an - x.an)).slice(0, 12) : [];
-    if(pl) h += '<div class="bloco"><h3>Mesma planta, disponíveis</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">Nenhuma outra disponível com esta planta.</div>') + '</div>';
-    h += '</div></div>';
-    $('fi-corpo').innerHTML = h;
+    const bPar = pl ? '<div class="bloco"><h3>Mesma planta, disponíveis</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">Nenhuma outra disponível com esta planta.</div>') + '</div>' : '';
+    const bVal = blocoValores(x);
+    $('fi-corpo').innerHTML = tags + (telaLarga.matches
+      ? '<div class="fx-grid"><div class="col">' + bPl + bAnd + bVi + '</div><div class="col">' + bVal + bPar + '</div></div>'
+      : '<div class="col">' + bPl + bVal + bAnd + bVi + bPar + '</div>');
     requestAnimationFrame(() => NEX.centrarAndar($('fi-corpo')));
     const plImg = $('fi-pl'); if(plImg) plImg.addEventListener('click', () => visualizador([{src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}] : []), 0, {acoes: acoesImg}));
     const dec = $('fi-dec'); if(dec) dec.addEventListener('click', () => visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}, {src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
@@ -1008,7 +1079,7 @@ window.NEX = (function(){
     const roofs = () => visualizador(P.vistas_rooftop.map(v => ({src: img(P, v.id), t: v.t, nome: v.id + '.jpg'})), 0, {acoes: acoesImg});
     const rf = $('fi-roof'); if(rf) rf.addEventListener('click', roofs);
     const vr = $('fi-vr'); if(vr) vr.addEventListener('click', roofs);
-    document.querySelectorAll('#fi-base button').forEach(b => b.addEventListener('click', () => { baseFicha = b.dataset.v; renderFicha(); }));
+    document.querySelectorAll('#fi-corpo .pr-alts button').forEach(b => b.addEventListener('click', () => { baseFicha = b.dataset.v; const y = $('fi-corpo').scrollTop; renderFicha(); $('fi-corpo').scrollTop = y; }));
     document.querySelectorAll('#fi-corpo .parecidas button').forEach(b => b.addEventListener('click', () => abrirFicha(b.dataset.n)));
   }
   function imagensDaUnidade(x){

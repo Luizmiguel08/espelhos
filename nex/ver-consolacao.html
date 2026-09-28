@@ -69,6 +69,10 @@ a{color:var(--accent)}
 .u-top span{color:var(--ink-2)}
 .fora{background:rgba(255,140,128,.12);border:1px solid rgba(255,140,128,.35);color:var(--bad);border-radius:12px;padding:10px 12px;font-size:14.5px}
 .u-grid{display:grid;gap:16px}
+.u-col{display:grid;gap:16px;min-width:0;align-content:start}
+.u-col .cat{margin-top:0}
+#u-tit[hidden]~#unids .u-top h3{font-size:36px}
+@media (min-width:900px){#u-tit[hidden]~#unids .u-top h3{font-size:44px}}
 @media (min-width:900px){.u-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
 .cartao{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}
 .cartao h4 small{display:block;font-family:"IBM Plex Sans",sans-serif;font-size:13px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:500;margin-top:2px}
@@ -132,8 +136,18 @@ a{color:var(--accent)}
 footer{max-width:1080px;margin:0 auto;padding:30px 20px 120px;color:var(--muted);font-size:11.5px;line-height:1.55;border-top:1px solid var(--line)}
 footer p{margin:0 0 10px}
 
-.wa-fixo{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:40;display:inline-flex;align-items:center;gap:9px;background:#1fa855;color:#fff;text-decoration:none;font-weight:600;border-radius:99px;padding:13px 20px;box-shadow:0 10px 30px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
-.wa-fixo svg{width:20px;height:20px;flex:none}
+.wa-fixo{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:56px;height:56px;background:#1fa855;color:#fff;text-decoration:none;font-weight:600;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap}
+.wa-fixo svg{width:28px;height:28px;flex:none}
+.wa-fixo span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.wa-fixo{transition:opacity .2s ease,transform .2s ease}
+.wa-fixo.recolhido{opacity:0;transform:scale(.6);pointer-events:none}
+.btn.wa-in{margin-top:14px;width:100%;background:#1fa855;border-color:#1fa855;color:#fff}
+.btn.wa-in svg{width:20px;height:20px;flex:none}
+@media (min-width:900px){
+  .wa-fixo{width:auto;height:auto;padding:13px 20px;right:24px;bottom:24px}
+  .wa-fixo svg{width:20px;height:20px}
+  .wa-fixo span{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+}
 .previa{position:fixed;top:0;left:0;right:0;z-index:45;background:var(--accent);color:var(--accent-ink);text-align:center;font-size:13px;font-weight:600;padding:6px 10px}
 
 /* visualizador */
@@ -235,7 +249,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202609272230
+// versão 202609272308
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -527,7 +541,7 @@ window.NEX = (function(){
   const q = new URLSearchParams(location.search);
   const id = (q.get('l') || '').trim();
   const previa = q.get('previa') === '1';
-  let L = null, P = null;
+  let L = null, P = null, waHref = '', waTxt = '';
   const feitos = new Set();
   function evento(e){ if(previa || !L || feitos.has(e)) return; feitos.add(e); rpc('link_ver', {p_id: id, p_evento: e}).catch(() => {}); }
   const primeiro = s => String(s || '').trim().split(/\s+/)[0] || '';
@@ -565,7 +579,13 @@ window.NEX = (function(){
 
     // ---- unidades ----
     const us = L.unidades || [];
-    $('u-tit').textContent = us.length > 1 ? 'Unidades para você' : 'Sua unidade';
+    if(L.whats){
+      const nomeCor = primeiro(L.corretor);
+      const un = us.length === 1 ? ' (unidade ' + us[0].n + ')' : us.length ? ' (unidades ' + us.map(u => u.n).join(', ') + ')' : '';
+      waHref = 'https://wa.me/' + waNum(L.whats) + '?text=' + encodeURIComponent('Olá' + (nomeCor ? ', ' + nomeCor : '') + '! Vi a apresentação do ' + P.nome + un + ' e quero conversar.');
+      waTxt = nomeCor ? 'Falar com ' + nomeCor + ' no WhatsApp' : 'Falar com o corretor no WhatsApp';
+    }
+    $('u-tit').textContent = 'Unidades para você'; $('u-tit').hidden = us.length < 2;
     const idx = $('indice');
     if(us.length > 1){ idx.hidden = false; idx.innerHTML = us.map(u => '<a href="#u-' + esc(u.n) + '">Unidade ' + esc(u.n) + '</a>').join(''); }
     const box = $('unids'); box.innerHTML = '';
@@ -614,18 +634,15 @@ window.NEX = (function(){
     // ---- rodapé e WhatsApp ----
     $('legal').textContent = P.legal || '';
     $('aviso-img').textContent = 'Imagens ilustrativas. ' + (P.aviso_planta || '') + ' ' + (P.aviso_vista || '');
-    if(L.whats){
-      const nomeCor = primeiro(L.corretor);
-      const un = us.length === 1 ? ' (unidade ' + us[0].n + ')' : us.length ? ' (unidades ' + us.map(u => u.n).join(', ') + ')' : '';
-      const w = $('wa'); w.hidden = false;
-      w.href = 'https://wa.me/' + waNum(L.whats) + '?text=' + encodeURIComponent('Olá' + (nomeCor ? ', ' + nomeCor : '') + '! Vi a apresentação do ' + P.nome + un + ' e quero conversar.');
-      $('wa-t').textContent = nomeCor ? 'Falar com ' + nomeCor + ' no WhatsApp' : 'Falar com o corretor no WhatsApp';
-      w.addEventListener('click', () => evento('whatsapp'));
+    if(waHref){
+      const w = $('wa'); w.hidden = false; w.href = waHref;
+      $('wa-t').textContent = waTxt; w.setAttribute('aria-label', waTxt);
+      document.querySelectorAll('#wa, .wa-in').forEach(a => a.addEventListener('click', () => evento('whatsapp')));
     }
 
     $('load').hidden = true; $('pg').hidden = false;
     requestAnimationFrame(() => NEX.centrarAndar(document));
-    observar();
+    observar(); if(waHref) recolherWa();
   }
 
   function blocoUnidade(u){
@@ -638,7 +655,16 @@ window.NEX = (function(){
              (pl.exata && pl.p.tour ? '<a class="btn tour" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour virtual 360° desta planta</a>' : '') +
              (pl.p.decorado ? '<img class="img-dec" alt="Decorado" src="' + esc(img(P, pl.p.decorado)) + '"><div class="leg">Decorado desta planta (sugestão de decoração).</div>' : '');
     else h += '<div class="sem">Planta disponível com o seu corretor.</div>';
-    h += '</div><div style="display:grid;gap:16px;min-width:0">';
+    h += '</div><div class="u-col">';
+    const v = u.valores;
+    if(v && v.linhas && v.linhas.length){
+      h += '<div class="cartao" data-ev="valores"><h4>' + (v.linhas.length > 1 ? 'Condições de pagamento' : 'Valor') + (v.rotulo ? '<small>' + esc(v.rotulo) + '</small>' : '') + '</h4><div class="fluxo">' +
+        v.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
+        (v.total && v.linhas.length > 1 ? '<div class="ln tot"><span>Valor total</span><b>' + esc(BRL(v.total)) + '</b></div>' : '') + '</div>' +
+        (v.nota ? '<p class="nota">' + esc(v.nota) + '</p>' : '') +
+        (waHref ? '<a class="btn wa-in" href="' + esc(waHref) + '" target="_blank" rel="noopener">' + ICO_WA + esc(waTxt) + '</a>' : '') + '</div>';
+    }
+    if(P.cat_info && P.cat_info[u.cat]) h += '<div class="cat">' + esc(P.cat_info[u.cat]) + '</div>';
     if(vi && vi.img) h += '<div class="cartao"><h4>A vista do seu andar</h4><img class="img-vista" data-ev="vista" alt="Simulação de vista" src="' + esc(img(P, vi.img)) + '"><div class="leg">Simulação no ' + vi.andar + 'º pavimento, sentido ' + esc(vi.face.nome) + (vi.andar !== x.an ? ' (a mais próxima do ' + x.an + 'º)' : '') + '.</div></div>';
     else if(vi && !vi.sem) h += '<div class="cartao"><h4>A vista do seu andar</h4><div class="sem">Para este andar não há simulação de vista. Seu corretor pode mostrar o entorno.</div></div>';
     else if(P.vistas_rooftop && P.vistas_rooftop.length) h += '<div class="cartao"><h4>' + esc(P.vistas_rooftop_rotulo || 'Vista do rooftop') + '</h4><img class="img-vista" data-ev="vista" alt="' + esc(P.vistas_rooftop[0].t) + '" src="' + esc(img(P, P.vistas_rooftop[0].id)) + '"><div class="leg">' + esc(P.vistas_rooftop[0].t) + '.</div>' +
@@ -646,14 +672,6 @@ window.NEX = (function(){
     const svg = svgAndar(P, x, {});
     if(svg) h += '<div class="cartao" data-ev="andar"><h4>Onde fica no andar</h4>' + svg + '<div class="leg">Sua unidade em destaque. ' + esc(P.andar_legenda_cliente || (P.andar_tipo ? 'O sol segue o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar.')) + '</div></div>';
     h += '</div></div>';
-    const v = u.valores;
-    if(v && v.linhas && v.linhas.length){
-      h += '<div class="cartao" data-ev="valores"><h4>' + (v.linhas.length > 1 ? 'Condições de pagamento' : 'Valor') + (v.rotulo ? '<small>' + esc(v.rotulo) + '</small>' : '') + '</h4><div class="fluxo">' +
-        v.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
-        (v.total && v.linhas.length > 1 ? '<div class="ln tot"><span>Valor total</span><b>' + esc(BRL(v.total)) + '</b></div>' : '') + '</div>' +
-        (v.nota ? '<p class="nota">' + esc(v.nota) + '</p>' : '') + '</div>';
-    }
-    if(P.cat_info && P.cat_info[u.cat]) h += '<div class="cat">' + esc(P.cat_info[u.cat]) + '</div>';
     a.innerHTML = h;
     const ip = a.querySelector('.img-planta'); if(ip) ip.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.id), t: pl.p.t + ' · unidade ' + u.n}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}] : []), 0); });
     const idc = a.querySelector('.img-dec'); if(idc) idc.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}, {src: img(P, pl.p.id), t: pl.p.t}], 0); });
@@ -662,6 +680,17 @@ window.NEX = (function(){
     return a;
   }
 
+  const ICO_WA = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg>';
+  function recolherWa(){
+    const cs = [...document.querySelectorAll('.cartao[data-ev="valores"]')];
+    if(!cs.length || !('IntersectionObserver' in window)) return;
+    const vis = new Set();
+    const io = new IntersectionObserver(ents => {
+      for(const e of ents){ if(e.isIntersecting) vis.add(e.target); else vis.delete(e.target); }
+      $('wa').classList.toggle('recolhido', vis.size > 0);
+    }, {threshold: 0});
+    cs.forEach(c => io.observe(c));
+  }
   function observar(){
     const alvo = [...document.querySelectorAll('[data-ev]')];
     const sLocal = $('perto');
