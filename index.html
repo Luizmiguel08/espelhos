@@ -86,6 +86,16 @@ button{font:inherit;color:inherit}
 .tabs .tab.on{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .tabs .tab.on small,.tabs .tab.on small i{color:inherit;opacity:.85}
 .tabs .tl{display:none}
+.tabs .tab.grupo b::after{content:" ▾";font-size:.8em;opacity:.7}
+/* projetos de um grupo (ex.: VitaUrbana) */
+.subtabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.subtabs .sl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-right:4px}
+.subtabs button{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;line-height:1.1;white-space:nowrap}
+.subtabs button:hover{border-color:var(--accent)}
+.subtabs button .n{font-size:11px;font-weight:600;padding:2px 6px;border-radius:999px;background:var(--disp);color:var(--disp-ink);font-variant-numeric:tabular-nums}
+.subtabs button .n.zero{background:var(--surface-2);color:var(--muted)}
+.subtabs button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.subtabs button.on .n{background:rgba(255,255,255,.22);color:inherit}
 
 /* header */
 .head{display:flex;flex-wrap:wrap;gap:4px 24px;align-items:flex-end;justify-content:space-between}
@@ -296,6 +306,10 @@ table.res tfoot td{font-weight:600;border-bottom:0}
 .tip .p small{display:block;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .tip .st{display:inline-block;margin-top:6px;padding:1px 7px;border-radius:5px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 svg.map .u .pr{font-size:7.2px;font-weight:700;letter-spacing:.01em}
+svg.map .u .pr.alt{font-style:italic;font-weight:600;opacity:.8}
+.sheet .info .cond .fx{display:block;margin-top:2px}
+.sheet .info .cond .fx b{font-weight:600;color:var(--ink-2)}
+.sheet .info .semp{font-size:12px;color:var(--ink-2);margin-top:4px}
 svg.map .u .tp.cmp{font-size:6px;letter-spacing:0}
 .foot{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:space-between;padding-top:8px;border-top:1px solid var(--line)}
 
@@ -492,6 +506,35 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 .fx-resumo .ok{color:var(--disp-text);font-weight:600}
 .fx-resumo .erro{color:var(--vend-text);font-weight:600}
 #fx-an-c .campo:last-child{flex:0 1 150px}
+/* grupos de projetos (VitaUrbana) */
+.painel .chips button.grp{font-weight:600}
+.painel .chips button.grp.parte{border-color:var(--accent);color:var(--accent)}
+.painel .chips button.ver-grp{border:0;background:none;color:var(--accent);padding:0 6px;font-weight:600}
+.painel .chips .chips.sub{flex-basis:100%;padding:8px;border:1px dashed var(--line-2);border-radius:12px}
+.painel .chips .chips.sub button{height:30px;font-size:12.5px}
+.av-grupo{border:1px solid var(--line);border-radius:10px}
+.av-grupo summary{display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;cursor:pointer;padding-right:10px}
+.av-grupo summary::-webkit-details-marker{display:none}
+.av-grupo summary label.ck{border:0;flex:1}
+.av-grupo summary .mais{font-size:12.5px;font-weight:600;color:var(--accent);white-space:nowrap}
+.av-grupo summary .mais::after{content:" ▾"}
+.av-grupo[open] summary .mais::after{content:" ▴"}
+.av-grupo .lst{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;padding:0 10px 10px}
+.av-grupo .lst label.ck{padding:7px 8px;font-size:13px}
+.av-grupo .lst label.ck input{width:18px;height:18px}
+/* subprojetos no celular: uma linha que rola para o lado */
+@media (max-width:640px){
+  .subtabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:8px 16px;border-radius:0;border-inline:0;scroll-snap-type:x proximity;scroll-padding-inline:16px}
+  .subtabs::-webkit-scrollbar{display:none}
+  .subtabs button{flex:0 0 auto;scroll-snap-align:start}
+  .subtabs .sl{display:none}
+}
+/* proposta: quatro tipos em grade 2x2 */
+.seg2.seg-full.muitos{display:grid;grid-template-columns:1fr 1fr;height:auto}
+.seg2.seg-full.muitos button{min-height:42px;border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);padding:6px 10px;white-space:normal}
+.seg2.seg-full.muitos button:nth-child(odd){border-left:0}
+.seg2.seg-full.muitos button:nth-child(-n+2){border-top:0}
+.previa .por-proj{font-size:12.5px;color:var(--ink-2)}
 </style>
 </head>
 <body>
@@ -505,6 +548,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 
 <div class="wrap">
   <nav class="tabs" id="tabs" aria-label="Projetos"><span class="tl">Projeto</span></nav>
+  <nav class="subtabs" id="subtabs" hidden aria-label="Projetos do grupo"></nav>
 
   <header class="head">
     <div class="titles">
@@ -659,7 +703,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       <div class="campo"><span>Projetos</span><div class="chips" id="bf-projs"></div></div>
       <div class="campo"><span>Metragem (m²)</span><div class="duo"><input id="bf-m2a" inputmode="decimal" placeholder="de"><input id="bf-m2b" inputmode="decimal" placeholder="até"></div></div>
       <div class="campo"><span>Preço máximo</span><div class="duo"><input id="bf-preco" inputmode="numeric" placeholder="Ex.: 150.000"><div class="seg2" id="bf-modo"><button type="button" data-v="pv" class="on">À vista</button><button type="button" data-v="pp">Parcelado</button></div></div></div>
-      <p class="dica">Pode digitar "150" para 150 mil. Com preço máximo, unidades sem preço no espelho ficam de fora; se o projeto não tiver o valor escolhido, vale o outro (por exemplo, o de tabela).</p>
+      <p class="dica">Pode digitar "150" para 150 mil. Com preço máximo, unidades sem preço no espelho ficam de fora; se o projeto não tiver o valor escolhido, vale o menor valor que ele tiver (nos projetos da VitaUrbana, o menor valor da tabela: associativo ou SFH).</p>
       <label class="campo"><span>Andar mínimo (opcional)</span><input id="bf-andar" inputmode="numeric" placeholder="Ex.: 10"></label>
       <div class="previa" id="bf-previa"></div>
       <div class="row"><button class="abtn primary" type="submit" id="bf-salvar">Salvar busca</button><button class="abtn" type="button" id="bf-cancelar">Cancelar</button></div>
@@ -740,9 +784,14 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const $ = id => document.getElementById(id);
   const fmtPct = x => (Math.round(x*10)/10).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
   const fmtDate = iso => { if(!iso) return '—'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
-  const floorLabel = f => f==='T' ? 'Térreo' : f+'º';
-  const floorShort = f => f==='T' ? 'T' : f+'º';
-  const CAMPO_LBL = {m2:'Metragem', tipo:'Tipo', cat:'Categoria', vista:'Vista', final:'Final'};
+  const floorLabel = f => f==='T' ? 'Térreo' : f==='S' ? 'Subsolo' : f==='L' ? 'Lojas (térreo)' : f+'º';
+  const floorShort = f => f==='T' ? 'T' : f==='S' ? 'S' : f==='L' ? 'Lj' : f+'º';
+  const CAMPO_LBL = {tb:'Tipologia', m2:'Metragem', tipo:'Tipo', cat:'Categoria', vista:'Vista', final:'Final'};
+  const CAMPOS = ['tb','m2','tipo','cat','vista','final'];
+  const TB_ORDEM = ['Studio','1 dorm','2 dorms','3 dorms','Loja'];
+  const tbDe = tl => !tl ? null : /^studio/i.test(tl) ? 'Studio' : /^1 dorm/i.test(tl) ? '1 dorm' : /^2 dorm/i.test(tl) ? '2 dorms' : /^3 dorm/i.test(tl) ? '3 dorms' : /^loja/i.test(tl) ? 'Loja' : tl;
+  const GRUPO_NOME = {vitaurbana:'VitaUrbana'};
+  const nomeCurto = p => (NOMES[p.id] && NOMES[p.id].curto) || p.curto || p.nome;
   const plural = l => String(l||'').replace(/^Disponível/,'Disponíveis').replace(/^Reservada/,'Reservadas').replace(/^Vendida/,'Vendidas');
   const fmtBRL = v => 'R$ '+Math.round(v).toLocaleString('pt-BR');
   const fmtMil = v => v >= 1e6 ? 'R$\u00a0'+(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2})+'\u00a0mi' : 'R$\u00a0'+Math.round(v/1000).toLocaleString('pt-BR')+'\u00a0mil';
@@ -751,6 +800,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const PC_DEFAULT = [{k:'pp',label:'Parcelado'},{k:'pv',label:'À vista'}];
   const PC = () => (P && Array.isArray(P.precos_campos) && P.precos_campos.length) ? P.precos_campos : PC_DEFAULT;
   const pcLabel = k => (PC().find(c=>c.k===k)||{}).label || k;
+  const minus = t => /^[A-Z]{2,}$/.test(t) ? t : t.toLowerCase();
   const hasHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   // faixas de metragem e nomes de exibição por projeto (opcionais; o app injeta os mesmos da central de produto)
   const FAIXAS = window.ESPELHO_FAIXAS || {}, NOMES = window.ESPELHO_NOMES || {};
@@ -763,19 +813,25 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   // ---------- persisted state ----------
   let store = {};
   try{ store = JSON.parse(localStorage.getItem('espelhos-filtros')||'{}') || {}; }catch(e){ store = {}; }
-  function persist(){ try{ store.proj = P.id; store[P.id] = {m2:state.m2,tipo:state.tipo,cat:state.cat,vista:state.vista,final:state.final,st:state.st,zoom2:state.zoomManual?state.zoom:0,pm:state.pm}; localStorage.setItem('espelhos-filtros', JSON.stringify(store)); }catch(e){} }
+  function persist(){ try{ store.proj = P.id; if(P.grupo) store['grupo:'+P.grupo] = P.id; store[P.id] = {tb:state.tb,m2:state.m2,tipo:state.tipo,cat:state.cat,vista:state.vista,final:state.final,st:state.st,zoom2:state.zoomManual?state.zoom:0,pm:state.pm}; localStorage.setItem('espelhos-filtros', JSON.stringify(store)); }catch(e){} }
 
   // ---------- current project ----------
-  let P = null, U = [], byN = new Map(), cells = new Map(), badges = {}, svg = null, W = 0, H = 0, hasPrices = false;
-  const state = {m2:null, tipo:null, cat:null, vista:null, final:null, st:'todos', sel:null, zoom:1, pm:'pp'};
+  let P = null, U = [], byN = new Map(), byUp = new Map(), cells = new Map(), badges = {}, svg = null, W = 0, H = 0, hasPrices = false;
+  const state = {tb:null, m2:null, tipo:null, cat:null, vista:null, final:null, st:'todos', sel:null, zoom:1, pm:'pp'};
   const scroll = $('mapscroll'), sheet = $('sheet'), busca = $('busca'), tip = $('tip');
   const forSale = u => u.st !== 'vendida';   // preço só aparece em unidade que ainda está à venda
   const priceOf = (u, mode) => (forSale(u) && u.extra && mode!=='none' && u.extra[mode]!=null) ? u.extra[mode] : null;
+  function priceCell(u, mode){   // {v, alt}: alt = mostrou o preço da outra modalidade (projetos com preco_alt)
+    const v = priceOf(u, mode); if(v!=null) return {v, alt:false};
+    if(!P.preco_alt || mode==='none' || !forSale(u) || !u.extra) return null;
+    const o = PC().map(c=>c.k).filter(k => k!==mode && u.extra[k]!=null);
+    return o.length ? {v:u.extra[o[0]], alt:true, k:o[0]} : null;
+  }
 
   function pickProject(){
     const h = (location.hash||'').replace('#','');
     let id = null;
-    if(h){ const m = /^([a-z0-9-]+?)(?:-u([0-9]+))?$/.exec(h); if(m && PROJS.some(p=>p.id===m[1])) id = m[1]; }
+    if(h){ const m = /^([a-z0-9-]+?)(?:-u(.+))?$/.exec(h); if(m && PROJS.some(p=>p.id===m[1])) id = m[1]; }
     if(!id && store.proj && PROJS.some(p=>p.id===store.proj)) id = store.proj;
     if(!id) id = PROJS[0].id;
     return id;
@@ -783,39 +839,71 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 
   function renderTabs(){
     const nav = $('tabs'); [...nav.querySelectorAll('.tab')].forEach(t=>t.remove());
+    const nDisp = p => p.unidades.filter(a=>a[6]==='disponivel').length;
+    const ir = id => { if(P.id!==id){ loadProject(id); try{ history.replaceState(null,'','#'+id); }catch(e){} } };
+    const grupos = {};
     for(const p of PROJS){
-      const disp = p.unidades.filter(a=>a[6]==='disponivel').length;
+      if(p.grupo){ if(!grupos[p.grupo]){ grupos[p.grupo] = []; nav.appendChild(Object.assign(document.createElement('span'), {className:'tab-slot', hidden:true})).dataset.grupo = p.grupo; } grupos[p.grupo].push(p); continue; }
+      const disp = nDisp(p);
       const b = document.createElement('button'); b.type='button'; b.className='tab'+(P && p.id===P.id?' on':'');
       b.innerHTML = '<b></b><small><i></i> <span></span></small>';
-      b.querySelector('b').textContent = (NOMES[p.id] && NOMES[p.id].curto) || p.nome; b.querySelector('i').textContent = disp+' disponíveis'; b.querySelector('span').textContent = '· '+p.unidades.length+' unidades';
-      b.addEventListener('click', ()=>{ if(P.id!==p.id){ loadProject(p.id); try{ history.replaceState(null,'','#'+p.id); }catch(e){} } });
+      b.querySelector('b').textContent = nomeCurto(p); b.querySelector('i').textContent = disp+' disponíveis'; b.querySelector('span').textContent = '· '+p.unidades.length+' unidades';
+      b.addEventListener('click', ()=>ir(p.id));
       nav.appendChild(b);
     }
+    // um botão por grupo (ex.: VitaUrbana), no lugar do primeiro projeto do grupo
+    for(const g in grupos){
+      const ps = grupos[g], disp = ps.reduce((a,p)=>a+nDisp(p),0);
+      const b = document.createElement('button'); b.type='button'; b.className='tab grupo'+(P && P.grupo===g?' on':''); b.dataset.grupo = g;
+      b.innerHTML = '<b></b><small><i></i> <span></span></small>';
+      b.querySelector('b').textContent = GRUPO_NOME[g] || g; b.querySelector('i').textContent = disp+' disponíveis'; b.querySelector('span').textContent = '· '+ps.length+' projetos';
+      b.addEventListener('click', ()=>{ if(P.grupo===g) return; const ult = store['grupo:'+g]; const alvo = ps.find(p=>p.id===ult) || ps.slice().sort((a,b)=>nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR'))[0]; ir(alvo.id); });
+      const slot = nav.querySelector('.tab-slot[data-grupo="'+g+'"]'); nav.replaceChild(b, slot);
+    }
     nav.hidden = PROJS.length < 2;
+    { const on = nav.querySelector('.tab.on'); if(on && nav.scrollWidth > nav.clientWidth && (on.offsetLeft + on.offsetWidth > nav.scrollLeft + nav.clientWidth || on.offsetLeft < nav.scrollLeft)) nav.scrollLeft = Math.max(0, on.offsetLeft - 16); }
+    // projetos do grupo aberto
+    const sub = $('subtabs'); sub.replaceChildren();
+    const gp = P && P.grupo ? (grupos[P.grupo] || []) : [];
+    sub.hidden = !gp.length;
+    if(gp.length){
+      const l = document.createElement('span'); l.className='sl'; l.textContent = (GRUPO_NOME[P.grupo] || P.grupo); sub.appendChild(l);
+      for(const p of gp.slice().sort((a,b)=>nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR'))){
+        const d = nDisp(p);
+        const b = document.createElement('button'); b.type='button'; if(p.id===P.id){ b.className='on'; b.setAttribute('aria-current','true'); }
+        b.innerHTML = '<span></span><span class="n"></span>'; b.firstChild.textContent = nomeCurto(p); b.lastChild.textContent = d; if(!d) b.lastChild.classList.add('zero');
+        b.title = d+' disponíveis de '+p.unidades.length;
+        b.addEventListener('click', ()=>ir(p.id));
+        sub.appendChild(b);
+      }
+      const on = sub.querySelector('button.on'); if(on && sub.scrollWidth > sub.clientWidth) sub.scrollLeft = Math.max(0, on.offsetLeft - 60);
+    }
   }
 
   function loadProject(id){
+    const trocou = !P || P.id !== id;
     P = PROJS.find(p=>p.id===id) || PROJS[0];
     select(null);
+    if(trocou) scroll.scrollLeft = 0;
     U = P.unidades.map(a => ({n:a[0], tipo:a[1], m2:a[2], cat:a[3], andar:a[4], col:a[5], st:a[6], extra:(a[7]&&typeof a[7]==='object')?a[7]:null}));
-    FX = (Array.isArray(FAIXAS[P.id]) && FAIXAS[P.id].length) ? FAIXAS[P.id] : null;
-    for(const u of U){ u.key = String(u.n); u.vista = null; for(const v of (P.vistas||[])){ if(u.col>=v.col_ini && u.col<=v.col_fim) u.vista = v.id; } u.final = P.grade.rotulos_colunas ? P.grade.rotulos_colunas[u.col] : null; u.fx = faixaDe(u.extra && u.extra.a!=null ? u.extra.a : u.m2); }
-    byN = new Map(U.map(u => [u.key, u]));
+    FX = (Array.isArray(FAIXAS[P.id]) && FAIXAS[P.id].length) ? FAIXAS[P.id] : (Array.isArray(P.faixas) && P.faixas.length ? P.faixas : null);
+    for(const u of U){ u.key = String(u.n); u.tb = tbDe(u.extra && u.extra.tl); u.vista = null; for(const v of (P.vistas||[])){ if(u.col>=v.col_ini && u.col<=v.col_fim) u.vista = v.id; } u.final = P.grade.rotulos_colunas && u.andar!=='L' && u.tb!=='Loja' ? P.grade.rotulos_colunas[u.col] : null; u.fx = faixaDe(u.extra && u.extra.a!=null ? u.extra.a : u.m2); }
+    byN = new Map(U.map(u => [u.key, u])); byUp = new Map(U.map(u => [u.key.toUpperCase().replace(/\s+/g,' '), u.key]));
     hasPrices = U.some(u => u.extra && PC().some(c => u.extra[c.k]!=null));
     const s = store[P.id] || {};
     const pmOk = PC().map(c=>c.k).concat(['none']);
     let m2s = s.m2??null; if(FX && typeof m2s==='number') m2s = faixaDe(m2s); if(!FX && typeof m2s==='string') m2s = null; if(FX && m2s!==null && !FX.some(f=>f[1]===m2s)) m2s = null;
-    Object.assign(state, {m2:m2s, tipo:s.tipo??null, cat:s.cat??null, vista:s.vista??null, final:s.final??null, st:s.st||'todos', sel:null, zoom:s.zoom2||0, zoomManual:!!s.zoom2, pm:(pmOk.includes(s.pm)?s.pm:PC()[0].k)});
+    Object.assign(state, {tb:s.tb??null, m2:m2s, tipo:s.tipo??null, cat:s.cat??null, vista:s.vista??null, final:s.final??null, st:s.st||'todos', sel:null, zoom:s.zoom2||0, zoomManual:!!s.zoom2, pm:(pmOk.includes(s.pm)?s.pm:PC()[0].k)});
     const seg = $('pm'); seg.replaceChildren();
     PC().concat([{k:'none',label:'Ocultar'}]).forEach(c => { const b=document.createElement('button'); b.type='button'; b.dataset.pm=c.k; b.textContent=c.label; b.addEventListener('click', ()=>{ state.pm = c.k; relayoutCells(); persist(); update(); }); seg.appendChild(b); });
     seg.hidden = !hasPrices; $('pm-lbl').hidden = !hasPrices;
-    for(const k of ['m2','tipo','cat','vista','final']) if(!(P.campos||[]).includes(k)) state[k]=null;
+    for(const k of CAMPOS) if(!(P.campos||[]).includes(k)) state[k]=null;
     if(!P.status[state.st]) state.st='todos';
     // header
     $('h-nome').textContent = (NOMES[P.id] && NOMES[P.id].longo) || P.nome; $('h-sub').textContent = P.subtitulo || '';
     $('m-atualizado').textContent = fmtDataCurta(P.atualizado_em);
     $('m-conferido').textContent = fmtDate(P.conferido_em || P.atualizado_em);
-    const nAnd = P.grade.andares.filter(f=>f!=='T').length, hasT = P.grade.andares.includes('T'); $('m-total').innerHTML = '<strong></strong> unidades · '+nAnd+' andares'+(hasT?' + térreo':'')+((P.grade.topo||[]).length?' + '+P.grade.topo.map(t=>t.texto.toLowerCase()).join(', '):''); $('m-total').querySelector('strong').textContent = U.length;
+    const nAnd = P.grade.andares.filter(f=>typeof f==='number' || /^\d+$/.test(f)).length, hasT = P.grade.andares.includes('T') || P.grade.andares.includes('L'), hasS = P.grade.andares.includes('S'); $('m-total').innerHTML = '<strong></strong> unidades · '+nAnd+' andares'+(hasT?' + térreo':'')+(hasS?' + subsolo':'')+((P.grade.topo||[]).length?' + '+P.grade.topo.map(t=>t.texto.toLowerCase()).join(', '):''); $('m-total').querySelector('strong').textContent = U.length;
     $('m-fonte').textContent = (P.fonte || 'PDF do espelho') + (P.tabela ? (P.tabela.regra ? ' · preços: '+P.tabela.nome+' × metragem da planta (regra definida em '+fmtDate(P.tabela.atualizado_em)+')' : ' · preços: tabela '+P.tabela.nome+' (importada em '+fmtDate(P.tabela.atualizado_em)+')') : ''); $('m-nota').textContent = P.nota || '';
     const first = (P.campos||[])[0]; $('h-hint').innerHTML = first==='m2' ? 'Toque numa metragem para ver <b>só ela</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : first==='final' ? 'Toque num final (coluna) para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.' : 'Toque num filtro para ver <b>só ele</b> no prédio.';
     renderTabs(); renderTiles(); renderLegend(); buildMap(); renderChanges();
@@ -825,9 +913,10 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
 
   // ---------- tiles ----------
+  const stsVisiveis = () => ST_ORDER.filter(s => P.status[s] && (s!=='processo_final' || U.some(u=>u.st===s)));
   function renderTiles(){
     const box = $('tiles'); box.replaceChildren();
-    const sts = ST_ORDER.filter(s => P.status[s]);
+    const sts = stsVisiveis();
     box.style.setProperty('--ntiles', sts.length+1);
     // no celular, com 5 blocos, os rótulos ficam abreviados para caber numa linha
     box.classList.toggle('t5', sts.length+1 > 4);
@@ -838,15 +927,15 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
   function renderLegend(){
     const lg = $('legend'); lg.replaceChildren();
-    for(const s of ST_ORDER.filter(s=>P.status[s])){ const sp=document.createElement('span'); sp.innerHTML='<i></i>'; sp.firstChild.className='l-'+s; sp.appendChild(document.createTextNode(P.status[s])); lg.appendChild(sp); }
+    for(const s of stsVisiveis()){ const sp=document.createElement('span'); sp.innerHTML='<i></i>'; sp.firstChild.className='l-'+s; sp.appendChild(document.createTextNode(P.status[s])); lg.appendChild(sp); }
     const off=document.createElement('span'); off.id='lg-off'; off.innerHTML='<i class="l-off"></i>Fora do filtro'; lg.appendChild(off);
   }
 
   // ---------- filters ----------
-  function baseMatch(u){ return (state.m2===null||valDe(u,'m2')===state.m2) && (state.tipo===null||u.tipo===state.tipo) && (state.cat===null||u.cat===state.cat) && (state.vista===null||u.vista===state.vista) && (state.final===null||u.final===state.final); }
+  function baseMatch(u){ return (state.tb===null||u.tb===state.tb) && (state.m2===null||valDe(u,'m2')===state.m2) && (state.tipo===null||u.tipo===state.tipo) && (state.cat===null||u.cat===state.cat) && (state.vista===null||u.vista===state.vista) && (state.final===null||u.final===state.final); }
   function fullMatch(u){ return baseMatch(u) && (state.st==='todos' || u.st===state.st); }
   function countDisp(pred){ let c=0; for(const u of U){ if(u.st==='disponivel' && pred(u)) c++; } return c; }
-  function others(except){ return u => ['m2','tipo','cat','vista','final'].every(k => k===except || state[k]===null || valDe(u,k)===state[k]); }
+  function others(except){ return u => CAMPOS.every(k => k===except || state[k]===null || valDe(u,k)===state[k]); }
   const finalNoMapa = () => !!(P.grade.rotulos_colunas && (P.campos||[]).includes('final'));
   const camposChips = () => (P.campos||[]).filter(k => !(k==='final' && finalNoMapa()));
   function chip(label, on, count, onclick){
@@ -867,14 +956,15 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const allLbl = (k==='tipo')?'Todos':'Todas';
       box.appendChild(chip(allLbl, state[k]===null, undefined, ()=>{ state[k]=null; if(k==='m2') state.tipo=null; update(); }));
       let vals;
-      if(k==='m2') vals = FX ? FX.map(f=>f[1]).filter(l => U.some(u=>u.fx===l)) : [...new Set(U.map(u=>u.m2).filter(v=>v!=null))].sort((a,b)=>a-b);
+      if(k==='tb') vals = [...new Set(U.map(u=>u.tb).filter(Boolean))].sort((a,b)=>{ const ia=TB_ORDEM.indexOf(a), ib=TB_ORDEM.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib) || a.localeCompare(b,'pt-BR'); });
+      else if(k==='m2') vals = FX ? FX.map(f=>f[1]).filter(l => U.some(u=>u.fx===l)) : [...new Set(U.map(u=>u.m2).filter(v=>v!=null))].sort((a,b)=>a-b);
       else if(k==='tipo') vals = [...new Set(U.map(u=>u.tipo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})).filter(t => state.m2===null || m2Chave(tipoM2.get(t))===state.m2);
       else if(k==='cat') vals = [...new Set(U.map(u=>u.cat).filter(Boolean))].sort((a,b)=>catName(a).localeCompare(catName(b),'pt-BR'));
       else if(k==='vista') vals = (P.vistas||[]).map(v=>v.id);
       else if(k==='final') vals = [...new Set(U.map(u=>u.final).filter(Boolean))].sort();
       else vals = [];
       for(const v of vals){
-        const lbl = k==='m2' ? (FX ? v : M2(v)+' m²') : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
+        const lbl = k==='tb' ? v : k==='m2' ? (FX ? v : M2(v)+' m²') : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
         const c = countDisp(u => valDe(u,k)===v && others(k)(u));
         if(c===0 && esconderZero && state[k]!==v) continue;   // opção sem nenhuma disponível: some (volta ao filtrar outra situação)
         box.appendChild(chip(lbl, state[k]===v, c, ()=>{ state[k] = (state[k]===v? null : v); if(k==='m2' && state.tipo!==null && m2Chave(tipoM2.get(state.tipo))!==state.m2) state.tipo=null; if(k==='tipo' && state.tipo!==null) state.m2 = m2Chave(tipoM2.get(state.tipo)); update(); }));
@@ -944,9 +1034,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
   function relayoutCells(){
     // 3ª linha da célula: preço (conforme o seletor) quando existe, senão a categoria (quando a 2ª linha é tipo/metragem)
-    for(const u of U){ const g = cells.get(u.key); if(!g) continue; const t3 = g.querySelector('text.ct'), t2 = g.querySelector('text.tp'); const pr = priceOf(u, state.pm);
+    for(const u of U){ const g = cells.get(u.key); if(!g) continue; const t3 = g.querySelector('text.ct'), t2 = g.querySelector('text.tp'); const pc = priceCell(u, state.pm), pr = pc ? pc.v : null;
       if(u.st==='vendida'){ t2.textContent=''; t3.textContent=''; g.classList.add('so'); g.classList.remove('two'); g.querySelector('text.num').setAttribute('y', CH/2+4); continue; }
-      if(pr!=null){ t3.textContent = fmtMil(pr); t3.setAttribute('class','ct pr');
+      if(pr!=null){ t3.textContent = fmtMil(pr); t3.setAttribute('class','ct pr'+(pc.alt?' alt':''));
         if(u.tipo){ t2.textContent = u.tipo.replace('TIPO ','T')+' · '+M2(u.m2)+'m² · '+catShort(u.cat); t2.setAttribute('class','tp cmp'); } }
       else { t3.textContent = u.tipo ? catShort(u.cat) : ''; t3.setAttribute('class','ct');
         if(u.tipo){ t2.textContent = u.tipo+' · '+M2(u.m2)+'m²'; t2.setAttribute('class','tp'); } }
@@ -961,6 +1051,24 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const pp = u.extra.pp, pv = u.extra.pv;
     if(pp!=null && pv!=null && pp){ const d = Math.round((1-pv/pp)*1000)/10; const c = cols.find(x=>x.k==='pv'); if(c && d>0) c.label += ' · −'+d.toLocaleString('pt-BR')+'%'; }
     return cols;
+  }
+  const fmtBRL2 = v => 'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const MES3 = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const mesAno = iso => { if(!iso) return ''; const [y,m] = iso.split('-'); return MES3[+m-1]+'/'+y.slice(2); };
+  function fluxosDe(u){ // fluxos de pagamento da tabela (projetos com tabela.fluxos): [{k, rotulo, txt, tabela, linhas}]
+    const F = P.tabela && P.tabela.fluxos; if(!F || !u.extra || !forSale(u)) return [];
+    const out = [];
+    for(const c of PC()){
+      const f = u.extra[c.k==='pa' ? 'fa' : c.k==='pp' ? 'fs' : null]; if(!f || !F[f[0]]) continue;
+      const T = F[f[0]], linhas = [];
+      T.cols.forEach((col, i) => { const v = f[i+1]; if(v==null) return;
+        if(col.t==='ato') linhas.push({t:'Ato', n:col.n, v, d:col.d});
+        else if(col.t==='mensal') linhas.push({t:'Mensais', n:col.n, v, d:col.d});
+        else if(col.t==='fin') linhas.push({t:'Financiamento '+(col.m==='assoc'?'associativo':'SFH'), n:1, v, d:col.d, fin:true}); });
+      const txt = linhas.map(l => l.fin ? 'financiamento '+fmtBRL2(l.v)+' ('+mesAno(l.d)+')' : l.t==='Ato' ? 'ato '+(l.n>1 ? l.n+'× ' : '')+fmtBRL2(l.v) : l.n+'× '+fmtBRL2(l.v)).join(' · ');
+      out.push({k:c.k, rotulo:c.label, txt, tabela:T.nome, linhas, total:u.extra[c.k]});
+    }
+    return out;
   }
   function metaOf(u){ return [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2 ? M2(u.m2)+' m²' : null), catName(u.cat), floorLabel(u.andar), u.final ? 'Final '+u.final : null].filter(Boolean).join(' · '); }
   function tipHTML(u){
@@ -990,7 +1098,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     document.querySelectorAll('.uc[data-n="'+CSS.escape(key)+'"]').forEach(x=>x.classList.add('sel'));
     $('s-num').textContent = u.key; $('s-num').className = 'big st-'+u.st;
     $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat)].filter(Boolean).join(' · ');
-    const pos = u.final ? 'Final '+u.final : 'posição '+(u.col+1)+' de '+P.grade.colunas;
+    const pos = u.final ? 'Final '+u.final : (u.tb==='Loja' ? null : 'posição '+(u.col+1)+' de '+P.grade.colunas);
     const vista = u.vista ? (P.vistas.find(v=>v.id===u.vista)||{}).label : null;
     $('s-s').textContent = [floorLabel(u.andar), vista, pos].filter(Boolean).join(' · ');
     const s = $('s-st'); s.textContent = P.status[u.st]||u.st; s.className = 'st st-'+u.st;
@@ -1000,9 +1108,21 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       sp.querySelectorAll('div > small').forEach((el,i)=>{ el.textContent = cols[i].label; }); sp.querySelectorAll('div > b').forEach((el,i)=>{ el.textContent = fmtBRL(cols[i].v); });
       const ds = sp.querySelectorAll('.desc'); let di=0; if(u.extra.pt){ ds[di++].textContent = 'de '+fmtBRL(u.extra.pt); } if(u.extra.aj){ ds[di++].textContent = '★ '+u.extra.aj; }
       sp.hidden = false;
-      const cond = P.tabela && P.tabela.condicoes && u.extra.c!=null ? P.tabela.condicoes[u.extra.c] : null;
-      sc.textContent = cond ? 'Fluxo: '+cond+(P.tabela ? ' · tabela '+P.tabela.nome : '') : (P.tabela ? 'Tabela '+P.tabela.nome : ''); sc.hidden = !sc.textContent;
-    } else { sp.hidden = true; sc.hidden = true; }
+      const fx = fluxosDe(u);
+      if(fx.length){
+        sc.replaceChildren();
+        for(const f of fx){ const d = document.createElement('span'); d.className = 'fx'; d.innerHTML = '<b></b> '; d.firstChild.textContent = f.rotulo+':'; d.appendChild(document.createTextNode(f.txt)); sc.appendChild(d); }
+        const t = document.createElement('span'); t.className = 'fx'; t.textContent = 'Tabela vigente de '+P.tabela.nome.toLowerCase()+(u.extra.pt ? ' (condição promocional)' : ''); t.title = [...new Set(fx.map(f=>f.tabela))].join(' · '); sc.appendChild(t);
+        sc.hidden = false;
+      } else {
+        const cond = P.tabela && P.tabela.condicoes && u.extra.c!=null ? P.tabela.condicoes[u.extra.c] : null;
+        sc.textContent = cond ? 'Fluxo: '+cond+(P.tabela ? ' · tabela '+P.tabela.nome : '') : (P.tabela ? 'Tabela '+P.tabela.nome : ''); sc.hidden = !sc.textContent;
+      }
+    } else {
+      sp.hidden = true;
+      const semp = u.st==='disponivel' ? (P.sem_tabela || (P.tabela && P.tabela.fluxos ? 'Sem valor na tabela de '+P.tabela.nome.toLowerCase()+' (a unidade não estava na tabela). Confirme o preço com a incorporadora.' : '')) : '';
+      sc.textContent = semp; sc.hidden = !semp;
+    }
     sheet.hidden = false;
     if(window.__onUnidade) window.__onUnidade(u);
     if(scrollTo && g){ const r = g.getBoundingClientRect(); const sr = scroll.getBoundingClientRect();
@@ -1011,16 +1131,17 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   }
   $('s-x').addEventListener('click', ()=>select(null));
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') select(null); });
-  busca.addEventListener('input', ()=>{ const k = busca.value.trim().toUpperCase(); if(byN.has(k)) select(k, true); });
-  busca.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const k=busca.value.trim().toUpperCase(); if(byN.has(k)) select(k,true); } });
-  $('limpar').addEventListener('click', ()=>{ Object.assign(state,{m2:null,tipo:null,cat:null,vista:null,final:null,st:'todos'}); busca.value=''; select(null); update(); });
+  const chaveBusca = () => { const k = busca.value.trim().toUpperCase().replace(/\s+/g,' '); return byN.has(k) ? k : (byUp.get(k) || null); };
+  busca.addEventListener('input', ()=>{ const k = chaveBusca(); if(k) select(k, true); });
+  busca.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const k = chaveBusca(); if(k) select(k,true); } });
+  $('limpar').addEventListener('click', ()=>{ Object.assign(state,{tb:null,m2:null,tipo:null,cat:null,vista:null,final:null,st:'todos'}); busca.value=''; select(null); update(); });
 
   // ---------- update ----------
   function update(){
     persist(); renderChips();
     const base = U.filter(baseMatch); const tot = base.length;
     const cnt = {}; ST_ORDER.forEach(s=>cnt[s]=0); base.forEach(u=>cnt[u.st]++);
-    const anyBase = ['m2','tipo','cat','vista','final'].some(k=>state[k]!==null);
+    const anyBase = CAMPOS.some(k=>state[k]!==null);
     document.querySelectorAll('.tile').forEach(t => { const s=t.dataset.st; t.classList.toggle('on', s===state.st); if(s==='todos'){ t.querySelector('.val').textContent=tot; t.querySelector('.pct').textContent = anyBase ? `de ${U.length} unidades` : 'todas as unidades'; } else { t.querySelector('.val').textContent=cnt[s]; t.querySelector('.pct').textContent = tot? fmtPct(cnt[s]/tot*100) : '—'; } });
     const single = state.st!=='todos';
     const perFloor = {}; for(const f of P.grade.andares) perFloor[String(f)]={disp:0, match:0};
@@ -1031,7 +1152,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const vv = single ? ST_VAR[state.st] : null; const rect=b.g.querySelector('rect');
       rect.style.fill = vv ? `var(--${vv})` : ''; rect.style.stroke = vv ? `var(--${vv}-line)` : ''; b.t.style.fill = vv ? `var(--${vv}-ink)` : '';
     }
-    const parts=[]; if(state.m2!==null) parts.push(FX ? state.m2 : M2(state.m2)+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(single) parts.push((P.status[state.st]||'').toLowerCase());
+    const parts=[]; if(state.tb!==null) parts.push(state.tb); if(state.m2!==null) parts.push(FX ? state.m2 : M2(state.m2)+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(single) parts.push((P.status[state.st]||'').toLowerCase());
     $('f-resumo').textContent = parts.length ? 'Mostrando: '+parts.join(' · ') : 'Mostrando todas as '+U.length+' unidades';
     $('map-title').textContent = parts.length ? 'Mapa · '+parts.join(' · ') : 'Mapa de unidades';
     $('limpar').hidden = !parts.length;
@@ -1048,26 +1169,27 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const row = document.createElement('div'); row.className='floor';
       const fn = document.createElement('div'); fn.className='fn'; fn.innerHTML='<span></span><small></small>'; fn.firstChild.textContent = floorShort(f); fn.lastChild.textContent = us.length+' unid.';
       const units = document.createElement('div'); units.className='units';
-      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pr = priceOf(u, pmk); c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.m2?M2(u.m2)+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), pr!=null ? fmtMil(pr)+(pmk!==PC()[0].k?' '+pcLabel(pmk).toLowerCase():'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
+      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pc = priceCell(u, pmk), pr = pc ? pc.v : null, pk = pc && pc.alt ? pc.k : pmk; c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.extra&&u.extra.tl?u.extra.tl:null, u.m2?M2(u.m2)+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), pr!=null ? fmtMil(pr)+((pk!==PC()[0].k || (P.preco_alt && PC().length>1))?' '+minus(pcLabel(pk)):'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
       row.appendChild(fn); row.appendChild(units); floorsBox.appendChild(row);
     }
     if(!total){ const e=document.createElement('div'); e.className='empty'; e.textContent = 'Nenhuma unidade '+(P.status[listSt]||listSt).toLowerCase()+' com esses filtros.'; floorsBox.appendChild(e); }
     $('list-sub').textContent = total ? `${total} unidade(s) em ${floorsWith.length} andar(es): ${floorsWith.slice().reverse().map(floorShort).join(', ')}` : '';
     // resumo table
-    const sts = ST_ORDER.filter(s=>P.status[s]); const grp = P.agrupar || (P.campos||[])[0] || 'cat';
-    $('res-title').textContent = 'Resumo por '+(grp==='tipo'?'tipo':grp==='final'?'final':grp==='m2'?'metragem':'categoria');
-    $('res-head').innerHTML = '<tr><th>'+(grp==='tipo'?'Tipo':grp==='final'?'Final':grp==='m2'?'Metragem':'Categoria')+'</th>'+sts.map(s=>'<th>'+(P.status[s])+'</th>').join('')+'<th>Total</th></tr>';
+    const sts = stsVisiveis(); const grp = P.agrupar || (P.campos||[])[0] || 'cat';
+    $('res-title').textContent = 'Resumo por '+(grp==='tb'?'tipologia':grp==='tipo'?'tipo':grp==='final'?'final':grp==='m2'?'metragem':'categoria');
+    $('res-head').innerHTML = '<tr><th>'+(grp==='tb'?'Tipologia':grp==='tipo'?'Tipo':grp==='final'?'Final':grp==='m2'?'Metragem':'Categoria')+'</th>'+sts.map(s=>'<th>'+(P.status[s])+'</th>').join('')+'<th>Total</th></tr>';
     const tb = $('res-body'); tb.replaceChildren(); const T = {}; sts.forEach(s=>T[s]=0);
     const gv = u => valDe(u, grp);
     let keys = [...new Set(U.map(gv).filter(v=>v!=null))];
     if(grp==='m2' && FX) keys = FX.map(f=>f[1]).filter(l => keys.includes(l));
-    if(!(grp==='m2' && FX)) keys.sort((a,b)=> typeof a==='number' ? a-b : String(grp==='cat'?catName(a):a).localeCompare(String(grp==='cat'?catName(b):b),'pt-BR',{numeric:true}));
+    if(grp==='tb') keys.sort((a,b)=>{ const ia=TB_ORDEM.indexOf(a), ib=TB_ORDEM.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+    else if(!(grp==='m2' && FX)) keys.sort((a,b)=> typeof a==='number' ? a-b : String(grp==='cat'?catName(a):a).localeCompare(String(grp==='cat'?catName(b):b),'pt-BR',{numeric:true}));
     for(const kv of keys){
-      const rows = U.filter(u => gv(u)===kv && ['m2','tipo','cat','vista','final'].every(k => k===grp || state[k]===null || valDe(u,k)===state[k]));
+      const rows = U.filter(u => gv(u)===kv && CAMPOS.every(k => k===grp || state[k]===null || valDe(u,k)===state[k]));
       if(!rows.length) continue;
       const c={}; sts.forEach(s=>c[s]=0); rows.forEach(u=>{ if(c[u.st]!==undefined){ c[u.st]++; T[u.st]++; } });
       const tr=document.createElement('tr'); if(state[grp]===kv) tr.classList.add('on');
-      const lbl = grp==='tipo' ? `${kv} · ${tipoM2.get(kv)} m²` : grp==='final' ? 'Final '+kv : grp==='m2' ? (FX ? kv : M2(kv)+' m²') : catName(kv);
+      const lbl = grp==='tb' ? kv : grp==='tipo' ? `${kv} · ${tipoM2.get(kv)} m²` : grp==='final' ? 'Final '+kv : grp==='m2' ? (FX ? kv : M2(kv)+' m²') : catName(kv);
       tr.innerHTML = '<td></td>'+sts.map(s=>'<td class="c-'+s+'">'+c[s]+'</td>').join('')+'<td><b>'+rows.length+'</b></td>'; tr.firstChild.textContent=lbl;
       tr.addEventListener('click', ()=>{ state[grp] = (state[grp]===kv? null : kv); if(grp==='tipo') state.m2 = state.tipo ? m2Chave(tipoM2.get(kv)) : state.m2; update(); });
       tb.appendChild(tr);
@@ -1097,7 +1219,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(!PROJS.length) return;
     if(!booted){
       booted = true; loadProject(pickProject());
-      const m = /^#([a-z0-9-]+?)-u([0-9A-Za-z]+)$/.exec(location.hash||''); if(m && m[1]===P.id && byN.has(m[2])) setTimeout(()=>select(m[2], true), 300);
+      const m = /^#([a-z0-9-]+?)-u(.+)$/.exec(location.hash||''); const un = m ? decodeURIComponent(m[2]) : null; if(m && m[1]===P.id && byN.has(un)) setTimeout(()=>select(un, true), 300);
       return;
     }
     const cur = P.id, sel = state.sel, sx = scroll.scrollLeft, sy = window.scrollY;
@@ -1111,7 +1233,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(!P || P.id!==id) loadProject(id);
     if(n && byN.has(String(n))) setTimeout(()=>select(String(n), true), 250);
   }
-  function unidade(){ if(!P || state.sel===null || !byN.has(state.sel)) return null; const u = byN.get(state.sel); return { P, u, andar: floorLabel(u.andar), area: u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2 ? M2(u.m2)+' m²' : null), precos: priceCols(u) }; }
+  function unidade(){ if(!P || state.sel===null || !byN.has(state.sel)) return null; const u = byN.get(state.sel); return { P, u, andar: floorLabel(u.andar), area: u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2 ? M2(u.m2)+' m²' : null), precos: priceCols(u), fluxos: fluxosDe(u) }; }
   window.ESPELHO = { setData, goto, current: () => P ? P.id : null, unidade };
 })();
 </script>
@@ -1132,6 +1254,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     del(k){ try{ localStorage.removeItem(k); }catch(e){} }
   };
   const K_COD='espelhos-codigo', K_CACHE='espelhos-cache', K_AV='espelhos-avisos';
+  const GRUPO_NOME = {vitaurbana: 'VitaUrbana'};
+  const curto = p => p.curto || p.nome;
+  const minus = t => /^[A-Z]{2,}$/.test(t) ? t : String(t).toLowerCase();
   let codigo = LS.get(K_COD), dados = null, mudou = null, robo = {}, nivel = null, carregando = false, ultimoFull = 0, swReg = null, promptInst = null;
 
   async function rpc(fn, args){
@@ -1159,6 +1284,14 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const min = (Date.now() - new Date(r.visto_em)) / 60000;
     const em = r.info && r.info[pid] && r.info[pid].em;
     if(em) confEm(em, min <= 4 ? ' · ao vivo' : ' · robô parado');
+    const pg = dados && dados.projetos.find(x=>x.id===pid);
+    if(pg && pg.grupo){   // lidos em rodízio: cada projeto é conferido a cada ~10 min
+      if(!em){ el.classList.add('atraso'); t.textContent = 'Aguardando robô'; el.title = 'O robô ainda não leu este projeto.'; return; }
+      const minP = (Date.now() - new Date(em)) / 60000;
+      if(min <= 4 && minP <= 25){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(em)+'</span>'; el.title = 'Conferido no sistema às '+hora(em)+'. Os projetos da VitaUrbana são conferidos em rodízio, a cada 10 minutos mais ou menos.'; }
+      else { el.classList.add('atraso'); t.textContent = 'Conferido '+quando(em); el.title = 'A última leitura deste projeto foi '+quando(em)+'. Os dados podem estar desatualizados.'; }
+      return;
+    }
     if(min <= 4){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(r.visto_em)+'</span>'; el.title = 'Conferido no sistema às '+hora(r.visto_em)+'. O espelho se atualiza sozinho.'; }
     else { el.classList.add('atraso'); t.textContent = 'Parado desde '+quando(r.visto_em); el.title = 'O robô de atualização não lê o sistema desde '+quando(r.visto_em)+'. Os dados podem estar desatualizados.'; }
   }
@@ -1168,8 +1301,20 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 
   // ---------- dados ----------
   function fonteDe(pid){ const p = dados && dados.projetos.find(x=>x.id===pid); return (p && p.robo) || CFG.fonte[pid] || null; }
-  function nomeFonte(f){ const ps = dados ? dados.projetos.filter(p=>fonteDe(p.id)===f).map(p=>p.nome) : []; return CFG.fonteNome[f] + (ps.length ? ' ('+ps.join(', ')+')' : ''); }
-  function aplicar(d){ dados = d; nivel = d.nivel || nivel; robo = d.robo || robo; ESPELHO.setData(d); try{ atualizarContador(); }catch(e){} }
+  function nomeFonte(f){
+    const ps = dados ? dados.projetos.filter(p=>fonteDe(p.id)===f) : [];
+    const soltos = ps.filter(p=>!p.grupo).map(p=>p.nome), gr = {};
+    ps.filter(p=>p.grupo).forEach(p => { gr[p.grupo] = (gr[p.grupo] || 0) + 1; });
+    const partes = soltos.concat(Object.keys(gr).map(g => gr[g]+' projetos da '+(GRUPO_NOME[g] || g)));
+    return CFG.fonteNome[f] + (partes.length ? ' ('+partes.join(', ').replace(/, ([^,]*)$/, ' e $1')+')' : '');
+  }
+  function aplicar(d){ dados = d; nivel = d.nivel || nivel; robo = d.robo || robo; ESPELHO.setData(d); try{ atualizarContador(); }catch(e){} novidade(); }
+  function novidade(){
+    const gs = dados ? [...new Set(dados.projetos.filter(p => p.grupo).map(p => p.grupo))] : [];
+    for(const g of gs){ const k = 'espelhos-novo-' + g; if(LS.get(k)) continue; LS.set(k, '1');
+      const n = dados.projetos.filter(p => p.grupo === g).length;
+      setTimeout(() => toast('Novo: aba ' + (GRUPO_NOME[g] || g) + ' com mais ' + n + ' projetos. As buscas de clientes já procuram neles também.', 7000), 1200); }
+  }
   async function carregar(forcar){
     if(!codigo || carregando) return; carregando = true;
     try{
@@ -1214,9 +1359,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   async function reg(){ if(swReg) return swReg; if(!('serviceWorker' in navigator)) return null; swReg = await navigator.serviceWorker.ready; return swReg; }
   async function assinatura(){ const r = await reg(); return r && r.pushManager ? r.pushManager.getSubscription() : null; }
   const escolhidos = () => {
-    if(document.querySelector('#av-projs input')) return [...document.querySelectorAll('#av-projs input:checked')].map(i => i.value);
+    if(document.querySelector('#av-projs input')) return [...document.querySelectorAll('#av-projs input:checked:not(.grp)')].map(i => i.value);
     let pref = null; try{ pref = JSON.parse(LS.get(K_AV) || 'null'); }catch(e){}
-    return pref && pref.projs && pref.projs.length ? pref.projs : (dados ? dados.projetos.map(p => p.id) : []);
+    return pref && pref.projs && pref.projs.length ? pref.projs : (dados ? dados.projetos.filter(p => !p.grupo).map(p => p.id) : []);
   };
   async function ligarAvisos(){   // pede permissão, assina e registra este aparelho; devolve o endereço ou lança erro com texto amigável
     if(!suportaPush) throw new Error(isIOS ? 'No iPhone, primeiro adicione o app à Tela de Início (Compartilhar → Adicionar à Tela de Início) e abra por lá.' : 'Este navegador não aceita notificações. Use o Chrome.');
@@ -1256,15 +1401,38 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const s = await assinatura(); if(!s) return;
     try{ await inscrever(s); toast('Preferências salvas.'); }catch(e){ toast('Não consegui salvar agora.'); }
   }
+  function marcaGrupos(){
+    document.querySelectorAll('#av-projs .av-grupo').forEach(det => {
+      const is = [...det.querySelectorAll('.lst input')], n = is.filter(i => i.checked).length, gi = det.querySelector('input.grp');
+      gi.checked = n === is.length && n > 0; gi.indeterminate = n > 0 && n < is.length;
+      det.querySelector('.mais').textContent = n && n < is.length ? n + ' marcados' : 'escolher';
+    });
+  }
   async function renderAvisos(){
     const box = $('av-projs'); box.replaceChildren();
     let pref = null; try{ pref = JSON.parse(LS.get(K_AV) || 'null'); }catch(e){}
-    for(const p of (dados ? dados.projetos : [])){
+    const ck = (p, pai) => {
       const l = document.createElement('label'); l.className = 'ck';
-      const i = document.createElement('input'); i.type = 'checkbox'; i.value = p.id; i.checked = pref ? pref.projs.includes(p.id) : true;
-      i.addEventListener('change', salvarPrefs);
-      l.appendChild(i); l.appendChild(document.createTextNode(p.nome + (fonteDe(p.id) ? '' : ' (atualização manual)'))); box.appendChild(l);
+      const i = document.createElement('input'); i.type = 'checkbox'; i.value = p.id; i.checked = pref ? pref.projs.includes(p.id) : !p.grupo;
+      i.addEventListener('change', () => { marcaGrupos(); salvarPrefs(); });
+      l.appendChild(i); l.appendChild(document.createTextNode((p.grupo ? curto(p) : p.nome) + (fonteDe(p.id) ? '' : ' (atualização manual)'))); pai.appendChild(l);
+    };
+    const grupos = {};
+    for(const p of (dados ? dados.projetos : [])){ if(p.grupo){ (grupos[p.grupo] = grupos[p.grupo] || []).push(p); continue; } ck(p, box); }
+    for(const g in grupos){
+      const det = document.createElement('details'); det.className = 'av-grupo'; det.dataset.grupo = g;
+      const sm = document.createElement('summary');
+      const l = document.createElement('label'); l.className = 'ck'; l.addEventListener('click', e => e.stopPropagation());
+      const gi = document.createElement('input'); gi.type = 'checkbox'; gi.className = 'grp';
+      gi.addEventListener('change', () => { det.querySelectorAll('.lst input').forEach(i => { i.checked = gi.checked; }); marcaGrupos(); salvarPrefs(); });
+      l.append(gi, document.createTextNode((GRUPO_NOME[g] || g) + ' (' + grupos[g].length + ' projetos)'));
+      const mais = document.createElement('span'); mais.className = 'mais'; mais.textContent = 'escolher';
+      sm.append(l, mais); det.appendChild(sm);
+      const lst = document.createElement('div'); lst.className = 'lst';
+      grupos[g].slice().sort((a, b) => curto(a).localeCompare(curto(b), 'pt-BR')).forEach(p => ck(p, lst));
+      det.appendChild(lst); box.appendChild(det);
     }
+    marcaGrupos();
     const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
     const sub = suportaPush ? await assinatura().catch(()=>null) : null;
     $('av-ios').hidden = !(isIOS && !standalone());
@@ -1318,8 +1486,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const exDe = a => (a[7] && typeof a[7] === 'object') ? a[7] : {};
   const areaDe = a => { const ex = exDe(a); return ex.a != null ? +ex.a : +a[2]; };
   const fmtM2 = v => (Number.isInteger(v) ? String(v) : v.toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: 2}));
-  const andarNum = v => v === 'T' ? 0 : (+v || 0);
-  const andarTxt = v => v === 'T' ? 'térreo' : v + 'º andar';
+  const andarNum = v => v === 'T' || v === 'S' || v === 'L' ? 0 : (+v || 0);
+  const andarTxt = v => v === 'T' ? 'térreo' : v === 'S' ? 'subsolo' : v === 'L' ? 'loja no térreo' : v + 'º andar';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const numArea = s => { const t = String(s || '').trim().replace(',', '.'); if(!t) return null; const n = Number(t); return isFinite(n) && n > 0 ? n : null; };
   const numPreco = s => { let t = String(s || '').trim(); if(!t) return null; t = t.replace(/,\d{1,2}$/, '').replace(/\D/g, ''); if(!t) return null; let n = Number(t); if(n > 0 && n < 5000) n *= 1000; return n > 0 ? n : null; };
@@ -1329,12 +1497,12 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function fecharJanela(id){ $(id).hidden = true; }
   document.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => { b.closest('.painel-fundo').hidden = true; }));
   ['pn-buscas', 'pn-prop', 'pn-resumo'].forEach(id => $(id).addEventListener('click', e => { if(e.target === $(id)) $(id).hidden = true; }));
-  function irUnidade(pid, n){ document.querySelectorAll('.painel-fundo').forEach(p => p.hidden = true); try{ history.replaceState(null, '', '#' + pid + '-u' + n); }catch(e){} if(window.ESPELHO) ESPELHO.goto(pid, n); }
-  function precoDe(p, a, modo){
-    const ex = exDe(a), m = modo || 'pv', outro = m === 'pp' ? 'pv' : 'pp';
-    const k = ex[m] != null ? m : (ex[outro] != null ? outro : null); if(!k) return null;
+  function irUnidade(pid, n){ document.querySelectorAll('.painel-fundo').forEach(p => p.hidden = true); try{ history.replaceState(null, '', '#' + pid + '-u' + encodeURIComponent(n)); }catch(e){} if(window.ESPELHO) ESPELHO.goto(pid, n); }
+  function precoDe(p, a, modo){   // o valor pedido (à vista/parcelado); se o projeto não tiver, o menor valor que ele tiver (ex.: associativo ou SFH)
+    const ex = exDe(a), m = modo || 'pv';
+    const k = ex[m] != null ? m : ['pv', 'pp', 'pa'].filter(x => ex[x] != null).sort((x, y) => ex[x] - ex[y])[0]; if(!k) return null;
     const pc = (p.precos_campos || []).find(x => x.k === k);
-    return {v: ex[k], k, lbl: pc ? pc.label.toLowerCase() : (k === 'pv' ? 'à vista' : 'parcelado')};
+    return {v: ex[k], k, lbl: pc ? minus(pc.label) : (k === 'pv' ? 'à vista' : k === 'pa' ? 'associativo' : 'parcelado')};
   }
   function listaUnidades(itens, modo, max){
     const box = document.createElement('div'); box.className = 'ulist';
@@ -1361,7 +1529,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   // =====================================================================
   // 1) Me avisa quando aparecer (buscas de clientes)
   // =====================================================================
-  let buscas = [], bsEditando = null, bsProjs = [], bsModo = 'pv', bsEp = null, bsExcluir = null;
+  let buscas = [], bsEditando = null, bsProjs = [], bsModo = 'pv', bsEp = null, bsExcluir = null, bsGrupoAberto = {};
   function casa(c, p, a){
     if(a[6] !== 'disponivel') return false;
     if(c.projetos && c.projetos.length && !c.projetos.includes(p.id)) return false;
@@ -1372,9 +1540,26 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     if(c.preco_max != null){ const pr = precoDe(p, a, c.modo); if(!pr || pr.v > c.preco_max) return false; }
     return true;
   }
-  function encontrados(c){ const out = []; for(const p of (dados ? dados.projetos : [])) for(const a of p.unidades) if(casa(c, p, a)) out.push({p, a}); return out; }
+  function encontrados(c){
+    const out = []; for(const p of (dados ? dados.projetos : [])) for(const a of p.unidades) if(casa(c, p, a)) out.push({p, a});
+    if(c.preco_max != null) out.sort((x, y) => { const px = precoDe(x.p, x.a, c.modo), py = precoDe(y.p, y.a, c.modo); return (px ? px.v : 9e12) - (py ? py.v : 9e12); });   // mais baratas primeiro
+    return out;
+  }
+  function porProjeto(itens){   // "RAJ MENDES (158), Praça da Árvore (61) e mais 6 projetos"
+    const n = new Map(); for(const {p} of itens) n.set(p, (n.get(p) || 0) + 1);
+    const l = [...n.entries()].sort((a, b) => b[1] - a[1]), nome = p => p.grupo ? curto(p) : p.nome;
+    const mostra = l.slice(0, 4).map(([p, k]) => nome(p) + ' (' + k + ')');
+    return l.length > 4 ? mostra.join(', ') + ' e mais ' + (l.length - 4) + ' projeto' + (l.length - 4 > 1 ? 's' : '') : mostra.join(', ').replace(/, ([^,]*)$/, ' e $1');
+  }
+  function nomesProjs(ids){
+    const ps = dados ? dados.projetos : [], out = [], usados = new Set();
+    const grupos = {}; ps.filter(p => p.grupo).forEach(p => (grupos[p.grupo] = grupos[p.grupo] || []).push(p.id));
+    for(const g in grupos){ if(grupos[g].every(id => ids.includes(id))){ out.push((GRUPO_NOME[g] || g) + ' (todos)'); grupos[g].forEach(id => usados.add(id)); } }
+    for(const id of ids){ if(usados.has(id)) continue; const p = ps.find(x => x.id === id); out.push(p ? (p.grupo ? curto(p) + ' (' + (GRUPO_NOME[p.grupo] || p.grupo) + ')' : p.nome) : id); }
+    return out.join(', ');
+  }
   function critTexto(c){
-    const nomes = (c.projetos && c.projetos.length) ? c.projetos.map(id => (dados && dados.projetos.find(p => p.id === id) || {nome: id}).nome).join(', ') : 'Todos os projetos';
+    const nomes = (c.projetos && c.projetos.length) ? nomesProjs(c.projetos) : 'Todos os projetos';
     const partes = [nomes];
     if(c.m2_min != null && c.m2_max != null) partes.push('de ' + fmtM2(c.m2_min) + ' a ' + fmtM2(c.m2_max) + ' m²');
     else if(c.m2_min != null) partes.push('a partir de ' + fmtM2(c.m2_min) + ' m²');
@@ -1406,7 +1591,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       card.querySelector('small').textContent = b.avisos ? b.avisos + ' aviso' + (b.avisos > 1 ? 's' : '') + (b.ultimo_aviso ? ' · último ' + quando(b.ultimo_aviso) : '') : '';
       card.querySelector('.crit').textContent = critTexto(b.criterios);
       const ag = card.querySelector('.agora');
-      if(achou.length){ ag.classList.add('tem'); ag.textContent = achou.length + (achou.length === 1 ? ' unidade disponível agora' : ' unidades disponíveis agora'); }
+      if(achou.length){ ag.classList.add('tem'); ag.textContent = achou.length + (achou.length === 1 ? ' unidade disponível agora' : ' unidades disponíveis agora') + ' · ' + porProjeto(achou); }
       else ag.textContent = 'Nenhuma disponível agora. Você recebe um aviso quando aparecer.';
       const ac = card.querySelector('.acoes'), lst = card.querySelector('.lst');
       const bt = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn'; x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
@@ -1429,7 +1614,23 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       b.addEventListener('click', () => { if(id === null) bsProjs = []; else bsProjs = bsProjs.includes(id) ? bsProjs.filter(x => x !== id) : bsProjs.concat(id); renderChipsProjs(); previaBusca(); });
       box.appendChild(b); };
     mk(null, 'Todos');
-    for(const p of (dados ? dados.projetos : [])) mk(p.id, p.nome);
+    const grupos = {};
+    for(const p of (dados ? dados.projetos : [])){ if(p.grupo){ (grupos[p.grupo] = grupos[p.grupo] || []).push(p); continue; } mk(p.id, p.nome); }
+    for(const g in grupos){
+      const ids = grupos[g].map(p => p.id), n = ids.filter(id => bsProjs.includes(id)).length;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'grp' + (n === ids.length ? ' on' : n ? ' parte' : '');
+      b.textContent = (GRUPO_NOME[g] || g) + ' (' + (n && n < ids.length ? n + ' de ' : '') + ids.length + ')';
+      b.addEventListener('click', () => { bsProjs = n === ids.length ? bsProjs.filter(x => !ids.includes(x)) : [...new Set(bsProjs.concat(ids))]; renderChipsProjs(); previaBusca(); });
+      box.appendChild(b);
+      const t = document.createElement('button'); t.type = 'button'; t.className = 'ver-grp'; t.textContent = bsGrupoAberto[g] ? 'fechar ▴' : 'escolher ▾';
+      t.addEventListener('click', () => { bsGrupoAberto[g] = !bsGrupoAberto[g]; renderChipsProjs(); });
+      box.appendChild(t);
+      if(bsGrupoAberto[g]){ const sub = document.createElement('div'); sub.className = 'chips sub'; box.appendChild(sub);
+        for(const p of grupos[g].slice().sort((a, b) => curto(a).localeCompare(curto(b), 'pt-BR'))){
+          const c = document.createElement('button'); c.type = 'button'; c.textContent = curto(p); if(bsProjs.includes(p.id)) c.classList.add('on');
+          c.addEventListener('click', () => { bsProjs = bsProjs.includes(p.id) ? bsProjs.filter(x => x !== p.id) : bsProjs.concat(p.id); renderChipsProjs(); previaBusca(); });
+          sub.appendChild(c); } }
+    }
   }
   function critDoForm(){
     const a = numArea($('bf-m2a').value), b = numArea($('bf-m2b').value);
@@ -1443,8 +1644,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function previaBusca(){
     const c = critDoForm(), achou = encontrados(c), box = $('bf-previa'); box.replaceChildren();
     const t = document.createElement('div');
-    t.innerHTML = achou.length ? 'Hoje já há <b>' + achou.length + '</b> ' + (achou.length === 1 ? 'unidade disponível' : 'unidades disponíveis') + ' assim:' : 'Hoje não há nenhuma disponível assim. Assim que aparecer, você recebe o aviso.';
+    t.innerHTML = achou.length ? 'Hoje já há <b>' + achou.length + '</b> ' + (achou.length === 1 ? 'unidade disponível' : 'unidades disponíveis') + ' assim' + (c.preco_max != null ? ' (as mais baratas primeiro)' : '') + ':' : 'Hoje não há nenhuma disponível assim. Assim que aparecer, você recebe o aviso.';
     box.appendChild(t);
+    if(achou.length){ const pp = document.createElement('div'); pp.className = 'por-proj'; pp.textContent = 'Em ' + porProjeto(achou) + '.'; box.appendChild(pp); }
     if(achou.length) box.appendChild(listaUnidades(achou, c.modo, 6));
     const d = document.createElement('div'); d.style.fontSize = '12.5px'; d.textContent = critTexto(c); box.appendChild(d);
   }
@@ -1582,14 +1784,28 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   $('fx-an').addEventListener('change', () => { $('fx-an-c').hidden = !$('fx-an').checked; atualizarProposta(); });
   function montarModos(){
     const seg = $('pp-modo'); seg.replaceChildren();
-    const ops = [['fluxo', 'Fluxo de pagamento']];
+    const fxs = ppInfo.fluxos || [];
+    const ops = fxs.map(f => ['tab:' + f.k, 'Tabela ' + minus(f.rotulo)]);
+    if(!fxs.length) ops.push(['fluxo', 'Fluxo de pagamento']);
     if(precoK('pv') != null) ops.push(['avista', 'À vista']);
-    if(ppInfo.precos.length) ops.push(['tabela', 'Valores da tabela']);
-    ppModo = 'fluxo';
+    if(ppInfo.precos.length && !(fxs.length === 1 && ppInfo.precos.length === 1)) ops.push(['tabela', fxs.length ? 'Só os valores' : 'Valores da tabela']);
+    if(fxs.length) ops.push(['fluxo', 'Montar fluxo']);
+    ppModo = ops[0][0]; seg.classList.toggle('muitos', ops.length > 3);
     for(const [v, l] of ops){ const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = l; if(v === ppModo) b.classList.add('on');
       b.addEventListener('click', () => { ppModo = v; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === v)); $('pp-fluxo').hidden = v !== 'fluxo'; atualizarProposta(); }); seg.appendChild(b); }
-    $('pp-fluxo').hidden = false;
+    $('pp-fluxo').hidden = ppModo !== 'fluxo';
   }
+  function fluxoTabela(k){   // fluxo exato da tabela da incorporadora (projetos da VitaUrbana)
+    const f = (ppInfo.fluxos || []).find(x => x.k === k); if(!f) return null;
+    const linhas = f.linhas.map(l => {
+      const ym = l.d ? l.d.slice(0, 7) : '';
+      if(l.fin) return {t: l.t, dir: BRLc(l.v), sub: ym ? 'previsto para ' + mesAno(ym) : '', txt: l.t + ': ' + BRLc(l.v) + (ym ? ' (previsto para ' + mesAno(ym) + ')' : ''), saldo: true};
+      if(l.t === 'Ato') return {t: 'Ato', dir: l.n > 1 ? l.n + 'x de ' + BRLc(l.v) : BRLc(l.v), sub: l.n > 1 ? 'total de ' + BRLc(l.v * l.n) : 'na assinatura', txt: 'Ato: ' + (l.n > 1 ? l.n + 'x de ' : '') + BRLc(l.v)};
+      return {t: 'Mensais', dir: l.n + 'x de ' + BRLc(l.v), sub: ym ? 'a partir de ' + mesAno(ym) : '', txt: l.n + (l.n > 1 ? ' mensais' : ' mensal') + ' de ' + BRLc(l.v) + (ym ? ' (a partir de ' + mesAno(ym) + ')' : '')};
+    });
+    return {total: f.total, linhas, titulo: 'FLUXO DA TABELA · ' + f.rotulo.toUpperCase(), rotulo: f.rotulo, tabela: f.tabela};
+  }
+  const fluxoAtual = () => ppModo === 'fluxo' ? calcFluxo() : (ppModo.startsWith('tab:') ? fluxoTabela(ppModo.slice(4)) : null);
   async function abrirProposta(){
     ppInfo = window.ESPELHO && ESPELHO.unidade(); if(!ppInfo) return;
     const {P, u} = ppInfo;
@@ -1615,8 +1831,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     $(id).addEventListener('input', h); $(id).addEventListener('change', h);
   });
   const dataBR = iso => iso ? iso.split('-').reverse().join('/') : '';
-  function endereco(P){ const s = P.subtitulo || ''; const i = s.indexOf(' · '); return i >= 0 ? s.slice(i + 3) : s; }
-  function detalheUnidade(sep){ const {u, area, andar} = ppInfo; return [u.tipo ? u.tipo.replace(/^TIPO /, 'Tipo ') : null, area, andar === 'Térreo' ? 'Térreo' : andar + ' andar'].filter(Boolean).join(sep); }
+  function endereco(P){ if(P.endereco) return P.endereco; const s = P.subtitulo || ''; const i = s.indexOf(' · '); return i >= 0 ? s.slice(i + 3) : s; }
+  function detalheUnidade(sep){ const {u, area, andar} = ppInfo; return [u.tipo ? u.tipo.replace(/^TIPO /, 'Tipo ') : null, u.extra && u.extra.tl ? u.extra.tl : null, area, /º$/.test(andar) ? andar + ' andar' : andar].filter(Boolean).join(sep); }
   function precosModo(){
     if(ppModo === 'avista') return precoK('pv') != null ? [{label: 'À vista', v: precoK('pv')}] : [];
     const pr = ppInfo.precos.map(x => ({k: x.k, label: rotuloPreco(x.k), v: x.v}));
@@ -1625,9 +1841,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function textoProposta(){
     const {P, u} = ppInfo;
     const L = ['*' + P.nome + '* — Unidade ' + u.key, detalheUnidade(' · ')];
-    if(ppModo === 'fluxo'){
-      const f = calcFluxo();
-      L.push('Valor do imóvel: *' + BRLc(f.total) + '*', '', '*Fluxo de pagamento*');
+    if(ppModo === 'fluxo' || ppModo.startsWith('tab:')){
+      const f = fluxoAtual();
+      L.push('Valor do imóvel: *' + BRLc(f.total) + '*', '', f.rotulo ? '*Fluxo de pagamento · ' + f.rotulo + '*' : '*Fluxo de pagamento*');
       for(const l of f.linhas) L.push('• ' + l.txt);
     } else {
       const pr = precosModo();
@@ -1650,7 +1866,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const {P, u} = ppInfo; const cv = $('pp-canvas'), W = 1080;
     const BC = '"Barlow Condensed","Arial Narrow",sans-serif', PX = '"IBM Plex Sans",system-ui,-apple-system,sans-serif';
     const AZ = '#2447c9', TX = '#182030', T2 = '#4b5566', MU = '#7b8494', LN = '#e3e6ec';
-    const fl = ppModo === 'fluxo' ? calcFluxo() : null;
+    const fl = fluxoAtual();
     const cli = $('pp-cli').value.trim(), obs = $('pp-obs').value.trim(), val = $('pp-val').value;
     const extra = (cli ? 1 : 0) + (obs ? 1 : 0);
     const H = fl ? Math.max(1350, 1140 + fl.linhas.length * 112 + extra * 56) : 1350;
@@ -1679,7 +1895,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('VALOR DO IMÓVEL', X, y + 58);
       g.fillStyle = AZ; caber(g, BRLc(fl.total), XR - X, 88, '700', BC); g.fillText(BRLc(fl.total), X - 3, y + 142);
       y += 190;
-      g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText('FLUXO DE PAGAMENTO', X, y);
+      g.fillStyle = MU; g.font = '600 24px ' + PX; g.fillText(fl.titulo || 'FLUXO DE PAGAMENTO', X, y);
       y += 22;
       fl.linhas.forEach((l, i) => {
         const ry = y + i * 112, rh = 100, dest = l.saldo;
@@ -1748,19 +1964,32 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     for(const [k, cls, nome] of [['vendas', 'v', 'Vendas'], ['reservas', 'r', 'Reservas'], ['liberadas', 'l', 'Liberadas'], ['processo', 'p', 'Em processo']]){
       const x = document.createElement('div'); x.className = cls; x.innerHTML = '<b></b><small></small>'; x.firstChild.textContent = soma(k); x.lastChild.textContent = nome; tot.appendChild(x);
     }
-    for(const p of r.projetos){
-      const card = document.createElement('div'); card.className = 'rs-proj';
-      card.innerHTML = '<div class="h"><b></b><small></small></div>'; card.querySelector('b').textContent = p.nome; card.querySelector('small').textContent = p.disponiveis + ' disponíveis agora';
+    const grupoDe = id => { const x = dados && dados.projetos.find(q => q.id === id); return x && x.grupo ? x : null; };
+    const linhas = (card, p, prefixo) => {
       let algo = false;
       for(const [k, nome] of [['vendas', 'Vendidas'], ['reservas', 'Reservadas'], ['processo', 'Em processo final'], ['liberadas', 'Liberadas']]){
         const ns = p[k] || []; if(!ns.length) continue; algo = true;
-        const l = document.createElement('div'); l.className = 'linha'; const em = document.createElement('em'); em.textContent = nome + ' (' + ns.length + '):'; l.appendChild(em);
+        const l = document.createElement('div'); l.className = 'linha'; const em = document.createElement('em'); em.textContent = (prefixo ? prefixo + ' · ' : '') + nome + ' (' + ns.length + '):'; l.appendChild(em);
         for(const n of ns){ const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.addEventListener('click', () => irUnidade(p.id, n)); l.appendChild(b); }
         card.appendChild(l);
       }
-      if(!algo){ const n = document.createElement('div'); n.className = 'nada'; n.textContent = 'Sem mudanças neste dia.'; card.appendChild(n); }
+      return algo;
+    };
+    const gcards = {};
+    for(const p of r.projetos){
+      const gp = grupoDe(p.id);
+      if(gp){   // projetos de grupo (VitaUrbana): um cartão só, com as linhas de quem mudou
+        let gc = gcards[gp.grupo];
+        if(!gc){ gc = gcards[gp.grupo] = {card: document.createElement('div'), disp: 0, algo: false}; gc.card.className = 'rs-proj'; gc.card.innerHTML = '<div class="h"><b></b><small></small></div>'; gc.card.querySelector('b').textContent = GRUPO_NOME[gp.grupo] || gp.grupo; corpo.appendChild(gc.card); }
+        gc.disp += p.disponiveis; gc.algo = linhas(gc.card, p, curto(gp)) || gc.algo;
+        continue;
+      }
+      const card = document.createElement('div'); card.className = 'rs-proj';
+      card.innerHTML = '<div class="h"><b></b><small></small></div>'; card.querySelector('b').textContent = p.nome; card.querySelector('small').textContent = p.disponiveis + ' disponíveis agora';
+      if(!linhas(card, p, '')){ const n = document.createElement('div'); n.className = 'nada'; n.textContent = 'Sem mudanças neste dia.'; card.appendChild(n); }
       corpo.appendChild(card);
     }
+    for(const g in gcards){ const gc = gcards[g]; gc.card.querySelector('small').textContent = gc.disp + ' disponíveis agora em ' + dados.projetos.filter(p => p.grupo === g).length + ' projetos'; if(!gc.algo){ const n = document.createElement('div'); n.className = 'nada'; n.textContent = 'Sem mudanças neste dia.'; gc.card.appendChild(n); } }
   }
   $('rs-ant').addEventListener('click', () => { rsDia = somaDias(rsDia, -1); renderResumo(); });
   $('rs-prox').addEventListener('click', () => { const h = hojeSP(); rsDia = somaDias(rsDia, 1); if(rsDia > h) rsDia = h; renderResumo(); });
@@ -1783,7 +2012,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   window.addEventListener('appinstalled', () => { $('btn-instalar').hidden = true; toast('App instalado! Agora ative os avisos.'); });
 
   // ---------- service worker, links de notificação ----------
-  function irPara(hash){ const r = /^#?resumo(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(hash || ''); if(r){ if(codigo) abrirResumo(r[1]); return; } const m = /^#?([a-z0-9-]+?)(?:-u([0-9A-Za-z]+))?$/.exec(hash || ''); if(m && window.ESPELHO) ESPELHO.goto(m[1], m[2]); }
+  function irPara(hash){ const r = /^#?resumo(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(hash || ''); if(r){ if(codigo) abrirResumo(r[1]); return; } const m = /^#?([a-z0-9-]+?)(?:-u(.+))?$/.exec(hash || ''); if(m && window.ESPELHO) ESPELHO.goto(m[1], m[2] ? decodeURIComponent(m[2]) : m[2]); }
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
     navigator.serviceWorker.addEventListener('message', ev => {

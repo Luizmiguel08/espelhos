@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.3.0
+// @version      1.4.0
 // @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas.
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -20,7 +20,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.3.0';
+  const VERSAO = '1.4.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -126,11 +126,15 @@
     const out = [];
     const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto]) : [['23', 'consolacao'], ['28', 'sumare']];
     for (const [id, projeto] of mapas) {
-      const r = await fetch('/imobiliaria/comercial/mapadisponibilidade/' + id, { credentials: 'include', cache: 'no-store' });
-      const html = await r.text();
+      // um mapa com problema não derruba os outros (a lista vem do servidor e inclui os projetos da VitaUrbana em rodízio)
+      let html;
+      try {
+        const r = await fetch('/imobiliaria/comercial/mapadisponibilidade/' + id, { credentials: 'include', cache: 'no-store' });
+        html = await r.text();
+      } catch (e) { out.push({ projeto, erro: 'rede' }); continue; }
       const d = new DOMParser().parseFromString(html, 'text/html');
       const blocos = d.querySelectorAll('.disp-bloco');
-      if (!blocos.length) { if (/Acesse sua conta|Sua senha/i.test(html)) throw new Sessao('login'); throw new Error('mapa ' + projeto + ' veio vazio'); }
+      if (!blocos.length) { if (/Acesse sua conta|Sua senha/i.test(html)) throw new Sessao('login'); out.push({ projeto, erro: 'mapa vazio' }); continue; }
       const s = {};
       blocos.forEach(b => {
         const c = ([...b.classList].find(x => x.startsWith('div-')) || '').replace('div-', '');
@@ -351,7 +355,7 @@
       if (e instanceof Sessao) {
         st.sessao = true;
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
-                                    : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para Consolação e Sumaré continuarem ao vivo.';
+                                    : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
         st.erro = 'chave do robô inválida'; gset('chave', '');
