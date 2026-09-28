@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.5.0
-// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, troca o empreendimento do espelho na mesma janela para ler os outros projetos).
+// @version      1.6.0
+// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
@@ -20,7 +20,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.5.0';
+  const VERSAO = '1.6.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -540,6 +540,129 @@
     }
   }
 
+  // ---------- ONE: espelho completo de outros empreendimentos, lido em segundo plano (sem mexer na tela) ----------
+  // Busca a mesma página que o portal abre no botão "Espelho completo do produto" (EspelhoEmpreendimento.aspx?Emp=...),
+  // só leitura, e lê as unidades do HTML. Não navega, não abre aba e não clica em nada.
+  const LS_DONO = 'roboEspelho:dono:' + FONTE, LS_POSC = 'roboEspelho:posc:' + FONTE;
+  const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  async function souDono() {                      // se houver duas cópias do robô na mesma página, só uma trabalha
+    const ttl = Math.max(150000, INTERVALO * 2.5);
+    let d = lsGet(LS_DONO);
+    if (d && d.id !== ID && Date.now() - d.t < ttl) return false;
+    if (!d || d.id !== ID) { lsSet(LS_DONO, { id: ID, t: Date.now() }); await dormir(300 + Math.random() * 900); d = lsGet(LS_DONO); if (!d || d.id !== ID) return false; }
+    lsSet(LS_DONO, { id: ID, t: Date.now() }); return true;
+  }
+  function rgbDe(s) {
+    s = String(s || '').trim().toLowerCase();
+    let m = s.match(/^#([0-9a-f]{6})$/); if (m) { const v = parseInt(m[1], 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255].join(','); }
+    m = s.match(/^#([0-9a-f]{3})$/); if (m) return m[1].split('').map(c => parseInt(c + c, 16)).join(',');
+    m = s.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/); if (m) return m[1] + ',' + m[2] + ',' + m[3];
+    return null;
+  }
+  function corInline(el) {                        // cor de fundo escrita no HTML (sem CSS calculado)
+    if (!el || !el.getAttribute) return null;
+    const b = el.getAttribute('bgcolor'); if (b) return rgbDe(b);
+    const m = (el.getAttribute('style') || '').match(/background(?:-color)?\s*:\s*(#[0-9a-f]{3,6}|rgba?\([^)]*\))/i);
+    return m ? rgbDe(m[1]) : null;
+  }
+  const RE_RS = /R\$|\d{1,3}(\.\d{3})+,\d{2}/;
+  function lerCelulasDoc(doc, opt) {              // unidades de um documento sem renderização (DOMParser)
+    opt = opt || {};
+    const PAL = Object.assign({}, PALETA, (cfg && cfg.paleta) || {});
+    const reNum = opt.num_re ? new RegExp(opt.num_re, 'i') : null;
+    const numDe = ls => { if (reNum) { for (const l of ls) { const m = l.match(reNum); if (m) return String(parseInt(m[1], 10)); } return null; } return acharNumero(ls); };
+    const hist = {};
+    for (const el of doc.querySelectorAll('[style*="background"],[bgcolor]')) { const k = corInline(el); if (k) hist[k] = (hist[k] || 0) + 1; }
+    const base = opt.celula_sel ? [...doc.querySelectorAll(opt.celula_sel)] : [...doc.querySelectorAll('td,div,span,a,li,p,section,article')];
+    const cand = new Map();
+    for (const el of base) {
+      const tl = (el.textContent || '').length;
+      if (!opt.celula_sel && (tl < 4 || tl > 400)) continue;
+      const ls = linhas(el); if (!ls.length || ls.length > 25) continue;
+      const num = numDe(ls); if (!num) continue;
+      let stt = null; for (const l of ls) { stt = stTexto(l); if (stt) break; }
+      let k = null;
+      if (!stt && opt.textos) { for (const l of ls) { for (const [re, v] of Object.entries(opt.textos)) { if (new RegExp(re, 'i').test(l)) { stt = v; break; } } if (stt) break; } }
+      if (!stt) { let q = el; for (let i = 0; q && i < 3 && !stt; i++, q = q.parentElement) { k = corInline(q); if (k && PAL[k]) stt = PAL[k]; } }
+      if (!stt && opt.classes) { let q = el; for (let i = 0; q && i < 3 && !stt; i++, q = q.parentElement) { const cl = String(q.className || ''); for (const [c, v] of Object.entries(opt.classes)) { if (cl.includes(c)) { stt = v; break; } } } }
+      if (!stt || !['disponivel', 'reservada', 'processo_final', 'vendida'].includes(stt)) continue;
+      cand.set(el, { el, num, stt, ls, cor: k });
+    }
+    const achados = [];                            // fica com o mais interno quando um candidato contém outro
+    for (const c of cand.values()) { let tem = false; for (const d of c.el.querySelectorAll('*')) { if (cand.has(d)) { tem = true; break; } } if (!tem) achados.push(c); }
+    // blocos/torres: pelo seletor do servidor ou, havendo números repetidos, pelo ancestral com id "_IT<n>_"
+    const grupos = new Map(); const gDe = el => {
+      let g = null;
+      if (opt.grupo_sel) { const a = el.closest(opt.grupo_sel); if (a) g = a; }
+      if (!g) { for (let q = el.parentElement; q; q = q.parentElement) { if (q.id && /_IT\d+(_|$)/.test(q.id)) { g = q; break; } } }
+      if (!g) return 0;
+      if (!grupos.has(g)) grupos.set(g, { i: grupos.size, rotulo: limpa((linhas(g)[0] || '')).slice(0, 80), n: 0 });
+      return grupos.get(g).i;
+    };
+    const vistos = {}; let dup = 0;
+    for (const c of achados) { c.g = gDe(c.el); vistos[c.num] = (vistos[c.num] || 0) + 1; if (vistos[c.num] > 1) dup++; }
+    const status = {}, det = {}; const porGrupo = dup > 0 || !!opt.grupo_sel;
+    for (const c of achados) {
+      const key = porGrupo && grupos.size > 1 ? c.g + '|' + c.num : c.num;
+      if (status[key]) continue;
+      status[key] = c.stt; det[key] = c.ls.filter(l => UTIL.test(l)).slice(0, 8).map(x => x.slice(0, 40));
+      if (grupos.size) for (const g of grupos.values()) if (g.i === c.g) g.n++;
+    }
+    return { status, det, dup, hist, achados, grupos: [...grupos.values()] };
+  }
+  function diagCompleto(doc, html, r, l, ms) {    // retrato da página buscada (para ajustar a leitura pelo servidor)
+    const anc = el => { const o = []; for (let q = el.parentElement, i = 0; q && i < 5; i++, q = q.parentElement) o.push(q.tagName + (q.id ? '#' + q.id.slice(-40) : '') + (q.className ? '.' + String(q.className).slice(0, 30) : '')); return o; };
+    const cont = {}; for (const v of Object.values(l.status)) cont[v] = (cont[v] || 0) + 1;
+    const cab = []; for (const el of doc.querySelectorAll('span,td,div,h1,h2,h3,a,label')) { if (cab.length >= 15) break; const t = limpa(el.textContent); if (t.length < 90 && /Livre|Bloco|Torre|Fase|Espelho/i.test(t) && !cab.includes(t)) cab.push(t); }
+    return { http: r.status, caminho: (r.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''), tam: html.length, ms,
+      titulo: limpa(doc.title).slice(0, 80), elementos: doc.getElementsByTagName('*').length, n: Object.keys(l.status).length, dup: l.dup, contagem: cont,
+      cores: Object.entries(l.hist).sort((a, b) => b[1] - a[1]).slice(0, 12), grupos: l.grupos.slice(0, 20), cabecalhos: cab,
+      amostras: l.achados.filter(c => c.stt === 'disponivel').concat(l.achados.filter(c => c.stt !== 'disponivel')).slice(0, 3)
+        .map(c => ({ st: c.stt, html: semValores(c.el.outerHTML).slice(0, 700), anc: anc(c.el), linhas: (c.stt === 'disponivel' ? c.ls : c.ls.filter(x => UTIL.test(x))).slice(0, 8).map(x => x.slice(0, 40)) })),
+      inicio: l.achados.length ? undefined : limpa(doc.body ? doc.body.textContent : '').slice(0, 1200),
+      html: l.achados.length ? undefined : semValores(doc.body ? doc.body.innerHTML : html).replace(/\s+/g, ' ').slice(0, 3000) };
+  }
+  async function lerCompletoONE(a) {
+    const url = a.url || ('/Vendas/EspelhoEmpreendimento.aspx?Emp=' + encodeURIComponent(a.emp));
+    const t0 = Date.now(); let r, html;
+    try { r = await fetch(url, { credentials: 'include', cache: 'no-store' }); html = await r.text(); }
+    catch (e) { return { info: { erro: 'rede', ms: Date.now() - t0 } }; }
+    const fim = (r.url || '').replace(/^https?:\/\/[^/]+/, '');
+    if (/sair\.aspx|login/i.test(fim) || /type=["']?password/i.test(html)) return { sessao: true, info: { erro: 'sessao', caminho: fim.replace(/\?.*$/, ''), http: r.status } };
+    if (!r.ok) return { info: { erro: 'http ' + r.status, ms: Date.now() - t0 } };
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const l = lerCelulasDoc(doc, (cfg && cfg.completo) || {});
+    const info = diagCompleto(doc, html, r, l, Date.now() - t0);
+    const rot = a.rotulo_sel ? limpa((doc.querySelector(a.rotulo_sel) || {}).textContent) : (info.cabecalhos[0] || info.titulo);
+    return { leitura: Object.keys(l.status).length ? l : null, rotulo: rot, info };
+  }
+  let ultCompleto = 0, buscando = false;
+  async function completosONE() {
+    const lista = ((cfg && cfg.completos) || []).filter(a => a && a.alvo && (a.emp || a.url));
+    if (!lista.length || buscando) return;
+    if (Date.now() - ultCompleto < Math.max(20, cfg.completos_cada || 90) * 1000) return;
+    if (!(await souDono())) return;
+    buscando = true; ultCompleto = Date.now();
+    const k = Math.min(Math.max(1, cfg.completos_por_ciclo || 2), lista.length);
+    let pos = (+lsGet(LS_POSC) || 0) % lista.length;
+    try {
+      for (let i = 0; i < k; i++) {
+        const a = lista[pos]; pos = (pos + 1) % lista.length; lsSet(LS_POSC, pos);
+        const r = await lerCompletoONE(a);
+        if (r.sessao) { st.aviso = 'o portal pediu login ao ler outro empreendimento; pausado'; ultCompleto = Date.now() + 600000; await enviarLeitura(a, null, null, r.info); break; }
+        if (r.info && r.info.erro === 'rede') { await enviarLeitura(a, null, null, r.info); break; }   // falha de rede: tenta no próximo ciclo
+        const l = r.leitura;
+        await enviarLeitura(a, l ? { status: l.status, det: l.det, dup: l.dup, semNumero: [], hist: l.hist } : null, r.rotulo || null, r.info);
+        if (l && a.sync && a.projeto) {
+          try { const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: a.projeto, p_status: l.status, p_fonte: 'one' }); if (res && res.mudancas) st.mudancas += res.mudancas.length; }
+          catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
+        }
+        await dormir(1500 + Math.random() * 1500);
+      }
+    } finally { buscando = false; }
+  }
+
   let ultRetrato = 0, ultAssinatura = '';
   async function enviarRetrato(doc, leitura, forcar) {
     const r = retrato(doc, leitura);
@@ -601,6 +724,7 @@
     batimento();
     agendarRecarga();
     if (rodizioLigado()) await rodizioONE();      // outros empreendimentos da ONE (poucos por vez) e volta para o Bela Cintra
+    if (cfg && Array.isArray(cfg.completos) && cfg.completos.length) await completosONE();   // outros empreendimentos, em segundo plano
   }
 
   // ---------- ciclo ----------
