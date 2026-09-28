@@ -235,7 +235,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202609272201
+// versão 202609272230
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -356,7 +356,7 @@ window.NEX = (function(){
     }
     for(const c of precosCampos(P, E)){
       const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
-      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null});
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null, envio: c.envio !== false});
     }
     return out;
   }
@@ -421,7 +421,8 @@ window.NEX = (function(){
       const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
       if(!alvo && !c) continue;
       for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
-      if(alvo){ const [cx, cy, cw, ch] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch / 2 + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+      // 5º número opcional: altura do rótulo dentro da unidade (0 = topo, 1 = base), para não cobrir o número da planta
+      if(alvo){ const [cx, cy, cw, ch, fy] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch * (fy != null ? fy : 0.5) + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
     }
     s += txt;
     if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';

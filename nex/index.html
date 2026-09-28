@@ -268,6 +268,9 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 .svg-andar.faixa .num-c{font:600 12px "IBM Plex Sans",sans-serif;fill:#1d2533;opacity:.75}.svg-andar.faixa .num-c.alvo{fill:#fff;opacity:1}
 .andar-img.faixa-w{background:transparent;padding-bottom:2px}
 
+.nota-aj{margin-top:8px;font-size:13px;font-weight:600;color:#8a5a00;background:#fff4d6;border-radius:8px;padding:6px 10px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nota-aj{color:#ffd98a;background:#3b2e10}}
+
 </style>
 </head>
 <body>
@@ -388,7 +391,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202609272201
+// versão 202609272230
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -509,7 +512,7 @@ window.NEX = (function(){
     }
     for(const c of precosCampos(P, E)){
       const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
-      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null});
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null, envio: c.envio !== false});
     }
     return out;
   }
@@ -574,7 +577,8 @@ window.NEX = (function(){
       const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
       if(!alvo && !c) continue;
       for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
-      if(alvo){ const [cx, cy, cw, ch] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch / 2 + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+      // 5º número opcional: altura do rótulo dentro da unidade (0 = topo, 1 = base), para não cobrir o número da planta
+      if(alvo){ const [cx, cy, cw, ch, fy] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch * (fy != null ? fy : 0.5) + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
     }
     s += txt;
     if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';
@@ -892,7 +896,7 @@ window.NEX = (function(){
     b.querySelector('.num').textContent = x.n;
     const p1 = b.querySelectorAll('.pill')[0]; p1.textContent = st[0]; p1.classList.add(st[1]);
     const pc = b.querySelectorAll('.pill')[1]; if(x.cat && !/RESERVA|CONVERS/i.test(x.cat)) pc.textContent = x.cat; else pc.remove();
-    b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · ' + posTxt(x) + (x.a ? ' · ' + m2(x.a) : '');
+    b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · ' + posTxt(x) + (x.ex && x.ex.tl ? ' · ' + x.ex.tl : '') + (x.a ? ' · ' + m2(x.a) : '');
     const op = opLista(x);
     b.querySelector('.preco').textContent = op ? BRL(op.total) + (op.k !== F.base && BASES.length > 1 ? ' · ' + op.rotulo.toLowerCase() : '') : 'sem preço';
     b.querySelector('.face').textContent = x.face ? (x.face.lado || 'vista ' + x.face.nome.replace('Rua ', 'R. ')) : '';
@@ -920,6 +924,7 @@ window.NEX = (function(){
     const tab = x.ops.find(o => o.k === 'tabela');
     h += '<div class="precos">' + x.ops.map(o => '<div><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' +
       (tab && o !== tab && o.total < tab.total ? '<span>' + (Math.round((1 - o.total / tab.total) * 1000) / 10).toLocaleString('pt-BR') + '% abaixo da tabela</span>' : '') + '</div>').join('') + '</div>';
+    if(x.ex && x.ex.aj) h += '<div class="nota-aj">★ ' + esc(x.ex.aj) + '</div>';
     const o = fl.find(z => z.k === baseFicha) || fl[0];
     if(o){
       h += '<div class="fluxo">' + o.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
@@ -945,7 +950,7 @@ window.NEX = (function(){
   function renderFicha(){
     const x = atual; if(!x) return;
     const st = ST[x.st] || [x.st, 'cat'];
-    $('fi-tit').innerHTML = 'Unidade ' + esc(x.n) + '<small>' + esc(andarTxt(x.andar)) + ' · ' + esc(posTxt(x)) + (x.a ? ' · ' + esc(m2(x.a)) : '') + '</small>';
+    $('fi-tit').innerHTML = 'Unidade ' + esc(x.n) + '<small>' + esc(andarTxt(x.andar)) + ' · ' + esc(posTxt(x)) + (x.ex && x.ex.tl ? ' · ' + esc(x.ex.tl) : '') + (x.a ? ' · ' + esc(m2(x.a)) : '') + '</small>';
     const pl = x.pl, vi = vista(P, x);
     let h = '<div class="fx-grid"><div style="display:grid;gap:14px;min-width:0">';
     // planta
@@ -1044,7 +1049,7 @@ window.NEX = (function(){
     const box = $('en-val'), antes = (box.querySelector('input:checked') || {}).value;
     const xs = envUnids.map(n => porN.get(n)).filter(Boolean);
     const x0 = xs[0]; box.innerHTML = '';
-    const ops = x0 ? x0.ops : [];
+    const ops = x0 ? x0.ops.filter(o => o.envio !== false) : [];   // projeções (ex.: valor futuro) não vão para o cliente
     let marcado = false;
     const add = (v, titulo, sub, ok) => {
       const l = document.createElement('label'); l.innerHTML = '<input type="radio" name="val"><span></span>';
