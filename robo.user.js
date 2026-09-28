@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.4.0
-// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas.
+// @version      1.5.0
+// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, troca o empreendimento do espelho na mesma janela para ler os outros projetos).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
@@ -20,7 +20,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.4.0';
+  const VERSAO = '1.5.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -194,17 +194,26 @@
     return it.length ? it : linhas(el);
   }
   const semValores = h => h.replace(/="[^"]{40,}"/g, '="…"').replace(/='[^']{40,}'/g, "='…'");
+  // linhas úteis da célula (status, número/tipo, m², preço, tipologia): as visíveis e depois as ocultas, no máximo 8.
+  // Outras linhas (ex.: quem está com a reserva) não são enviadas.
+  const UTIL = /m²|m2\b|R\$|^\d|dorm|stud|su[ií]te|garden|cobert|duplex|loja|sala|vaga|\b(NR|HIS|HMP|R2V|RES|FA)\b|dispon|vend|reserv|pend|bloq|permut|indisp|process/i;
+  function detalhe(el, vis) {
+    const out = vis.filter(l => UTIL.test(l)).slice(0, 8);
+    try { for (const l of linhas(el)) { if (out.length >= 8) break; if (UTIL.test(l) && !out.includes(l)) out.push(l); } } catch (e) {}
+    return out.map(x => x.slice(0, 40));
+  }
   function lerCelulasONE(doc) {
+    const PAL = Object.assign({}, PALETA, (cfg && cfg.paleta) || {});
     const hist = {}, coloridos = [];
     for (const el of doc.querySelectorAll('td,div,span,a,li,button,section,article,p')) {
       const k = cor(el); if (!k) continue;
       hist[k] = (hist[k] || 0) + 1;
-      if (PALETA[k]) coloridos.push({ el, k });
+      if (PAL[k]) coloridos.push({ el, k });
     }
     // quantos quadradinhos coloridos cada ancestral contém (para não pegar número do vizinho)
     const conta = new Map();
     for (const c of coloridos) { let p = c.el.parentElement, i = 0; while (p && i < 4) { conta.set(p, (conta.get(p) || 0) + 1); p = p.parentElement; i++; } }
-    const status = {}, amostra = [], semNumero = []; let dup = 0;
+    const status = {}, det = {}, amostra = [], semNumero = []; let dup = 0;
     const dentro = new Set(coloridos.map(c => c.el));
     for (const c of coloridos) {
       // se um colorido está dentro de outro colorido da mesma cor, fica com o mais interno
@@ -212,21 +221,28 @@
       let ls = linhasVis(c.el), num = acharNumero(ls), stt = null;
       for (const l of ls) { stt = stTexto(l); if (stt) break; }
       if (!num) { let q = c.el.parentElement; for (let i = 0; q && i < 3 && (conta.get(q) || 0) <= 1; i++, q = q.parentElement) { const l2 = linhasVis(q); num = acharNumero(l2); if (num) { if (!stt) for (const l of l2) { stt = stTexto(l); if (stt) break; } break; } } }
-      if (!stt) stt = PALETA[c.k];
+      if (!stt) stt = PAL[c.k];
       if (!num) { if (semNumero.length < 4) semNumero.push({ tag: c.el.tagName, cor: c.k, linhas: ls.slice(0, 6).map(x => x.slice(0, 40)), html: semValores(c.el.outerHTML).slice(0, 500) }); continue; }
       if (status[num]) { if (!aninhado) dup++; continue; }
-      status[num] = stt;
+      status[num] = stt; det[num] = detalhe(c.el, ls);
+      if (!det[num].some(l => /R\$|\d{1,3}(\.\d{3})+,\d{2}/.test(l))) {   // preço fora do quadradinho colorido?
+        let q = c.el.parentElement;
+        for (let i = 0; q && i < 3 && (conta.get(q) || 0) <= 1; i++, q = q.parentElement) {
+          const extra = detalhe(q, linhasVis(q)).filter(l => /R\$|\d{1,3}(\.\d{3})+,\d{2}/.test(l) && !det[num].includes(l));
+          if (extra.length) { det[num] = det[num].concat(extra).slice(0, 8); break; }
+        }
+      }
       if (amostra.length < 6 || (stt !== 'disponivel' && amostra.length < 12)) amostra.push({ tag: c.el.tagName, cls: String(c.el.className || '').slice(0, 60), cor: c.k, st: stt, n: num, linhas: ls.slice(0, 7).map(x => x.slice(0, 40)) });
     }
     // amostras cruas por cor (para ajustar a leitura se precisar)
     const cruas = [];
-    for (const k of Object.keys(PALETA)) {
+    for (const k of Object.keys(PAL)) {
       coloridos.filter(c => c.k === k).slice(0, 2).forEach(c => {
         const pais = []; let q = c.el.parentElement; for (let i = 0; q && i < 4; i++, q = q.parentElement) pais.push(q.tagName + '.' + String(q.className || '').slice(0, 30) + ' [' + (q.textContent || '').length + ']');
         cruas.push({ cor: k, tag: c.el.tagName, texto: (c.el.innerText || '').slice(0, 160), tamTexto: (c.el.textContent || '').length, html: semValores(c.el.outerHTML).slice(0, 700), pais });
       });
     }
-    return { status, amostra, dup, hist, semNumero, cruas, coloridos: coloridos.length };
+    return { status, det, amostra, dup, hist, semNumero, cruas, coloridos: coloridos.length, els: coloridos.slice(0, 6).map(c => c.el) };
   }
   const ehNex = doc => (cfg && cfg.nome ? new RegExp(cfg.nome, 'i') : /bela\s*c[iy]ntra|\bnex\b/i).test((doc.title || '') + ' ' + ((doc.body && doc.body.textContent) || '').slice(0, 20000) + ' ' + [...doc.querySelectorAll('select')].map(s => s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : '').join(' '));
 
@@ -246,7 +262,7 @@
     const cont = {}; for (const v of Object.values(leitura.status)) cont[v] = (cont[v] || 0) + 1;
     return {
       versao: VERSAO, em: new Date().toISOString(), caminho: location.pathname, params: [...new URLSearchParams(location.search).keys()],
-      topo: TOPO, titulo: txt(doc.title).slice(0, 80), nav: { tipo: nav.type, redirecionamentos: nav.redirectCount },
+      topo: TOPO, titulo: txt(doc.title).slice(0, 80), rotulo: rotuloEspelho(doc), nav: { tipo: nav.type, redirecionamentos: nav.redirectCount },
       referencia: (document.referrer || '').replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''),
       nex: ehNex(doc), celulas: Object.keys(leitura.status).length, contagem: cont, duplicadas: leitura.dup,
       mapa: Object.entries(leitura.status).map(([n, s]) => n + ':' + s[0]).join(','),
@@ -272,6 +288,258 @@
     try { const col = W.ASPxClientControl && W.ASPxClientControl.GetControlCollection(); if (col && col.ForEachControl) col.ForEachControl(c => { if (out.length < 40 && /espelho|cbp|callback|grid|mapa/i.test(c.name || '')) out.push((c.name || '').replace(/^ctl00_RoundPanelConteudo_cphConteudo_/, '…') + ' :: ' + (c.constructor && c.constructor.name || typeof c) + (typeof c.PerformCallback === 'function' ? ' [callback]' : '')); }); } catch (e) { out.push('erro: ' + String(e).slice(0, 80)); }
     return out;
   }
+  // ---------- ONE: rótulo do espelho, descoberta e rodízio dos empreendimentos (só leitura, mesma janela) ----------
+  const limpa = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const semSegredo = s => s.replace(/([?&][\w.]+=)[^&'"\s]*/g, '$1…').replace(/[A-Za-z0-9+/=_-]{40,}/g, '…');
+  const dormir = ms => new Promise(r => setTimeout(r, ms));
+  function dxCol() { try { return W.ASPxClientControl && W.ASPxClientControl.GetControlCollection(); } catch (e) { return null; } }
+  function dxAchar(sufixo) {                      // controle DevExpress da página cujo nome termina com o sufixo
+    const col = dxCol(); let r = null;
+    try { if (col && col.ForEachControl) col.ForEachControl(c => { if (!r && c && typeof c.name === 'string' && c.name.endsWith(sufixo)) r = c; }); } catch (e) {}
+    return r;
+  }
+  function emCallback() {                         // algum controle da página ainda carregando?
+    const col = dxCol(); let ocupado = false;
+    try { if (col && col.ForEachControl) col.ForEachControl(c => { try { if (!ocupado && c && typeof c.InCallback === 'function' && c.InCallback()) ocupado = true; } catch (e) {} }); } catch (e) {}
+    return ocupado;
+  }
+  function rotuloEspelho(doc) {                   // texto que identifica qual espelho está na tela
+    const sel = (cfg && cfg.rotulo_sel) || '[id$="rpnEspelho_HTC_lblEspelho"]';
+    try { return [...doc.querySelectorAll(sel)].map(el => limpa(el.textContent)).filter(Boolean).join(' | ').slice(0, 250); } catch (e) { return ''; }
+  }
+  function eventosDX(c) {                         // funções ligadas aos eventos do controle (ex.: clique no nó da árvore)
+    const out = {};
+    try {
+      for (const k in c) {
+        let v; try { v = c[k]; } catch (e) { continue; }
+        if (v && typeof v === 'object' && Array.isArray(v.handlerInfoList) && v.handlerInfoList.length)
+          out[k] = v.handlerInfoList.slice(0, 3).map(h => semSegredo(limpa(String(h && h.handler))).slice(0, 600));
+      }
+    } catch (e) {}
+    return out;
+  }
+  function propsDX(c) {
+    const out = {};
+    try {
+      for (const k in c) {
+        if (Object.keys(out).length >= 30) break;
+        if (!/^cp|^properties$|focused|selected|^key|nodeKey|expanded/i.test(k)) continue;
+        let v; try { v = c[k]; } catch (e) { continue; }
+        if (v == null || typeof v === 'function' || (typeof v === 'object' && v.nodeType)) continue;
+        try { out[k] = semSegredo(JSON.stringify(v)).slice(0, 800); } catch (e) {}
+      }
+    } catch (e) {}
+    return out;
+  }
+  function descobrirONE(doc) {                    // o que existe na página para trocar de empreendimento (nada é clicado aqui)
+    const d = { rotulo: rotuloEspelho(doc) };
+    const tree = dxAchar('_treEmpBlo');
+    if (tree) {
+      const a = { nome: tree.name.replace(/^ctl00_RoundPanelConteudo_cphConteudo_/, '…'), eventos: eventosDX(tree), props: propsDX(tree) };
+      try { a.foco = tree.GetFocusedNodeKey ? tree.GetFocusedNodeKey() : null; } catch (e) {}
+      try {
+        const ks = tree.GetVisibleNodeKeys ? tree.GetVisibleNodeKeys() : [];
+        a.total = ks.length;
+        a.nos = ks.slice(0, 400).map(k => {
+          let el = null, t = null, estado = null, recuo = null;
+          try { el = tree.GetNodeHtmlElement(k); } catch (e) {}
+          if (el) { t = limpa(el.textContent).slice(0, 90); recuo = el.querySelectorAll('td[class*="Indent"],td[class*="dxtl__I"]').length; }
+          try { estado = tree.GetNodeState ? tree.GetNodeState(k) : null; } catch (e) {}
+          return [k, t, estado, recuo];
+        });
+        a.amostras = ks.slice(0, 3).map(k => { try { const el = tree.GetNodeHtmlElement(k); return el ? semValores(el.outerHTML).slice(0, 1500) : null; } catch (e) { return null; } });
+      } catch (e) { a.erro = String(e).slice(0, 160); }
+      d.arvore = a;
+    }
+    const elArv = doc.querySelector('[id$="_treEmpBlo"]');
+    if (elArv && !(d.arvore && d.arvore.total)) d.arvoreHtml = semValores(elArv.outerHTML).slice(0, 8000);
+    d.combos = {};
+    for (const suf of ['_cboFiltroEmp', '_cboFaseObraEmp']) {
+      const c = dxAchar(suf); if (!c) continue;
+      const o = { eventos: eventosDX(c) };
+      try { const n = c.GetItemCount(); o.n = n; o.itens = []; for (let i = 0; i < Math.min(n, 300); i++) { const it = c.GetItem(i); o.itens.push([limpa(it.text).slice(0, 90), it.value]); } } catch (e) { o.erro = String(e).slice(0, 120); }
+      try { o.valor = c.GetValue(); o.texto = c.GetText(); } catch (e) {}
+      d.combos[suf.slice(1)] = o;
+    }
+    d.controles = {};
+    for (const suf of ['_cbpEspelho', '_btnPesquisar', '_btnLimpar', '_btnRefresh', '_hdfEspelhoVendas', '_popEspelhoEmpreendimento', '_txtFiltroPesquisa', '_rpnEspelho']) {
+      const c = dxAchar(suf); if (!c) continue;
+      const o = { nome: c.name.replace(/^ctl00_RoundPanelConteudo_cphConteudo_/, '…'), eventos: eventosDX(c), props: propsDX(c) };
+      try { if (c.properties) o.valores = semSegredo(JSON.stringify(c.properties)).slice(0, 1500); } catch (e) {}
+      d.controles[suf.slice(1)] = o;
+    }
+    d.rotulos = {};
+    for (const suf of ['lblQtdEmpreendimentos', 'lblSemEmpreendimentos', 'lblTreeList', 'lblFiltroPesquisa', 'lblEmpreendimento', 'lblEmprendimento', 'lblLocalizacao', 'lblFaseObra', 'lblAreaM2', 'lblEspelho']) {
+      const el = doc.querySelector('[id$="_' + suf + '"]'); if (el) d.rotulos[suf] = limpa(el.textContent).slice(0, 200);
+    }
+    const tr = [];
+    for (const s of doc.scripts) {
+      if (s.src) continue;
+      const c = s.textContent || '';
+      for (const kw of ['treEmpBlo', 'cbpEspelho', 'NodeClick', 'FocusedNodeChanged', 'PerformCallback', 'hdfEspelhoVendas', 'EspelhoVendas']) {
+        let i = c.indexOf(kw), n = 0;
+        while (i >= 0 && n < 3 && tr.length < 40) { tr.push(kw + ': ' + semSegredo(limpa(c.slice(Math.max(0, i - 160), i + 260)))); i = c.indexOf(kw, i + kw.length); n++; }
+      }
+    }
+    d.trechos = tr;
+    const fx = [];
+    try { for (const k of Object.keys(W)) { if (fx.length >= 40) break; if (!/espelho|bloco|empreend|arvore|tree|carreg|unidade/i.test(k)) continue; let f; try { f = W[k]; } catch (e) { continue; } if (typeof f === 'function') fx.push(k + ': ' + semSegredo(limpa(String(f))).slice(0, 500)); } } catch (e) {}
+    d.funcoes = fx;
+    try {
+      const l = lerCelulasONE(doc), am = [];
+      for (const el of doc.querySelectorAll('td,div,span,a,li')) {
+        if (am.length >= 2) break;
+        if (cor(el) !== '204,255,204') continue;           // só disponíveis (sem nome de quem reservou)
+        am.push({ html: semValores(el.outerHTML).slice(0, 1200), pai: el.parentElement ? semValores(el.parentElement.outerHTML).slice(0, 2500) : null, linhas: linhasVis(el).slice(0, 8), brutas: linhas(el).slice(0, 12) });
+      }
+      d.celulas = am; d.detalhe = Object.entries(l.det).slice(0, 5);
+    } catch (e) { d.celulas = String(e).slice(0, 120); }
+    return d;
+  }
+  let ultDescoberta = 0;
+  async function enviarDescoberta(doc) {
+    if (Date.now() - ultDescoberta < 600000) return;          // no máximo a cada 10 min
+    ultDescoberta = Date.now();
+    let d; try { d = descobrirONE(doc); } catch (e) { d = { erro: String(e).slice(0, 200) }; }
+    try { await rpc('diagnostico_robo', { p_chave: chave(), p_fonte: 'one', p_caminho: '/descoberta', p_info: { versao: VERSAO, em: new Date().toISOString(), descoberta: d } }); } catch (e) {}
+  }
+
+  // uso do portal por uma pessoa (qualquer quadro): o rodízio pausa para não atrapalhar
+  const USO = 'uso:one';
+  if (FONTE === 'one') {
+    let ultUso = 0;
+    const marcaUso = e => { if (!e.isTrusted) return; const t = Date.now(); if (t - ultUso < 5000) return; ultUso = t; gset(USO, t); };
+    ['mousedown', 'keydown', 'wheel', 'touchstart'].forEach(ev => { try { window.addEventListener(ev, marcaUso, { capture: true, passive: true }); } catch (e) {} });
+  }
+  const emUso = () => Date.now() - (gget(USO, 0) || 0) < Math.max(30, (cfg && cfg.pausa_uso) || 180) * 1000;
+
+  // ações de navegação: só trocam o que aparece no espelho; nunca em botão/opção de reserva, proposta, envio etc.
+  const PROIBIDO = /reserv|propost|confirm|enviar|salvar|gravar|exclu|apagar|logoff|sair|cancel|descart|recuper|vender|compr|aprov|assin|contrat|pagar|boleto/i;
+  function clicar(el) {
+    const o = { bubbles: true, cancelable: true };
+    try { el.dispatchEvent(new MouseEvent('mousedown', o)); el.dispatchEvent(new MouseEvent('mouseup', o)); } catch (e) {}
+    el.click();
+  }
+  async function esperarLivre(ms) { const t0 = Date.now(); await dormir(300); while (Date.now() - t0 < ms && emCallback()) await dormir(300); }
+  function acharNo(tree, a) {
+    if (a.chave != null) return String(a.chave);
+    if (!a.texto) return null;
+    const re = new RegExp(a.texto, 'i');
+    try { return (tree.GetVisibleNodeKeys() || []).find(k => { const el = tree.GetNodeHtmlElement(k); return el && re.test(limpa(el.textContent)); }) || null; } catch (e) { return null; }
+  }
+  async function executar(a) {                    // devolve null se deu certo, ou o motivo
+    if (!a || !a.tipo) return 'sem ação';
+    if (a.tipo === 'no' || a.tipo === 'expandir') {
+      const tree = dxAchar(a.arvore || '_treEmpBlo'); if (!tree) return 'árvore não encontrada';
+      for (const k of [].concat(a.expandir || [])) { try { if (tree.GetNodeState && tree.GetNodeState(String(k)) === 'Collapsed') { tree.ExpandNode(String(k)); await esperarLivre(15000); } } catch (e) {} }
+      if (a.tipo === 'expandir') return null;
+      const k = acharNo(tree, a); if (k == null) return 'nó não encontrado';
+      let row = null; try { row = tree.GetNodeHtmlElement(k); } catch (e) {}
+      if (!row) return 'nó sem elemento';
+      const el = (a.sel && row.querySelector(a.sel)) || [...row.querySelectorAll('td')].reverse().find(td => limpa(td.textContent)) || row;
+      if (PROIBIDO.test(limpa(el.textContent) + ' ' + (el.id || ''))) return 'bloqueado';
+      clicar(el); return null;
+    }
+    if (a.tipo === 'callback') {
+      const c = dxAchar(a.controle || '_cbpEspelho'); if (!c || typeof c.PerformCallback !== 'function') return 'controle não encontrado';
+      if (PROIBIDO.test(c.name)) return 'bloqueado';
+      if (a.hdf) { const h = dxAchar(a.hdf.controle || '_hdfEspelhoVendas'); if (h && h.Set) for (const [kk, vv] of Object.entries(a.hdf.valores || {})) h.Set(kk, vv); }
+      c.PerformCallback(a.arg == null ? '' : String(a.arg)); return null;
+    }
+    if (a.tipo === 'combo') {
+      const c = dxAchar(a.controle || '_cboFiltroEmp'); if (!c) return 'combo não encontrado';
+      if (a.valor != null) c.SetValue(a.valor);
+      else if (a.texto) { const re = new RegExp(a.texto, 'i'); let i = -1; for (let j = 0; j < c.GetItemCount(); j++) if (re.test(c.GetItem(j).text)) { i = j; break; } if (i < 0) return 'item não encontrado'; c.SetSelectedIndex(i); }
+      if (a.disparar) { try { const ev = c.SelectedIndexChanged; if (ev && ev.FireEvent) ev.FireEvent(c, {}); } catch (e) {} }
+      if (a.botao) {
+        const b = dxAchar(a.botao); if (!b) return 'botão não encontrado';
+        let tb = ''; try { tb = b.GetText ? b.GetText() : ''; } catch (e) {}
+        if (PROIBIDO.test(b.name + ' ' + tb)) return 'bloqueado';
+        if (typeof b.DoClick === 'function') b.DoClick(); else { const el = document.getElementById(b.name); if (!el) return 'botão sem elemento'; clicar(el); }
+      }
+      return null;
+    }
+    if (a.tipo === 'clique') {
+      let el = null; try { el = document.querySelector(a.sel); } catch (e) {}
+      if (!el) return 'elemento não encontrado';
+      if (PROIBIDO.test(limpa(el.textContent) + ' ' + (el.id || '') + ' ' + (el.value || '') + ' ' + (el.getAttribute('onclick') || '') + ' ' + (el.getAttribute('href') || ''))) return 'bloqueado';
+      clicar(el); return null;
+    }
+    if (a.tipo === 'funcao') {
+      if (!/^[A-Za-z_$][\w$]*$/.test(a.nome || '') || PROIBIDO.test(a.nome)) return 'bloqueado';
+      const f = W[a.nome]; if (typeof f !== 'function') return 'função não encontrada';
+      f.apply(W, (a.args || []).filter(x => x == null || ['string', 'number', 'boolean'].includes(typeof x))); return null;
+    }
+    return 'ação desconhecida';
+  }
+  async function esperarEspelho(antes, re, ms) {  // espera o espelho ser trocado (células antigas saem da página) e estabilizar
+    const t0 = Date.now(); let ult = null;
+    while (Date.now() - t0 < ms) {
+      await dormir(700);
+      if (emCallback()) continue;
+      if (antes && antes.length && !antes.some(el => !el.isConnected)) continue;
+      const rot = rotuloEspelho(document);
+      if (re && !re.test(rot)) continue;
+      const l = lerCelulasONE(document); const ks = Object.keys(l.status);
+      if (!ks.length) continue;
+      const ass = ks.length + '|' + ks.slice(0, 12).join(',') + '|' + rot;
+      if (ass === ult) return { leitura: l, rotulo: rot };
+      ult = ass;
+    }
+    return null;
+  }
+  async function enviarLeitura(a, l, rot, info) {
+    let cel = null;
+    if (l) { cel = {}; for (const [n, s] of Object.entries(l.status)) cel[n] = a.det === false ? s : [s].concat(l.det[n] || []); }
+    const inf = Object.assign({ versao: VERSAO, em: new Date().toISOString() }, info || {});
+    if (l) { const cont = {}; for (const v of Object.values(l.status)) cont[v] = (cont[v] || 0) + 1; inf.contagem = cont; inf.n = Object.keys(l.status).length; inf.dup = l.dup; inf.semNumero = l.semNumero; inf.cores = Object.entries(l.hist).sort((x, y) => y[1] - x[1]).slice(0, 14); }
+    try { await rpc('leitura_robo', { p_chave: chave(), p_fonte: 'one', p_alvo: String(a.alvo), p_projeto: a.projeto || null, p_rotulo: rot || null, p_celulas: cel, p_info: inf }); }
+    catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
+  }
+  const rodizioLigado = () => !!(cfg && Array.isArray(cfg.alvos) && cfg.alvos.length && cfg.rotulo_casa && cfg.casa);
+  let navegando = false, ultRodizio = 0, ultVolta = 0;
+  async function voltarCasa() {                   // volta para o espelho do NEX Bela Cintra
+    const reCasa = new RegExp(cfg.rotulo_casa, 'i');
+    if (reCasa.test(rotuloEspelho(document))) return true;
+    const antes = lerCelulasONE(document).els;
+    const err = await executar(cfg.casa).catch(e => String(e && e.message || e));
+    if (err) { st.aviso = 'não consegui voltar para o NEX Bela Cintra (' + err + ')'; return false; }
+    return !!(await esperarEspelho(antes, reCasa, Math.max(5, cfg.espera || 25) * 1000));
+  }
+  async function rodizioONE() {                   // lê alguns empreendimentos por vez e volta para o Bela Cintra
+    if (!rodizioLigado() || navegando) return;
+    if (Date.now() - ultRodizio < Math.max(30, cfg.rodizio_cada || 90) * 1000) return;
+    if (emUso()) { st.aviso = 'outros empreendimentos: pausado enquanto alguém usa o portal'; return; }
+    const alvos = cfg.alvos.filter(a => a && a.alvo && a.acao);
+    if (!alvos.length) return;
+    ultRodizio = Date.now(); navegando = true;
+    const k = Math.min(Math.max(1, cfg.alvos_por_ciclo || 2), alvos.length);
+    let pos = (+gget('pos:one', 0) || 0) % alvos.length;
+    let lidos = 0;
+    try {
+      for (let i = 0; i < k; i++) {
+        if (emUso()) break;
+        const a = alvos[pos]; pos = (pos + 1) % alvos.length; gset('pos:one', pos);
+        const t0 = Date.now();
+        const antes = lerCelulasONE(document).els;
+        const err = await executar(a.acao).catch(e => 'erro: ' + String(e && e.message || e).slice(0, 80));
+        if (err) { await enviarLeitura(a, null, rotuloEspelho(document), { erro: err }); continue; }
+        const r = await esperarEspelho(antes, a.rotulo ? new RegExp(a.rotulo, 'i') : null, Math.max(5, cfg.espera || 25) * 1000);
+        if (!r) { await enviarLeitura(a, null, rotuloEspelho(document), { erro: 'tempo', ms: Date.now() - t0 }); continue; }
+        await enviarLeitura(a, r.leitura, r.rotulo, { ms: Date.now() - t0 });
+        lidos++;
+        if (a.sync && a.projeto && a.rotulo) {
+          try { const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: a.projeto, p_status: r.leitura.status, p_fonte: 'one' }); if (res && res.mudancas) st.mudancas += res.mudancas.length; }
+          catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
+        }
+      }
+    } finally {
+      try { await voltarCasa(); } catch (e) {}
+      navegando = false;
+      if (lidos) st.aviso = null;
+    }
+  }
+
   let ultRetrato = 0, ultAssinatura = '';
   async function enviarRetrato(doc, leitura, forcar) {
     const r = retrato(doc, leitura);
@@ -285,8 +553,11 @@
     try { const c = await rpc('robo_config', { p_chave: chave(), p_fonte: 'one' }); if (c && typeof c === 'object') { cfg = Object.assign(cfg, c); INTERVALO = Math.max(30, cfg.intervalo || 120) * 1000; } }
     catch (e) { if (e && e.status) throw e; }
   }
+  let tRecarga = null;
+  function agendarRecarga() { clearTimeout(tRecarga); tRecarga = setTimeout(recarregarONE, Math.max(30, (cfg.intervalo || 120)) * 1000); }
   function recarregarONE() {                      // só quando configurado no servidor; nunca abre outra aba
     if (!cfg || recarregado) return;
+    if (navegando) { agendarRecarga(); return; }  // no meio do rodízio: deixa para depois
     if (cfg.recarregar === 'quadro') { recarregado = true; location.replace(location.href); }
     else if (cfg.recarregar === 'botao' && cfg.seletor) { const b = document.querySelector(cfg.seletor); if (b) { recarregado = true; b.click(); } }
     else if (cfg.recarregar === 'callback' && cfg.controle) { try { const c = W.ASPxClientControl.GetControlCollection().GetByName(cfg.controle); if (c && c.PerformCallback) { recarregado = true; c.PerformCallback(cfg.arg || ''); } } catch (e) {} }
@@ -306,10 +577,19 @@
     const espelho = /espelho/i.test(location.pathname);
     if (n < 20 && !espelho) return;               // quadros sem espelho: nada a fazer
     await lerConfig();
-    if (n < 20) { mostrar = true; st.aviso = 'abra o espelho do NEX Bela Cintra nesta janela'; await enviarRetrato(document, leitura, false); return; }
+    // com o rodízio ligado, o Bela Cintra é reconhecido pelo rótulo do espelho (a árvore lista todos os empreendimentos)
+    const rot = rotuloEspelho(document);
+    const naCasa = cfg && cfg.rotulo_casa ? new RegExp(cfg.rotulo_casa, 'i').test(rot) : null;
+    if (naCasa === false && rodizioLigado() && !navegando && !emUso() && Date.now() - ultVolta > 60000) {
+      ultVolta = Date.now(); navegando = true;
+      try { await voltarCasa(); } finally { navegando = false; }
+      return;
+    }
+    if (n < 20) { mostrar = true; st.aviso = 'abra o espelho do NEX Bela Cintra nesta janela'; await enviarRetrato(document, leitura, false); if (cfg && cfg.descobrir !== false) await enviarDescoberta(document); return; }
     mostrar = true; st.aviso = null;
-    const nex = ehNex(document);
+    const nex = naCasa === null ? ehNex(document) : naCasa;
     await enviarRetrato(document, leitura, false);
+    if (cfg && cfg.descobrir !== false) await enviarDescoberta(document);
     if (!nex) { st.aviso = 'este espelho não é o do NEX Bela Cintra'; return; }
     if (!cfg || !cfg.sincronizar) { st.fase = 'mapeando'; st.ultimo = Date.now(); return; }
     if (cfg.recarregar === 'nenhum' && jaSincronizado) return;   // sem recarregar, a tela não muda: não finge conferência nova
@@ -319,7 +599,8 @@
     if (res && res.ok === false) throw new Error('leitura incompleta (' + res.lidos + ' de ' + res.total + ')');
     st.ultimo = Date.now(); st.mudancas = res && res.mudancas ? res.mudancas.length : 0; st.fase = 'ok'; jaSincronizado = true;
     batimento();
-    setTimeout(recarregarONE, Math.max(30, (cfg.intervalo || 120)) * 1000);
+    agendarRecarga();
+    if (rodizioLigado()) await rodizioONE();      // outros empreendimentos da ONE (poucos por vez) e volta para o Bela Cintra
   }
 
   // ---------- ciclo ----------
