@@ -96,6 +96,10 @@ button{font:inherit;color:inherit}
 .subtabs button .n.zero{background:var(--surface-2);color:var(--muted)}
 .subtabs button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .subtabs button.on .n{background:rgba(255,255,255,.22);color:inherit}
+.subtabs .sub-sel{flex:0 1 420px;min-width:0;height:36px;padding:0 10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.subtabs button.sub-nav{width:36px;height:36px;padding:0;justify-content:center;font-size:20px;font-weight:600;flex:none}
+.subtabs button.sub-nav:disabled{opacity:.35;cursor:default}
+.subtabs .sub-info{font-size:12.5px;color:var(--muted);margin-left:6px}
 
 /* header */
 .head{display:flex;flex-wrap:wrap;gap:4px 24px;align-items:flex-end;justify-content:space-between}
@@ -533,6 +537,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   .subtabs::-webkit-scrollbar{display:none}
   .subtabs button{flex:0 0 auto;scroll-snap-align:start}
   .subtabs .sl{display:none}
+  .subtabs .sub-sel{flex:1 1 auto}
+  .subtabs .sub-info{display:none}
 }
 /* proposta: quatro tipos em grade 2x2 */
 .seg2.seg-full.muitos{display:grid;grid-template-columns:1fr 1fr;height:auto}
@@ -795,7 +801,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   const CAMPOS = ['tb','m2','tipo','cat','vista','final'];
   const TB_ORDEM = ['Studio','1 dorm','2 dorms','3 dorms','Loja'];
   const tbDe = tl => !tl ? null : /^studio/i.test(tl) ? 'Studio' : /^1 dorm/i.test(tl) ? '1 dorm' : /^2 dorm/i.test(tl) ? '2 dorms' : /^3 dorm/i.test(tl) ? '3 dorms' : /^loja/i.test(tl) ? 'Loja' : tl;
-  const GRUPO_NOME = {vitaurbana:'VitaUrbana'};
+  const GRUPO_NOME = {vitaurbana:'VitaUrbana', one:'Construtora One', jra:'Construtora JRA'};
   const nomeCurto = p => (NOMES[p.id] && NOMES[p.id].curto) || p.curto || p.nome;
   const plural = l => String(l||'').replace(/^Disponível/,'Disponíveis').replace(/^Reservada/,'Reservadas').replace(/^Vendida/,'Vendidas');
   const fmtBRL = v => 'R$ '+Math.round(v).toLocaleString('pt-BR');
@@ -852,7 +858,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const disp = nDisp(p);
       const b = document.createElement('button'); b.type='button'; b.className='tab'+(P && p.id===P.id?' on':'');
       b.innerHTML = '<b></b><small><i></i> <span></span></small>';
-      b.querySelector('b').textContent = nomeCurto(p); b.querySelector('i').textContent = disp+' disponíveis'; b.querySelector('span').textContent = '· '+p.unidades.length+' unidades';
+      b.querySelector('b').textContent = nomeCurto(p); b.querySelector('i').textContent = disp+(disp===1?' disponível':' disponíveis'); b.querySelector('span').textContent = '· '+p.unidades.length+' unidades';
       b.addEventListener('click', ()=>ir(p.id));
       nav.appendChild(b);
     }
@@ -861,8 +867,11 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const ps = grupos[g], disp = ps.reduce((a,p)=>a+nDisp(p),0);
       const b = document.createElement('button'); b.type='button'; b.className='tab grupo'+(P && P.grupo===g?' on':''); b.dataset.grupo = g;
       b.innerHTML = '<b></b><small><i></i> <span></span></small>';
-      b.querySelector('b').textContent = GRUPO_NOME[g] || g; b.querySelector('i').textContent = disp+' disponíveis'; b.querySelector('span').textContent = '· '+ps.length+' projetos';
-      b.addEventListener('click', ()=>{ if(P.grupo===g) return; const ult = store['grupo:'+g]; const alvo = ps.find(p=>p.id===ult) || ps.slice().sort((a,b)=>nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR'))[0]; ir(alvo.id); });
+      b.querySelector('b').textContent = GRUPO_NOME[g] || g; b.querySelector('i').textContent = disp+(disp===1?' disponível':' disponíveis'); b.querySelector('span').textContent = '· '+ps.length+' projetos';
+      b.addEventListener('click', ()=>{ if(P.grupo===g) return; const ult = store['grupo:'+g];
+        const tam = {}; ps.forEach(p => { tam[p.linha||''] = (tam[p.linha||''] || 0) + 1; });
+        const ord = (a,b) => ps.length > 16 ? ((a.linha==='Outros') - (b.linha==='Outros') || (tam[b.linha||''] - tam[a.linha||'']) || (a.linha||'').localeCompare(b.linha||'','pt-BR') || nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR')) : nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR');
+        const alvo = ps.find(p=>p.id===ult) || ps.slice().sort(ord)[0]; ir(alvo.id); });
       const slot = nav.querySelector('.tab-slot[data-grupo="'+g+'"]'); nav.replaceChild(b, slot);
     }
     nav.hidden = PROJS.length < 2;
@@ -871,7 +880,28 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const sub = $('subtabs'); sub.replaceChildren();
     const gp = P && P.grupo ? (grupos[P.grupo] || []) : [];
     sub.hidden = !gp.length;
-    if(gp.length){
+    if(gp.length > 16){   // grupo grande (ex.: Construtora One): lista por linha + anterior/próximo
+      const l = document.createElement('span'); l.className='sl'; l.textContent = (GRUPO_NOME[P.grupo] || P.grupo); sub.appendChild(l);
+      const sel = document.createElement('select'); sel.className = 'sub-sel'; sel.setAttribute('aria-label', 'Empreendimento');
+      const linhas = {};
+      for(const p of gp) (linhas[p.linha || ''] = linhas[p.linha || ''] || []).push(p);
+      const ordemL = Object.keys(linhas).sort((a,b) => (a==='Outros') - (b==='Outros') || linhas[b].length - linhas[a].length || a.localeCompare(b,'pt-BR'));
+      const ordem = [];
+      for(const lin of ordemL){
+        const og = lin ? document.createElement('optgroup') : sel; if(lin){ og.label = lin; sel.appendChild(og); }
+        for(const p of linhas[lin].slice().sort((a,b)=>nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR'))){
+          const o = document.createElement('option'); o.value = p.id; o.selected = p.id === P.id;
+          const d = nDisp(p); o.textContent = nomeCurto(p) + ' · ' + (d ? d + ' disp.' : 'esgotado');
+          og.appendChild(o); ordem.push(p.id);
+        }
+      }
+      sel.addEventListener('change', () => ir(sel.value));
+      const i = ordem.indexOf(P.id);
+      const nav2 = (txt, j, lbl) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sub-nav'; b.textContent = txt; b.title = lbl; b.setAttribute('aria-label', lbl); b.disabled = j < 0 || j >= ordem.length; b.addEventListener('click', () => ir(ordem[j])); return b; };
+      const info = document.createElement('span'); info.className = 'sub-info'; info.textContent = gp.length + ' empreendimentos · ' + gp.reduce((a,p)=>a+nDisp(p),0) + ' disponíveis';
+      sub.append(nav2('‹', i - 1, 'Empreendimento anterior'), sel, nav2('›', i + 1, 'Próximo empreendimento'), info);
+    }
+    else if(gp.length){
       const l = document.createElement('span'); l.className='sl'; l.textContent = (GRUPO_NOME[P.grupo] || P.grupo); sub.appendChild(l);
       for(const p of gp.slice().sort((a,b)=>nomeCurto(a).localeCompare(nomeCurto(b),'pt-BR'))){
         const d = nDisp(p);
@@ -1221,6 +1251,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   function setData(d){
     const antes = new Map(); if(P){ for(const u of U) antes.set(P.id+'|'+u.key, u.st); }
     DADOS = d || {projetos: []}; PROJS = DADOS.projetos || [];
+    for(const p of PROJS){ if(p.grupo && p.grupo_nome && !GRUPO_NOME[p.grupo]) GRUPO_NOME[p.grupo] = p.grupo_nome; }
     if(!PROJS.length) return;
     if(!booted){
       booted = true; loadProject(pickProject());
@@ -1259,7 +1290,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     del(k){ try{ localStorage.removeItem(k); }catch(e){} }
   };
   const K_COD='espelhos-codigo', K_CACHE='espelhos-cache', K_AV='espelhos-avisos';
-  const GRUPO_NOME = {vitaurbana: 'VitaUrbana'};
+  const GRUPO_NOME = {vitaurbana: 'VitaUrbana', one: 'Construtora One', jra: 'Construtora JRA'};
+  const GRUPO_RODIZIO = {vitaurbana: 10, one: 30, jra: 1};   // minutos, mais ou menos, entre duas leituras de cada projeto do grupo (1 = todo ciclo, sem rodízio)
   const curto = p => p.curto || p.nome;
   const minus = t => /^[A-Z]{2,}$/.test(t) ? t : String(t).toLowerCase();
   let codigo = LS.get(K_COD), dados = null, mudou = null, robo = {}, nivel = null, carregando = false, ultimoFull = 0, swReg = null, promptInst = null;
@@ -1290,10 +1322,11 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const em = r.info && r.info[pid] && r.info[pid].em;
     if(em) confEm(em, min <= 4 ? ' · ao vivo' : ' · robô parado');
     const pg = dados && dados.projetos.find(x=>x.id===pid);
-    if(pg && pg.grupo){   // lidos em rodízio: cada projeto é conferido a cada ~10 min
+    if(pg && pg.grupo && (GRUPO_RODIZIO[pg.grupo] || 10) > 2){   // lidos em rodízio: cada projeto é conferido a cada ~10 min (VitaUrbana) ou ~30 min (One)
       if(!em){ el.classList.add('atraso'); t.textContent = 'Aguardando robô'; el.title = 'O robô ainda não leu este projeto.'; return; }
       const minP = (Date.now() - new Date(em)) / 60000;
-      if(min <= 4 && minP <= 25){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(em)+'</span>'; el.title = 'Conferido no sistema às '+hora(em)+'. Os projetos da VitaUrbana são conferidos em rodízio, a cada 10 minutos mais ou menos.'; }
+      const cada = GRUPO_RODIZIO[pg.grupo] || 10;
+      if(min <= 4 && minP <= cada * 2.5){ el.classList.add('ok'); t.innerHTML = 'Ao vivo<span class="txt-long"> · '+hora(em)+'</span>'; el.title = 'Conferido no sistema às '+hora(em)+'. Os projetos da '+(GRUPO_NOME[pg.grupo] || pg.grupo)+' são conferidos em rodízio, a cada '+cada+' minutos mais ou menos.'; }
       else { el.classList.add('atraso'); t.textContent = 'Conferido '+quando(em); el.title = 'A última leitura deste projeto foi '+quando(em)+'. Os dados podem estar desatualizados.'; }
       return;
     }
@@ -1313,7 +1346,7 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
     const partes = soltos.concat(Object.keys(gr).map(g => gr[g]+' projetos da '+(GRUPO_NOME[g] || g)));
     return CFG.fonteNome[f] + (partes.length ? ' ('+partes.join(', ').replace(/, ([^,]*)$/, ' e $1')+')' : '');
   }
-  function aplicar(d){ dados = d; nivel = d.nivel || nivel; robo = d.robo || robo; ESPELHO.setData(d); try{ atualizarContador(); }catch(e){} novidade(); }
+  function aplicar(d){ dados = d; nivel = d.nivel || nivel; robo = d.robo || robo; for(const p of (d.projetos || [])){ if(p.grupo && p.grupo_nome && !GRUPO_NOME[p.grupo]) GRUPO_NOME[p.grupo] = p.grupo_nome; } ESPELHO.setData(d); try{ atualizarContador(); }catch(e){} novidade(); }
   function novidade(){
     const gs = dados ? [...new Set(dados.projetos.filter(p => p.grupo).map(p => p.grupo))] : [];
     for(const g of gs){ const k = 'espelhos-novo-' + g; if(LS.get(k)) continue; LS.set(k, '1');
