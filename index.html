@@ -1436,7 +1436,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
   let ppInfo = null, ppModo = 'fluxo', ppBtn = null;
   (function(){ const s = $('fx-am'); MESES.forEach((m, i) => { const o = document.createElement('option'); o.value = i + 1; o.textContent = m.charAt(0).toUpperCase() + m.slice(1); s.appendChild(o); }); s.value = '12'; })();
   // projetos com central de produto (ficha completa, página do cliente)
-  const CENTRAL = {'nex-bela-cintra': 'nex/'};
+  // projetos com ficha completa na central de produto
+  const CENTRAL = new Set(['nex-bela-cintra', 'consolacao', 'raj-mendes', 'raj-2']);
   let fcBtn = null;
   window.__onUnidade = u => {
     if(!ppBtn){
@@ -1450,9 +1451,9 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
       const info = document.querySelector('#sheet .info'); (info || $('sheet')).appendChild(acoes);
     }
     ppBtn.hidden = !(u && u.st === 'disponivel');
-    const pid = window.ESPELHO && ESPELHO.current(), base = u && pid && CENTRAL[pid];
-    fcBtn.hidden = !base;
-    if(base) fcBtn.href = base + '#u' + encodeURIComponent(u.key);
+    const pid = window.ESPELHO && ESPELHO.current(), tem = !!(u && pid && CENTRAL.has(pid));
+    fcBtn.hidden = !tem;
+    if(tem) fcBtn.href = 'nex/?p=' + encodeURIComponent(pid) + '#u' + encodeURIComponent(u.key);
   };
   function corretor(){ try{ return JSON.parse(LS.get(K_COR) || '{}'); }catch(e){ return {}; } }
   function unidadeAtual(){
