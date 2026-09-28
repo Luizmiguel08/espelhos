@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Central de produto · NEX One Bela Cintra</title>
+<title>Central de produto</title>
 <meta name="description" content="Ficha de cada unidade, busca e apresentação para o cliente.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#2447c9">
@@ -147,9 +147,10 @@ img{display:block;max-width:100%}
 @media (min-width:860px){.fx-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
 .bloco{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
 .bloco h3{font-size:19px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.bloco h3 .acao{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;border:0;background:transparent;color:var(--accent);padding:0}
+.bloco h3 .acao{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;border:0;background:transparent;color:var(--accent);padding:0;text-decoration:none;cursor:pointer}
+.bloco h3 .acoes-h{display:inline-flex;gap:14px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
 .bloco .leg{font-size:12.5px;color:var(--muted);margin-top:6px}
-.img-planta{width:100%;background:#fff;border-radius:10px;cursor:zoom-in;aspect-ratio:1300/1444;object-fit:contain}
+.img-planta{display:block;width:100%;height:auto;max-height:72vh;background:#fff;border-radius:10px;cursor:zoom-in;object-fit:contain}
 .img-vista{width:100%;border-radius:10px;cursor:zoom-in;aspect-ratio:2000/940;object-fit:cover;background:var(--surface-2)}
 .sem-vista{padding:18px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -179,6 +180,7 @@ img{display:block;max-width:100%}
 .fluxo .ln small{display:block;color:var(--muted);font-size:12px}
 .fluxo .tot{background:var(--surface-2);font-weight:600}
 .notas{font-size:12px;color:var(--muted);margin:8px 0 0;padding-left:16px}
+details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;color:var(--ink-2)}
 .nota-cor{font-size:12.5px;background:var(--warn-soft);color:var(--warn);border-radius:9px;padding:7px 9px;margin-top:8px}
 .parecidas{display:flex;gap:6px;flex-wrap:wrap}
 .parecidas button{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 9px;font-size:13px;text-align:left;line-height:1.25}
@@ -243,6 +245,29 @@ img{display:block;max-width:100%}
 .toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:11px;font-size:14px;z-index:90;max-width:calc(100vw - 32px);box-shadow:var(--shadow)}
 .carregando{padding:40px;text-align:center;color:var(--muted)}
 
+/* seletor de projeto */
+.projs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding-bottom:2px}
+.projs::-webkit-scrollbar{display:none}
+.proj{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 13px;font-weight:600;font-size:14px;white-space:nowrap;color:var(--ink-2)}
+.proj.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* planta real do andar com marcação */
+.andar-img{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.andar-img.larga{scrollbar-width:thin}
+.svg-img{width:100%;height:auto;display:block;background:#fff}
+.svg-img rect.alvo{fill:rgba(36,71,201,.30);stroke:#2447c9}
+.svg-img rect.st{opacity:.45;stroke:none}
+.svg-img .alvo-t{font-family:"IBM Plex Sans",sans-serif;font-weight:700;fill:#10205e;stroke:#fff;paint-order:stroke;stroke-linejoin:round}
+.svg-img .rua-img{font-family:"IBM Plex Sans",sans-serif;font-weight:600;fill:#777}
+/* faixa do espelho */
+.svg-andar.faixa .banda{fill:var(--surface-2)}
+.svg-andar.faixa .banda-t{font:700 16px "IBM Plex Sans",sans-serif;fill:var(--ink-2);letter-spacing:.05em}
+.svg-andar.faixa .seta{fill:var(--svg-alvo)}
+.svg-andar.faixa .faixa-t{font:700 22px "IBM Plex Sans",sans-serif;fill:var(--ink)}
+.svg-andar.faixa .c rect{stroke:var(--surface);stroke-width:1}
+
+.svg-andar.faixa .num-c{font:600 12px "IBM Plex Sans",sans-serif;fill:#1d2533;opacity:.75}.svg-andar.faixa .num-c.alvo{fill:#fff;opacity:1}
+.andar-img.faixa-w{background:transparent;padding-bottom:2px}
+
 </style>
 </head>
 <body>
@@ -263,6 +288,7 @@ img{display:block;max-width:100%}
 </div>
 
 <main class="wrap" id="app" hidden>
+  <nav class="projs" id="projs" aria-label="Projetos" hidden></nav>
   <section class="topo">
     <div class="topo-img"><img id="hero" alt="" fetchpriority="high"></div>
     <div class="topo-txt">
@@ -287,7 +313,7 @@ img{display:block;max-width:100%}
       <div class="fgrupo linha">
         <label>Andar a partir do <select id="f-andar"></select></label>
         <label>Preço até <input id="f-preco" inputmode="numeric" placeholder="Ex.: 450 mil"></label>
-        <span class="seg" id="f-base" role="group" aria-label="Preço usado"><button type="button" data-v="tabela" class="on">Tabela</button><button type="button" data-v="espelho">Espelho</button></span>
+        <span class="seg" id="f-base" role="group" aria-label="Preço usado"></span>
         <label class="ck"><input type="checkbox" id="f-disp" checked> Só disponíveis</label>
       </div>
     </div>
@@ -308,9 +334,10 @@ img{display:block;max-width:100%}
   </section>
 
   <section class="aba" id="aba-mat" hidden>
-    <div class="mat-sec"><h3>Book do cliente</h3>
+    <div class="mat-sec" id="book-sec"><h3>Book do cliente</h3>
       <div class="row"><a class="abtn" id="book-abrir" target="_blank" rel="noopener">Abrir o book (PDF)</a><button class="abtn" type="button" id="book-comp">Compartilhar o PDF</button></div>
     </div>
+    <div class="mat-sec" id="tour-sec" hidden><h3>Tours 360°</h3><div class="row" id="tours"></div></div>
     <div class="mat-sec"><h3>Perspectivas</h3><div class="galeria" id="g-renders"></div></div>
     <div class="mat-sec"><h3>Plantas humanizadas</h3><div class="galeria pl" id="g-plantas"></div></div>
     <div class="mat-sec"><h3>Simulações de vista</h3><div class="galeria" id="g-vistas"></div></div>
@@ -338,11 +365,7 @@ img{display:block;max-width:100%}
         <div class="campo"><span>Unidades na apresentação</span><div class="unid-sel" id="en-unids"></div>
           <div class="row" style="margin-top:4px"><select id="en-add" aria-label="Adicionar outra unidade"></select></div></div>
         <div class="campo"><span>Valores</span>
-          <div class="opcoes" id="en-val">
-            <label><input type="radio" name="val" value="tabela" checked><span>Tabela de setembro<small id="en-val-t">Fluxo completo da tabela da incorporadora</small></span></label>
-            <label><input type="radio" name="val" value="espelho"><span>Preço do espelho<small id="en-val-e">Mesmo fluxo, calculado sobre o preço do espelho</small></span></label>
-            <label><input type="radio" name="val" value="nao"><span>Não mostrar valores<small>O cliente vê planta, vista e o prédio</small></span></label>
-          </div></div>
+          <div class="opcoes" id="en-val"></div></div>
         <div class="duo">
           <label class="campo"><span>Seu nome</span><input id="en-cor" maxlength="40" placeholder="Corretor"></label>
           <label class="campo"><span>Seu WhatsApp</span><input id="en-tel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
@@ -365,7 +388,7 @@ img{display:block;max-width:100%}
 </div>
 
 <script>
-// versão 202609272026
+// versão 202609272201
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -382,6 +405,7 @@ window.NEX = (function(){
   };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const BRLc = v => 'R$ ' + (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   const m2 = v => (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' m²';
   const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   const mesAno = ym => { const [a, m] = String(ym).split('-').map(Number); return MESES[m - 1] + '/' + a; };
@@ -394,30 +418,47 @@ window.NEX = (function(){
     return j;
   }
 
-  // ---------- unidades (formato do espelho: [n, _, m2, cat, andar, col, situação, extras]) ----------
+  // ---------- unidades (formato do espelho: [n, tipo, m2, cat, andar, col, situação, extras]) ----------
   const andarN = a => (a === 'T' || a === 0 || a === '0') ? 0 : (+a || 0);
   const andarTxt = a => andarN(a) === 0 ? 'Térreo' : andarN(a) + 'º andar';
   const andarCurto = a => andarN(a) === 0 ? 'térreo' : andarN(a) + 'º';
   const areaU = u => (u[7] && u[7].a != null) ? +u[7].a : +u[2];
   const finalU = u => (+u[5]) + 1;
+  const pad2 = n => String(n).padStart(2, '0');
+  const normTipo = t => String(t || '').toUpperCase().replace(/\s+/g, ' ').trim();
+  // unidade normalizada a partir da linha do espelho
+  function un(u){
+    const col = +u[5], ex = (u[7] && typeof u[7] === 'object') ? u[7] : {};
+    return {n: String(u[0]), u, andar: u[4], an: andarN(u[4]), col, fin: col + 1, tipo: u[1] || null,
+            a: ex.a != null ? +ex.a : (u[2] != null ? +u[2] : null), cat: u[3], st: u[6], ex};
+  }
+  // unidade vinda do link do cliente: {n, andar, col, tipo, a, cat, livre}
+  const unLink = v => ({n: String(v.n), andar: v.andar, an: andarN(v.andar), col: +v.col, fin: (+v.col) + 1, tipo: v.tipo || null, a: v.a != null ? +v.a : null, cat: v.cat, st: v.livre ? 'disponivel' : 'indisponivel', ex: {}});
+  const tipoTxt = t => t ? normTipo(t).replace(/^TIPO\s*/, 'tipo ') : '';
+  const posTxt = x => x.tipo ? tipoTxt(x.tipo) : 'final ' + pad2(x.fin);
 
-  function face(P, fin){ return (P.faces || []).find(f => f.finais.indexOf(+fin) >= 0) || null; }
-  function planta(P, andar, fin){
-    const n = andarN(andar);
-    const ex = (P.plantas || []).find(p => p.finais.indexOf(+fin) >= 0 && (p.de == null || n >= p.de) && (p.ate == null || n <= p.ate));
+  function face(P, x){ return (P.faces || []).find(f => (f.finais && f.finais.indexOf(x.fin) >= 0) || (f.cols && f.cols.indexOf(x.col) >= 0)) || null; }
+  function planta(P, x){
+    const n = x.an, tipo = normTipo(x.tipo), ok = p => (p.de == null || n >= p.de) && (p.ate == null || n <= p.ate);
+    let ex = tipo ? (P.plantas || []).find(p => p.tipos && p.tipos.map(normTipo).indexOf(tipo) >= 0 && ok(p)) : null;
+    if(!ex) ex = (P.plantas || []).find(p => p.finais && p.finais.indexOf(x.fin) >= 0 && ok(p));
     if(ex) return {p: ex, exata: true};
-    const r = (P.planta_ref || {})[String(fin)];
-    const p = r && (P.plantas || []).find(x => x.id === r);
+    // referências: mesma tipologia em outro andar ou final (podem depender do andar)
+    const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
+    const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
+    const p = r && (P.plantas || []).find(q => q.id === r);
     return p ? {p, exata: false} : null;
   }
-  function vista(P, andar, fin){
-    const f = face(P, fin); if(!f) return null;
-    const n = andarN(andar);
-    const alts = Object.keys(f.vistas).map(Number).filter(a => a <= n).sort((a, b) => b - a);
+  function vista(P, x){
+    const f = face(P, x); if(!f) return null;
+    if(!f.vistas) return {face: f, img: null, andar: null, sem: true};
+    const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
     return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
   }
   const img = (P, id) => (P.pasta || '') + id + '.jpg';
+  const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
   const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
 
   // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
   function fluxo(T, preco){
@@ -446,9 +487,38 @@ window.NEX = (function(){
   }
   const cap = s => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
 
+  // ---------- opções de valores de uma unidade: tabela (com fluxo) e preços do espelho ----------
+  function precosCampos(P, E){
+    if(P.precos && P.precos.length) return P.precos;
+    if(E && E.precos_campos && E.precos_campos.length) return E.precos_campos;
+    return [{k: 'pp', label: 'Parcelado'}, {k: 'pv', label: 'À vista'}];
+  }
+  function opcoesPreco(P, E, T, x){
+    const out = [];
+    const chave = String(x.n).toUpperCase();
+    if(T && T.u){
+      const t = T.u[chave] != null ? T.u[chave] : T.u[x.n];
+      if(t != null){
+        if(T.tipo === 'lista'){
+          // tabela da incorporadora com o fluxo pronto por unidade: [total, parcela1, parcela2, ...] na ordem de T.colunas
+          if(Array.isArray(t)) out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t[0], linhas: (T.colunas || []).map((c, i) => ({t: c.t, v: BRLc(t[i + 1]), s: c.s || ''})).filter((l, i) => t[i + 1] != null && +t[i + 1] > 0)});
+          else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t.total, linhas: t.linhas || []});
+        }
+        else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t, linhas: linhasFluxo(T, +t)});
+      }
+    }
+    for(const c of precosCampos(P, E)){
+      const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null});
+    }
+    return out;
+  }
+
   // ---------- planta do andar (esquema) com a unidade em destaque e o sol do estudo de insolação ----------
-  function svgAndar(P, andar, fin, opt){
+  function svgAndar(P, x, opt){
     opt = opt || {};
+    if(!P.andar_tipo) return P.andar_img ? svgImagemAndar(P, x, opt) : svgFaixa(P, x, opt);
+    const andar = x.andar, fin = x.fin;
     const n = andarN(andar);
     const tipo = (P.andar_tipo && (n >= P.andar_tipo.alto.de ? P.andar_tipo.alto : P.andar_tipo.baixo)) || null;
     if(!tipo) return '';
@@ -489,6 +559,57 @@ window.NEX = (function(){
     }
     return s + '</svg>';
   }
+
+  // planta real do andar (imagem da incorporadora) com a unidade marcada por cima
+  function svgImagemAndar(P, x, opt){
+    const L = (P.andar_img || []).find(l => x.an >= l.de && x.an <= l.ate); if(!L) return svgFaixa(P, x, opt);
+    const sit = opt.sit || {};
+    const cor = st => st === 'disponivel' ? 'var(--svg-disp)' : (st === 'reservada' || st === 'processo_final') ? 'var(--svg-res)' : st === 'vendida' ? 'var(--svg-vend)' : null;
+    const rects = v => Array.isArray(v[0]) ? v : [v];            // uma unidade pode ter mais de um retângulo (planta em L)
+    const fs = Math.round(L.w / 34), sw = Math.max(4, Math.round(L.w / 300)), rx = Math.round(L.w / 250);
+    const larga = L.w / L.h > 2.2;                               // planta comprida: no celular fica rolável, com altura mínima
+    let s = '<svg class="svg-img" viewBox="0 0 ' + L.w + ' ' + L.h + '"' + (larga ? ' style="min-width:' + Math.round(200 * L.w / L.h) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na planta do andar"><image href="' + esc(img(P, L.img)) + '" x="0" y="0" width="' + L.w + '" height="' + L.h + '"/>';
+    let txt = '', cx0 = null;
+    for(const f of Object.keys(L.cells)){
+      const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
+      if(!alvo && !c) continue;
+      for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
+      if(alvo){ const [cx, cy, cw, ch] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch / 2 + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+    }
+    s += txt;
+    if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';
+    return '<div class="andar-img' + (larga ? ' larga' : '') + '"' + (cx0 != null ? ' data-cx="' + (cx0 / L.w).toFixed(3) + '"' : '') + '>' + s + '</svg></div>';
+  }
+  // planta do andar larga: rola até a unidade em destaque
+  function centrarAndar(root){
+    (root || document).querySelectorAll('.andar-img[data-cx]').forEach(el => {
+      if(el.scrollWidth <= el.clientWidth + 2) return;
+      el.scrollLeft = Math.max(0, (+el.dataset.cx) * el.scrollWidth - el.clientWidth / 2);
+    });
+  }
+  // faixa do espelho: a linha do andar com a unidade em destaque e os lados (vistas) marcados
+  function svgFaixa(P, x, opt){
+    const nc = P.colunas || 0; if(!nc) return '';
+    const sit = opt.sitCol || {}, existe = opt.existeCol || null, nums = opt.numCol || null;
+    const W = 40, H = 54, gap = 4, top = (P.faces || []).some(f => f.cols) ? 36 : 6;
+    const largura = nc * (W + gap) - gap, larga = nc > 12;
+    const cor = c => { if(c === x.col) return 'var(--svg-alvo)'; const st = sit[c]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)'; return 'var(--svg-cel)'; };
+    let s = '<svg class="svg-andar faixa" viewBox="-4 0 ' + (largura + 8) + ' ' + (top + H + 40) + '"' + (larga ? ' style="min-width:' + (nc * 30) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na linha do andar">';
+    for(const f of (P.faces || [])){
+      if(!f.cols || !f.cols.length) continue;
+      const a = Math.min.apply(null, f.cols), b = Math.max.apply(null, f.cols), x0 = a * (W + gap), x1 = b * (W + gap) + W;
+      s += '<rect x="' + x0 + '" y="4" width="' + (x1 - x0) + '" height="26" rx="5" class="banda"/><text x="' + ((x0 + x1) / 2) + '" y="22.5" text-anchor="middle" class="banda-t">' + esc(f.curto || f.nome).toUpperCase() + '</text>';
+    }
+    for(let c = 0; c < nc; c++){
+      const ok = !existe || existe.has(c), alvo = c === x.col, n = nums && nums[c];
+      s += '<g class="c' + (alvo ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + (c * (W + gap)) + '" y="' + top + '" width="' + W + '" height="' + H + '" rx="5" style="fill:' + (ok ? cor(c) : 'transparent') + '"/>' +
+           (ok && n != null && String(n).length <= 4 ? '<text x="' + (c * (W + gap) + W / 2) + '" y="' + (top + H / 2 + 5) + '" text-anchor="middle" class="num-c' + (alvo ? ' alvo' : '') + '">' + esc(n) + '</text>' : '') + '</g>';
+    }
+    const cx = x.col * (W + gap) + W / 2;
+    s += '<path d="M' + cx + ' ' + (top + H + 5) + ' l-8 11 h16 z" class="seta"/><text x="' + Math.max(50, Math.min(largura - 50, cx)) + '" y="' + (top + H + 36) + '" text-anchor="middle" class="faixa-t">' + esc(x.n) + '</text></svg>';
+    return larga ? '<div class="andar-img larga faixa-w" data-cx="' + ((cx + 4) / (largura + 8)).toFixed(3) + '">' + s + '</div>' : s;
+  }
+
 
   // ---------- visualizador de imagens (tocar para ampliar) ----------
   let vis = null;
@@ -549,30 +670,34 @@ window.NEX = (function(){
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
 
-  return {CFG, $, LS, esc, BRL, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, face, planta, vista, img, thumb, fluxo, linhasFluxo, svgAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
 })();
 
 (function(){
   'use strict';
-  const {$, LS, esc, BRL, m2, rpc, andarN, andarTxt, andarCurto, areaU, finalU, face, planta, vista, img, thumb, linhasFluxo, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
-  const PID = 'nex-bela-cintra';
-  const K_COD = 'espelhos-codigo', K_EP = 'espelhos-endpoint', K_COR = 'espelhos-corretor', K_DONO = 'espelhos-dono', K_AV = 'espelhos-avisos', K_FILTRO = 'nex-filtro';
+  const {$, LS, esc, BRL, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
+  // projetos com central (a ordem é a das abas)
+  const PROJETOS = [
+    {id: 'nex-bela-cintra', nome: 'NEX One Bela Cintra'},
+    {id: 'raj-mendes', nome: 'RAJ Mendes'},
+    {id: 'raj-2', nome: 'RAJ 2'},
+    {id: 'consolacao', nome: 'Nurban Consolação'},
+    {id: 'sumare', nome: 'Nurban Sumaré'}
+  ];
+  const K_COD = 'espelhos-codigo', K_EP = 'espelhos-endpoint', K_COR = 'espelhos-corretor', K_DONO = 'espelhos-dono', K_AV = 'espelhos-avisos', K_PROJ = 'nex-projeto', K_FILTRO = 'nex-filtro-';
   const BASE_URL = new URL('./', location.href).href;
   let codigo = LS.get(K_COD);
-  let P = null, E = null, T = null, versao = null, robo = null;
-  let U = [];                 // unidades enriquecidas
-  let porN = new Map();
-  let atual = null, baseFicha = 'tabela';
-  let mostrando = 30;
-  let links = [];
-  const F = Object.assign({tip: 'todas', face: 'todas', cat: 'todas', andar: 0, preco: null, base: 'tabela', disp: true, ord: 'preco'}, (() => { try{ return JSON.parse(LS.get(K_FILTRO) || '{}'); }catch(e){ return {}; } })());
+  let DADOS = null, versao = null;
+  const cacheP = {}, cacheT = {};
+  let PID = null, P = null, E = null, T = null;
+  let U = [], porN = new Map(), BASES = [];
+  let atual = null, baseFicha = null, mostrando = 30, links = [];
+  let F = {};
+  const disponiveis = new Set();   // projetos com página de apresentação publicada
 
   const ST = {disponivel: ['Disponível', 'disp'], reservada: ['Reservada', 'res'], processo_final: ['Pend. pagamento do ato', 'res'], vendida: ['Vendida', 'vend']};
-  const TIPS = [['todas', 'Todas'], ['20', '20 m²'], ['24', '23 a 26 m²'], ['28', '27 a 30 m²'], ['32', '31 m² ou mais']];
-  const tipDe = a => a < 22 ? '20' : a < 27 ? '24' : a < 31 ? '28' : '32';
-  const precoDe = (x, base) => (base || F.base) === 'espelho' ? x.pp : x.pt;
   const numPreco = s => { let t = String(s || '').trim(); if(!t) return null; const mil = /mil|k/i.test(t); t = t.replace(/,\d{1,2}$/, '').replace(/\D/g, ''); if(!t) return null; let n = +t; if(mil || n < 5000) n *= 1000; return n > 0 ? n : null; };
-  const pad2 = n => String(n).padStart(2, '0');
+  const nomeProj = id => (PROJETOS.find(p => p.id === id) || {}).nome || id;
 
   function dono(){
     let d = LS.get(K_DONO);
@@ -597,22 +722,55 @@ window.NEX = (function(){
 
   // ---------------- dados ----------------
   async function carregarEspelho(){
-    const d = await rpc('espelho', {p_codigo: codigo});
-    versao = d.versao; robo = (d.robo || {}).one || null;
-    E = (d.projetos || []).find(p => p.id === PID) || null;
-    montarUnidades();
+    DADOS = await rpc('espelho', {p_codigo: codigo});
+    versao = DADOS.versao;
+    if(PID){ E = (DADOS.projetos || []).find(p => p.id === PID) || null; montarUnidades(); }
+  }
+  async function carregarProjeto(id){
+    if(!cacheP[id]){
+      const r = await fetch('p/' + id + '.json', {cache: 'no-cache'}); if(!r.ok) throw new Error('sem_apresentacao');
+      cacheP[id] = await r.json();
+    }
+    if(!(id in cacheT)){
+      try{ const c = await rpc('catalogo_ler', {p_codigo: codigo, p_projeto: id}); cacheT[id] = (c && c.tabela) || null; }
+      catch(e){ if(/codigo/.test(e.message)) throw e; cacheT[id] = null; }
+    }
+    return {P: cacheP[id], T: cacheT[id]};
+  }
+  async function trocarProjeto(id, semHash){
+    if(!disponiveis.has(id)) id = [...disponiveis][0];
+    const r = await carregarProjeto(id);
+    PID = id; P = r.P; T = r.T; E = DADOS ? (DADOS.projetos || []).find(p => p.id === PID) || null : null;
+    LS.set(K_PROJ, id);
+    try{ const u = new URL(location.href); u.searchParams.set('p', id); if(!semHash) u.hash = ''; history.replaceState(null, '', u.pathname + u.search + u.hash); }catch(e){}
+    F = Object.assign({faixa: 'todas', face: 'todas', cat: 'todas', andar: 0, preco: null, base: null, disp: true, ord: 'preco'}, (() => { try{ return JSON.parse(LS.get(K_FILTRO + id) || '{}'); }catch(e){ return {}; } })());
+    mostrando = 30; atual = null;
+    renderProjs(); renderTopo(); montarFiltros(); montarUnidades();
+    if(!$('aba-mat').hidden) renderMaterial();
   }
   function montarUnidades(){
-    if(!E || !P) return;
+    if(!E || !P) { U = []; porN = new Map(); renderLista(); return; }
     U = (E.unidades || []).map(u => {
-      const fin = finalU(u), a = areaU(u), n = String(u[0]);
-      return {n, u, andar: u[4], an: andarN(u[4]), fin, a, cat: u[3], st: u[6], pp: (u[7] && u[7].pp) || null,
-              pt: T && T.u ? (T.u[n] || null) : null, face: face(P, fin), pl: planta(P, u[4], fin), tip: tipDe(a)};
+      const x = un(u);
+      x.face = face(P, x); x.pl = planta(P, x); x.faixa = faixaDe(P, x.a); x.ops = opcoesPreco(P, E, T, x);
+      return x;
     });
     porN = new Map(U.map(x => [x.n, x]));
-    atualizarVivo(); renderStats(); renderLista();
+    BASES = bases();
+    if(!F.base || !BASES.some(b => b.k === F.base)) F.base = (BASES[0] || {}).k || null;
+    montarBase(); atualizarVivo(); renderStats(); renderLista();
     if(atual && porN.get(atual.n) && !$('ficha').hidden){ atual = porN.get(atual.n); renderFicha(); }
   }
+  // chaves de preço presentes no projeto (tabela do catálogo e colunas do espelho)
+  function bases(){
+    const vistas = new Map();
+    for(const x of U) for(const o of x.ops) if(!vistas.has(o.k)) vistas.set(o.k, o.rotulo);
+    return [...vistas].map(([k, rotulo]) => ({k, rotulo}));
+  }
+  // preço na base escolhida; sem ela, o primeiro preço que a unidade tiver (o cartão diz qual é)
+  const opDe = (x, k) => x.ops.find(z => z.k === k) || null;
+  const opLista = x => opDe(x, F.base) || x.ops[0] || null;
+  const precoDe = (x, k) => { const o = k ? opDe(x, k) : opLista(x); return o ? o.total : null; };
   function atualizarVivo(){
     const q = E && (E.conferido_em || E.atualizado_em);
     const ok = q && (Date.now() - new Date(q).getTime()) < 20 * 60 * 1000;
@@ -621,78 +779,104 @@ window.NEX = (function(){
   }
   async function verificarVersao(){
     if(document.hidden || !codigo) return;
-    try{ const v = await rpc('espelho_versao', {p_codigo: codigo}); if(v.versao !== versao) await carregarEspelho(); else if(E){ atualizarVivo(); } }catch(e){}
+    try{ const v = await rpc('espelho_versao', {p_codigo: codigo}); if(v.versao !== versao) await carregarEspelho(); else if(E) atualizarVivo(); }catch(e){}
   }
 
   // ---------------- topo ----------------
+  function renderProjs(){
+    const box = $('projs'); box.innerHTML = '';
+    for(const p of PROJETOS){
+      if(!disponiveis.has(p.id)) continue;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'proj' + (p.id === PID ? ' on' : ''); b.textContent = p.nome;
+      b.setAttribute('aria-pressed', p.id === PID ? 'true' : 'false');
+      b.addEventListener('click', () => { if(p.id !== PID) trocarProjeto(p.id).catch(() => toast('Não consegui abrir agora.')); });
+      box.appendChild(b);
+    }
+    box.hidden = box.children.length < 2;
+  }
   function renderTopo(){
     document.title = 'Central de produto · ' + P.nome;
-    $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva da fachada do ' + P.nome;
-    $('p-nome').textContent = P.nome; $('p-end').textContent = P.endereco + ' · ' + P.entrega.replace('Previsão de término das obras: ', 'entrega prevista para ');
-    $('p-cham').textContent = P.chamada;
+    $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva do ' + P.nome;
+    $('p-nome').textContent = P.nome;
+    $('p-end').textContent = P.endereco + (P.entrega ? ' · ' + P.entrega : '');
+    $('p-cham').textContent = P.chamada || '';
   }
   function renderStats(){
     const box = $('p-stats'); box.innerHTML = '';
     const disp = U.filter(x => x.st === 'disponivel');
     const add = (b, s, sm) => { const d = document.createElement('div'); d.className = 'stat'; d.innerHTML = '<b></b><span></span>' + (sm ? '<small></small>' : ''); d.children[0].textContent = b; d.children[1].textContent = s; if(sm) d.children[2].textContent = sm; box.appendChild(d); };
     add(String(disp.length), 'disponíveis de ' + U.length, null);
-    for(const [k, lbl] of TIPS.slice(1)){
-      const g = disp.filter(x => x.tip === k); if(!g.length) continue;
+    for(const [, lbl] of (P.faixas || [])){
+      const g = disp.filter(x => x.faixa === lbl); if(!g.length) continue;
       const ps = g.map(x => precoDe(x)).filter(Boolean);
       add(String(g.length), lbl, ps.length ? 'a partir de R$ ' + Math.round(Math.min.apply(null, ps) / 1000).toLocaleString('pt-BR') + ' mil' : null);
     }
   }
 
   // ---------------- filtros e lista ----------------
+  function salvarFiltro(){ LS.set(K_FILTRO + PID, JSON.stringify(F)); }
   function chips(id, itens, chave){
     const box = $(id); box.innerHTML = '';
+    box.closest('.fgrupo').hidden = itens.length < 3;
     for(const [v, lbl] of itens){
       const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (String(F[chave]) === String(v) ? ' on' : ''); b.textContent = lbl;
       b.addEventListener('click', () => { F[chave] = v; salvarFiltro(); chips(id, itens, chave); mostrando = 30; renderLista(); });
       box.appendChild(b);
     }
   }
-  function salvarFiltro(){ LS.set(K_FILTRO, JSON.stringify(F)); }
   function montarFiltros(){
-    chips('f-tip', TIPS, 'tip');
-    chips('f-face', [['todas', 'Todas']].concat(P.faces.map(f => [f.id, f.nome.replace('Rua ', 'R. ')])), 'face');
-    chips('f-cat', [['todas', 'Todas'], ['R2V', 'R2V'], ['HMP', 'HMP'], ['HIS', 'HIS']], 'cat');
+    chips('f-tip', [['todas', 'Todas']].concat((P.faixas || []).map(f => [f[1], f[1]])), 'faixa');
+    chips('f-face', [['todas', 'Todas']].concat((P.faces || []).map(f => [f.id, f.curto || f.nome.replace('Rua ', 'R. ')])), 'face');
     const sel = $('f-andar'); sel.innerHTML = '';
-    for(let a = 0; a <= 20; a++){ const o = document.createElement('option'); o.value = a; o.textContent = a === 0 ? 'térreo' : a + 'º'; sel.appendChild(o); }
-    sel.value = F.andar || 0;
-    sel.addEventListener('change', () => { F.andar = +sel.value; salvarFiltro(); mostrando = 30; renderLista(); });
+    const ands = ((E && E.grade && E.grade.andares) || []).map(a => NEX.andarN(a)).sort((a, b) => a - b);
+    for(const a of (ands.length ? ands : [0])){ const o = document.createElement('option'); o.value = a; o.textContent = a === 0 ? 'térreo' : a + 'º'; sel.appendChild(o); }
+    sel.value = F.andar || ands[0] || 0;
     $('f-preco').value = F.preco ? (F.preco / 1000).toLocaleString('pt-BR') + ' mil' : '';
-    $('f-preco').addEventListener('input', () => { F.preco = numPreco($('f-preco').value); salvarFiltro(); mostrando = 30; renderLista(); });
     $('f-disp').checked = F.disp !== false;
-    $('f-disp').addEventListener('change', () => { F.disp = $('f-disp').checked; salvarFiltro(); mostrando = 30; renderLista(); });
     $('f-ord').value = F.ord || 'preco';
-    $('f-ord').addEventListener('change', () => { F.ord = $('f-ord').value; salvarFiltro(); renderLista(); });
-    document.querySelectorAll('#f-base button').forEach(b => {
-      b.classList.toggle('on', b.dataset.v === F.base);
-      b.addEventListener('click', () => { F.base = b.dataset.v; salvarFiltro(); document.querySelectorAll('#f-base button').forEach(x => x.classList.toggle('on', x === b)); renderStats(); renderLista(); });
-    });
-    $('mais').addEventListener('click', () => { mostrando += 30; renderLista(); });
   }
+  function montarCats(){
+    const cats = [...new Set(U.filter(x => x.st === 'disponivel' && x.cat).map(x => x.cat))].sort();
+    const nomes = (E && E.cat_nome) || {};
+    chips('f-cat', [['todas', 'Todas']].concat(cats.map(c => [c, nomes[c] || c])), 'cat');
+  }
+  function montarBase(){
+    const box = $('f-base'); box.innerHTML = '';
+    const bs = BASES; box.hidden = bs.length < 2;
+    for(const b of bs){
+      const el = document.createElement('button'); el.type = 'button'; el.dataset.v = b.k; el.textContent = b.rotulo; el.className = b.k === F.base ? 'on' : '';
+      el.addEventListener('click', () => { F.base = b.k; salvarFiltro(); montarBase(); renderStats(); renderLista(); });
+      box.appendChild(el);
+    }
+    montarCats();
+  }
+  $('f-andar').addEventListener('change', () => { F.andar = +$('f-andar').value; salvarFiltro(); mostrando = 30; renderLista(); });
+  $('f-preco').addEventListener('input', () => { F.preco = numPreco($('f-preco').value); salvarFiltro(); mostrando = 30; renderLista(); });
+  $('f-disp').addEventListener('change', () => { F.disp = $('f-disp').checked; salvarFiltro(); mostrando = 30; renderLista(); });
+  $('f-ord').addEventListener('change', () => { F.ord = $('f-ord').value; salvarFiltro(); renderLista(); });
+  $('mais').addEventListener('click', () => { mostrando += 30; renderLista(); });
+
   function filtrados(){
-    let r = U.filter(x => (!F.disp || x.st === 'disponivel')
-      && (F.tip === 'todas' || x.tip === F.tip)
+    const r = U.filter(x => (!F.disp || x.st === 'disponivel')
+      && (F.faixa === 'todas' || x.faixa === F.faixa)
       && (F.face === 'todas' || (x.face && x.face.id === F.face))
       && (F.cat === 'todas' || x.cat === F.cat)
       && x.an >= (F.andar || 0)
       && (!F.preco || (precoDe(x) != null && precoDe(x) <= F.preco)));
     const pr = x => precoDe(x) == null ? Infinity : precoDe(x);
     const ord = {
-      'preco': (a, b) => pr(a) - pr(b) || a.an - b.an,
+      'preco': (a, b) => pr(a) - pr(b) || a.an - b.an || a.col - b.col,
       'preco-': (a, b) => (pr(b) === Infinity ? -1 : pr(b)) - (pr(a) === Infinity ? -1 : pr(a)),
-      'andar-': (a, b) => b.an - a.an || a.fin - b.fin,
-      'm2-': (a, b) => b.a - a.a || pr(a) - pr(b),
-      'n': (a, b) => a.an - b.an || a.fin - b.fin
+      'andar-': (a, b) => b.an - a.an || a.col - b.col,
+      'm2-': (a, b) => (b.a || 0) - (a.a || 0) || pr(a) - pr(b),
+      'n': (a, b) => a.an - b.an || a.col - b.col
     }[F.ord || 'preco'];
     return r.sort(ord);
   }
   function renderLista(){
-    if(!U.length) return;
-    const r = filtrados(), box = $('lista');
+    const box = $('lista');
+    if(!U.length){ box.innerHTML = '<div class="carregando">Carregando unidades…</div>'; $('res-n').textContent = ''; $('mais').hidden = true; return; }
+    const r = filtrados();
     $('res-n').textContent = r.length ? r.length + (r.length === 1 ? ' unidade' : ' unidades') : 'Nenhuma unidade com esses filtros';
     box.innerHTML = '';
     if(!r.length){ box.innerHTML = '<div class="vazio">Nenhuma unidade com esses filtros. Tente tirar um deles.</div>'; $('mais').hidden = true; return; }
@@ -707,10 +891,11 @@ window.NEX = (function(){
     const im = b.querySelector('img'); if(x.pl) im.src = thumb(P, x.pl.p.id); else im.style.visibility = 'hidden';
     b.querySelector('.num').textContent = x.n;
     const p1 = b.querySelectorAll('.pill')[0]; p1.textContent = st[0]; p1.classList.add(st[1]);
-    b.querySelectorAll('.pill')[1].textContent = x.cat;
-    b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · final ' + pad2(x.fin) + ' · ' + m2(x.a);
-    b.querySelector('.preco').textContent = pr ? BRL(pr) : 'sem preço';
-    b.querySelector('.face').textContent = x.face ? 'vista ' + x.face.nome.replace('Rua ', 'R. ') : '';
+    const pc = b.querySelectorAll('.pill')[1]; if(x.cat && !/RESERVA|CONVERS/i.test(x.cat)) pc.textContent = x.cat; else pc.remove();
+    b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · ' + posTxt(x) + (x.a ? ' · ' + m2(x.a) : '');
+    const op = opLista(x);
+    b.querySelector('.preco').textContent = op ? BRL(op.total) + (op.k !== F.base && BASES.length > 1 ? ' · ' + op.rotulo.toLowerCase() : '') : 'sem preço';
+    b.querySelector('.face').textContent = x.face ? (x.face.lado || 'vista ' + x.face.nome.replace('Rua ', 'R. ')) : '';
     b.addEventListener('click', () => abrirFicha(x.n));
     return b;
   }
@@ -718,72 +903,113 @@ window.NEX = (function(){
   // ---------------- ficha da unidade ----------------
   function abrirFicha(n){
     const x = porN.get(String(n)); if(!x) return;
-    atual = x; baseFicha = F.base === 'espelho' && x.pp ? 'espelho' : 'tabela';
+    atual = x;
+    const fl = x.ops.filter(o => o.linhas && o.linhas.length);
+    baseFicha = (fl.find(o => o.k === F.base) || fl[0] || {}).k || null;
     renderFicha(); $('ficha').hidden = false; document.body.classList.add('sem-rolagem');
-    $('fi-corpo').scrollTop = 0;
-    try{ history.replaceState(null, '', '#u' + x.n); }catch(e){}
+    $('fi-corpo').scrollTop = 0; NEX.centrarAndar($('fi-corpo'));
+    try{ history.replaceState(null, '', location.pathname + location.search + '#u' + x.n); }catch(e){}
   }
   function fecharFicha(){ $('ficha').hidden = true; document.body.classList.remove('sem-rolagem'); try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
+  function blocoValores(x){
+    let h = '<h3>Valores';
+    const fl = x.ops.filter(o => o.linhas && o.linhas.length);
+    if(fl.length > 1) h += ' <span class="seg" id="fi-base" role="group" aria-label="Base do fluxo">' + fl.map(o => '<button type="button" data-v="' + esc(o.k) + '"' + (o.k === baseFicha ? ' class="on"' : '') + '>' + esc(o.rotulo) + '</button>').join('') + '</span>';
+    h += '</h3>';
+    if(!x.ops.length) return h + '<div class="sem-vista">Sem preço cadastrado para esta unidade.</div>';
+    const tab = x.ops.find(o => o.k === 'tabela');
+    h += '<div class="precos">' + x.ops.map(o => '<div><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' +
+      (tab && o !== tab && o.total < tab.total ? '<span>' + (Math.round((1 - o.total / tab.total) * 1000) / 10).toLocaleString('pt-BR') + '% abaixo da tabela</span>' : '') + '</div>').join('') + '</div>';
+    const o = fl.find(z => z.k === baseFicha) || fl[0];
+    if(o){
+      h += '<div class="fluxo">' + o.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
+           '<div class="ln tot"><span>Valor total</span><b>' + BRL(o.total) + '</b></div></div>';
+      if(o.k === 'tabela' && T && T.notas && T.notas.length) h += '<ul class="notas">' + T.notas.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>';
+    }
+    // condições do espelho (quando não há fluxo, ou como referência ao lado da tabela)
+    const cs = condEspelho(x);
+    if(cs.length) h += o ? '<details class="cond"><summary>Condições do espelho</summary><ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>'
+                         : '<ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
+    return h;
+  }
+  function condEspelho(x){
+    const tb = E && E.tabela, cs = [];
+    if(P.cond_texto) cs.push(P.cond_texto);
+    if(tb && tb.nome) cs.push('Tabela do espelho: ' + tb.nome + '.');
+    const conds = (tb && tb.condicoes) || [], ci = x && x.ex && x.ex.c != null ? conds[+x.ex.c] : null;
+    if(ci) cs.push('Fluxo desta unidade no espelho: ' + ci);
+    else for(const c of conds) cs.push(c);
+    if(E && E.nota && /R\$/.test(E.nota)) cs.push(E.nota);
+    return cs;
+  }
   function renderFicha(){
     const x = atual; if(!x) return;
     const st = ST[x.st] || [x.st, 'cat'];
-    $('fi-tit').innerHTML = 'Unidade ' + esc(x.n) + '<small>' + esc(andarTxt(x.andar)) + ' · final ' + pad2(x.fin) + ' · ' + esc(m2(x.a)) + '</small>';
-    const pl = x.pl, vi = vista(P, x.andar, x.fin);
+    $('fi-tit').innerHTML = 'Unidade ' + esc(x.n) + '<small>' + esc(andarTxt(x.andar)) + ' · ' + esc(posTxt(x)) + (x.a ? ' · ' + esc(m2(x.a)) : '') + '</small>';
+    const pl = x.pl, vi = vista(P, x);
     let h = '<div class="fx-grid"><div style="display:grid;gap:14px;min-width:0">';
     // planta
-    h += '<div class="bloco"><h3>Planta</h3>';
+    h += '<div class="bloco"><h3>Planta<span class="acoes-h">' + (pl && pl.p.decorado ? '<button class="acao" type="button" id="fi-dec">Ver decorado</button>' : '') +
+         (pl && pl.exata && pl.p.tour ? '<a class="acao" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour 360°</a>' : '') + '</span></h3>';
     if(pl){
-      h += '<img class="img-planta" id="fi-pl" src="' + esc(img(P, pl.p.id)) + '" alt="' + esc(pl.p.t) + '">';
-      h += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + ' · planta do final ' + esc(pl.p.finais.map(pad2).join(', ')) + ' (' + esc(pl.p.andares) + ')'
-            : 'Planta de referência: ' + esc(pl.p.t) + ', finais ' + esc(pl.p.finais.map(pad2).join(', ')) + '. Mesma tipologia; esta unidade pode ser espelhada.') +
-           (x.an === 0 ? ' No térreo a metragem é maior que nos andares: confirme a planta com a incorporadora.' : '') + '</div>';
-    } else h += '<div class="sem-vista">Planta não encontrada para este final.</div>';
+      h += '<img class="img-planta" id="fi-pl" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + ' alt="' + esc(pl.p.t) + '">';
+      const base = pl.p.finais ? 'final ' + pl.p.finais.map(pad2).join(', ') : (pl.p.tipos || []).map(t => NEX.tipoTxt(t)).join(', ');
+      h += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + (base ? ' · ' + esc(base) : '') + (pl.p.andares ? ' (' + esc(pl.p.andares) + ')' : '')
+            : 'Planta de referência: ' + esc(pl.p.t) + (base ? ', ' + esc(base) : '') + '. Mesma tipologia; esta unidade pode ser espelhada ou ter pequenas diferenças.') +
+           (P.nota_planta_andar && P.nota_planta_andar[String(x.an)] ? ' ' + esc(P.nota_planta_andar[String(x.an)]) : '') + '</div>';
+    } else h += '<div class="sem-vista">A incorporadora não divulgou a planta humanizada desta unidade.</div>';
     h += '</div>';
     // vista
-    h += '<div class="bloco"><h3>Vista do andar <button class="acao" type="button" id="fi-roof">Vistas do rooftop</button></h3>';
-    if(vi && vi.img){
-      h += '<img class="img-vista" id="fi-vi" src="' + esc(img(P, vi.img)) + '" alt="Simulação de vista">';
-      h += '<div class="leg">Simulação · sentido ' + esc(vi.face.nome) + ' · ' + vi.andar + 'º pavimento' + (vi.andar !== x.an ? ' (a mais próxima abaixo do ' + x.an + 'º)' : '') + '</div>';
-    } else h += '<div class="sem-vista">Andar baixo: a incorporadora não fez simulação de vista para este andar' + (vi ? ' na face ' + esc(vi.face.nome) : '') + '.</div>';
-    h += '</div></div><div style="display:grid;gap:14px;min-width:0">';
-    // resumo
-    h += '<div class="bloco"><div class="tags"><span class="pill ' + st[1] + '">' + esc(st[0]) + '</span><span class="pill cat">' + esc(x.cat) + '</span>' +
-         (x.face ? '<span class="pill cat">vista ' + esc(x.face.nome) + '</span>' : '') + '</div>';
-    // valores
-    const pt = x.pt, pp = x.pp;
-    h += '<h3>Valores <span class="seg" id="fi-base" role="group" aria-label="Base do fluxo"><button type="button" data-v="tabela"' + (baseFicha === 'tabela' ? ' class="on"' : '') + '>Tabela</button><button type="button" data-v="espelho"' + (baseFicha === 'espelho' ? ' class="on"' : '') + (pp ? '' : ' disabled') + '>Espelho</button></span></h3>';
-    h += '<div class="precos"><div><span>Tabela set/2026</span><b>' + (pt ? BRL(pt) : '—') + '</b></div><div><span>Espelho (portal)</span><b>' + (pp ? BRL(pp) : '—') + '</b>' +
-         (pp && pt ? '<span>' + (Math.round((1 - pp / pt) * 1000) / 10).toLocaleString('pt-BR') + '% abaixo da tabela</span>' : (pp ? '' : '<span>sem preço no espelho</span>')) + '</div></div>';
-    const base = baseFicha === 'espelho' && pp ? pp : pt;
-    if(base && T){
-      h += '<div class="fluxo">';
-      for(const l of linhasFluxo(T, base)) h += '<div class="ln"><span>' + esc(l.t) + '<small>' + esc(l.s) + '</small></span><b>' + esc(l.v) + '</b></div>';
-      h += '<div class="ln tot"><span>Valor total</span><b>' + BRL(base) + '</b></div></div>';
-      h += '<ul class="notas">' + (T.notas || []).map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>';
-    } else h += '<div class="sem-vista">Sem preço de tabela para esta unidade.</div>';
-    if(x.cat === 'HIS' || x.cat === 'HMP') h += '<div class="nota-cor">' + esc((P.cat_info || {})[x.cat] || '') + ' ' + esc(T && T.nota_corretor || '') + '</div>';
+    if((vi && !vi.sem) || (P.vistas_rooftop && P.vistas_rooftop.length)){
+      h += '<div class="bloco"><h3>' + (vi && !vi.sem ? 'Vista do andar' : 'Vistas') + '<span class="acoes-h">' + (P.vistas_rooftop && P.vistas_rooftop.length ? '<button class="acao" type="button" id="fi-roof">' + esc(P.vistas_rooftop_rotulo || 'Vistas do rooftop') + '</button>' : '') +
+           (P.tour_rooftop ? '<a class="acao" href="' + esc(P.tour_rooftop) + '" target="_blank" rel="noopener">360° do rooftop</a>' : '') + '</span></h3>';
+      if(vi && vi.img){
+        h += '<img class="img-vista" id="fi-vi" src="' + esc(img(P, vi.img)) + '" alt="Simulação de vista">';
+        h += '<div class="leg">Simulação · sentido ' + esc(vi.face.nome) + ' · ' + vi.andar + 'º pavimento' + (vi.andar !== x.an ? ' (a mais próxima abaixo do ' + x.an + 'º)' : '') + '</div>';
+      } else if(vi && !vi.sem){
+        h += '<div class="sem-vista">Andar baixo: a incorporadora não fez simulação de vista para este andar na face ' + esc(vi.face.nome) + '.</div>';
+      } else {
+        const r0 = P.vistas_rooftop[0];
+        h += '<img class="img-vista" id="fi-vr" src="' + esc(img(P, r0.id)) + '" alt="' + esc(r0.t) + '"><div class="leg">' + esc(r0.t) + '</div>';
+      }
+      h += '</div>';
+    }
+    h += '</div><div style="display:grid;gap:14px;min-width:0">';
+    // resumo + valores
+    h += '<div class="bloco"><div class="tags"><span class="pill ' + st[1] + '">' + esc(st[0]) + '</span>' + (x.cat && !/RESERVA|CONVERS/i.test(x.cat) ? '<span class="pill cat">' + esc(x.cat) + '</span>' : '') +
+         (x.face ? '<span class="pill cat">' + esc(x.face.lado || 'vista ' + x.face.nome) + '</span>' : '') + '</div>';
+    h += blocoValores(x);
+    const ci = (P.cat_info || {})[x.cat];
+    if(ci || (T && T.nota_corretor && /HIS|HMP/.test(x.cat || ''))) h += '<div class="nota-cor">' + esc(ci || '') + ' ' + esc(T && T.nota_corretor && /HIS|HMP/.test(x.cat || '') ? T.nota_corretor : '') + '</div>';
     h += '</div>';
     // onde fica
-    const doAndar = U.filter(z => z.an === x.an), existe = new Set(doAndar.map(z => z.fin)), sit = {};
-    for(const z of doAndar) sit[z.fin] = z.st;
-    h += '<div class="bloco"><h3>Onde fica no andar</h3>' + svgAndar(P, x.andar, x.fin, {existe, sit}) +
-         '<div class="legenda"><span><i style="background:var(--svg-alvo)"></i>esta unidade</span><span><i style="background:var(--svg-disp)"></i>disponível</span><span><i style="background:var(--svg-res)"></i>reservada</span><span><i style="background:var(--svg-vend)"></i>vendida</span><span><i style="background:#f6b73c;border-radius:50%"></i>sol ao longo do dia</span></div>' +
-         '<div class="leg">Sol conforme o estudo de insolação da incorporadora. ' + (x.face ? 'Janela voltada para a ' + esc(x.face.nome) + '.' : '') + '</div></div>';
+    const doAndar = U.filter(z => z.an === x.an), sitFin = {}, sitCol = {}, numCol = {};
+    for(const z of doAndar){ sitFin[z.fin] = z.st; sitCol[z.col] = z.st; numCol[z.col] = z.n; }
+    const svg = svgAndar(P, x, {existe: new Set(doAndar.map(z => z.fin)), sit: sitFin, existeCol: new Set(doAndar.map(z => z.col)), sitCol, numCol});
+    if(svg){
+      h += '<div class="bloco"><h3>Onde fica no andar</h3>' + svg +
+           '<div class="legenda"><span><i style="background:var(--svg-alvo)"></i>esta unidade</span><span><i style="background:var(--svg-disp)"></i>disponível</span><span><i style="background:var(--svg-res)"></i>reservada</span><span><i style="background:var(--svg-vend)"></i>vendida</span>' + (P.andar_tipo ? '<span><i style="background:#f6b73c;border-radius:50%"></i>sol ao longo do dia</span>' : '') + '</div>' +
+           '<div class="leg">' + esc(P.andar_legenda || (P.andar_tipo ? 'Sol conforme o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar, como no espelho de vendas.')) + (x.face ? ' ' + esc(x.face.frase || ('Janela voltada para a ' + x.face.nome + '.')) : '') + '</div></div>';
+    }
     // parecidas
     const par = pl ? U.filter(z => z.n !== x.n && z.st === 'disponivel' && z.pl && z.pl.p.id === pl.p.id).sort((a, b) => Math.abs(a.an - x.an) - Math.abs(b.an - x.an)).slice(0, 12) : [];
-    h += '<div class="bloco"><h3>Mesma planta, disponíveis</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + ' · ' + (precoDe(z, baseFicha) ? BRL(precoDe(z, baseFicha)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">Nenhuma outra disponível com esta planta.</div>') + '</div>';
+    if(pl) h += '<div class="bloco"><h3>Mesma planta, disponíveis</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">Nenhuma outra disponível com esta planta.</div>') + '</div>';
     h += '</div></div>';
     $('fi-corpo').innerHTML = h;
-    // eventos
-    const plImg = $('fi-pl'); if(plImg) plImg.addEventListener('click', () => visualizador([{src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
+    requestAnimationFrame(() => NEX.centrarAndar($('fi-corpo')));
+    const plImg = $('fi-pl'); if(plImg) plImg.addEventListener('click', () => visualizador([{src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}] : []), 0, {acoes: acoesImg}));
+    const dec = $('fi-dec'); if(dec) dec.addEventListener('click', () => visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}, {src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
     const viImg = $('fi-vi'); if(viImg) viImg.addEventListener('click', () => visualizador([{src: img(P, vi.img), t: 'Vista · ' + vi.face.nome + ' · ' + vi.andar + 'º pavimento', nome: 'vista-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
-    $('fi-roof').addEventListener('click', () => visualizador(P.vistas_rooftop.map(v => ({src: img(P, v.id), t: v.t, nome: v.id + '.jpg'})), 0, {acoes: acoesImg}));
-    document.querySelectorAll('#fi-base button').forEach(b => b.addEventListener('click', () => { if(b.disabled) return; baseFicha = b.dataset.v; renderFicha(); }));
+    const roofs = () => visualizador(P.vistas_rooftop.map(v => ({src: img(P, v.id), t: v.t, nome: v.id + '.jpg'})), 0, {acoes: acoesImg});
+    const rf = $('fi-roof'); if(rf) rf.addEventListener('click', roofs);
+    const vr = $('fi-vr'); if(vr) vr.addEventListener('click', roofs);
+    document.querySelectorAll('#fi-base button').forEach(b => b.addEventListener('click', () => { baseFicha = b.dataset.v; renderFicha(); }));
     document.querySelectorAll('#fi-corpo .parecidas button').forEach(b => b.addEventListener('click', () => abrirFicha(b.dataset.n)));
   }
   function imagensDaUnidade(x){
-    const l = []; const pl = x.pl, vi = vista(P, x.andar, x.fin);
+    const l = []; const pl = x.pl, vi = vista(P, x);
     if(pl) l.push({src: img(P, pl.p.id), nome: 'planta-' + x.n + '.jpg'});
+    if(pl && pl.p.decorado) l.push({src: img(P, pl.p.decorado), nome: 'decorado-' + x.n + '.jpg'});
     if(vi && vi.img) l.push({src: img(P, vi.img), nome: 'vista-' + x.n + '.jpg'});
     l.push({src: img(P, P.hero), nome: 'fachada.jpg'});
     return l;
@@ -796,7 +1022,7 @@ window.NEX = (function(){
   }
   $('fi-imgs').addEventListener('click', async () => {
     if(!atual) return;
-    try{ const r = await compartilhar(imagensDaUnidade(atual), 'Unidade ' + atual.n + ' · ' + P.nome); if(r === 'baixado') toast('Imagens baixadas: planta, vista e fachada.'); }
+    try{ const r = await compartilhar(imagensDaUnidade(atual), 'Unidade ' + atual.n + ' · ' + P.nome); if(r === 'baixado') toast('Imagens baixadas.'); }
     catch(e){ toast('Não consegui compartilhar agora.'); }
   });
   $('fi-enviar').addEventListener('click', () => { if(atual) abrirEnvio([atual.n]); });
@@ -805,20 +1031,40 @@ window.NEX = (function(){
   document.addEventListener('keydown', e => { if(e.key !== 'Escape') return; const v = document.querySelector('.vis'); if(v && !v.hidden) return; if(!$('envio').hidden) $('envio').hidden = true; else if(!$('ficha').hidden) fecharFicha(); });
 
   // ---------------- enviar ao cliente ----------------
-  let envUnids = [];
+  let envUnids = [], envProj = null;
   function abrirEnvio(ns){
-    envUnids = ns.slice(0, 3);
+    envUnids = ns.slice(0, 3); envProj = PID;
     const c = corretor(); $('en-cor').value = c.nome || ''; $('en-tel').value = c.tel || '';
     $('en-form').hidden = false; $('en-pronto').hidden = true; $('en-erro').textContent = '';
     $('en-cli').value = '';
     renderEnvUnids(); $('envio').hidden = false; document.body.classList.add('sem-rolagem');
     avisoEnvio(); setTimeout(() => $('en-cli').focus(), 60);
   }
+  function renderValoresEnvio(){
+    const box = $('en-val'), antes = (box.querySelector('input:checked') || {}).value;
+    const xs = envUnids.map(n => porN.get(n)).filter(Boolean);
+    const x0 = xs[0]; box.innerHTML = '';
+    const ops = x0 ? x0.ops : [];
+    let marcado = false;
+    const add = (v, titulo, sub, ok) => {
+      const l = document.createElement('label'); l.innerHTML = '<input type="radio" name="val"><span></span>';
+      const i = l.querySelector('input'); i.value = v; i.disabled = !ok;
+      l.querySelector('span').innerHTML = esc(titulo) + '<small>' + esc(sub) + '</small>';
+      box.appendChild(l); return i;
+    };
+    for(const o of ops){
+      const todos = xs.every(z => z.ops.some(q => q.k === o.k));
+      const i = add(o.k, o.rotulo, (o.linhas && o.linhas.length ? 'Fluxo completo · ' : 'Valor · ') + BRL(o.total) + (xs.length > 1 ? ' (1ª unidade)' : ''), todos);
+      if(todos && !marcado && (o.k === antes || (!antes && o.linhas && o.linhas.length))){ i.checked = true; marcado = true; }
+    }
+    const nao = add('nao', 'Não mostrar valores', 'O cliente vê planta, vista e o prédio', true);
+    if(!marcado){ const prim = box.querySelector('input:not(:disabled)'); if(antes === 'nao') nao.checked = true; else if(prim) prim.checked = true; }
+  }
   function renderEnvUnids(){
     const box = $('en-unids'); box.innerHTML = '';
     for(const n of envUnids){
       const x = porN.get(n); const s = document.createElement('span'); s.className = 'u';
-      s.textContent = n + ' · ' + (x ? m2(x.a) + ' · ' + andarCurto(x.andar) : '');
+      s.textContent = n + ' · ' + (x ? (x.a ? m2(x.a) + ' · ' : '') + andarCurto(x.andar) : '');
       if(envUnids.length > 1){ const b = document.createElement('button'); b.type = 'button'; b.textContent = '×'; b.setAttribute('aria-label', 'Tirar a unidade ' + n); b.onclick = () => { envUnids = envUnids.filter(z => z !== n); renderEnvUnids(); }; s.appendChild(b); }
       box.appendChild(s);
     }
@@ -829,14 +1075,10 @@ window.NEX = (function(){
     const disp = U.filter(z => z.st === 'disponivel' && envUnids.indexOf(z.n) < 0);
     const mesma = x0 && x0.pl ? disp.filter(z => z.pl && z.pl.p.id === x0.pl.p.id) : [];
     const outras = disp.filter(z => mesma.indexOf(z) < 0);
-    const grupo = (lbl, arr) => { if(!arr.length) return; const g = document.createElement('optgroup'); g.label = lbl; for(const z of arr){ const o = document.createElement('option'); o.value = z.n; o.textContent = z.n + ' · ' + m2(z.a) + ' · ' + andarCurto(z.andar) + (z.pt ? ' · ' + BRL(z.pt) : ''); g.appendChild(o); } sel.appendChild(g); };
+    const grupo = (lbl, arr) => { if(!arr.length) return; const g = document.createElement('optgroup'); g.label = lbl; for(const z of arr){ const o = document.createElement('option'); o.value = z.n; o.textContent = z.n + ' · ' + (z.a ? m2(z.a) + ' · ' : '') + andarCurto(z.andar) + (precoDe(z) ? ' · ' + BRL(precoDe(z)) : ''); g.appendChild(o); } sel.appendChild(g); };
     grupo('Mesma planta', mesma.sort((a, b) => a.an - b.an));
-    grupo('Outras disponíveis', outras.sort((a, b) => a.an - b.an || a.fin - b.fin));
-    const x = porN.get(envUnids[0]);
-    $('en-val-t').textContent = x && x.pt ? 'Fluxo completo da tabela · ' + BRL(x.pt) + (envUnids.length > 1 ? ' (1ª unidade)' : '') : 'Sem preço de tabela';
-    $('en-val-e').textContent = x && x.pp ? 'Mesmo fluxo sobre o preço do espelho · ' + BRL(x.pp) : 'Sem preço no espelho';
-    document.querySelector('#en-val input[value="espelho"]').disabled = !envUnids.every(n => (porN.get(n) || {}).pp);
-    if(document.querySelector('#en-val input[value="espelho"]').disabled && document.querySelector('#en-val input[value="espelho"]').checked) document.querySelector('#en-val input[value="tabela"]').checked = true;
+    grupo('Outras disponíveis', outras.sort((a, b) => a.an - b.an || a.col - b.col));
+    renderValoresEnvio();
   }
   $('en-add').addEventListener('change', () => { const v = $('en-add').value; if(v && envUnids.length < 3){ envUnids.push(v); renderEnvUnids(); } });
   async function avisoEnvio(){
@@ -846,26 +1088,30 @@ window.NEX = (function(){
     av.innerHTML = suportaPush() ? 'Para receber o aviso quando o cliente abrir, ligue os avisos neste aparelho. <button type="button" class="abtn" id="en-ligar" style="margin-top:6px">Ligar avisos</button>' : esc(motivoSemPush());
     const b = $('en-ligar'); if(b) b.onclick = async () => { b.disabled = true; try{ await ligarAvisos(); av.className = 'aviso good'; av.textContent = 'Avisos ligados neste aparelho.'; }catch(e){ av.className = 'aviso bad'; av.textContent = e.message; } };
   }
-  function valoresPara(n, modo){
-    const x = porN.get(n); if(!x || modo === 'nao') return null;
-    const base = modo === 'espelho' ? x.pp : x.pt; if(!base) return null;
-    return {base: modo, rotulo: modo === 'espelho' ? 'Condição atual' : String(T.nome || 'Tabela de vendas').split(' (')[0],
-            total: base, linhas: linhasFluxo(T, base), nota: (T.notas || []).join(' ')};
+  function valoresPara(n, k){
+    const x = porN.get(n); if(!x || k === 'nao') return null;
+    const o = x.ops.find(z => z.k === k); if(!o) return null;
+    const fluxo = !!(o.linhas && o.linhas.length);
+    const linhas = fluxo ? o.linhas : [{t: o.rotulo.replace(/\s*\(.*\)$/, ''), v: BRL(o.total), s: ''}];
+    // o cliente vê o nome da tabela; um fluxo sobre o preço do espelho aparece como "Condição atual"
+    const rotulo = o.k === 'tabela' ? String((T && T.nome) || 'Tabela de vendas').split(' (')[0] : fluxo ? 'Condição atual' : '';
+    const nota = fluxo && T && T.notas && T.notas.length ? T.notas.join(' ') : (P.nota_valores || 'Valor na data do envio, sujeito a alteração e à disponibilidade da unidade.');
+    return {base: k, rotulo, total: o.total, linhas, nota};
   }
   $('en-form').addEventListener('submit', async e => {
     e.preventDefault();
     const cli = $('en-cli').value.trim(); if(!cli){ $('en-erro').textContent = 'Digite o nome do cliente.'; return; }
-    const modo = (document.querySelector('#en-val input:checked') || {}).value || 'tabela';
+    const modo = (document.querySelector('#en-val input:checked') || {}).value || 'nao';
     const nome = $('en-cor').value.trim(), tel = $('en-tel').value.trim();
     LS.set(K_COR, JSON.stringify(Object.assign(corretor(), {nome, tel})));
     $('en-criar').disabled = true; $('en-erro').textContent = '';
     try{
       const ep = await meuEndpoint().catch(() => null);
-      const r = await rpc('link_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_projeto: PID, p_cliente: cli, p_corretor: nome, p_whats: tel,
+      const r = await rpc('link_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_projeto: envProj, p_cliente: cli, p_corretor: nome, p_whats: tel,
         p_unidades: envUnids.map(n => ({n, valores: valoresPara(n, modo)}))});
-      const url = BASE_URL + 'ver.html?l=' + encodeURIComponent(r.id);
+      const url = BASE_URL + (P.pagina || 'ver.html') + '?l=' + encodeURIComponent(r.id);
       const x = porN.get(envUnids[0]);
-      const txt = 'Olá, ' + cli.split(' ')[0] + '! Separei a apresentação do ' + P.nome + ' com ' + (envUnids.length === 1 ? 'a unidade ' + envUnids[0] + ' (' + m2(x.a) + ', ' + andarTxt(x.andar).toLowerCase() + ')' : 'as unidades ' + envUnids.join(', ')) + ' para você: ' + url;
+      const txt = 'Olá, ' + cli.split(' ')[0] + '! Separei a apresentação do ' + P.nome + ' com ' + (envUnids.length === 1 ? 'a unidade ' + envUnids[0] + ' (' + (x.a ? m2(x.a) + ', ' : '') + andarTxt(x.andar).toLowerCase() + ')' : 'as unidades ' + envUnids.join(', ')) + ' para você: ' + url;
       $('en-url').textContent = url;
       $('en-wa').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
       $('en-ver').href = url + '&previa=1';
@@ -882,7 +1128,7 @@ window.NEX = (function(){
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const suportaPush = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-  const motivoSemPush = () => isIOS && !standalone() ? 'No iPhone, os avisos chegam só pelo app instalado na tela de início. Por aqui, acompanhe em "Links enviados".' : 'Este navegador não aceita avisos. Acompanhe em "Links enviados".';
+  const motivoSemPush = () => isIOS && !standalone() ? 'No iPhone, os avisos chegam só pelo app instalado na tela de início (botão "Ficha completa" dentro do app). Por aqui, acompanhe em "Links enviados".' : 'Este navegador não aceita avisos. Acompanhe em "Links enviados".';
   function b64u(s){ const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); }
   async function reg(){
     if(!('serviceWorker' in navigator)) return null;
@@ -929,7 +1175,7 @@ window.NEX = (function(){
     if(!links.length){ box.innerHTML = '<div class="vazio">Nenhum link enviado deste aparelho ainda. Abra uma unidade e toque em “Enviar ao cliente”.</div>'; return; }
     for(const l of links){
       const d = document.createElement('div'); d.className = 'lk';
-      const url = BASE_URL + 'ver.html?l=' + encodeURIComponent(l.id);
+      const url = BASE_URL + ((cacheP[l.projeto] && cacheP[l.projeto].pagina) || 'ver.html') + '?l=' + encodeURIComponent(l.id);
       const vist = Object.keys(l.vistos || {}).filter(k => EV[k]).map(k => EV[k] + (l.vistos[k] > 1 ? ' ' + l.vistos[k] + '×' : ''));
       d.innerHTML = '<div class="l1"><b></b><span class="st"></span></div><div class="lkl un"></div><div class="lkl vi"></div><div class="row"></div>';
       d.querySelector('b').textContent = l.cliente;
@@ -937,10 +1183,10 @@ window.NEX = (function(){
       if(l.expirado){ st.textContent = 'expirado'; st.className = 'frio'; }
       else if(l.aberturas > 0){ st.textContent = 'abriu ' + l.aberturas + '× · ' + quando(l.ultimo_acesso); st.className = 'quente'; }
       else { st.textContent = 'ainda não abriu'; st.className = 'frio'; }
-      d.querySelector('.un').textContent = (l.unidades || []).length === 1 ? 'Unidade ' + l.unidades[0] + ' · enviado ' + quando(l.criado_em) : 'Unidades ' + (l.unidades || []).join(', ') + ' · enviado ' + quando(l.criado_em);
+      d.querySelector('.un').textContent = nomeProj(l.projeto) + ' · ' + ((l.unidades || []).length === 1 ? 'unidade ' + l.unidades[0] : 'unidades ' + (l.unidades || []).join(', ')) + ' · enviado ' + quando(l.criado_em);
       d.querySelector('.vi').textContent = vist.length ? 'Viu: ' + vist.join(', ') : (l.aberturas ? 'Abriu, sem detalhes ainda.' : '');
       const row = d.querySelector('.row');
-      const bt = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'abtn' + (cls ? ' ' + cls : ''); b.textContent = t; b.onclick = fn; row.appendChild(b); return b; };
+      const bt = (t, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'abtn'; b.textContent = t; b.onclick = fn; row.appendChild(b); return b; };
       bt('Copiar link', async () => { try{ await navigator.clipboard.writeText(url); toast('Link copiado.'); }catch(e){ toast(url); } });
       bt('Ver como o cliente', () => window.open(url + '&previa=1', '_blank', 'noopener'));
       bt('Apagar', async () => { if(!confirm('Apagar o link de ' + l.cliente + '? Ele deixa de abrir para o cliente.')) return; try{ await rpc('link_apagar', {p_codigo: codigo, p_dono: dono(), p_id: l.id}); links = links.filter(z => z.id !== l.id); renderLinks(); }catch(e){ toast('Não consegui apagar agora.'); } });
@@ -950,8 +1196,9 @@ window.NEX = (function(){
   $('av-ligar').addEventListener('click', async () => { $('av-ligar').disabled = true; try{ await ligarAvisos(); toast('Avisos ligados.'); }catch(e){ toast(e.message); } finally{ $('av-ligar').disabled = false; } });
 
   // ---------------- material ----------------
-  function galeria(id, itens, opt){
+  function galeria(id, itens){
     const box = $(id); box.innerHTML = '';
+    box.closest('.mat-sec').hidden = !itens.length;
     itens.forEach((it, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy"><span></span>';
       b.querySelector('img').src = it.th; b.querySelector('span').textContent = it.t;
@@ -960,15 +1207,21 @@ window.NEX = (function(){
     });
   }
   function renderMaterial(){
-    galeria('g-renders', P.renders.map(r => ({src: img(P, r.id), th: thumb(P, r.id), t: r.t, nome: r.id + '.jpg'})));
-    galeria('g-plantas', P.plantas.map(p => ({src: img(P, p.id), th: thumb(P, p.id), t: p.t + ' · final ' + p.finais.map(pad2).join(', '), nome: p.id + '.jpg'})));
+    galeria('g-renders', (P.renders || []).map(r => ({src: img(P, r.id), th: thumb(P, r.id), t: r.t, nome: r.id + '.jpg'})));
+    galeria('g-plantas', (P.plantas || []).map(p => ({src: img(P, p.id), th: thumb(P, p.id), t: p.t + (p.finais ? ' · final ' + p.finais.map(pad2).join(', ') : p.tipos ? ' · ' + p.tipos.map(t => NEX.tipoTxt(t)).join(', ') : ''), nome: p.id + '.jpg'})));
     const vs = [];
-    for(const f of P.faces) for(const a of Object.keys(f.vistas).map(Number).sort((a, b) => a - b)) vs.push({src: img(P, f.vistas[a]), th: thumb(P, f.vistas[a]), t: f.nome.replace('Rua ', 'R. ') + ' · ' + a + 'º pav.', nome: f.vistas[a] + '.jpg'});
-    for(const v of P.vistas_rooftop) vs.push({src: img(P, v.id), th: thumb(P, v.id), t: v.t, nome: v.id + '.jpg'});
+    for(const f of (P.faces || [])) if(f.vistas) for(const a of Object.keys(f.vistas).map(Number).sort((a, b) => a - b)) vs.push({src: img(P, f.vistas[a]), th: thumb(P, f.vistas[a]), t: f.nome.replace('Rua ', 'R. ') + ' · ' + a + 'º pav.', nome: f.vistas[a] + '.jpg'});
+    for(const v of (P.vistas_rooftop || [])) vs.push({src: img(P, v.id), th: thumb(P, v.id), t: v.t, nome: v.id + '.jpg'});
     galeria('g-vistas', vs);
-    galeria('g-lazer', P.lazer.map(l => ({src: img(P, l.planta), th: thumb(P, l.planta), t: l.onde, nome: l.planta + '.jpg'})));
-    $('book-abrir').href = (P.pasta || '') + P.book;
-    $('book-comp').onclick = async () => { try{ const r = await compartilhar([{src: (P.pasta || '') + P.book, nome: 'Book ' + P.nome + '.pdf'}], P.nome); if(r === 'baixado') toast('PDF baixado.'); }catch(e){ toast('Não consegui compartilhar agora.'); } };
+    galeria('g-lazer', (P.lazer || []).filter(l => l.planta).map(l => ({src: img(P, l.planta), th: thumb(P, l.planta), t: l.onde, nome: l.planta + '.jpg'})));
+    const tours = (P.plantas || []).filter(p => p.tour).map(p => ({t: p.t, u: p.tour})).concat(P.tour_rooftop ? [{t: 'Rooftop', u: P.tour_rooftop}] : []);
+    $('tour-sec').hidden = !tours.length;
+    $('tours').innerHTML = tours.map(z => '<a class="abtn" target="_blank" rel="noopener" href="' + esc(z.u) + '">' + esc(z.t) + '</a>').join('');
+    const temBook = !!P.book; $('book-sec').hidden = !temBook;
+    if(temBook){
+      $('book-abrir').href = (P.pasta || '') + P.book;
+      $('book-comp').onclick = async () => { try{ const r = await compartilhar([{src: (P.pasta || '') + P.book, nome: 'Book ' + P.nome + '.pdf'}], P.nome); if(r === 'baixado') toast('PDF baixado.'); }catch(e){ toast('Não consegui compartilhar agora.'); } };
+    }
   }
 
   // ---------------- abas e navegação ----------------
@@ -976,14 +1229,14 @@ window.NEX = (function(){
     document.querySelectorAll('.abas button').forEach(b => { const on = b.dataset.aba === nome; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     $('aba-unid').hidden = nome !== 'unid'; $('aba-links').hidden = nome !== 'links'; $('aba-mat').hidden = nome !== 'mat';
     if(nome === 'links'){ renderAvisoLinks(); carregarLinks(); }
-    if(nome === 'mat' && !$('g-renders').children.length) renderMaterial();
+    if(nome === 'mat') renderMaterial();
   }
-  document.querySelectorAll('.abas button').forEach(b => b.addEventListener('click', () => { aba(b.dataset.aba); try{ history.replaceState(null, '', b.dataset.aba === 'unid' ? location.pathname : '#' + b.dataset.aba); }catch(e){} }));
+  document.querySelectorAll('.abas button').forEach(b => b.addEventListener('click', () => { aba(b.dataset.aba); try{ history.replaceState(null, '', location.pathname + location.search + (b.dataset.aba === 'unid' ? '' : '#' + b.dataset.aba)); }catch(e){} }));
   function irPara(h){
     h = h || location.hash;
     if(/^#links/.test(h)){ fecharTudo(); aba('links'); return; }
     if(/^#mat/.test(h)){ aba('mat'); return; }
-    const m = /^#u([0-9A-Za-z]+)$/.exec(h); if(m && porN.get(m[1])) abrirFicha(m[1]);
+    const m = /^#u([0-9A-Za-z %]+)$/.exec(h); if(m){ const n = decodeURIComponent(m[1]); if(porN.get(n)) abrirFicha(n); }
   }
   function fecharTudo(){ $('envio').hidden = true; if(!$('ficha').hidden) fecharFicha(); }
   window.addEventListener('hashchange', () => { if(U.length) irPara(location.hash); });
@@ -991,7 +1244,7 @@ window.NEX = (function(){
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message', ev => {
       const m = ev.data || {};
-      if(m.tipo === 'abrir' && m.url){ try{ const u = new URL(m.url); if(u.pathname === location.pathname) irPara(u.hash); }catch(e){} }
+      if(m.tipo === 'abrir' && m.url){ try{ const u = new URL(m.url); if(u.pathname === location.pathname){ const p = u.searchParams.get('p'); if(p && p !== PID && disponiveis.has(p)) trocarProjeto(p, true).then(() => irPara(u.hash)); else irPara(u.hash); } }catch(e){} }
       if(m.tipo === 'atualizar'){ if(!$('aba-links').hidden) carregarLinks(); verificarVersao(); }
     });
   }
@@ -1000,13 +1253,15 @@ window.NEX = (function(){
   async function iniciar(){
     $('app').hidden = false;
     try{
-      const [pj, cat] = await Promise.all([
-        fetch('p/' + PID + '.json', {cache: 'no-cache'}).then(r => r.json()),
-        rpc('catalogo_ler', {p_codigo: codigo, p_projeto: PID})
-      ]);
-      P = pj; T = (cat && cat.tabela) || null;
-      renderTopo(); montarFiltros();
       await carregarEspelho();
+      // só entram as abas dos projetos que têm apresentação publicada (lista em p/index.json)
+      const idx = await fetch('p/index.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
+      if(Array.isArray(idx) && idx.length) PROJETOS.splice(0, PROJETOS.length, ...idx);
+      const checks = await Promise.all(PROJETOS.map(p => fetch('p/' + p.id + '.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)));
+      PROJETOS.forEach((p, i) => { if(checks[i]){ cacheP[p.id] = checks[i]; disponiveis.add(p.id); } });
+      const pedido = new URLSearchParams(location.search).get('p');
+      const ini = (pedido && disponiveis.has(pedido)) ? pedido : (disponiveis.has(LS.get(K_PROJ)) ? LS.get(K_PROJ) : [...disponiveis][0]);
+      await trocarProjeto(ini, true);
       irPara();
       setInterval(verificarVersao, 60000);
       document.addEventListener('visibilitychange', () => { if(!document.hidden) verificarVersao(); });
