@@ -216,6 +216,48 @@ img{display:block;max-width:100%}
 .fluxo .ln small{display:block;color:var(--muted);font-size:12px}
 .fluxo .tot{background:var(--surface-2);font-weight:600}
 .notas{font-size:12px;color:var(--muted);margin:8px 0 0;padding-left:16px}
+.pr-main small.acima{color:var(--warn)}
+.fluxo.pers{border-color:var(--accent)}
+.fluxo.pers .tot{background:var(--accent-soft)}
+.pers-info{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;color:var(--ink-2);margin:8px 0 0}
+.pers-info button{flex:none;border:0;background:transparent;color:var(--bad);font-weight:600;font-size:12.5px;padding:0;cursor:pointer}
+
+/* editor do fluxo personalizado */
+.bloco.editor{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.fe-dica{margin:0 0 10px;font-size:13px;color:var(--ink-2)}
+.fe{display:grid;gap:8px}
+.fe-ln{display:grid;grid-template-columns:58px minmax(0,1fr) 112px 30px;gap:6px 6px;align-items:end;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface)}
+.fe-ln label{display:grid;gap:2px;min-width:0}
+.fe-ln label span{font-size:11px;color:var(--muted);font-weight:600}
+.fe-ln input{width:100%;min-width:0;border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:8px 8px;font-size:15px}
+.fe-ln input:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 1px var(--accent) inset}
+.fe-ln .fe-q input{text-align:center;padding:8px 4px}
+.fe-ln .fe-v input{text-align:right;font-weight:600}
+.fe-ln .fe-s{grid-column:1 / -1}
+.fe-ln .fe-s input{font-size:14px;color:var(--ink-2)}
+.fe-ln .fe-sub{grid-column:1 / -1;font-size:12px;color:var(--muted);text-align:right;min-height:0}
+.fe-ln .fe-sub:empty{display:none}
+.fe-x{width:30px;height:36px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);font-size:18px;line-height:1;color:var(--ink-2);cursor:pointer}
+.fe-x:disabled{opacity:.35;cursor:default}
+.fe-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+.fe-add span{font-size:12.5px;color:var(--muted);margin-right:2px}
+.fe-add button{border:1px dashed var(--line-2);background:transparent;border-radius:99px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer}
+.fe-add button:disabled{opacity:.4;cursor:default}
+.fe-tot{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.fe-tot span{font-weight:600}
+.fe-tot b{font-family:"Barlow Condensed",sans-serif;font-size:30px;line-height:1;margin-left:auto}
+.fe-tot small{flex-basis:100%;text-align:right;font-size:12.5px;color:var(--ink-2)}
+.fe-tot small.abaixo{color:var(--good)}
+.fe-tot small.acima{color:var(--warn)}
+.fe-neg{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:10px}
+.fe-neg label{display:grid;gap:4px;flex:1 1 150px;min-width:0;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.fe-neg input{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:9px 10px;font-size:15px;min-width:0}
+.fe-neg .abtn{flex:1 1 150px}
+.fe-bts{margin-top:12px;justify-content:flex-end}
+.fe-bts .abtn{flex:1 1 0}
+.fe-bts .abtn.primary{flex:1.4 1 0}
+.bloco .erro{color:var(--bad);font-size:13px;margin-top:6px}
+.bloco .erro:empty{display:none}
 details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;color:var(--ink-2)}
 .nota-cor{font-size:12.5px;background:var(--warn-soft);color:var(--warn);border-radius:9px;padding:7px 9px;margin-top:8px}
 .parecidas{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px}
@@ -430,7 +472,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202609272341
+// versão 202609281907
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -718,7 +760,7 @@ window.NEX = (function(){
 
 (function(){
   'use strict';
-  const {$, LS, esc, BRL, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
+  const {$, LS, esc, BRL, BRLc, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
   // projetos com central (a ordem é a das abas)
   const PROJETOS = [
     {id: 'raj-mendes', nome: 'RAJ Mendes'},
@@ -735,12 +777,56 @@ window.NEX = (function(){
   let PID = null, P = null, E = null, T = null;
   let U = [], porN = new Map(), BASES = [];
   let atual = null, baseFicha = null, mostrando = 30, links = [];
+  let edicao = null;   // fluxo sendo editado na ficha: {n, linhas, ref, refRotulo, alvo}
   let F = {};
   const disponiveis = new Set();   // projetos com página de apresentação publicada
 
   const ST = {disponivel: ['Disponível', 'disp'], reservada: ['Reservada', 'res'], processo_final: ['Pend. pagamento do ato', 'res'], vendida: ['Vendida', 'vend']};
   const numPreco = s => { let t = String(s || '').trim(); if(!t) return null; const mil = /mil|k/i.test(t); t = t.replace(/,\d{1,2}$/, '').replace(/\D/g, ''); if(!t) return null; let n = +t; if(mil || n < 5000) n *= 1000; return n > 0 ? n : null; };
   const nomeProj = id => (PROJETOS.find(p => p.id === id) || {}).nome || id;
+
+  // ---------------- fluxo personalizado (o corretor monta o fluxo que vai para o cliente) ----------------
+  // guardado neste aparelho por projeto|unidade: {linhas: [{q, nome, valor, quando}], em}
+  const K_PERS = 'nex-fluxos', MAX_LINHAS = 8;
+  let PERS = (() => { try{ const o = JSON.parse(LS.get(K_PERS) || '{}'); return o && typeof o === 'object' ? o : {}; }catch(e){ return {}; } })();
+  const persKey = (pid, n) => pid + '|' + n;
+  function gravarPers(){
+    const ks = Object.keys(PERS).sort((a, b) => String(PERS[b].em || '').localeCompare(String(PERS[a].em || '')));
+    for(const k of ks.slice(80)) delete PERS[k];
+    LS.set(K_PERS, JSON.stringify(PERS));
+  }
+  const temCentavos = v => Math.abs(v - Math.round(v)) >= 0.005;
+  const fmtV = v => temCentavos(v) ? BRLc(v) : BRL(v);
+  const numTxt = v => v == null || !isFinite(v) ? '' : (+v).toLocaleString('pt-BR', {minimumFractionDigits: temCentavos(v) ? 2 : 0, maximumFractionDigits: 2});
+  // "12.019,42" / "R$ 300.483" / "1502.41" / "12 mil" -> número
+  function numBR(s){
+    let t = String(s == null ? '' : s).toLowerCase().replace(/r\$|\s| /g, '');
+    if(!t) return null;
+    const mil = /mil$|k$/.test(t); t = t.replace(/mil$|k$/, '');
+    if(/,\d{1,2}$/.test(t)) t = t.replace(/\./g, '').replace(',', '.');
+    else if(!/^\d+\.\d{1,2}$/.test(t)) t = t.replace(/[.,]/g, '');
+    let n = parseFloat(t); if(!isFinite(n)) return null;
+    if(mil) n *= 1000;
+    return Math.round(n * 100) / 100;
+  }
+  const tituloLinha = l => ((+l.q || 1) > 1 ? (+l.q) + ' ' : '') + String(l.nome || '').trim();
+  const linhasDe = ls => ls.map(l => ({t: tituloLinha(l), v: fmtV(+l.valor || 0), s: String(l.quando || '').trim()}));
+  const totalDe = ls => Math.round(ls.reduce((s, l) => s + (+l.q || 1) * (+l.valor || 0), 0) * 100) / 100;
+  // linhas de um preço (tabela ou espelho) viram linhas editáveis; preço sem fluxo vira uma linha só
+  function linhasEditaveis(o){
+    if(o && o.linhas && o.linhas.length) return o.linhas.map(l => {
+      const m = /^(\d+)\s*(?:x|×)?\s+(.+)$/i.exec(String(l.t || '').trim());
+      return {q: m ? +m[1] : 1, nome: m ? m[2] : String(l.t || ''), valor: numBR(l.v) || 0, quando: l.s || ''};
+    });
+    return [{q: 1, nome: 'À vista', valor: o ? o.total : 0, quando: 'no fechamento'}];
+  }
+  const opPers = pz => ({k: 'personalizado', rotulo: 'Fluxo personalizado', total: totalDe(pz.linhas), linhas: linhasDe(pz.linhas), envio: true, pers: pz});
+  function opsDaUnidade(x){
+    const ops = opcoesPreco(P, E, T, x);
+    const pz = PERS[persKey(PID, x.n)];
+    if(pz && Array.isArray(pz.linhas) && pz.linhas.length) ops.unshift(opPers(pz));
+    return ops;
+  }
 
   function dono(){
     let d = LS.get(K_DONO);
@@ -795,7 +881,7 @@ window.NEX = (function(){
     if(!E || !P) { U = []; porN = new Map(); renderLista(); return; }
     U = (E.unidades || []).map(u => {
       const x = un(u);
-      x.face = face(P, x); x.pl = planta(P, x); x.faixa = faixaDe(P, x.a); x.ops = opcoesPreco(P, E, T, x);
+      x.face = face(P, x); x.pl = planta(P, x); x.faixa = faixaDe(P, x.a); x.ops = opsDaUnidade(x);
       return x;
     });
     porN = new Map(U.map(x => [x.n, x]));
@@ -807,7 +893,7 @@ window.NEX = (function(){
   // chaves de preço presentes no projeto (tabela do catálogo e colunas do espelho)
   function bases(){
     const vistas = new Map();
-    for(const x of U) for(const o of x.ops) if(!vistas.has(o.k)) vistas.set(o.k, o.rotulo);
+    for(const x of U) for(const o of x.ops) if(!o.pers && !vistas.has(o.k)) vistas.set(o.k, o.rotulo);
     return [...vistas].map(([k, rotulo]) => ({k, rotulo}));
   }
   // preço na base escolhida; sem ela, o primeiro preço que a unidade tiver (o cartão diz qual é)
@@ -964,7 +1050,10 @@ window.NEX = (function(){
     b.querySelector('.l2').textContent = andarTxt(x.andar) + ' · ' + posTxt(x) + (x.ex && x.ex.tl ? ' · ' + x.ex.tl : '') + (x.a ? ' · ' + m2(x.a) : '');
     const op = opLista(x);
     b.querySelector('.preco').textContent = op ? BRL(op.total) : 'sem preço';
-    b.querySelector('.alt').textContent = op && op.k !== F.base && BASES.length > 1 ? op.rotulo.toLowerCase() : '';
+    const alt = [];
+    if(op && op.pers) alt.push('fluxo personalizado');
+    else { if(op && op.k !== F.base && BASES.length > 1) alt.push(op.rotulo.toLowerCase()); if(x.ops[0] && x.ops[0].pers) alt.push('tem fluxo personalizado'); }
+    b.querySelector('.alt').textContent = alt.join(' · ');
     b.querySelector('.face').textContent = x.face ? (x.face.lado || 'vista ' + x.face.nome.replace('Rua ', 'R. ')) : '';
     b.addEventListener('click', () => abrirFicha(x.n));
     return b;
@@ -977,8 +1066,9 @@ window.NEX = (function(){
   if(telaLarga.addEventListener) telaLarga.addEventListener('change', aoMudarTela); else if(telaLarga.addListener) telaLarga.addListener(aoMudarTela);
   function abrirFicha(n){
     const x = porN.get(String(n)); if(!x) return;
+    if(!atual || atual.n !== x.n) edicao = null;
     atual = x;
-    baseFicha = (x.ops.find(o => o.k === F.base) || x.ops[0] || {}).k || null;
+    baseFicha = (x.ops.find(o => o.pers) || x.ops.find(o => o.k === F.base) || x.ops[0] || {}).k || null;
     renderFicha(); $('ficha').hidden = false; document.body.classList.add('sem-rolagem');
     $('fi-corpo').scrollTop = 0; NEX.centrarAndar($('fi-corpo'));
     try{ history.replaceState(null, '', location.pathname + location.search + '#u' + x.n); }catch(e){}
@@ -992,24 +1082,187 @@ window.NEX = (function(){
   }
   // um preço em destaque (o da lista, ou o que o corretor tocar) e os demais como botões ao lado
   function blocoValores(x){
-    let h = '<div class="bloco"><h3>Valores</h3>';
-    if(!x.ops.length) return h + '<div class="sem-vista">Sem preço cadastrado para esta unidade.</div>' + notaCat(x) + '</div>';
+    if(edicao && edicao.n === x.n) return blocoEditor(x);
+    if(!x.ops.length) return '<div class="bloco"><h3>Valores</h3><div class="sem-vista">Sem preço cadastrado para esta unidade.</div>' + notaCat(x) + '</div>';
     const o = x.ops.find(z => z.k === baseFicha) || x.ops[0];
+    let h = '<div class="bloco" id="fi-valores"><h3>Valores<span class="acoes-h"><button class="acao" type="button" data-fe="copiar">Copiar</button>' +
+         '<button class="acao" type="button" data-fe="editar">' + (o.pers ? 'Editar fluxo' : 'Personalizar') + '</button></span></h3>';
     const tab = x.ops.find(z => z.k === 'tabela'), pc = pctAbaixo(o, tab);
-    h += '<div class="pr-main"><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' + (pc ? '<small>' + pc + ' abaixo da tabela</small>' : '') + '</div>';
+    const acima = tab && o !== tab && o.total > tab.total + 0.5 ? fmtV(o.total - tab.total) + ' acima da tabela' : '';
+    h += '<div class="pr-main"><span>' + esc(o.rotulo) + '</span><b>' + BRL(o.total) + '</b>' + (pc ? '<small>' + pc + ' abaixo da tabela</small>' : acima ? '<small class="acima">' + acima + '</small>' : '') + '</div>';
     const alts = x.ops.filter(z => z !== o);
     if(alts.length) h += '<div class="pr-alts" role="group" aria-label="Outros preços desta unidade">' + alts.map(z => '<button type="button" data-v="' + esc(z.k) + '" title="Ver este preço"><span>' + esc(z.rotulo) + '</span><b>' + BRL(z.total) + '</b>' + (pctAbaixo(z, tab) ? '<i>−' + pctAbaixo(z, tab) + '</i>' : '') + '</button>').join('') + '</div>';
     if(x.ex && x.ex.aj) h += '<div class="nota-aj">★ ' + esc(x.ex.aj) + '</div>';
     const fluxo = !!(o.linhas && o.linhas.length);
     if(fluxo){
-      h += '<div class="fluxo">' + o.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
+      h += '<div class="fluxo' + (o.pers ? ' pers' : '') + '">' + o.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
            '<div class="ln tot"><span>Valor total</span><b>' + BRL(o.total) + '</b></div></div>';
-      if(o.k === 'tabela' && T && T.notas && T.notas.length) h += listaNotas(T.notas);
+      if(o.pers) h += '<div class="pers-info"><span>Montado ' + esc(quando(o.pers.em)) + ' neste aparelho. É este fluxo que vai no “Enviar ao cliente”.</span><button type="button" data-fe="descartar">Descartar</button></div>';
+      if((o.k === 'tabela' || o.pers) && T && T.notas && T.notas.length) h += listaNotas(T.notas);
     }
     // condições do espelho: abertas quando o preço é do espelho; recolhidas quando o destaque é a tabela da incorporadora
     const cs = condEspelho(x);
-    if(cs.length) h += fluxo && o.k === 'tabela' ? '<details class="cond"><summary>Condições do espelho</summary>' + listaNotas(cs) + '</details>' : listaNotas(cs);
+    if(cs.length) h += fluxo && (o.k === 'tabela' || o.pers) ? '<details class="cond"><summary>Condições do espelho</summary>' + listaNotas(cs) + '</details>' : listaNotas(cs);
     return h + notaCat(x) + '</div>';
+  }
+
+  // ---------------- editor do fluxo ----------------
+  const proxMes = () => { const d = new Date(); d.setMonth(d.getMonth() + 1); return NEX.mesAno(d.getFullYear() + '-' + pad2(d.getMonth() + 1)); };
+  const MODELOS = [
+    {rot: 'Ato', q: 1, nome: 'Ato', quando: 'no fechamento'},
+    {rot: 'Mensais', q: 12, nome: 'mensais', quando: () => 'a partir de ' + proxMes()},
+    {rot: 'Anuais', q: 2, nome: 'anuais', quando: ''},
+    {rot: 'Parcela única', q: 1, nome: 'Parcela única', quando: ''},
+    {rot: 'Financiamento', q: 1, nome: 'Financiamento bancário', quando: 'na entrega das chaves'},
+    {rot: 'Outra', q: 1, nome: 'Parcela', quando: ''}
+  ];
+  // linha que "fecha a conta" quando o corretor pede um total: o financiamento (ou chaves/saldo); sem ele, a última linha única
+  function linhaFechamento(ls){
+    for(let i = ls.length - 1; i >= 0; i--) if(/financ|chaves|saldo|repasse/i.test(ls[i].nome)) return i;
+    for(let i = ls.length - 1; i >= 0; i--) if((+ls[i].q || 1) === 1) return i;
+    return ls.length - 1;
+  }
+  function abrirEditor(x){
+    const o = x.ops.find(z => z.k === baseFicha) || x.ops[0];
+    const tab = x.ops.find(z => z.k === 'tabela');
+    const base = o && o.pers ? o.pers.linhas.map(l => Object.assign({}, l)) : linhasEditaveis(o);
+    const ref = tab || x.ops.find(z => !z.pers) || null;
+    edicao = {n: x.n, linhas: base.slice(0, MAX_LINHAS), ref: ref ? ref.total : null, refRotulo: ref ? (ref.k === 'tabela' ? 'da tabela' : 'do ' + ref.rotulo.toLowerCase()) : '', alvo: ''};
+    renderFicha(); rolarAteValores();
+  }
+  function rolarAteValores(){ requestAnimationFrame(() => { const b = $('fi-valores'); if(b) $('fi-corpo').scrollTop = Math.max(0, b.offsetTop - 8); }); }
+  function blocoEditor(x){
+    const cheio = edicao.linhas.length >= MAX_LINHAS;
+    let h = '<div class="bloco editor" id="fi-valores"><h3>Personalizar fluxo<span class="acoes-h"><button class="acao" type="button" data-fe="restaurar">' + (x.ops.some(z => z.k === 'tabela') ? 'Voltar ao da tabela' : 'Voltar ao original') + '</button></span></h3>' +
+      '<p class="fe-dica">Mude quantidade, valor e data de cada parcela, inclua ou tire linhas. O total soma sozinho e o cliente recebe exatamente este fluxo.</p>' +
+      '<div class="fe">' + edicao.linhas.map((l, i) =>
+        '<div class="fe-ln" data-i="' + i + '">' +
+          '<label class="fe-q"><span>Qtd.</span><input type="number" inputmode="numeric" min="1" max="480" step="1" value="' + (+l.q || 1) + '" aria-label="Quantidade de parcelas"></label>' +
+          '<label class="fe-n"><span>Parcela</span><input maxlength="40" value="' + esc(l.nome) + '" aria-label="Nome da parcela"></label>' +
+          '<label class="fe-v"><span>Valor de cada</span><input inputmode="decimal" value="' + esc(numTxt(+l.valor || 0)) + '" aria-label="Valor de cada parcela"></label>' +
+          '<button type="button" class="fe-x" data-fe-del="' + i + '" aria-label="Tirar esta linha"' + (edicao.linhas.length < 2 ? ' disabled' : '') + '>×</button>' +
+          '<label class="fe-s"><span>Quando</span><input maxlength="60" value="' + esc(l.quando || '') + '" placeholder="ex.: a partir de out/2026" aria-label="Quando"></label>' +
+          '<small class="fe-sub"></small>' +
+        '</div>').join('') + '</div>' +
+      '<div class="fe-add"><span>' + (cheio ? 'Máximo de ' + MAX_LINHAS + ' linhas' : 'Incluir') + '</span>' + MODELOS.map((m, i) => '<button type="button" data-fe-add="' + i + '"' + (cheio ? ' disabled' : '') + '>+ ' + esc(m.rot) + '</button>').join('') + '</div>' +
+      '<div class="fe-tot"><span>Total do fluxo</span><b id="fe-total">—</b><small id="fe-dif"></small></div>' +
+      '<div class="fe-neg"><label><span>Fechar o total em</span><input id="fe-alvo" inputmode="decimal" value="' + esc(edicao.alvo || '') + '" placeholder="ex.: 295.000"></label>' +
+      '<button type="button" class="abtn" data-fe="ajustar">Ajustar no ' + esc(/financ/i.test((edicao.linhas[linhaFechamento(edicao.linhas)] || {}).nome || '') ? 'financiamento' : 'última parcela') + '</button></div>' +
+      '<div class="row fe-bts"><button class="abtn" type="button" data-fe="cancelar">Cancelar</button><button class="abtn primary" type="button" data-fe="salvar">Salvar fluxo</button></div>' +
+      '<div class="erro" id="fe-erro" role="alert"></div>';
+    return h + notaCat(x) + '</div>';
+  }
+  function atualizarTotais(){
+    if(!edicao) return;
+    const tot = totalDe(edicao.linhas), el = $('fe-total'); if(!el) return;
+    el.textContent = fmtV(tot);
+    const ref = edicao.ref, dif = $('fe-dif');
+    if(ref){
+      const d = Math.round((tot - ref) * 100) / 100, pct = (Math.round(Math.abs(d) / ref * 1000) / 10).toLocaleString('pt-BR') + '%';
+      dif.textContent = Math.abs(d) < 1 ? 'igual ao total ' + edicao.refRotulo : fmtV(Math.abs(d)) + (d < 0 ? ' abaixo' : ' acima') + ' ' + edicao.refRotulo + ' (' + (d < 0 ? '−' : '+') + pct + ')';
+      dif.className = Math.abs(d) < 1 ? '' : d < 0 ? 'abaixo' : 'acima';
+    } else dif.textContent = '';
+    document.querySelectorAll('#fi-corpo .fe-ln').forEach(r => {
+      const l = edicao.linhas[+r.dataset.i]; if(!l) return;
+      const q = +l.q || 1; r.querySelector('.fe-sub').textContent = q > 1 && l.valor ? q + ' × ' + fmtV(+l.valor) + ' = ' + fmtV(q * l.valor) : '';
+    });
+  }
+  function validarEdicao(){
+    const ls = edicao.linhas;
+    if(!ls.length) return 'Inclua pelo menos uma parcela.';
+    for(const l of ls){
+      if(!String(l.nome || '').trim()) return 'Dê um nome a cada parcela (ex.: Ato, mensais, Financiamento).';
+      if(!(+l.q >= 1 && +l.q <= 480 && Number.isInteger(+l.q))) return 'A quantidade de "' + tituloLinha(l) + '" precisa ser um número inteiro de 1 a 480.';
+      if(!(+l.valor > 0)) return 'Falta o valor de "' + tituloLinha(l) + '".';
+    }
+    return '';
+  }
+  function salvarEdicao(){
+    const e = validarEdicao(); if(e){ const b = $('fe-erro'); if(b) b.textContent = e; return false; }
+    const x = porN.get(edicao.n); if(!x) return false;
+    PERS[persKey(PID, x.n)] = {linhas: edicao.linhas.map(l => ({q: +l.q || 1, nome: String(l.nome).trim(), valor: Math.round((+l.valor) * 100) / 100, quando: String(l.quando || '').trim()})), em: new Date().toISOString()};
+    gravarPers();
+    x.ops = opsDaUnidade(x); edicao = null; baseFicha = 'personalizado';
+    renderFicha(); renderLista(); rolarAteValores();
+    return true;
+  }
+  function textoFluxo(x, o){
+    const ls = o.linhas && o.linhas.length ? o.linhas : [{t: o.rotulo, v: BRL(o.total), s: ''}];
+    return P.nome + ' · unidade ' + x.n + '\n' + andarTxt(x.andar) + ' · ' + posTxt(x) + (x.ex && x.ex.tl ? ' · ' + x.ex.tl : '') + (x.a ? ' · ' + m2(x.a) : '') + '\n\n' +
+      (o.pers ? 'Condição personalizada' : o.rotulo) + ':\n' + ls.map(l => '• ' + l.t + ': ' + l.v + (l.s ? ' (' + l.s + ')' : '')).join('\n') +
+      (ls.length > 1 ? '\nValor total: ' + BRL(o.total) : '');
+  }
+  // eventos do bloco Valores (visualização e editor), ligados a cada renderFicha
+  function ligarValores(x){
+    const box = $('fi-valores'); if(!box) return;
+    box.addEventListener('click', async ev => {
+      const b = ev.target.closest('button'); if(!b || !box.contains(b)) return;
+      const acao = b.dataset.fe, add = b.dataset.feAdd, del = b.dataset.feDel;
+      if(acao === 'editar') return abrirEditor(x);
+      if(acao === 'copiar'){
+        const o = x.ops.find(z => z.k === baseFicha) || x.ops[0]; if(!o) return;
+        try{ await navigator.clipboard.writeText(textoFluxo(x, o)); toast('Valores copiados. Cole na conversa com o cliente.'); }catch(e){ toast('Não consegui copiar neste aparelho.'); }
+        return;
+      }
+      if(acao === 'descartar'){
+        if(!confirm('Descartar o fluxo personalizado da unidade ' + x.n + '?')) return;
+        delete PERS[persKey(PID, x.n)]; gravarPers();
+        x.ops = opsDaUnidade(x); baseFicha = (x.ops.find(o => o.k === F.base) || x.ops[0] || {}).k || null;
+        renderFicha(); renderLista(); toast('Fluxo personalizado descartado.');
+        return;
+      }
+      if(!edicao) return;
+      const y = $('fi-corpo').scrollTop;
+      if(add != null){
+        if(edicao.linhas.length >= MAX_LINHAS) return;
+        const m = MODELOS[+add], nova = {q: m.q, nome: m.nome, valor: 0, quando: typeof m.quando === 'function' ? m.quando() : m.quando};
+        const fin = edicao.linhas.findIndex(l => /financ|chaves|saldo|repasse/i.test(l.nome));
+        const pos = /financ/i.test(m.nome) || fin < 0 ? edicao.linhas.length : (/^ato$/i.test(m.nome) ? 0 : fin);
+        edicao.linhas.splice(pos, 0, nova);
+        renderFicha(); $('fi-corpo').scrollTop = y;
+        const inp = document.querySelector('#fi-corpo .fe-ln[data-i="' + pos + '"] .fe-v input'); if(inp) inp.focus();
+        return;
+      }
+      if(del != null){ if(edicao.linhas.length > 1){ edicao.linhas.splice(+del, 1); renderFicha(); $('fi-corpo').scrollTop = y; } return; }
+      if(acao === 'restaurar'){
+        const tab = x.ops.find(z => z.k === 'tabela') || x.ops.find(z => !z.pers);
+        edicao.linhas = linhasEditaveis(tab).slice(0, MAX_LINHAS); edicao.alvo = '';
+        renderFicha(); $('fi-corpo').scrollTop = y; return;
+      }
+      if(acao === 'ajustar'){
+        const alvo = numBR(edicao.alvo), err = $('fe-erro');
+        if(!alvo || alvo <= 0){ err.textContent = 'Digite o total que quer fechar (ex.: 295.000).'; return; }
+        const i = linhaFechamento(edicao.linhas), l = edicao.linhas[i], q = +l.q || 1;
+        const resto = alvo - (totalDe(edicao.linhas) - q * (+l.valor || 0));
+        if(resto <= 0){ err.textContent = 'Com as outras parcelas já passa de ' + fmtV(alvo) + '. Diminua alguma delas antes.'; return; }
+        l.valor = Math.round(resto / q * 100) / 100;
+        renderFicha(); $('fi-corpo').scrollTop = y;
+        if(Math.abs(totalDe(edicao.linhas) - alvo) >= 0.01) toast('Arredondei centavos: o total ficou ' + fmtV(totalDe(edicao.linhas)) + '.');
+        return;
+      }
+      if(acao === 'cancelar'){ edicao = null; renderFicha(); rolarAteValores(); return; }
+      if(acao === 'salvar'){ if(salvarEdicao()) toast('Fluxo salvo. Toque em “Enviar ao cliente” para mandar.'); }
+    });
+    if(!edicao) return;
+    box.addEventListener('input', ev => {
+      const t = ev.target; if(!(t instanceof HTMLInputElement)) return;
+      if(t.id === 'fe-alvo'){ edicao.alvo = t.value; return; }
+      const r = t.closest('.fe-ln'); if(!r) return;
+      const l = edicao.linhas[+r.dataset.i]; if(!l) return;
+      const c = t.closest('label').className;
+      if(c === 'fe-q'){ const q = parseInt(t.value, 10); l.q = isFinite(q) && q > 0 ? Math.min(q, 480) : 1; }
+      else if(c === 'fe-n') l.nome = t.value;
+      else if(c === 'fe-v') l.valor = numBR(t.value) || 0;
+      else if(c === 'fe-s') l.quando = t.value;
+      const err = $('fe-erro'); if(err) err.textContent = '';
+      atualizarTotais();
+    });
+    // ao sair do campo de valor, mostra o número já formatado (ex.: 1502,4 -> 1.502,40)
+    box.addEventListener('focusout', ev => {
+      const t = ev.target; if(!(t instanceof HTMLInputElement) || !t.closest('label.fe-v')) return;
+      const r = t.closest('.fe-ln'), l = r && edicao && edicao.linhas[+r.dataset.i]; if(l && t.value.trim()) t.value = numTxt(+l.valor || 0);
+    });
+    atualizarTotais();
   }
   function condEspelho(x){
     const tb = E && E.tabela, cs = [];
@@ -1073,6 +1326,7 @@ window.NEX = (function(){
       ? '<div class="fx-grid"><div class="col">' + bPl + bAnd + bVi + '</div><div class="col">' + bVal + bPar + '</div></div>'
       : '<div class="col">' + bPl + bVal + bAnd + bVi + bPar + '</div>');
     requestAnimationFrame(() => NEX.centrarAndar($('fi-corpo')));
+    ligarValores(x);
     const plImg = $('fi-pl'); if(plImg) plImg.addEventListener('click', () => visualizador([{src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}] : []), 0, {acoes: acoesImg}));
     const dec = $('fi-dec'); if(dec) dec.addEventListener('click', () => visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}, {src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
     const viImg = $('fi-vi'); if(viImg) viImg.addEventListener('click', () => visualizador([{src: img(P, vi.img), t: 'Vista · ' + vi.face.nome + ' · ' + vi.andar + 'º pavimento', nome: 'vista-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
@@ -1101,15 +1355,20 @@ window.NEX = (function(){
     try{ const r = await compartilhar(imagensDaUnidade(atual), 'Unidade ' + atual.n + ' · ' + P.nome); if(r === 'baixado') toast('Imagens baixadas.'); }
     catch(e){ toast('Não consegui compartilhar agora.'); }
   });
-  $('fi-enviar').addEventListener('click', () => { if(atual) abrirEnvio([atual.n]); });
+  $('fi-enviar').addEventListener('click', () => {
+    if(!atual) return;
+    // fluxo aberto no editor: salva antes de enviar (se faltar algo, avisa e fica no editor)
+    if(edicao && edicao.n === atual.n && !salvarEdicao()){ rolarAteValores(); toast('Confira o fluxo antes de enviar.'); return; }
+    abrirEnvio([atual.n]);
+  });
   document.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => { const f = b.closest('.fundo'); if(f.id === 'ficha') fecharFicha(); else { f.hidden = true; if($('ficha').hidden) document.body.classList.remove('sem-rolagem'); } }));
   ['ficha', 'envio'].forEach(id => $(id).addEventListener('click', e => { if(e.target === $(id)){ if(id === 'ficha') fecharFicha(); else $(id).hidden = true; } }));
   document.addEventListener('keydown', e => { if(e.key !== 'Escape') return; const v = document.querySelector('.vis'); if(v && !v.hidden) return; if(!$('envio').hidden) $('envio').hidden = true; else if(!$('ficha').hidden) fecharFicha(); });
 
   // ---------------- enviar ao cliente ----------------
-  let envUnids = [], envProj = null;
+  let envUnids = [], envProj = null, envNovo = false;
   function abrirEnvio(ns){
-    envUnids = ns.slice(0, 3); envProj = PID;
+    envUnids = ns.slice(0, 3); envProj = PID; envNovo = true;
     const c = corretor(); $('en-cor').value = c.nome || ''; $('en-tel').value = c.tel || '';
     $('en-form').hidden = false; $('en-pronto').hidden = true; $('en-erro').textContent = '';
     $('en-cli').value = '';
@@ -1128,10 +1387,16 @@ window.NEX = (function(){
       l.querySelector('span').innerHTML = esc(titulo) + '<small>' + esc(sub) + '</small>';
       box.appendChild(l); return i;
     };
+    // com fluxo personalizado na 1ª unidade, ele vem marcado ao abrir o envio (mesmo que antes tenha ido outra opção);
+    // ao incluir/tirar unidades no mesmo envio, fica a opção escolhida. Unidades sem fluxo próprio vão pela tabela.
+    const temPers = ops.some(o => o.pers);
+    const pref = envNovo && temPers ? 'personalizado' : antes || (temPers ? 'personalizado' : null);
+    envNovo = false;
     for(const o of ops){
-      const todos = xs.every(z => z.ops.some(q => q.k === o.k));
-      const i = add(o.k, o.rotulo, (o.linhas && o.linhas.length ? 'Fluxo completo · ' : 'Valor · ') + BRL(o.total) + (xs.length > 1 ? ' (1ª unidade)' : ''), todos);
-      if(todos && !marcado && (o.k === antes || (!antes && o.linhas && o.linhas.length))){ i.checked = true; marcado = true; }
+      const todos = o.pers ? true : xs.every(z => z.ops.some(q => q.k === o.k));
+      const semPers = o.pers ? xs.filter(z => !z.ops.some(q => q.pers)).length : 0;
+      const i = add(o.k, o.rotulo, (o.linhas && o.linhas.length ? 'Fluxo completo · ' : 'Valor · ') + BRL(o.total) + (xs.length > 1 ? ' (1ª unidade' + (semPers ? '; ' + (semPers === 1 ? 'a outra vai' : 'as outras vão') + ' pela tabela' : '') + ')' : ''), todos);
+      if(todos && !marcado && (o.k === pref || (!pref && o.linhas && o.linhas.length))){ i.checked = true; marcado = true; }
     }
     const nao = add('nao', 'Não mostrar valores', 'O cliente vê planta, vista e o prédio', true);
     if(!marcado){ const prim = box.querySelector('input:not(:disabled)'); if(antes === 'nao') nao.checked = true; else if(prim) prim.checked = true; }
@@ -1166,13 +1431,23 @@ window.NEX = (function(){
   }
   function valoresPara(n, k){
     const x = porN.get(n); if(!x || k === 'nao') return null;
-    const o = x.ops.find(z => z.k === k); if(!o) return null;
+    let o = x.ops.find(z => z.k === k);
+    // unidade sem fluxo personalizado num envio "personalizado": vai pela tabela (ou pelo primeiro preço com fluxo)
+    if(!o && k === 'personalizado') o = x.ops.find(z => z.k === 'tabela') || x.ops.find(z => !z.pers && z.linhas && z.linhas.length) || x.ops.find(z => !z.pers && z.envio !== false);
+    if(!o) return null;
     const fluxo = !!(o.linhas && o.linhas.length);
     const linhas = fluxo ? o.linhas : [{t: o.rotulo.replace(/\s*\(.*\)$/, ''), v: BRL(o.total), s: ''}];
+    if(o.pers){
+      const dia = new Date().toLocaleDateString('pt-BR', {timeZone: 'America/Sao_Paulo'});
+      let nota = 'Condição personalizada preparada em ' + dia + ', sujeita à aprovação da incorporadora e à disponibilidade da unidade.';
+      if(T && T.notas && T.notas.length) nota += ' ' + T.notas.join(' ');
+      if(nota.length > 400) nota = nota.slice(0, 400).replace(/[^.]*$/, '').trim();
+      return {base: 'personalizado', rotulo: 'Condição personalizada', total: o.total, linhas, nota};
+    }
     // o cliente vê o nome da tabela; um fluxo sobre o preço do espelho aparece como "Condição atual"
     const rotulo = o.k === 'tabela' ? String((T && T.nome) || 'Tabela de vendas').split(' (')[0] : fluxo ? 'Condição atual' : '';
     const nota = fluxo && T && T.notas && T.notas.length ? T.notas.join(' ') : (P.nota_valores || 'Valor na data do envio, sujeito a alteração e à disponibilidade da unidade.');
-    return {base: k, rotulo, total: o.total, linhas, nota};
+    return {base: o.k, rotulo, total: o.total, linhas, nota};
   }
   $('en-form').addEventListener('submit', async e => {
     e.preventDefault();
