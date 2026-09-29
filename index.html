@@ -2731,8 +2731,8 @@ body.mk-aberto{overflow:hidden}
   function blocoMaterial(e, d){
     const abrirO = '<a class="abtn" href="' + esc(urlOrulo(e, d)) + '" target="_blank" rel="noopener">Abrir na Órulo ↗</a>';
     let h = '<div class="mk-mat" id="mk-mat"><h4>Book, tabela e contato do comercial</h4>';
-    if(!(ST && ST.login)) return h + '<p>Ficam na Órulo, no login de cada corretor (a conta é grátis). Abra o empreendimento lá para baixar o material e falar com o comercial.</p><div class="row">' + abrirO + '</div></div>';
-    if(!tokenOrulo()) return h + '<p>Conecte a sua conta da Órulo uma vez (o login é seu e é grátis) e o book, a tabela, o contato do comercial e a comissão aparecem aqui, direto da Órulo.</p><div class="row"><button class="abtn primary" type="button" data-or="conectar">Conectar minha Órulo</button>' + abrirO + '</div></div>';
+    if(!(ST && ST.login)) return h + '<p>Material exclusivo para corretores, com o login de cada um na Órulo (o cadastro é grátis). Abra o empreendimento lá para baixar o book e a tabela e falar com o comercial.</p><div class="row">' + abrirO + '</div></div>';
+    if(!tokenOrulo()) return h + '<p>Material exclusivo para corretores: conecte a sua conta da Órulo uma vez (login individual; se ainda não tiver, dá para criar grátis na própria tela da Órulo). O book, a tabela, o contato do comercial e a comissão aparecem aqui, direto da Órulo.</p><div class="row"><button class="abtn primary" type="button" data-or="conectar">Conectar minha Órulo</button>' + abrirO + '</div></div>';
     return h + '<div class="mk-mat-c" aria-live="polite">Buscando o material na Órulo…</div><div class="row">' + abrirO + '<button class="mk-link" type="button" data-or="sair">Desconectar minha Órulo</button></div></div>';
   }
   let matPedido = 0;
