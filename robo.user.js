@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.6.0
-// @description  Lê a disponibilidade na BLL, no CV CRM e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
+// @version      1.7.0
+// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana e Maskan) e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
+// @match        https://maskan.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -20,9 +21,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.6.0';
+  const VERSAO = '1.7.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL e CV: só a página principal
@@ -122,14 +123,28 @@
     }
     return out;
   }
+  // Maskan: a unidade vem como "HIS 2 - 1802", "T00-0102", "U-141", "L00-0001"... No app fica só o número
+  // (sem zeros à esquerda) e as lojas como "Loja N" (mesma regra usada para montar os projetos).
+  function chaveMaskan(nome, tip) {
+    const s = String(nome || '').trim();
+    const partes = s.split(/\s*-\s*/);
+    let p = partes[partes.length - 1].trim();
+    if (/^\d+$/.test(p)) p = String(parseInt(p, 10));
+    if (Number(tip) === 17 || /^LOJA/i.test(s)) { const n = /^\d+$/.test(p) ? parseInt(p, 10) : 0; return n ? 'Loja ' + n : 'Loja'; }
+    return p;
+  }
+  const SITUACAO_CV = { 1: 'disponivel', 2: 'reservada', 3: 'vendida', 5: 'processo_final' };
   async function lerCV() {
     const out = [];
-    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto]) : [['23', 'consolacao'], ['28', 'sumare']];
+    const padrao = FONTE === 'cv' ? [['23', 'consolacao'], ['28', 'sumare']] : [];
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto]) : padrao;
+    const painel = (cfgFonte && /^[a-z]+$/.test(cfgFonte.painel || '')) ? cfgFonte.painel : 'imobiliaria';
+    const porJson = !!(cfgFonte && cfgFonte.chave === 'maskan');
     for (const [id, projeto] of mapas) {
-      // um mapa com problema não derruba os outros (a lista vem do servidor e inclui os projetos da VitaUrbana em rodízio)
+      // um mapa com problema não derruba os outros (a lista vem do servidor, com os projetos em rodízio)
       let html;
       try {
-        const r = await fetch('/imobiliaria/comercial/mapadisponibilidade/' + id, { credentials: 'include', cache: 'no-store' });
+        const r = await fetch('/' + painel + '/comercial/mapadisponibilidade/' + id, { credentials: 'include', cache: 'no-store' });
         html = await r.text();
       } catch (e) { out.push({ projeto, erro: 'rede' }); continue; }
       const d = new DOMParser().parseFromString(html, 'text/html');
@@ -137,9 +152,13 @@
       if (!blocos.length) { if (/Acesse sua conta|Sua senha/i.test(html)) throw new Sessao('login'); out.push({ projeto, erro: 'mapa vazio' }); continue; }
       const s = {};
       blocos.forEach(b => {
+        if (porJson) {
+          let j = null; try { j = JSON.parse((b.querySelector('div') || {}).textContent || ''); } catch (e) {}
+          if (j && j['data-filtro-nome-unidade'] && SITUACAO_CV[j['data-filtro-situacao']]) { s[chaveMaskan(j['data-filtro-nome-unidade'], j['data-filtro-idtipologia'])] = SITUACAO_CV[j['data-filtro-situacao']]; return; }
+        }
         const c = ([...b.classList].find(x => x.startsWith('div-')) || '').replace('div-', '');
         const sp = b.querySelector('span'); const n = sp ? sp.textContent.trim() : '';
-        if (n && MAPA_CV[c]) s[n] = MAPA_CV[c];
+        if (n && MAPA_CV[c]) s[porJson ? chaveMaskan(n, null) : n] = MAPA_CV[c];
       });
       out.push({ projeto, status: s });
     }
@@ -673,7 +692,7 @@
   }
   let recarregado = false, jaSincronizado = false;
   async function lerConfig() {
-    try { const c = await rpc('robo_config', { p_chave: chave(), p_fonte: 'one' }); if (c && typeof c === 'object') { cfg = Object.assign(cfg, c); INTERVALO = Math.max(30, cfg.intervalo || 120) * 1000; } }
+    try { const c = await rpc('robo_config', { p_chave: chave(), p_fonte: 'one' }); if (c && typeof c === 'object') { cfg = Object.assign({ sincronizar: false, recarregar: 'nenhum', intervalo: 120 }, c); INTERVALO = Math.max(30, cfg.intervalo || 120) * 1000; } }
     catch (e) { if (e && e.status) throw e; }
   }
   let tRecarga = null;
@@ -760,6 +779,7 @@
       if (e instanceof Sessao) {
         st.sessao = true;
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
+                  : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
