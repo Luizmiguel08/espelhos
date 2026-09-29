@@ -1,5 +1,5 @@
 // Espelhos de Vendas — service worker (app offline + notificações)
-const V = 'espelhos-202609281329';
+const V = 'espelhos-202609291517';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png', './favicon-64.png'];
 
 self.addEventListener('install', e => {
