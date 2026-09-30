@@ -249,7 +249,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202609272308
+// versão 202609301602
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -319,6 +319,12 @@ window.NEX = (function(){
   const img = (P, id) => (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
   const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
+  // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
+  const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
+  const difArea = (pl, a) => { const r = pl && areaPlanta(pl.p); return !!(r && a != null && isFinite(a) && (a < r[0] - 1 || a > r[1] + 1)); };
+  const driveUrl = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const bookOficial = P => ((P && P.material_oficial) || []).find(d => d.c === 'Book do cliente' && d.ext === 'pdf') || null;
   const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
 
   // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
@@ -532,12 +538,12 @@ window.NEX = (function(){
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
 })();
 
 (function(){
   'use strict';
-  const {$, esc, BRL, m2, rpc, andarTxt, face, planta, vista, img, thumb, svgAndar, visualizador, waNum, unLink} = NEX;
+  const {$, esc, BRL, m2, rpc, andarTxt, face, planta, vista, img, thumb, svgAndar, visualizador, waNum, unLink, driveUrl, bookOficial, difArea} = NEX;
   const q = new URLSearchParams(location.search);
   const id = (q.get('l') || '').trim();
   const previa = q.get('previa') === '1';
@@ -629,7 +635,8 @@ window.NEX = (function(){
     $('s-local').hidden = !(P.perto && P.perto.length);
     $('perto-fonte').textContent = P.perto_fonte || '';
     if(P.mapa){ $('mapa').href = P.mapa; $('mapa').onclick = () => evento('local'); } else $('mapa').hidden = true;
-    if(P.book){ $('book').href = (P.pasta || '') + P.book; } else $('book').hidden = true;
+    const bo = bookOficial(P);
+    if(P.book){ $('book').href = (P.pasta || '') + P.book; } else if(bo){ $('book').href = driveUrl(bo.id); } else $('book').hidden = true;
 
     // ---- rodapé e WhatsApp ----
     $('legal').textContent = P.legal || '';
@@ -651,7 +658,7 @@ window.NEX = (function(){
     let h = '<div class="u-top"><h3>Unidade ' + esc(u.n) + '</h3><span>' + esc(andarTxt(u.andar)) + (x.a ? ' · ' + esc(m2(x.a)) : '') + (f ? ' · ' + esc(f.lado || ('vista para a ' + f.nome)) : '') + '</span></div>';
     if(!u.livre) h += '<div class="fora">Esta unidade não está mais disponível. Fale com ' + esc(primeiro(L.corretor) || 'o seu corretor') + ' para ver opções parecidas.</div>';
     h += '<div class="u-grid"><div class="cartao"><h4>Planta</h4>';
-    if(pl) h += '<img class="img-planta" data-ev="planta" alt="' + esc(pl.p.t) + '" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + '><div class="leg">' + esc(pl.p.t) + (pl.exata ? '' : ' · planta da mesma tipologia (a unidade pode ser espelhada)') + '</div><div class="dica">Toque na planta para ampliar.</div>' +
+    if(pl) h += '<img class="img-planta" data-ev="planta" alt="' + esc(pl.p.t) + '" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + '><div class="leg">' + esc(pl.p.t) + (pl.exata ? '' : ' · planta da mesma tipologia (a unidade pode ser espelhada)') + (difArea(pl, x.a) ? ' · planta ilustrativa; esta unidade tem ' + esc(m2(x.a)) : '') + '</div><div class="dica">Toque na planta para ampliar.</div>' +
              (pl.exata && pl.p.tour ? '<a class="btn tour" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour virtual 360° desta planta</a>' : '') +
              (pl.p.decorado ? '<img class="img-dec" alt="Decorado" src="' + esc(img(P, pl.p.decorado)) + '"><div class="leg">Decorado desta planta (sugestão de decoração).</div>' : '');
     else h += '<div class="sem">Planta disponível com o seu corretor.</div>';

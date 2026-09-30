@@ -301,6 +301,15 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 .galeria span{display:block;font-size:12.5px;padding:6px 8px;color:var(--ink-2)}
 .mat-sec{margin-bottom:18px}
 .mat-sec h3{font-size:20px;margin:0 0 8px}
+.mat-nota{margin:-2px 0 10px;font-size:13px;color:var(--ink-2)}
+.docs{display:flex;flex-direction:column;gap:12px}
+.doc-g h4{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.doc{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:6px}
+.doc-i{min-width:0;flex:1 1 220px;display:flex;flex-direction:column;gap:2px}
+.doc-i b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.doc-i small{font-size:12px;color:var(--muted)}
+.doc-a{display:flex;gap:8px;flex:none}
+.doc-a .abtn{padding:8px 12px;font-size:13.5px}
 
 /* visualizador */
 .vis{position:fixed;inset:0;z-index:80;background:rgba(8,10,16,.96);display:flex;flex-direction:column;color:#fff}
@@ -418,6 +427,10 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
   </section>
 
   <section class="aba" id="aba-mat" hidden>
+    <div class="mat-sec" id="docs-sec" hidden><h3>Material oficial da construtora</h3>
+      <p class="mat-nota">Arquivos originais do Linktree da ONE: abrem no Google Drive e o link pode ser enviado ao cliente.</p>
+      <div class="docs" id="docs"></div>
+    </div>
     <div class="mat-sec" id="book-sec"><h3>Book do cliente</h3>
       <div class="row"><a class="abtn" id="book-abrir" target="_blank" rel="noopener">Abrir o book (PDF)</a><button class="abtn" type="button" id="book-comp">Compartilhar o PDF</button></div>
     </div>
@@ -472,7 +485,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202609281907
+// versão 202609301602
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -542,6 +555,12 @@ window.NEX = (function(){
   const img = (P, id) => (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
   const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
+  // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
+  const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
+  const difArea = (pl, a) => { const r = pl && areaPlanta(pl.p); return !!(r && a != null && isFinite(a) && (a < r[0] - 1 || a > r[1] + 1)); };
+  const driveUrl = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const bookOficial = P => ((P && P.material_oficial) || []).find(d => d.c === 'Book do cliente' && d.ext === 'pdf') || null;
   const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
 
   // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
@@ -755,12 +774,12 @@ window.NEX = (function(){
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
 })();
 
 (function(){
   'use strict';
-  const {$, LS, esc, BRL, BRLc, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
+  const {$, LS, esc, BRL, BRLc, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, driveUrl, difArea, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
   // projetos com central (a ordem é a das abas)
   const PROJETOS = [
     {id: 'raj-mendes', nome: 'RAJ Mendes'},
@@ -1289,7 +1308,8 @@ window.NEX = (function(){
       const base = pl.p.finais ? 'final ' + pl.p.finais.map(pad2).join(', ') : (pl.p.tipos || []).map(t => NEX.tipoTxt(t)).join(', ');
       bPl += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + (base ? ' · ' + esc(base) : '') + (pl.p.andares ? ' (' + esc(pl.p.andares) + ')' : '')
             : 'Planta de referência: ' + esc(pl.p.t) + (base ? ', ' + esc(base) : '') + '. Mesma tipologia; esta unidade pode ser espelhada ou ter pequenas diferenças.') +
-           (P.nota_planta_andar && P.nota_planta_andar[String(x.an)] ? ' ' + esc(P.nota_planta_andar[String(x.an)]) : '') + '</div>';
+           (P.nota_planta_andar && P.nota_planta_andar[String(x.an)] ? ' ' + esc(P.nota_planta_andar[String(x.an)]) : '') +
+           (difArea(pl, x.a) ? ' Metragem desta unidade no espelho de vendas: ' + esc(m2(x.a)) + ' (a planta é a ilustrativa do material da construtora).' : '') + '</div>';
     } else bPl += '<div class="sem-vista">A incorporadora não divulgou a planta humanizada desta unidade.</div>';
     bPl += '</div>';
     // vista
@@ -1568,6 +1588,19 @@ window.NEX = (function(){
     const tours = (P.plantas || []).filter(p => p.tour).map(p => ({t: p.t, u: p.tour})).concat(P.tour_rooftop ? [{t: 'Rooftop', u: P.tour_rooftop}] : []);
     $('tour-sec').hidden = !tours.length;
     $('tours').innerHTML = tours.map(z => '<a class="abtn" target="_blank" rel="noopener" href="' + esc(z.u) + '">' + esc(z.t) + '</a>').join('');
+    const docs = P.material_oficial || [];
+    $('docs-sec').hidden = !docs.length;
+    if(docs.length){
+      let h = '', cat = null;
+      for(const d of docs){
+        if(d.c !== cat){ if(cat !== null) h += '</div>'; cat = d.c; h += '<div class="doc-g"><h4>' + esc(cat) + '</h4>'; }
+        const u = driveUrl(d.id);
+        h += '<div class="doc"><div class="doc-i"><b>' + esc(d.n) + '</b><small>' + esc(String(d.ext || '').toUpperCase()) + ' · ' + String(d.mb).replace('.', ',') + ' MB</small></div>' +
+             '<div class="doc-a"><a class="abtn" target="_blank" rel="noopener" href="' + esc(u) + '">Abrir</a><button class="abtn" type="button" data-u="' + esc(u) + '">Copiar link</button></div></div>';
+      }
+      $('docs').innerHTML = h + '</div>';
+      $('docs').querySelectorAll('button[data-u]').forEach(b => { b.onclick = async () => { try{ await navigator.clipboard.writeText(b.dataset.u); toast('Link copiado.'); }catch(e){ toast(b.dataset.u); } }; });
+    }
     const temBook = !!P.book; $('book-sec').hidden = !temBook;
     if(temBook){
       $('book-abrir').href = (P.pasta || '') + P.book;
