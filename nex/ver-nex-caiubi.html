@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Apresentação · NEX One Caiubi</title>
+<meta name="description" content="Planta, posição no andar e condições da unidade que o seu corretor separou para você.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0e0f12">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NEX One Caiubi · apresentação separada para você">
+<meta property="og:description" content="Planta, posição no andar e condições da unidade que separei para você.">
+<meta property="og:image" content="https://luizmiguel08.github.io/espelhos/nex/img/cai/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="../favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0e0f12; --surface:#16181d; --surface-2:#1e2128; --ink:#f3f2ee; --ink-2:#c3c5cb; --muted:#8c909a; --line:#2a2e36;
+  --accent:#d6b67a; --accent-2:#b8955a; --accent-ink:#1a1407; --good:#8fd26b; --bad:#ff8c80;
+  --svg-cel:#2b2f38; --svg-alvo:#d6b67a; --svg-disp:#2b2f38; --svg-res:#2b2f38; --svg-vend:#2b2f38; --svg-ink:#e9e7e1;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+body.sem-rolagem{overflow:hidden}
+h1,h2,h3{font-family:"Barlow Condensed","IBM Plex Sans",sans-serif;margin:0;font-weight:600;letter-spacing:.02em}
+img{display:block;max-width:100%}
+button,a{font:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.load{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.erro-pg{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.erro-pg h1{font-size:30px}
+.erro-pg p{color:var(--ink-2);max-width:420px;margin:0}
+
+.hero{position:relative;min-height:88vh;min-height:88svh;display:flex;align-items:flex-end;overflow:hidden}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,15,18,.05) 30%,rgba(14,15,18,.55) 62%,rgba(14,15,18,.97) 100%)}
+.hero-txt{position:relative;z-index:1;padding:24px 20px 34px;max-width:760px;width:100%}
+.ola{margin:0 0 6px;color:var(--accent);font-weight:600;letter-spacing:.02em}
+.hero h1{font-size:46px;line-height:.98;text-transform:uppercase;letter-spacing:.04em}
+.hero .end{margin:10px 0 0;color:var(--ink-2)}
+.hero .cham{margin:12px 0 0;font-size:16.5px;max-width:520px}
+.por{margin:16px 0 0;font-size:13.5px;color:var(--muted)}
+.rolar{display:inline-flex;margin-top:18px;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-size:14px;border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:8px 14px;background:rgba(14,15,18,.35)}
+@media (min-width:900px){.hero-txt{padding:48px 56px 64px}.hero h1{font-size:72px}}
+
+.sec{max-width:1080px;margin:0 auto;padding:42px 20px}
+.sec+.sec{border-top:1px solid var(--line)}
+.rot{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px;font-weight:600}
+.sec h2{font-size:34px;line-height:1.05;text-transform:uppercase;letter-spacing:.04em;margin-bottom:14px}
+.sec .intro{color:var(--ink-2);max-width:640px;margin:0 0 18px}
+@media (min-width:900px){.sec{padding:64px 32px}.sec h2{font-size:44px}}
+
+.indice{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 18px}
+.indice a{border:1px solid var(--line);border-radius:99px;padding:6px 12px;text-decoration:none;color:var(--ink);font-size:14px}
+
+.unid{display:grid;gap:18px;margin-bottom:34px}
+.unid:last-child{margin-bottom:0}
+.u-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.u-top h3{font-size:30px;text-transform:uppercase;letter-spacing:.04em}
+.u-top span{color:var(--ink-2)}
+.fora{background:rgba(255,140,128,.12);border:1px solid rgba(255,140,128,.35);color:var(--bad);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.u-grid{display:grid;gap:16px}
+.u-col{display:grid;gap:16px;min-width:0;align-content:start}
+.u-col .cat{margin-top:0}
+#u-tit[hidden]~#unids .u-top h3{font-size:36px}
+@media (min-width:900px){#u-tit[hidden]~#unids .u-top h3{font-size:44px}}
+@media (min-width:900px){.u-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.cartao{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.cartao h4 small{display:block;font-family:"IBM Plex Sans",sans-serif;font-size:13px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:500;margin-top:2px}
+.cartao h4{margin:0 0 10px;font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.cartao .leg{font-size:12.5px;color:var(--muted);margin-top:8px}
+.img-planta{display:block;width:100%;height:auto;max-height:72vh;background:#fff;border-radius:12px;cursor:zoom-in;object-fit:contain}
+.img-vista{width:100%;border-radius:12px;cursor:zoom-in;aspect-ratio:2000/940;object-fit:cover;background:var(--surface-2)}
+.sem{padding:16px;border-radius:12px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
+.dica{font-size:12.5px;color:var(--muted);margin-top:6px}
+.svg-andar{width:100%;height:auto;display:block}
+.svg-andar .corr,.svg-andar .core{fill:#20242b}
+.svg-andar .c rect{stroke:var(--bg);stroke-width:2}
+.svg-andar .c text{font:600 21px "IBM Plex Sans",sans-serif;fill:#9ea3ad}
+.svg-andar .c.alvo text{fill:#1a1407}
+.svg-andar .c.nao text{opacity:.3}
+.svg-andar .c.nao rect{stroke:#2a2e36;stroke-dasharray:3 3}
+.svg-andar .rua{font:600 15px "IBM Plex Sans",sans-serif;fill:#8c909a;letter-spacing:.04em}
+.svg-andar .arco{fill:none;stroke:#e0a33a;stroke-width:1.6;stroke-dasharray:5 5;opacity:.8}
+.svg-andar .sol circle{fill:#f6b73c}
+.svg-andar .sol text{font:600 15px "IBM Plex Sans",sans-serif;fill:#c3c5cb}
+
+.fluxo{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.fluxo .ln{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-top:1px solid var(--line);align-items:baseline}
+.fluxo .ln:first-child{border-top:0}
+.fluxo .ln b{white-space:nowrap;font-weight:600}
+.fluxo .ln small{display:block;color:var(--muted);font-size:12.5px}
+.fluxo .tot{background:var(--surface-2)}
+.fluxo .tot b{color:var(--accent);font-size:17px}
+.nota{font-size:12.5px;color:var(--muted);margin-top:10px}
+.cat{font-size:13.5px;background:var(--surface-2);border-radius:10px;padding:9px 11px;margin-top:10px;color:var(--ink-2)}
+
+.carrossel{display:grid;grid-auto-flow:column;grid-auto-columns:84%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}
+@media (min-width:900px){.carrossel{grid-auto-columns:40%}}
+.carrossel button{scroll-snap-align:start;border:0;padding:0;background:var(--surface);border-radius:14px;overflow:hidden;text-align:left;color:var(--ink);cursor:zoom-in}
+.carrossel img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.carrossel span{display:block;padding:8px 10px;font-size:13.5px;color:var(--ink-2)}
+.fatos{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line);margin-top:18px}
+@media (min-width:720px){.fatos{grid-template-columns:1fr 1fr;column-gap:28px}}
+.fatos div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.fatos dt{color:var(--muted);white-space:nowrap}
+.fatos dd{margin:0;text-align:right}
+.lazer{display:grid;gap:12px;margin-top:22px}
+@media (min-width:900px){.lazer{grid-template-columns:repeat(3,1fr)}}
+.lazer .cartao ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14.5px}
+.lazer .cartao button{border:0;padding:0;background:transparent;margin-top:10px;cursor:zoom-in;width:100%}
+.lazer .cartao button img{border-radius:10px;width:100%;aspect-ratio:16/9;object-fit:cover;background:#fff}
+.lista-check{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+@media (min-width:720px){.lista-check{grid-template-columns:1fr 1fr;column-gap:28px}}
+.lista-check li{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)}
+.lista-check li::before{content:"";flex:none;width:18px;height:18px;margin-top:3px;border-radius:50%;background:var(--accent);-webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>') center/14px no-repeat;mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>') center/14px no-repeat}
+.perto{display:grid;gap:0;border-top:1px solid var(--line)}
+@media (min-width:720px){.perto{grid-template-columns:1fr 1fr;column-gap:28px}}
+.perto div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}
+.perto .t{display:flex;gap:12px;color:var(--ink-2);font-size:14px;white-space:nowrap}
+.perto .t span{display:inline-flex;align-items:center;gap:4px}
+.perto svg{width:16px;height:16px;opacity:.8}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:11px 16px;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.ouro{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+footer{max-width:1080px;margin:0 auto;padding:30px 20px 120px;color:var(--muted);font-size:11.5px;line-height:1.55;border-top:1px solid var(--line)}
+footer p{margin:0 0 10px}
+
+.wa-fixo{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:56px;height:56px;background:#1fa855;color:#fff;text-decoration:none;font-weight:600;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap}
+.wa-fixo svg{width:28px;height:28px;flex:none}
+.wa-fixo span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.wa-fixo{transition:opacity .2s ease,transform .2s ease}
+.wa-fixo.recolhido{opacity:0;transform:scale(.6);pointer-events:none}
+.btn.wa-in{margin-top:14px;width:100%;background:#1fa855;border-color:#1fa855;color:#fff}
+.btn.wa-in svg{width:20px;height:20px;flex:none}
+@media (min-width:900px){
+  .wa-fixo{width:auto;height:auto;padding:13px 20px;right:24px;bottom:24px}
+  .wa-fixo svg{width:20px;height:20px}
+  .wa-fixo span{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+}
+.previa{position:fixed;top:0;left:0;right:0;z-index:45;background:var(--accent);color:var(--accent-ink);text-align:center;font-size:13px;font-weight:600;padding:6px 10px}
+
+/* visualizador */
+.vis{position:fixed;inset:0;z-index:80;background:rgba(6,7,9,.97);display:flex;flex-direction:column;color:#fff}
+.vis-top{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
+.vis-t{flex:1;font-size:14px;min-width:0}
+.vis-acoes{display:flex;gap:6px}
+.vis-x{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.vis-area{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;cursor:zoom-in;-webkit-overflow-scrolling:touch}
+.vis-area img{max-width:100%;max-height:100%;object-fit:contain}
+.vis-area.zoom{display:block;cursor:zoom-out}
+.vis-area.zoom img{max-width:none;max-height:none;width:220%}
+.vis-ant,.vis-prox{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:34px;border-radius:10px;cursor:pointer}
+.vis-ant{left:6px}.vis-prox{right:6px}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:11px;font-size:14px;z-index:90}
+
+.img-dec{width:100%;border-radius:12px;margin-top:12px;cursor:zoom-in;aspect-ratio:16/10;object-fit:cover;background:var(--surface-2)}
+.andar-img{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.andar-img.larga{scrollbar-width:thin}
+.svg-img{width:100%;height:auto;display:block;background:#fff}
+.svg-img rect.alvo{fill:rgba(214,182,122,.40);stroke:#b8955a}
+.svg-img rect.st{opacity:.45;stroke:none}
+.svg-img .alvo-t{font-family:"IBM Plex Sans",sans-serif;font-weight:700;fill:#3a2a08;stroke:#fff;paint-order:stroke;stroke-linejoin:round}
+.svg-img .rua-img{font-family:"IBM Plex Sans",sans-serif;font-weight:600;fill:#777}
+.svg-andar.faixa .banda{fill:#20242b}
+.svg-andar.faixa .banda-t{font:700 16px "IBM Plex Sans",sans-serif;fill:#c3c5cb;letter-spacing:.05em}
+.svg-andar.faixa .seta{fill:var(--accent)}
+.svg-andar.faixa .faixa-t{font:700 22px "IBM Plex Sans",sans-serif;fill:var(--ink)}
+.svg-andar.faixa .c rect{stroke:var(--bg);stroke-width:1}
+
+.btn.tour{margin-top:12px;display:inline-flex;align-items:center;gap:6px;font-size:14px}
+
+.svg-andar.faixa .num-c{font:600 12px "IBM Plex Sans",sans-serif;fill:#1d2533;opacity:.75}.svg-andar.faixa .num-c.alvo{fill:#fff;opacity:1}
+.andar-img.faixa-w{background:transparent;padding-bottom:2px}
+
+</style>
+</head>
+<body>
+<div class="load" id="load">Carregando a apresentação…</div>
+<div class="erro-pg" id="erro" hidden>
+  <h1 id="erro-t">Link não encontrado</h1>
+  <p id="erro-p">Este link não existe ou foi apagado. Peça um novo ao seu corretor.</p>
+  <a class="btn ouro" id="erro-wa" hidden target="_blank" rel="noopener">Falar com o corretor</a>
+</div>
+<div class="previa" id="previa" hidden>Prévia do corretor: esta visita não conta como abertura do cliente.</div>
+
+<main id="pg" hidden>
+  <header class="hero">
+    <img id="hero" alt="" fetchpriority="high">
+    <div class="hero-txt">
+      <p class="ola" id="ola"></p>
+      <h1 id="nome"></h1>
+      <p class="end" id="end"></p>
+      <p class="cham" id="cham"></p>
+      <p class="por" id="por"></p>
+      <a class="rolar" href="#s-unids">Ver a unidade ↓</a>
+    </div>
+  </header>
+
+  <section class="sec" id="s-unids">
+    <p class="rot">Separado para você</p>
+    <h2 id="u-tit">Sua unidade</h2>
+    <div class="indice" id="indice" hidden></div>
+    <div id="unids"></div>
+  </section>
+
+  <section class="sec" id="s-predio">
+    <p class="rot">O empreendimento</p>
+    <h2>O prédio</h2>
+    <p class="intro" id="intro"></p>
+    <div class="carrossel" id="renders"></div>
+    <dl class="fatos" id="fatos"></dl>
+    <div class="lazer" id="lazer"></div>
+  </section>
+
+  <section class="sec" id="s-apto">
+    <div id="apto-bloco"><p class="rot">Entregue na unidade</p>
+    <h2>O que vem no apartamento</h2>
+    <ul class="lista-check" id="entregue"></ul></div>
+    <div id="difs-bloco"><h2 style="margin-top:34px;font-size:28px">Diferenciais</h2>
+    <ul class="lista-check" id="difs"></ul></div>
+  </section>
+
+  <section class="sec" id="s-local">
+    <p class="rot">Localização</p>
+    <h2>Tudo perto</h2>
+    <p class="intro" id="local-end"></p>
+    <div class="perto" id="perto"></div>
+    <p class="dica" id="perto-fonte"></p>
+    <div class="acoes"><a class="btn" id="mapa" target="_blank" rel="noopener">Ver no mapa</a><a class="btn" id="book" target="_blank" rel="noopener">Book completo (PDF)</a></div>
+  </section>
+
+  <footer>
+    <p id="legal"></p>
+    <p id="aviso-img"></p>
+    <p>Esta apresentação avisa o seu corretor quando é aberta.</p>
+  </footer>
+  <a class="wa-fixo" id="wa" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg><span id="wa-t">Falar com o corretor</span></a>
+</main>
+
+<script>
+// versão 202609300002
+// Central de produto — utilidades comuns (corretor e cliente)
+window.NEX = (function(){
+  'use strict';
+  const CFG = {
+    url: 'https://dptchfjbotmddaniuzvr.supabase.co',
+    key: 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP',
+    vapid: 'BI8mWAmkgfYL1lUm7gPdQ3JYK-YmFS_drWs7PfvbsU50oBFJKtbULXwWKp3BSE0cnWyAeBBIlXErynB_oQ6QmZo'
+  };
+  const $ = id => document.getElementById(id);
+  const LS = {
+    get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const BRLc = v => 'R$ ' + (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const m2 = v => (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' m²';
+  const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const mesAno = ym => { const [a, m] = String(ym).split('-').map(Number); return MESES[m - 1] + '/' + a; };
+  const somaMeses = (ym, k) => { let [a, m] = String(ym).split('-').map(Number); m += k; while(m > 12){ m -= 12; a++; } return a + '-' + String(m).padStart(2, '0'); };
+
+  async function rpc(fn, args){
+    const r = await fetch(CFG.url + '/rest/v1/rpc/' + fn, {method: 'POST', headers: {'apikey': CFG.key, 'Content-Type': 'application/json'}, body: JSON.stringify(args || {}), cache: 'no-store'});
+    const t = await r.text(); let j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+    if(!r.ok){ const e = new Error((j && (j.message || j.hint)) || ('http_' + r.status)); e.status = r.status; throw e; }
+    return j;
+  }
+
+  // ---------- unidades (formato do espelho: [n, tipo, m2, cat, andar, col, situação, extras]) ----------
+  const andarN = a => (a === 'T' || a === 0 || a === '0') ? 0 : (+a || 0);
+  const andarTxt = a => andarN(a) === 0 ? 'Térreo' : andarN(a) + 'º andar';
+  const andarCurto = a => andarN(a) === 0 ? 'térreo' : andarN(a) + 'º';
+  const areaU = u => (u[7] && u[7].a != null) ? +u[7].a : +u[2];
+  const finalU = u => (+u[5]) + 1;
+  const pad2 = n => String(n).padStart(2, '0');
+  const normTipo = t => String(t || '').toUpperCase().replace(/\s+/g, ' ').trim();
+  // unidade normalizada a partir da linha do espelho
+  function un(u){
+    const col = +u[5], ex = (u[7] && typeof u[7] === 'object') ? u[7] : {};
+    return {n: String(u[0]), u, andar: u[4], an: andarN(u[4]), col, fin: col + 1, tipo: u[1] || null,
+            a: ex.a != null ? +ex.a : (u[2] != null ? +u[2] : null), cat: u[3], st: u[6], ex};
+  }
+  // unidade vinda do link do cliente: {n, andar, col, tipo, a, cat, livre}
+  const unLink = v => ({n: String(v.n), andar: v.andar, an: andarN(v.andar), col: +v.col, fin: (+v.col) + 1, tipo: v.tipo || null, a: v.a != null ? +v.a : null, cat: v.cat, st: v.livre ? 'disponivel' : 'indisponivel', ex: {}});
+  const tipoTxt = t => t ? normTipo(t).replace(/^TIPO\s*/, 'tipo ') : '';
+  const posTxt = x => x.tipo ? tipoTxt(x.tipo) : 'final ' + pad2(x.fin);
+
+  function face(P, x){ return (P.faces || []).find(f => (f.finais && f.finais.indexOf(x.fin) >= 0) || (f.cols && f.cols.indexOf(x.col) >= 0)) || null; }
+  function planta(P, x){
+    const n = x.an, tipo = normTipo(x.tipo), ok = p => (p.de == null || n >= p.de) && (p.ate == null || n <= p.ate);
+    let ex = tipo ? (P.plantas || []).find(p => p.tipos && p.tipos.map(normTipo).indexOf(tipo) >= 0 && ok(p)) : null;
+    if(!ex) ex = (P.plantas || []).find(p => p.finais && p.finais.indexOf(x.fin) >= 0 && ok(p));
+    if(ex) return {p: ex, exata: true};
+    // referências: mesma tipologia em outro andar ou final (podem depender do andar)
+    const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
+    const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
+    const p = r && (P.plantas || []).find(q => q.id === r);
+    return p ? {p, exata: false} : null;
+  }
+  function vista(P, x){
+    const f = face(P, x); if(!f) return null;
+    if(!f.vistas) return {face: f, img: null, andar: null, sem: true};
+    const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
+    return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
+  }
+  const img = (P, id) => (P.pasta || '') + id + '.jpg';
+  const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
+  const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
+
+  // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
+  function fluxo(T, preco){
+    if(!T || !preco) return null;
+    const r = T.arredonda || 10; let soma = 0; const out = [];
+    for(const p of T.partes){
+      if(p.resto) continue;
+      const num = preco * Math.round(p.pct * 10), den = 1000 * p.q * r;     // inteiros: arredonda metade para cima
+      const v = Math.floor((2 * num + den) / (2 * den)) * r;
+      soma += v * p.q; out.push(Object.assign({}, p, {v}));
+    }
+    const f = T.partes.find(p => p.resto);
+    if(f) out.push(Object.assign({}, f, {v: preco - soma}));
+    return out;
+  }
+  // linhas prontas para mostrar: {t, v, s}
+  function linhasFluxo(T, preco){
+    const fx = fluxo(T, preco); if(!fx) return [];
+    return fx.map(p => {
+      if(p.k === 'ato') return {t: 'Ato', v: BRL(p.v), s: 'no fechamento'};
+      if(p.resto) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.q === 1) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.lbl === 'anuais'){ const ds = []; for(let i = 0; i < p.q; i++) ds.push(mesAno(somaMeses(p.ini, 12 * i))); return {t: p.q + ' anuais', v: BRL(p.v), s: ds.join(' e ')}; }
+      return {t: p.q + ' ' + p.lbl, v: BRL(p.v), s: 'a partir de ' + mesAno(p.ini)};
+    });
+  }
+  const cap = s => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
+
+  // ---------- opções de valores de uma unidade: tabela (com fluxo) e preços do espelho ----------
+  function precosCampos(P, E){
+    if(P.precos && P.precos.length) return P.precos;
+    if(E && E.precos_campos && E.precos_campos.length) return E.precos_campos;
+    return [{k: 'pp', label: 'Parcelado'}, {k: 'pv', label: 'À vista'}];
+  }
+  function opcoesPreco(P, E, T, x){
+    const out = [];
+    const chave = String(x.n).toUpperCase();
+    if(T && T.u){
+      const t = T.u[chave] != null ? T.u[chave] : T.u[x.n];
+      if(t != null){
+        if(T.tipo === 'lista'){
+          // tabela da incorporadora com o fluxo pronto por unidade: [total, parcela1, parcela2, ...] na ordem de T.colunas
+          if(Array.isArray(t)) out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t[0], linhas: (T.colunas || []).map((c, i) => ({t: c.t, v: BRLc(t[i + 1]), s: c.s || ''})).filter((l, i) => t[i + 1] != null && +t[i + 1] > 0)});
+          else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t.total, linhas: t.linhas || []});
+        }
+        else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t, linhas: linhasFluxo(T, +t)});
+      }
+    }
+    for(const c of precosCampos(P, E)){
+      const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null, envio: c.envio !== false});
+    }
+    return out;
+  }
+
+  // ---------- planta do andar (esquema) com a unidade em destaque e o sol do estudo de insolação ----------
+  function svgAndar(P, x, opt){
+    opt = opt || {};
+    if(!P.andar_tipo) return P.andar_img ? svgImagemAndar(P, x, opt) : svgFaixa(P, x, opt);
+    const andar = x.andar, fin = x.fin;
+    const n = andarN(andar);
+    const tipo = (P.andar_tipo && (n >= P.andar_tipo.alto.de ? P.andar_tipo.alto : P.andar_tipo.baixo)) || null;
+    if(!tipo) return '';
+    const existe = opt.existe || null;            // Set de finais que existem neste andar (se souber)
+    const sit = opt.sit || {};                     // final -> situação (só para o corretor)
+    const W = 50, H = 58;
+    const cel = [];
+    const base = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5];
+    base.forEach((f, i) => { if(tipo.baixo.indexOf(f) >= 0) cel.push({f, x: i * W, y: 92, w: W, h: H}); });
+    const topo = [15, 16, 17, 18, 19, 20, 21, 22];
+    topo.forEach((f, i) => { if(tipo.cima.indexOf(f) >= 0) cel.push({f, x: i * W, y: f >= 20 ? 0 : 12, w: W, h: f >= 20 ? 70 : 58}); });
+    const lx = 10 * W + 22;
+    [[1, 4, 37], [2, 41, 37], [3, 78, 36], [4, 114, 36]].forEach(([f, y, h]) => { if(tipo.lado.indexOf(f) >= 0) cel.push({f, x: f === 4 ? lx - 22 : lx, y, w: f === 4 ? 92 : 70, h}); });
+    const larg = lx + 70;
+    const cor = f => {
+      if(+f === +fin) return 'var(--svg-alvo)';
+      const st = sit[f]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)';
+      return 'var(--svg-cel)';
+    };
+    const sol = opt.sol !== false;
+    const x0 = sol ? -78 : -8, y0 = -34, w = larg + 30 - x0, hh = (sol ? 238 : 190) - y0;
+    let s = '<svg class="svg-andar" viewBox="' + x0 + ' ' + y0 + ' ' + w + ' ' + hh + '" role="img" aria-label="Posição da unidade ' + String(fin).padStart(2, '0') + ' no andar">';
+    s += '<rect x="0" y="70" width="' + (10 * W) + '" height="22" class="corr"/>';
+    s += '<rect x="' + (8 * W) + '" y="12" width="' + (2 * W + 22) + '" height="58" class="core"/>';
+    for(const c of cel){
+      const ok = !existe || existe.has(c.f);
+      s += '<g class="c' + (+c.f === +fin ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + c.x + '" y="' + c.y + '" width="' + c.w + '" height="' + c.h + '" rx="4" style="fill:' + (ok ? cor(c.f) : 'transparent') + '"/>' +
+           '<text x="' + (c.x + c.w / 2) + '" y="' + (c.y + c.h / 2 + 7) + '" text-anchor="middle">' + String(c.f).padStart(2, '0') + '</text></g>';
+    }
+    s += '<text class="rua" x="' + (larg + 18) + '" y="75" transform="rotate(90 ' + (larg + 18) + ' 75)" text-anchor="middle">R. PEDRO TAQUES</text>';
+    s += '<text class="rua" x="' + (4 * W) + '" y="-12" text-anchor="middle">SENTIDO R. BELA CINTRA</text>';
+    s += '<text class="rua" x="' + (5 * W) + '" y="176" text-anchor="middle">SENTIDO R. DA CONSOLAÇÃO</text>';
+    if(sol){
+      // posições relativas do estudo de insolação da incorporadora (nascente à esquerda, poente embaixo)
+      const ps = [[-52, -14, '6h'], [-58, 116, '10h'], [30, 214, '14h'], [300, 214, '18h']];
+      s += '<path class="arco" d="M-52 -14 Q -80 70 -58 116 Q -34 196 30 214 Q 165 232 300 214" />';
+      for(const [x, y, t] of ps) s += '<g class="sol"><circle cx="' + x + '" cy="' + y + '" r="10"/><text x="' + (x + (x < 0 ? -4 : 15)) + '" y="' + (y + (x < 0 ? 28 : 5)) + '"' + (x < 0 ? ' text-anchor="middle"' : '') + '>' + t + '</text></g>';
+    }
+    return s + '</svg>';
+  }
+
+  // planta real do andar (imagem da incorporadora) com a unidade marcada por cima
+  function svgImagemAndar(P, x, opt){
+    const L = (P.andar_img || []).find(l => x.an >= l.de && x.an <= l.ate); if(!L) return svgFaixa(P, x, opt);
+    const sit = opt.sit || {};
+    const cor = st => st === 'disponivel' ? 'var(--svg-disp)' : (st === 'reservada' || st === 'processo_final') ? 'var(--svg-res)' : st === 'vendida' ? 'var(--svg-vend)' : null;
+    const rects = v => Array.isArray(v[0]) ? v : [v];            // uma unidade pode ter mais de um retângulo (planta em L)
+    const fs = Math.round(L.w / 34), sw = Math.max(4, Math.round(L.w / 300)), rx = Math.round(L.w / 250);
+    const larga = L.w / L.h > 2.2;                               // planta comprida: no celular fica rolável, com altura mínima
+    let s = '<svg class="svg-img" viewBox="0 0 ' + L.w + ' ' + L.h + '"' + (larga ? ' style="min-width:' + Math.round(200 * L.w / L.h) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na planta do andar"><image href="' + esc(img(P, L.img)) + '" x="0" y="0" width="' + L.w + '" height="' + L.h + '"/>';
+    let txt = '', cx0 = null;
+    for(const f of Object.keys(L.cells)){
+      const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
+      if(!alvo && !c) continue;
+      for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
+      // 5º número opcional: altura do rótulo dentro da unidade (0 = topo, 1 = base), para não cobrir o número da planta
+      if(alvo){ const [cx, cy, cw, ch, fy] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch * (fy != null ? fy : 0.5) + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+    }
+    s += txt;
+    if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';
+    return '<div class="andar-img' + (larga ? ' larga' : '') + '"' + (cx0 != null ? ' data-cx="' + (cx0 / L.w).toFixed(3) + '"' : '') + '>' + s + '</svg></div>';
+  }
+  // planta do andar larga: rola até a unidade em destaque
+  function centrarAndar(root){
+    (root || document).querySelectorAll('.andar-img[data-cx]').forEach(el => {
+      if(el.scrollWidth <= el.clientWidth + 2) return;
+      el.scrollLeft = Math.max(0, (+el.dataset.cx) * el.scrollWidth - el.clientWidth / 2);
+    });
+  }
+  // faixa do espelho: a linha do andar com a unidade em destaque e os lados (vistas) marcados
+  function svgFaixa(P, x, opt){
+    const nc = P.colunas || 0; if(!nc) return '';
+    const sit = opt.sitCol || {}, existe = opt.existeCol || null, nums = opt.numCol || null;
+    const W = 40, H = 54, gap = 4, top = (P.faces || []).some(f => f.cols) ? 36 : 6;
+    const largura = nc * (W + gap) - gap, larga = nc > 12;
+    const cor = c => { if(c === x.col) return 'var(--svg-alvo)'; const st = sit[c]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)'; return 'var(--svg-cel)'; };
+    let s = '<svg class="svg-andar faixa" viewBox="-4 0 ' + (largura + 8) + ' ' + (top + H + 40) + '"' + (larga ? ' style="min-width:' + (nc * 30) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na linha do andar">';
+    for(const f of (P.faces || [])){
+      if(!f.cols || !f.cols.length) continue;
+      const a = Math.min.apply(null, f.cols), b = Math.max.apply(null, f.cols), x0 = a * (W + gap), x1 = b * (W + gap) + W;
+      s += '<rect x="' + x0 + '" y="4" width="' + (x1 - x0) + '" height="26" rx="5" class="banda"/><text x="' + ((x0 + x1) / 2) + '" y="22.5" text-anchor="middle" class="banda-t">' + esc(f.curto || f.nome).toUpperCase() + '</text>';
+    }
+    for(let c = 0; c < nc; c++){
+      const ok = !existe || existe.has(c), alvo = c === x.col, n = nums && nums[c];
+      s += '<g class="c' + (alvo ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + (c * (W + gap)) + '" y="' + top + '" width="' + W + '" height="' + H + '" rx="5" style="fill:' + (ok ? cor(c) : 'transparent') + '"/>' +
+           (ok && n != null && String(n).length <= 4 ? '<text x="' + (c * (W + gap) + W / 2) + '" y="' + (top + H / 2 + 5) + '" text-anchor="middle" class="num-c' + (alvo ? ' alvo' : '') + '">' + esc(n) + '</text>' : '') + '</g>';
+    }
+    const cx = x.col * (W + gap) + W / 2;
+    s += '<path d="M' + cx + ' ' + (top + H + 5) + ' l-8 11 h16 z" class="seta"/><text x="' + Math.max(50, Math.min(largura - 50, cx)) + '" y="' + (top + H + 36) + '" text-anchor="middle" class="faixa-t">' + esc(x.n) + '</text></svg>';
+    return larga ? '<div class="andar-img larga faixa-w" data-cx="' + ((cx + 4) / (largura + 8)).toFixed(3) + '">' + s + '</div>' : s;
+  }
+
+
+  // ---------- visualizador de imagens (tocar para ampliar) ----------
+  let vis = null;
+  function visualizador(itens, i, opt){
+    opt = opt || {};
+    if(!vis){
+      vis = document.createElement('div'); vis.className = 'vis'; vis.hidden = true;
+      vis.innerHTML = '<div class="vis-top"><span class="vis-t"></span><span class="vis-acoes"></span><button type="button" class="vis-x" aria-label="Fechar">×</button></div>' +
+        '<div class="vis-area"><img alt=""></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
+      document.body.appendChild(vis);
+      const area = vis.querySelector('.vis-area');
+      vis.querySelector('.vis-x').onclick = () => fechar();
+      area.addEventListener('click', e => { if(e.target.tagName === 'IMG') area.classList.toggle('zoom'); else fechar(); });
+      document.addEventListener('keydown', e => { if(vis.hidden) return; if(e.key === 'Escape') fechar(); if(e.key === 'ArrowRight') mover(1); if(e.key === 'ArrowLeft') mover(-1); });
+      vis.querySelector('.vis-ant').onclick = () => mover(-1);
+      vis.querySelector('.vis-prox').onclick = () => mover(1);
+      let x0 = null; area.addEventListener('touchstart', e => { x0 = e.touches.length === 1 && !area.classList.contains('zoom') ? e.touches[0].clientX : null; }, {passive: true});
+      area.addEventListener('touchend', e => { if(x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if(Math.abs(dx) > 60) mover(dx < 0 ? 1 : -1); x0 = null; });
+    }
+    function fechar(){ vis.hidden = true; document.body.classList.remove('sem-rolagem'); }
+    function mover(d){ if(vis._itens.length < 2) return; vis._i = (vis._i + d + vis._itens.length) % vis._itens.length; mostrar(); }
+    function mostrar(){
+      const it = vis._itens[vis._i]; const area = vis.querySelector('.vis-area'); area.classList.remove('zoom'); area.scrollTo(0, 0);
+      vis.querySelector('img').src = it.src; vis.querySelector('.vis-t').textContent = it.t || '';
+      const ac = vis.querySelector('.vis-acoes'); ac.innerHTML = '';
+      if(vis._opt.acoes) vis._opt.acoes(it, ac);
+      vis.querySelector('.vis-ant').hidden = vis.querySelector('.vis-prox').hidden = vis._itens.length < 2;
+      if(vis._opt.aoVer) vis._opt.aoVer(it);
+    }
+    vis._itens = itens; vis._i = i || 0; vis._opt = opt;
+    vis.hidden = false; document.body.classList.add('sem-rolagem'); mostrar();
+  }
+
+  // ---------- compartilhar arquivos (WhatsApp etc.) com alternativa de baixar ----------
+  async function arquivos(lista){
+    return Promise.all(lista.map(async it => { const r = await fetch(it.src); const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }));
+  }
+  async function compartilhar(lista, texto){
+    try{
+      const fs = await arquivos(lista);
+      if(navigator.canShare && navigator.canShare({files: fs})){ await navigator.share({files: fs, text: texto || undefined}); return 'ok'; }
+      for(const f of fs){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+      return 'baixado';
+    }catch(e){ if(e && e.name === 'AbortError') return 'cancelado'; throw e; }
+  }
+  function toast(t){
+    let el = $('toast'); if(!el){ el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = t; el.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+  const quando = iso => {
+    if(!iso) return '';
+    const d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+    if(s < 60) return 'agora há pouco';
+    if(s < 3600) return 'há ' + Math.floor(s / 60) + ' min';
+    if(s < 86400) return 'há ' + Math.floor(s / 3600) + ' h';
+    return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo'}) + ' às ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'});
+  };
+  const soDigitos = s => String(s || '').replace(/\D/g, '');
+  const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
+
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+})();
+
+(function(){
+  'use strict';
+  const {$, esc, BRL, m2, rpc, andarTxt, face, planta, vista, img, thumb, svgAndar, visualizador, waNum, unLink} = NEX;
+  const q = new URLSearchParams(location.search);
+  const id = (q.get('l') || '').trim();
+  const previa = q.get('previa') === '1';
+  let L = null, P = null, waHref = '', waTxt = '';
+  const feitos = new Set();
+  function evento(e){ if(previa || !L || feitos.has(e)) return; feitos.add(e); rpc('link_ver', {p_id: id, p_evento: e}).catch(() => {}); }
+  const primeiro = s => String(s || '').trim().split(/\s+/)[0] || '';
+  const pad2 = n => String(n).padStart(2, '0');
+
+  function erro(tipo, dados){
+    $('load').hidden = true; $('pg').hidden = true; $('erro').hidden = false;
+    if(tipo === 'expirado'){
+      $('erro-t').textContent = 'Este link expirou';
+      $('erro-p').textContent = 'Peça ao seu corretor uma apresentação atualizada.';
+      if(dados && dados.whats){ const w = $('erro-wa'); w.hidden = false; w.href = 'https://wa.me/' + waNum(dados.whats); w.textContent = 'Falar com ' + (primeiro(dados.corretor) || 'o corretor'); }
+    } else if(tipo === 'rede'){
+      $('erro-t').textContent = 'Sem conexão'; $('erro-p').textContent = 'Não consegui carregar agora. Verifique a internet e tente de novo.';
+    }
+  }
+
+  async function iniciar(){
+    if(previa) $('previa').hidden = false;
+    if(!/^[A-Za-z0-9_-]{8,20}$/.test(id)) return erro('link_invalido');
+    try{ L = await rpc('link_ver', {p_id: id, p_evento: previa ? 'previa' : 'abriu'}); }catch(e){ return erro('rede'); }
+    if(!L || !L.ok) return erro(L && L.erro, L);
+    try{ P = await fetch('p/' + encodeURIComponent(L.projeto) + '.json').then(r => { if(!r.ok) throw new Error(); return r.json(); }); }catch(e){ return erro('rede'); }
+    render();
+  }
+
+  function render(){
+    const nomeCli = primeiro(L.cliente);
+    document.title = P.nome + ' · apresentação para ' + nomeCli;
+    $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva da fachada do ' + P.nome;
+    $('ola').textContent = 'Olá, ' + nomeCli;
+    $('nome').textContent = P.nome;
+    $('end').textContent = P.endereco;
+    $('cham').textContent = P.chamada;
+    $('por').textContent = L.corretor ? 'Apresentação preparada por ' + L.corretor : 'Apresentação preparada pelo seu corretor';
+
+    // ---- unidades ----
+    const us = L.unidades || [];
+    if(L.whats){
+      const nomeCor = primeiro(L.corretor);
+      const un = us.length === 1 ? ' (unidade ' + us[0].n + ')' : us.length ? ' (unidades ' + us.map(u => u.n).join(', ') + ')' : '';
+      waHref = 'https://wa.me/' + waNum(L.whats) + '?text=' + encodeURIComponent('Olá' + (nomeCor ? ', ' + nomeCor : '') + '! Vi a apresentação do ' + P.nome + un + ' e quero conversar.');
+      waTxt = nomeCor ? 'Falar com ' + nomeCor + ' no WhatsApp' : 'Falar com o corretor no WhatsApp';
+    }
+    $('u-tit').textContent = 'Unidades para você'; $('u-tit').hidden = us.length < 2;
+    const idx = $('indice');
+    if(us.length > 1){ idx.hidden = false; idx.innerHTML = us.map(u => '<a href="#u-' + esc(u.n) + '">Unidade ' + esc(u.n) + '</a>').join(''); }
+    const box = $('unids'); box.innerHTML = '';
+    for(const u of us) box.appendChild(blocoUnidade(u));
+
+    // ---- prédio ----
+    $('intro').textContent = P.intro || ((P.fatos && P.fatos[0] ? P.fatos[0][1] + '. ' : '') + (P.entrega ? P.entrega + '.' : ''));
+    const car = $('renders');
+    const itensR = (P.renders || []).map(r => ({src: img(P, r.id), t: r.t}));
+    (P.renders || []).forEach((r, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy"><span></span>';
+      b.querySelector('img').src = thumb(P, r.id); b.querySelector('img').alt = r.t; b.querySelector('span').textContent = r.t;
+      b.onclick = () => { evento('galeria'); visualizador(itensR, i); };
+      car.appendChild(b);
+    });
+    let rolou = false; car.addEventListener('scroll', () => { if(!rolou && car.scrollLeft > 60){ rolou = true; evento('galeria'); } }, {passive: true});
+    $('fatos').innerHTML = (P.fatos || []).map(f => '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>').join('');
+    const lz = $('lazer'); lz.innerHTML = '';
+    for(const l of (P.lazer || [])){
+      const c = document.createElement('div'); c.className = 'cartao';
+      c.innerHTML = '<h4></h4><ul>' + l.itens.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' + (l.planta ? '<button type="button" aria-label="Ampliar a planta"><img alt="" loading="lazy"></button>' : '');
+      c.querySelector('h4').textContent = l.onde;
+      if(l.planta){ c.querySelector('img').src = thumb(P, l.planta); c.querySelector('img').alt = 'Planta · ' + l.onde; c.querySelector('button').onclick = () => { evento('galeria'); visualizador([{src: img(P, l.planta), t: l.onde}], 0); }; }
+      lz.appendChild(c);
+    }
+    $('entregue').innerHTML = (P.entregue || []).map(t => '<li>' + esc(t) + '</li>').join('');
+    $('difs').innerHTML = (P.diferenciais || []).map(t => '<li>' + esc(t) + '</li>').join('');
+    $('apto-bloco').hidden = !(P.entregue && P.entregue.length); $('difs-bloco').hidden = !(P.diferenciais && P.diferenciais.length); $('s-apto').hidden = !((P.entregue || []).length || (P.diferenciais || []).length);
+
+    // ---- localização ----
+    $('local-end').textContent = P.endereco + '.';
+    const ico = {
+      carro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/><circle cx="7.5" cy="14.5" r=".8"/><circle cx="16.5" cy="14.5" r=".8"/></svg>',
+      pe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M8 12l2-4 4 1 2 4M11 15l-1-4"/></svg>',
+      bike: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l3 11M5.5 17 9 9h6l-6 8h9"/></svg>'
+    };
+    const lbl = {carro: 'de carro', pe: 'a pé', bike: 'de bicicleta'};
+    $('perto').innerHTML = (P.perto || []).map(p => '<div><span>' + esc(p.nome) + '</span><span class="t">' +
+      ['carro', 'pe', 'bike'].filter(k => p[k] != null).map(k => '<span title="' + lbl[k] + '">' + ico[k] + p[k] + ' min<span style="position:absolute;left:-9999px">' + lbl[k] + '</span></span>').join('') +
+      (p.min != null ? '<span>' + p.min + ' min</span>' : '') + (p.m != null ? '<span>' + (p.m >= 1000 ? (p.m / 1000).toLocaleString('pt-BR') + ' km' : p.m + ' m') + '</span>' : '') + '</span></div>').join('');
+    $('s-local').hidden = !(P.perto && P.perto.length);
+    $('perto-fonte').textContent = P.perto_fonte || '';
+    if(P.mapa){ $('mapa').href = P.mapa; $('mapa').onclick = () => evento('local'); } else $('mapa').hidden = true;
+    if(P.book){ $('book').href = (P.pasta || '') + P.book; } else $('book').hidden = true;
+
+    // ---- rodapé e WhatsApp ----
+    $('legal').textContent = P.legal || '';
+    $('aviso-img').textContent = 'Imagens ilustrativas. ' + (P.aviso_planta || '') + ' ' + (P.aviso_vista || '');
+    if(waHref){
+      const w = $('wa'); w.hidden = false; w.href = waHref;
+      $('wa-t').textContent = waTxt; w.setAttribute('aria-label', waTxt);
+      document.querySelectorAll('#wa, .wa-in').forEach(a => a.addEventListener('click', () => evento('whatsapp')));
+    }
+
+    $('load').hidden = true; $('pg').hidden = false;
+    requestAnimationFrame(() => NEX.centrarAndar(document));
+    observar(); if(waHref) recolherWa();
+  }
+
+  function blocoUnidade(u){
+    const x = unLink(u), pl = planta(P, x), vi = vista(P, x), f = face(P, x);
+    const a = document.createElement('article'); a.className = 'unid'; a.id = 'u-' + u.n;
+    let h = '<div class="u-top"><h3>Unidade ' + esc(u.n) + '</h3><span>' + esc(andarTxt(u.andar)) + (x.a ? ' · ' + esc(m2(x.a)) : '') + (f ? ' · ' + esc(f.lado || ('vista para a ' + f.nome)) : '') + '</span></div>';
+    if(!u.livre) h += '<div class="fora">Esta unidade não está mais disponível. Fale com ' + esc(primeiro(L.corretor) || 'o seu corretor') + ' para ver opções parecidas.</div>';
+    h += '<div class="u-grid"><div class="cartao"><h4>Planta</h4>';
+    if(pl) h += '<img class="img-planta" data-ev="planta" alt="' + esc(pl.p.t) + '" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + '><div class="leg">' + esc(pl.p.t) + (pl.exata ? '' : ' · planta da mesma tipologia (a unidade pode ser espelhada)') + '</div><div class="dica">Toque na planta para ampliar.</div>' +
+             (pl.exata && pl.p.tour ? '<a class="btn tour" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour virtual 360° desta planta</a>' : '') +
+             (pl.p.decorado ? '<img class="img-dec" alt="Decorado" src="' + esc(img(P, pl.p.decorado)) + '"><div class="leg">Decorado desta planta (sugestão de decoração).</div>' : '');
+    else h += '<div class="sem">Planta disponível com o seu corretor.</div>';
+    h += '</div><div class="u-col">';
+    const v = u.valores;
+    if(v && v.linhas && v.linhas.length){
+      h += '<div class="cartao" data-ev="valores"><h4>' + (v.linhas.length > 1 ? 'Condições de pagamento' : 'Valor') + (v.rotulo ? '<small>' + esc(v.rotulo) + '</small>' : '') + '</h4><div class="fluxo">' +
+        v.linhas.map(l => '<div class="ln"><span>' + esc(l.t) + (l.s ? '<small>' + esc(l.s) + '</small>' : '') + '</span><b>' + esc(l.v) + '</b></div>').join('') +
+        (v.total && v.linhas.length > 1 ? '<div class="ln tot"><span>Valor total</span><b>' + esc(BRL(v.total)) + '</b></div>' : '') + '</div>' +
+        (v.nota ? '<p class="nota">' + esc(v.nota) + '</p>' : '') +
+        (waHref ? '<a class="btn wa-in" href="' + esc(waHref) + '" target="_blank" rel="noopener">' + ICO_WA + esc(waTxt) + '</a>' : '') + '</div>';
+    }
+    if(P.cat_info && P.cat_info[u.cat]) h += '<div class="cat">' + esc(P.cat_info[u.cat]) + '</div>';
+    if(vi && vi.img) h += '<div class="cartao"><h4>A vista do seu andar</h4><img class="img-vista" data-ev="vista" alt="Simulação de vista" src="' + esc(img(P, vi.img)) + '"><div class="leg">Simulação no ' + vi.andar + 'º pavimento, sentido ' + esc(vi.face.nome) + (vi.andar !== x.an ? ' (a mais próxima do ' + x.an + 'º)' : '') + '.</div></div>';
+    else if(vi && !vi.sem) h += '<div class="cartao"><h4>A vista do seu andar</h4><div class="sem">Para este andar não há simulação de vista. Seu corretor pode mostrar o entorno.</div></div>';
+    else if(P.vistas_rooftop && P.vistas_rooftop.length) h += '<div class="cartao"><h4>' + esc(P.vistas_rooftop_rotulo || 'Vista do rooftop') + '</h4><img class="img-vista" data-ev="vista" alt="' + esc(P.vistas_rooftop[0].t) + '" src="' + esc(img(P, P.vistas_rooftop[0].id)) + '"><div class="leg">' + esc(P.vistas_rooftop[0].t) + '.</div>' +
+      (P.tour_rooftop ? '<a class="btn tour tour-roof" href="' + esc(P.tour_rooftop) + '" target="_blank" rel="noopener">Ver em 360°</a>' : '') + '</div>';
+    const svg = svgAndar(P, x, {});
+    if(svg) h += '<div class="cartao" data-ev="andar"><h4>Onde fica no andar</h4>' + svg + '<div class="leg">Sua unidade em destaque. ' + esc(P.andar_legenda_cliente || (P.andar_tipo ? 'O sol segue o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar.')) + '</div></div>';
+    h += '</div></div>';
+    a.innerHTML = h;
+    const ip = a.querySelector('.img-planta'); if(ip) ip.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.id), t: pl.p.t + ' · unidade ' + u.n}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}] : []), 0); });
+    const idc = a.querySelector('.img-dec'); if(idc) idc.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}, {src: img(P, pl.p.id), t: pl.p.t}], 0); });
+    a.querySelectorAll('.tour').forEach(t => t.addEventListener('click', () => evento(t.classList.contains('tour-roof') ? 'vista' : 'planta')));
+    const iv = a.querySelector('.img-vista'); if(iv) iv.addEventListener('click', () => { evento('vista'); visualizador(vi && vi.img ? [{src: img(P, vi.img), t: 'Vista simulada · ' + vi.andar + 'º pavimento'}] : P.vistas_rooftop.map(r => ({src: img(P, r.id), t: r.t})), 0); });
+    return a;
+  }
+
+  const ICO_WA = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg>';
+  function recolherWa(){
+    const cs = [...document.querySelectorAll('.cartao[data-ev="valores"]')];
+    if(!cs.length || !('IntersectionObserver' in window)) return;
+    const vis = new Set();
+    const io = new IntersectionObserver(ents => {
+      for(const e of ents){ if(e.isIntersecting) vis.add(e.target); else vis.delete(e.target); }
+      $('wa').classList.toggle('recolhido', vis.size > 0);
+    }, {threshold: 0});
+    cs.forEach(c => io.observe(c));
+  }
+  function observar(){
+    const alvo = [...document.querySelectorAll('[data-ev]')];
+    const sLocal = $('perto');
+    if(!('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(ents => {
+      for(const e of ents){ if(!e.isIntersecting) continue; const ev = e.target === sLocal ? 'local' : e.target.dataset.ev; evento(ev); io.unobserve(e.target); }
+    }, {threshold: 0.4});
+    alvo.forEach(el => io.observe(el)); io.observe(sLocal);
+  }
+
+  iniciar();
+})();
+
+</script>
+</body>
+</html>
