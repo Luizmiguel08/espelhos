@@ -705,6 +705,140 @@ body.mk-aberto{overflow:hidden}
   .mk-img{width:96px;height:96px}
   .mk-nome{font-size:18px}
 }
+
+
+/* ===== lupa: buscar para o cliente (buscar agora, avisos, enviadas) ===== */
+.painel.bz{gap:12px;padding-bottom:0}
+.bz-abas{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 -18px;padding:0 12px;overflow-x:auto;scrollbar-width:none;flex:none}
+.bz-abas::-webkit-scrollbar{display:none}
+.bz-abas button{position:relative;border:0;background:none;color:var(--ink-2);font:inherit;font-size:14px;font-weight:600;padding:9px 12px 11px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.bz-abas button:hover{color:var(--ink)}
+.bz-abas button.on{color:var(--accent)}
+.bz-abas button.on::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.bz-abas .n{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:18px;text-align:center}
+.bz-abas .n[hidden]{display:none}
+.bz-v{display:flex;flex-direction:column;gap:12px}
+.bz-v[hidden]{display:none}
+#bz-avisos,#bz-enviadas{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+@media (max-width:899px){ .painel.bz{min-height:78vh} }
+.bz-ed{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.bz-ed[hidden]{display:none}
+.lnk{border:0;background:none;color:var(--accent);font:inherit;font-size:13px;font-weight:600;padding:0;cursor:pointer}
+.lnk:hover{text-decoration:underline}
+.abtn:disabled{opacity:.5;cursor:default}
+.abtn:disabled:hover{border-color:var(--line-2);color:inherit}
+.abtn.primary:disabled:hover{color:var(--accent-ink)}
+a.abtn{text-decoration:none;color:var(--ink)}
+a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
+
+/* formulário */
+.bz-grid{display:flex;flex-direction:column;gap:16px}
+.bz-form{display:flex;flex-direction:column;gap:12px}
+.bz-form .duo select{height:42px;border:1px solid var(--line-2);border-radius:10px;padding:0 8px;font:inherit;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;background:var(--surface);color:var(--ink);flex:0 0 auto;width:auto;max-width:48%}
+.bz-bsug{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;text-transform:none;letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--vend-text)}
+.bz-bsug[hidden]{display:none}
+.bz-bsug button{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.bz-ou{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500;margin-top:3px}
+.painel .campo input.bad{border-color:var(--vend-line)}
+.painel .campo input.bad:focus{outline-color:var(--vend-line)}
+.bz-mais{border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.bz-mais summary{cursor:pointer;padding:11px 0;font-size:13.5px;font-weight:600;color:var(--ink);list-style:none;display:flex;align-items:center;gap:6px}
+.bz-mais summary::-webkit-details-marker{display:none}
+.bz-mais summary::after{content:"▾";margin-left:auto;color:var(--muted)}
+.bz-mais[open] summary::after{content:"▴"}
+.bz-mais summary small{color:var(--accent);font-weight:600;font-size:12.5px}
+.bz-mais[open]{padding-bottom:12px}
+.bz-mais > .campo,.bz-mais > label.ck{margin-top:10px}
+.bz-mais > .campo:first-of-type{margin-top:0}
+
+/* resultados */
+.bz-res{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ba-intro{border:1px dashed var(--line-2);border-radius:14px;padding:18px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:8px;background:color-mix(in srgb,var(--surface-2) 30%,var(--surface))}
+.ba-intro b{font-size:16px;color:var(--ink)}
+.ba-intro p{margin:0}
+.ba-intro .ex{font-size:13px;color:var(--muted)}
+.ba-topo{display:flex;align-items:center;justify-content:space-between;gap:8px 10px;flex-wrap:wrap}
+.ba-cont{font-size:14.5px;color:var(--ink-2)}
+.ba-cont b{color:var(--ink)}
+.seg2.mini{height:32px}
+.seg2.mini button{font-size:12.5px;padding:0 10px}
+.ba-crit{font-size:12.5px;color:var(--muted);margin-top:-6px}
+.ba-proj{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);flex:none}
+.ba-cab{display:flex;gap:12px;padding:12px}
+.ba-ph{position:relative;flex:0 0 96px;width:96px;height:96px;border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.ba-ph .ba-img{width:100%;height:100%;object-fit:cover;display:block}
+.ba-ph .mk-ph{font-size:24px}
+.ba-ph .mk-ph svg{width:28px;height:28px}
+.ba-loc .mk-fase{display:inline-block;margin-right:6px;font-size:10px;padding:1px 6px;vertical-align:1px}
+.ba-pi{min-width:0;display:flex;flex-direction:column;gap:3px}
+.ba-pi h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:21px;font-weight:700;line-height:1.05;letter-spacing:.01em;margin:0}
+.ba-loc{margin:0;font-size:12.5px;color:var(--ink-2)}
+.ba-dest{margin:0;font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ba-min{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+.ba-min b{color:var(--ink)}
+.ba-us{border-top:1px solid var(--line);padding:6px 8px 8px;display:flex;flex-direction:column;gap:2px;background:color-mix(in srgb,var(--surface-2) 38%,var(--surface))}
+.ba-ush{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 4px 4px;font-size:12px;color:var(--muted)}
+.ba-ush .lnk{font-size:12.5px}
+.ba-u{display:grid;grid-template-columns:20px auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:6px;border-radius:9px;cursor:pointer;font-size:13px;border:1px solid transparent}
+.ba-u:hover{background:var(--surface)}
+.ba-u.on{background:var(--surface);border-color:var(--line)}
+.ba-u input{width:18px;height:18px;accent-color:var(--accent);margin:0;cursor:pointer}
+.ba-n{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:16px;font-weight:600;min-width:46px;padding:1px 6px;border-radius:6px;border:0;background:var(--disp);color:var(--disp-ink);text-align:center;cursor:pointer;line-height:1.35}
+.ba-n:hover{outline:2px solid var(--disp-line)}
+.ba-ud{color:var(--ink-2);min-width:0}
+.ba-up{font-weight:600;color:var(--ink);text-align:right;white-space:nowrap}
+.ba-up small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+.ba-mais{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;font-weight:600;padding:6px;cursor:pointer;align-self:flex-start}
+.ba-maisp{align-self:center}
+.ba-sug{display:flex;flex-direction:column;gap:7px;border:1px solid var(--line);border-radius:14px;padding:12px;background:color-mix(in srgb,var(--accent-soft) 50%,var(--surface));flex:none}
+.ba-sug p{margin:0;font-size:13px;color:var(--ink-2)}
+.ba-sug p.ba-sug-av{font-size:12.5px;color:var(--muted)}
+.ba-sg{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 11px;font:inherit;cursor:pointer;color:var(--ink)}
+.ba-sg:hover{border-color:var(--accent)}
+.ba-sg b{font-size:13.5px}
+.ba-sg span{font-size:12px;color:var(--muted)}
+
+/* barra de envio, presa no pé da janela */
+.bz-barra{position:sticky;bottom:0;z-index:2;margin:4px -18px 0;padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 20px rgba(24,32,48,.08);display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.bz-sel{flex:1 1 170px;font-size:13px;color:var(--ink-2)}
+.bz-sel b{color:var(--ink)}
+.bz-bts{display:flex;gap:8px;flex-wrap:wrap}
+.bz-bts .abtn{height:40px}
+@media (max-width:480px){ .bz-bts{width:100%} .bz-bts .abtn{flex:1;justify-content:center;padding:0 8px} }
+
+/* enviar ao cliente */
+.bz-voltar{align-self:flex-start;margin-top:2px}
+.be-grid{display:flex;flex-direction:column;gap:16px}
+.be-form{display:flex;flex-direction:column;gap:12px;min-width:0}
+.painel .campo textarea{border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;font-size:14.5px;font-weight:400;line-height:1.45;letter-spacing:0;text-transform:none;background:var(--surface);color:var(--ink);resize:vertical;min-height:150px;width:100%}
+.painel .campo textarea:focus{outline:2px solid var(--focus);outline-offset:1px}
+.be-link{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.be-link.ok{background:color-mix(in srgb,var(--disp) 40%,var(--surface))}
+.be-link.ok b{color:var(--disp-text)}
+.be-link.bad{background:color-mix(in srgb,var(--vend) 14%,var(--surface));color:var(--ink)}
+.be-link small{color:var(--ink-2);overflow-wrap:normal}
+.be-cor{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);flex-wrap:wrap}
+.be-cor b{color:var(--ink)}
+.be-cor[hidden],#be-cor-f[hidden]{display:none}
+.be-barra .bz-bts{width:100%}
+.be-barra .abtn{flex:1 1 auto;justify-content:center}
+.be-barra .abtn.primary{flex:2 1 auto}
+.be-resumo{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:14px;padding:12px}
+.be-rt{margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.be-p{display:flex;gap:10px;align-items:center;min-width:0}
+.be-p .ba-ph{flex-basis:54px;width:54px;height:54px;border-radius:8px}
+.be-p .ba-ph .mk-fase,.be-p .mk-ph svg{display:none}
+.be-p .mk-ph{font-size:16px;padding:6px}
+.be-p b{display:block;font-size:14px}
+.be-p small{color:var(--muted);font-size:12px}
+.se-card.exp{opacity:.65}
+
+@media (min-width:900px){
+  .bz-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:22px;align-items:start}
+  .ba-ph{flex-basis:128px;width:128px;height:100px}
+  .be-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+}
+@media (max-width:560px){ .bz .top h2{font-size:21px} }
 </style>
 </head>
 <body>
@@ -712,7 +846,7 @@ body.mk-aberto{overflow:hidden}
   <div class="brand"><img src="icon-192.png" alt=""><b><span class="b-long">Espelhos de Vendas</span><span class="b-curto">Espelhos</span></b></div>
   <span class="live" id="live" title="Situação da atualização automática"><i></i><span id="live-t">Carregando…</span></span>
   <button class="abtn" id="btn-instalar" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span class="lbl">Instalar</span></button>
-  <button class="abtn" id="btn-buscas" type="button" aria-label="Buscas de clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg><span class="lbl">Buscas</span><span class="contador" id="buscas-n" hidden></span></button>
+  <button class="abtn" id="btn-buscas" type="button" aria-label="Buscar para o cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg><span class="lbl">Buscar</span><span class="contador" id="buscas-n" hidden></span></button>
   <button class="abtn" id="btn-avisos" type="button" aria-label="Avisos e ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="lbl" id="btn-avisos-t">Avisos</span></button>
 </div>
 
@@ -872,27 +1006,96 @@ body.mk-aberto{overflow:hidden}
     </div>
   </div>
 </div>
-<!-- Buscas de clientes: "Me avisa quando aparecer" -->
+<!-- Lupa: buscar para o cliente (buscar agora, avisos e seleções enviadas) -->
 <div class="painel-fundo" id="pn-buscas" hidden>
-  <div class="painel" role="dialog" aria-label="Buscas de clientes">
-    <div class="top"><h2>Avisar quando aparecer</h2><button class="xbtn" type="button" data-fechar aria-label="Fechar">×</button></div>
-    <div id="bs-lista-v">
-      <p class="txt">Cadastre o que o seu cliente procura. Quando uma unidade assim <b>ficar disponível em qualquer projeto</b> (reserva que caiu, distrato ou liberação), você recebe um aviso na hora, com o nome do cliente.</p>
-      <div id="bs-sem-push" class="aviso" hidden>Este aparelho ainda não recebe avisos. Pode cadastrar a busca normalmente: na hora de salvar, o app pede para ligar as notificações aqui. O aviso chega no aparelho onde a busca foi salva.</div>
-      <div class="row"><button class="abtn primary" type="button" id="bs-nova">+ Nova busca</button></div>
+  <div class="painel painel-largo bz" role="dialog" aria-label="Buscar para o cliente">
+    <div class="top"><h2>Buscar para o cliente</h2><button class="xbtn" type="button" data-fechar aria-label="Fechar">×</button></div>
+    <div class="bz-abas" role="tablist">
+      <button type="button" role="tab" data-aba="agora" class="on">Buscar agora</button>
+      <button type="button" role="tab" data-aba="avisos">Avisos <span class="n" id="bz-n-av" hidden></span></button>
+      <button type="button" role="tab" data-aba="enviadas">Enviadas</button>
+    </div>
+
+    <!-- 1) Buscar agora -->
+    <div class="bz-v" id="bz-agora">
+      <div class="aviso bz-ed" id="ba-editando" hidden><span id="ba-ed-t"></span> <button type="button" class="lnk" id="ba-ed-cancelar">Cancelar</button></div>
+      <div class="bz-grid">
+        <form class="bz-form" id="ba-form" autocomplete="off" onsubmit="return false">
+          <label class="campo"><span>Cliente</span><input id="ba-cli" maxlength="60" placeholder="Nome do cliente (ex.: Miguel)" autocomplete="off"></label>
+          <div class="campo"><span>Onde</span>
+            <div class="duo"><input id="ba-bairro" list="ba-bairros" placeholder="Bairro (ex.: Perdizes)" autocomplete="off" spellcheck="false"><select id="ba-raio" aria-label="Distância máxima do bairro"><option value="1.5">até 1,5 km</option><option value="3" selected>até 3 km</option><option value="5">até 5 km</option><option value="8">até 8 km</option><option value="12">até 12 km</option></select></div>
+            <datalist id="ba-bairros"></datalist>
+            <div class="bz-bsug" id="ba-bairro-sug" hidden></div>
+            <small class="bz-ou">ou escolha a região:</small>
+            <div class="chips" id="ba-zonas"></div>
+          </div>
+          <div class="campo"><span>Metragem (m²)</span><div class="duo"><input id="ba-m2a" inputmode="decimal" placeholder="de"><input id="ba-m2b" inputmode="decimal" placeholder="até"></div></div>
+          <div class="campo"><span>Preço máximo</span><div class="duo"><input id="ba-preco" inputmode="numeric" placeholder="Ex.: 250 mil"><div class="seg2" id="ba-modo"><button type="button" data-v="pv" class="on">À vista</button><button type="button" data-v="pp">Parcelado</button></div></div></div>
+          <div class="campo"><span>Fase da obra</span><div class="chips" id="ba-fases"></div></div>
+          <div class="campo"><span>Tipologia</span><div class="chips" id="ba-tipos"></div></div>
+          <details class="bz-mais" id="ba-mais">
+            <summary>Mais filtros <small id="ba-mais-n"></small></summary>
+            <div class="campo"><span>Construtora</span><div class="chips" id="ba-grupos"></div></div>
+            <div class="campo"><span>Empreendimentos</span><div class="chips" id="ba-projs"></div></div>
+            <label class="campo"><span>Andar mínimo</span><input id="ba-andar" inputmode="numeric" placeholder="Ex.: 10"></label>
+            <label class="ck"><input type="checkbox" id="ba-loja" checked> Esconder lojas</label>
+          </details>
+          <p class="dica">Pode digitar "250" para 250 mil. Com preço máximo, unidades sem preço ficam de fora; se o projeto não tiver o valor escolhido, vale o menor valor que ele tiver.</p>
+          <div class="row"><button class="abtn" type="button" id="ba-limpar">Limpar filtros</button></div>
+        </form>
+        <div class="bz-res" id="ba-res" aria-live="polite"></div>
+      </div>
+      <div class="bz-barra" id="ba-barra">
+        <div class="bz-sel" id="ba-sel">—</div>
+        <div class="bz-bts">
+          <button class="abtn" type="button" id="ba-avisar">Avisar quando aparecer</button>
+          <button class="abtn primary" type="button" id="ba-enviar" disabled>Enviar ao cliente</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b) Enviar a seleção para o cliente (link de uma página) -->
+    <div class="bz-v" id="bz-envio" hidden>
+      <button type="button" class="lnk bz-voltar" id="be-voltar">‹ Voltar para a busca</button>
+      <div class="be-grid">
+        <div class="be-form">
+          <div class="duo2">
+            <label class="campo"><span>Cliente</span><input id="be-cli" maxlength="60" placeholder="Ex.: Miguel" autocomplete="off"></label>
+            <label class="campo"><span>WhatsApp do cliente (opcional)</span><input id="be-tel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000" autocomplete="off"></label>
+          </div>
+          <div class="be-cor" id="be-cor-v" hidden><span>Assinado por <b id="be-cor-t"></b></span><button type="button" class="lnk" id="be-cor-alt">alterar</button></div>
+          <div class="duo2" id="be-cor-f">
+            <label class="campo"><span>Seu nome</span><input id="be-cor" maxlength="40" placeholder="Corretor" autocomplete="off"></label>
+            <label class="campo"><span>Seu WhatsApp</span><input id="be-mtel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000" autocomplete="off"></label>
+          </div>
+          <label class="campo"><span>Mensagem</span><textarea id="be-msg" rows="8"></textarea></label>
+          <div class="be-link" id="be-link"></div>
+          <div id="be-erro" class="aviso bad" hidden></div>
+        </div>
+        <div class="be-resumo" id="be-resumo"></div>
+      </div>
+      <div class="bz-barra be-barra">
+        <div class="bz-bts">
+          <button class="abtn primary" type="button" id="be-whats" disabled>Enviar no WhatsApp</button>
+          <button class="abtn" type="button" id="be-copiar" disabled>Copiar</button>
+          <a class="abtn" id="be-ver" target="_blank" rel="noopener" aria-disabled="true">Ver como o cliente</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) Avisos: "Me avisa quando aparecer" -->
+    <div class="bz-v" id="bz-avisos" hidden>
+      <p class="txt">Quando uma unidade com os filtros do cliente <b>ficar disponível em qualquer projeto</b> (reserva que caiu, distrato ou liberação), você recebe um aviso na hora, com o nome do cliente.</p>
+      <div id="bs-sem-push" class="aviso" hidden>Este aparelho ainda não recebe avisos. Pode cadastrar normalmente: na hora de salvar, o app pede para ligar as notificações aqui. O aviso chega no aparelho onde ele foi salvo.</div>
+      <div class="row"><button class="abtn primary" type="button" id="bs-nova">+ Novo aviso</button></div>
       <div id="bs-lista" class="bs-lista"></div>
     </div>
-    <form id="bs-form" hidden autocomplete="off">
-      <label class="campo"><span>Cliente</span><input id="bf-cli" maxlength="60" placeholder="Ex.: Maria Souza" required></label>
-      <div class="campo"><span>Projetos</span><div class="chips" id="bf-projs"></div></div>
-      <div class="campo"><span>Metragem (m²)</span><div class="duo"><input id="bf-m2a" inputmode="decimal" placeholder="de"><input id="bf-m2b" inputmode="decimal" placeholder="até"></div></div>
-      <div class="campo"><span>Preço máximo</span><div class="duo"><input id="bf-preco" inputmode="numeric" placeholder="Ex.: 150.000"><div class="seg2" id="bf-modo"><button type="button" data-v="pv" class="on">À vista</button><button type="button" data-v="pp">Parcelado</button></div></div></div>
-      <p class="dica">Pode digitar "150" para 150 mil. Com preço máximo, unidades sem preço no espelho ficam de fora; se o projeto não tiver o valor escolhido, vale o menor valor que ele tiver (nos projetos da VitaUrbana, o menor valor da tabela: associativo ou SFH).</p>
-      <label class="campo"><span>Andar mínimo (opcional)</span><input id="bf-andar" inputmode="numeric" placeholder="Ex.: 10"></label>
-      <div class="previa" id="bf-previa"></div>
-      <div class="row"><button class="abtn primary" type="submit" id="bf-salvar">Salvar busca</button><button class="abtn" type="button" id="bf-cancelar">Cancelar</button></div>
-      <div id="bf-msg" class="aviso" hidden></div>
-    </form>
+
+    <!-- 3) Seleções enviadas -->
+    <div class="bz-v" id="bz-enviadas" hidden>
+      <p class="txt">As seleções que você mandou deste aparelho. Você recebe um aviso quando o cliente abre o link ou toca em <b>Tenho interesse</b>. Cada link vale 60 dias.</p>
+      <div id="se-lista" class="bs-lista"></div>
+    </div>
   </div>
 </div>
 
@@ -1796,21 +1999,93 @@ body.mk-aberto{overflow:hidden}
   }
 
   // =====================================================================
-  // 1) Me avisa quando aparecer (buscas de clientes)
+  // 1) Lupa: buscar para o cliente (agora), avisos e seleções enviadas
+  //    - "Buscar agora": filtros do cliente → unidades disponíveis de todos os projetos, agrupadas por
+  //      empreendimento, com foto; marca as unidades e manda um link de uma página (s.html) no WhatsApp.
+  //    - "Avisos": a mesma busca salva; o servidor avisa quando aparecer unidade assim.
+  //    - "Enviadas": as seleções mandadas deste aparelho, com aberturas e pedidos de informação.
   // =====================================================================
-  let buscas = [], bsEditando = null, bsProjs = [], bsModo = 'pv', bsEp = null, bsExcluir = null, bsGrupoAberto = {};
-  function casa(c, p, a){
-    if(a[6] !== 'disponivel') return false;
+  let buscas = [], bsEp = null, bsExcluir = null, bsGrupoAberto = {};
+  // o endereço de notificação deste aparelho, sem travar a tela se o navegador não tiver service worker
+  const epRapido = () => Promise.race([meuEndpoint().catch(() => null), new Promise(r => setTimeout(() => r(null), 1500))]);
+  const K_DONO = 'espelhos-dono';
+  function dono(){   // identifica este aparelho como dono das seleções (o mesmo da central de produto)
+    let d = LS.get(K_DONO);
+    if(!d || !/^[A-Za-z0-9_-]{16,64}$/.test(d)){
+      const a = new Uint8Array(12); crypto.getRandomValues(a);
+      d = btoa(String.fromCharCode.apply(null, a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      LS.set(K_DONO, d);
+    }
+    return d;
+  }
+  const BAIRROS = [["Sé",-23.5503,-46.634,"centro"],["República",-23.544,-46.6425,"centro"],["Bela Vista",-23.561,-46.645,"centro"],["Consolação",-23.553,-46.659,"centro"],["Liberdade",-23.5605,-46.634,"centro"],["Santa Cecília",-23.5375,-46.651,"centro"],["Vila Buarque",-23.545,-46.6475,"centro"],["Higienópolis",-23.5445,-46.6565,"centro"],["Campos Elíseos",-23.534,-46.6445,"centro"],["Bom Retiro",-23.527,-46.638,"centro"],["Luz",-23.535,-46.635,"centro"],["Cambuci",-23.57,-46.62,"centro"],["Aclimação",-23.572,-46.6305,"centro"],["Brás",-23.544,-46.615,"centro"],["Pari",-23.529,-46.615,"centro"],["Cerqueira César",-23.562,-46.668,"oeste"],["Jardim Paulista",-23.5705,-46.662,"oeste"],["Jardins",-23.568,-46.664,"oeste"],["Jardim América",-23.572,-46.673,"oeste"],["Jardim Europa",-23.579,-46.68,"oeste"],["Jardim Paulistano",-23.578,-46.687,"oeste"],["Pacaembu",-23.5465,-46.6645,"oeste"],["Perdizes",-23.536,-46.678,"oeste"],["Pompeia",-23.53,-46.687,"oeste"],["Vila Romana",-23.529,-46.696,"oeste"],["Água Branca",-23.522,-46.688,"oeste"],["Barra Funda",-23.526,-46.666,"oeste"],["Sumaré",-23.547,-46.68,"oeste"],["Sumarezinho",-23.553,-46.688,"oeste"],["Pinheiros",-23.565,-46.69,"oeste"],["Vila Madalena",-23.554,-46.691,"oeste"],["Alto de Pinheiros",-23.552,-46.712,"oeste"],["Lapa",-23.521,-46.705,"oeste"],["Alto da Lapa",-23.531,-46.716,"oeste"],["Vila Leopoldina",-23.529,-46.733,"oeste"],["Butantã",-23.572,-46.709,"oeste"],["Cidade Universitária",-23.561,-46.728,"oeste"],["Rio Pequeno",-23.568,-46.753,"oeste"],["Jaguaré",-23.548,-46.747,"oeste"],["Morumbi",-23.595,-46.72,"oeste"],["Vila Sônia",-23.599,-46.737,"oeste"],["Itaim Bibi",-23.584,-46.679,"oeste"],["Vila Olímpia",-23.5955,-46.685,"oeste"],["Cidade Jardim",-23.588,-46.698,"oeste"],["Vila Nova Conceição",-23.588,-46.669,"sul"],["Moema",-23.6,-46.663,"sul"],["Indianópolis",-23.608,-46.66,"sul"],["Ibirapuera",-23.593,-46.66,"sul"],["Paraíso",-23.576,-46.6415,"sul"],["Vila Mariana",-23.589,-46.634,"sul"],["Vila Clementino",-23.598,-46.644,"sul"],["Chácara Klabin",-23.59,-46.628,"sul"],["Saúde",-23.618,-46.639,"sul"],["Vila da Saúde",-23.615,-46.632,"sul"],["Praça da Árvore",-23.6107,-46.6381,"sul"],["Bosque da Saúde",-23.618,-46.627,"sul"],["Mirandópolis",-23.613,-46.645,"sul"],["Planalto Paulista",-23.615,-46.656,"sul"],["Campo Belo",-23.623,-46.669,"sul"],["Brooklin",-23.615,-46.688,"sul"],["Vila Mascote",-23.64,-46.66,"sul"],["Jabaquara",-23.646,-46.643,"sul"],["Conceição",-23.636,-46.6405,"sul"],["Vila Guarani",-23.634,-46.637,"sul"],["Cursino",-23.62,-46.615,"sul"],["Ipiranga",-23.589,-46.607,"sul"],["Sacomã",-23.601,-46.603,"sul"],["Vila Monumento",-23.579,-46.613,"sul"],["Santo Amaro",-23.654,-46.709,"sul"],["Chácara Santo Antônio",-23.635,-46.715,"sul"],["Alto da Boa Vista",-23.645,-46.696,"sul"],["Granja Julieta",-23.633,-46.702,"sul"],["Vila Andrade",-23.628,-46.734,"sul"],["Campo Limpo",-23.642,-46.76,"sul"],["Socorro",-23.677,-46.704,"sul"],["Interlagos",-23.701,-46.698,"sul"],["Mooca",-23.558,-46.599,"leste"],["Belém",-23.541,-46.596,"leste"],["Tatuapé",-23.54,-46.576,"leste"],["Anália Franco",-23.56,-46.561,"leste"],["Carrão",-23.553,-46.54,"leste"],["Água Rasa",-23.565,-46.578,"leste"],["Vila Formosa",-23.566,-46.545,"leste"],["Vila Prudente",-23.583,-46.58,"leste"],["Penha",-23.526,-46.543,"leste"],["Vila Matilde",-23.532,-46.53,"leste"],["Vila Esperança",-23.529,-46.516,"leste"],["Patriarca",-23.531,-46.501,"leste"],["Vila Ré",-23.525,-46.497,"leste"],["Artur Alvim",-23.54,-46.485,"leste"],["Aricanduva",-23.573,-46.511,"leste"],["Itaquera",-23.542,-46.456,"leste"],["Cidade Líder",-23.561,-46.487,"leste"],["São Mateus",-23.606,-46.478,"leste"],["Guaianases",-23.541,-46.415,"leste"],["Santana",-23.502,-46.625,"norte"],["Tucuruvi",-23.48,-46.603,"norte"],["Casa Verde",-23.508,-46.661,"norte"],["Vila Guilherme",-23.511,-46.604,"norte"],["Vila Maria",-23.513,-46.587,"norte"],["Mandaqui",-23.48,-46.635,"norte"],["Freguesia do Ó",-23.499,-46.698,"norte"],["Limão",-23.502,-46.675,"norte"],["Pirituba",-23.484,-46.725,"norte"],["Parada Inglesa",-23.488,-46.608,"norte"],["Jaçanã",-23.463,-46.583,"norte"],["Tremembé",-23.46,-46.61,"norte"]];
+  const ZONA_NOME = {centro: 'Centro', oeste: 'Zona Oeste', sul: 'Zona Sul', norte: 'Zona Norte', leste: 'Zona Leste', gsp: 'Grande SP'};
+  const ZONA_EM = {centro: 'no Centro', oeste: 'na Zona Oeste', sul: 'na Zona Sul', norte: 'na Zona Norte', leste: 'na Zona Leste', gsp: 'na Grande São Paulo'};
+  const FASE_NOME = {pronto: 'Pronto para morar', obras: 'Em obras', lanc: 'Lançamento'};
+  const FASE_SELO = {pronto: 'Pronto', obras: 'Em obras', lanc: 'Lançamento', breve: 'Em breve'};
+  const TIPO_NOME = {studio: 'Studio', '1': '1 dorm', '2': '2 dorms', '3': '3+ dorms'};
+  const TIPO_ORDEM = ['studio', '1', '2', '3'];
+  const RAIOS = [1.5, 3, 5, 8, 12];
+  const norm = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const fmtKm = v => (+v).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' km';
+  const MES3C = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const mesAnoC = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); return m ? MES3C[+m[2] - 1] + '/' + m[1] : ''; };
+  function BRLmil(v){
+    if(v >= 1e6){ const m = Math.round(v / 1e4) / 100; return 'R$ ' + m.toLocaleString('pt-BR', {maximumFractionDigits: 2}) + (m >= 2 ? ' milhões' : ' milhão'); }
+    if(v >= 1000 && v % 1000 === 0) return 'R$ ' + (v / 1000).toLocaleString('pt-BR') + ' mil';
+    return BRL(v);
+  }
+
+  // ---------- dados do projeto (vêm de projetos_info, junto do espelho) ----------
+  const infoDe = p => (p && p.info) || {};
+  const grupoDe = p => p.grupo || infoDe(p).grupo || null;
+  const faseDe = p => { const f = infoDe(p).fase; return f === 'breve' ? 'lanc' : (f || null); };
+  function tipologiaDe(p, a){   // a do espelho (tl) ou, sem ela, a regra por metragem da central de produto
+    const tl = exDe(a).tl; if(tl != null && String(tl).trim()) return String(tl).trim();
+    const r = infoDe(p).tipologias_regra, ar = areaDe(a);
+    if(Array.isArray(r) && ar > 0){ let best = null; for(const q of r){ if(ar <= +q[0] && (!best || +q[0] < +best[0])) best = q; } if(best) return best[1]; }
+    return null;
+  }
+  function tipoK(tl){   // mesma regra do servidor (_tipo_k): studio, 1, 2, 3 (3 ou mais), loja, outro
+    if(tl == null) return null; const t = String(tl).trim(); if(!t) return null;
+    if(/^loja/i.test(t)) return 'loja'; if(/^(studio|st\.)/i.test(t)) return 'studio';
+    if(/^1\s*dorm/i.test(t)) return '1'; if(/^2\s*dorm/i.test(t)) return '2'; if(/^[3-9]\s*dorm/i.test(t)) return '3';
+    return 'outro';
+  }
+  const ehLoja = a => a[4] === 'L' || /loja/i.test(a[1] || '') || /^\s*loja/i.test(exDe(a).tl || '');
+  function distKm(la1, lo1, la2, lo2){
+    if([la1, lo1, la2, lo2].some(v => v == null || v === '' || !isFinite(+v))) return null;
+    const x = (lo1 - lo2) * 111.32 * Math.cos((+la1 + +la2) / 2 * Math.PI / 180), y = (la1 - la2) * 110.57;
+    return Math.sqrt(x * x + y * y);
+  }
+  const distProj = (p, r) => r ? distKm(infoDe(p).lat, infoDe(p).lng, r.lat, r.lng) : null;
+
+  // ---------- casamento (o mesmo do servidor, em _casar_buscas) ----------
+  function casaProj(c, p){
     if(c.projetos && c.projetos.length && !c.projetos.includes(p.id)) return false;
-    const ar = areaDe(a);
-    if(c.m2_min != null && ar < c.m2_min - 0.005) return false;
-    if(c.m2_max != null && ar > c.m2_max + 0.005) return false;
-    if(c.andar_min != null && andarNum(a[4]) < c.andar_min) return false;
-    if(c.preco_max != null){ const pr = precoDe(p, a, c.modo); if(!pr || pr.v > c.preco_max) return false; }
+    if(c.grupos && c.grupos.length && !c.grupos.includes(grupoDe(p))) return false;
+    if(c.fases && c.fases.length && !c.fases.includes(faseDe(p))) return false;
+    if(c.zonas && c.zonas.length && !c.zonas.includes(infoDe(p).zona)) return false;
+    if(c.regiao){ const d = distProj(p, c.regiao); if(d == null || d > (+c.regiao.raio || 3)) return false; }
     return true;
   }
+  function casaUni(c, p, a){
+    if(a[6] !== 'disponivel') return false;
+    if(c.m2_min != null || c.m2_max != null){
+      const ar = areaDe(a); if(!(ar > 0)) return false;
+      if(c.m2_min != null && ar < c.m2_min - 0.005) return false;
+      if(c.m2_max != null && ar > c.m2_max + 0.005) return false;
+    }
+    if(c.andar_min != null && andarNum(a[4]) < c.andar_min) return false;
+    if(c.preco_max != null){ const pr = precoDe(p, a, c.modo); if(!pr || pr.v > c.preco_max) return false; }
+    if(c.tipos && c.tipos.length && !c.tipos.includes(tipoK(tipologiaDe(p, a)))) return false;
+    if(c.sem_loja && ehLoja(a)) return false;
+    return true;
+  }
+  const casa = (c, p, a) => casaProj(c, p) && casaUni(c, p, a);
   function encontrados(c){
-    const out = []; for(const p of (dados ? dados.projetos : [])) for(const a of p.unidades) if(casa(c, p, a)) out.push({p, a});
+    const out = [];
+    for(const p of (dados ? dados.projetos : [])){ if(!casaProj(c, p)) continue; for(const a of p.unidades) if(casaUni(c, p, a)) out.push({p, a}); }
     if(c.preco_max != null) out.sort((x, y) => { const px = precoDe(x.p, x.a, c.modo), py = precoDe(y.p, y.a, c.modo); return (px ? px.v : 9e12) - (py ? py.v : 9e12); });   // mais baratas primeiro
     return out;
   }
@@ -1827,23 +2102,49 @@ body.mk-aberto{overflow:hidden}
     for(const id of ids){ if(usados.has(id)) continue; const p = ps.find(x => x.id === id); out.push(p ? (p.grupo ? curto(p) + ' (' + (GRUPO_NOME[p.grupo] || p.grupo) + ')' : p.nome) : id); }
     return out.join(', ');
   }
-  function critTexto(c){
-    const nomes = (c.projetos && c.projetos.length) ? nomesProjs(c.projetos) : 'Todos os projetos';
-    const partes = [nomes];
-    if(c.m2_min != null && c.m2_max != null) partes.push('de ' + fmtM2(c.m2_min) + ' a ' + fmtM2(c.m2_max) + ' m²');
-    else if(c.m2_min != null) partes.push('a partir de ' + fmtM2(c.m2_min) + ' m²');
-    else if(c.m2_max != null) partes.push('até ' + fmtM2(c.m2_max) + ' m²');
+  function txtM2(c){
+    if(c.m2_min != null && c.m2_max != null) return 'de ' + fmtM2(c.m2_min) + ' a ' + fmtM2(c.m2_max) + ' m²';
+    if(c.m2_min != null) return 'a partir de ' + fmtM2(c.m2_min) + ' m²';
+    if(c.m2_max != null) return 'até ' + fmtM2(c.m2_max) + ' m²';
+    return '';
+  }
+  function critTexto(c){   // resumo dos filtros para o corretor
+    const partes = [];
+    if(c.projetos && c.projetos.length) partes.push(nomesProjs(c.projetos));
+    else if(c.grupos && c.grupos.length) partes.push('Só ' + c.grupos.map(g => GRUPO_NOME[g] || g).join(' e '));
+    else partes.push('Todos os projetos');
+    if(c.regiao) partes.push('perto de ' + c.regiao.nome + ' (até ' + fmtKm(+c.regiao.raio || 3) + ')');
+    else if(c.zonas && c.zonas.length) partes.push(c.zonas.map(z => ZONA_NOME[z] || z).join(', '));
+    if(c.fases && c.fases.length) partes.push(c.fases.map(f => (FASE_NOME[f] || f).toLowerCase()).join(' ou '));
+    if(c.tipos && c.tipos.length) partes.push(TIPO_ORDEM.filter(t => c.tipos.includes(t)).map(t => TIPO_NOME[t]).join(', '));
+    const m2 = txtM2(c); if(m2) partes.push(m2);
     if(c.preco_max != null) partes.push('até ' + BRL(c.preco_max) + ((c.modo || 'pv') === 'pv' ? ' à vista' : ' parcelado'));
     if(c.andar_min != null) partes.push('do ' + c.andar_min + 'º andar para cima');
     return partes.join(' · ');
   }
+  function textoBusca(c){   // em português corrido, para o cliente: "apartamentos prontos para morar perto de Perdizes, de 20 a 50 m², até R$ 250 mil à vista"
+    const t = c.tipos || [], studio = t.includes('studio'), ns = t.filter(x => x !== 'studio').map(Number).sort((a, b) => a - b);
+    let dTxt = '';
+    if(ns.length){ dTxt = ns.includes(3) ? (ns.length === 1 ? '3 ou mais dormitórios' : ns[0] + ' ou mais dormitórios') : ns.join(' e ') + (ns.length === 1 && ns[0] === 1 ? ' dormitório' : ' dormitórios'); }
+    const tipo = studio && dTxt ? 'studios e apartamentos de ' + dTxt : studio ? 'studios' : dTxt ? 'apartamentos de ' + dTxt : 'apartamentos';
+    const f = c.fases || [], FT = {pronto: 'prontos para morar', obras: 'em obras', lanc: 'em lançamento'};
+    const fase = f.length && f.length < 3 ? ['pronto', 'obras', 'lanc'].filter(x => f.includes(x)).map(x => FT[x]).join(' ou ') : '';
+    const onde = c.regiao ? 'perto de ' + c.regiao.nome : (c.zonas && c.zonas.length ? c.zonas.map(z => ZONA_EM[z] || z).join(' ou ') : '');
+    const ex = [];
+    const m2 = txtM2(c); if(m2) ex.push(m2);
+    if(c.preco_max != null) ex.push('até ' + BRLmil(c.preco_max) + ((c.modo || 'pv') === 'pv' ? ' à vista' : ''));
+    return ([tipo, fase, onde].filter(Boolean).join(' ') + (ex.length ? ', ' + ex.join(', ') : '')).slice(0, 200);
+  }
   function atualizarContador(){
     const n = buscas.filter(b => encontrados(b.criterios).length).length;
     const el = $('buscas-n'); el.textContent = n; el.hidden = !n;
-    $('btn-buscas').title = n ? n + ' busca(s) com unidade disponível agora' : 'Buscas de clientes';
+    const t = $('bz-n-av'); if(t){ t.textContent = n; t.hidden = !n; }
+    $('btn-buscas').title = n ? n + ' aviso(s) com unidade disponível agora' : 'Buscar para o cliente';
   }
+
+  // ---------- avisos (buscas salvas) ----------
   async function carregarBuscas(){
-    bsEp = await meuEndpoint();
+    bsEp = await epRapido();
     $('bs-sem-push').hidden = !!bsEp;
     if(!bsEp || !codigo){ buscas = []; renderBuscas(); return; }
     try{ const r = await rpc('meus_avisos', {p_codigo: codigo, p_endpoint: bsEp}); buscas = r.buscas || []; }catch(e){}
@@ -1851,7 +2152,7 @@ body.mk-aberto{overflow:hidden}
   }
   function renderBuscas(){
     const box = $('bs-lista'); box.replaceChildren();
-    if(!buscas.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhuma busca neste aparelho ainda. Toque em "+ Nova busca" para cadastrar a primeira.'; box.appendChild(v); atualizarContador(); return; }
+    if(!buscas.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhum aviso neste aparelho ainda. Monte a busca em "Buscar agora" e toque em "Avisar quando aparecer".'; box.appendChild(v); atualizarContador(); return; }
     for(const b of buscas){
       const achou = encontrados(b.criterios);
       const card = document.createElement('div'); card.className = 'bs-card';
@@ -1863,12 +2164,13 @@ body.mk-aberto{overflow:hidden}
       if(achou.length){ ag.classList.add('tem'); ag.textContent = achou.length + (achou.length === 1 ? ' unidade disponível agora' : ' unidades disponíveis agora') + ' · ' + porProjeto(achou); }
       else ag.textContent = 'Nenhuma disponível agora. Você recebe um aviso quando aparecer.';
       const ac = card.querySelector('.acoes'), lst = card.querySelector('.lst');
-      const bt = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn'; x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
-      if(achou.length) bt('Ver unidades', () => { if(lst.firstChild) lst.replaceChildren(); else lst.appendChild(listaUnidades(achou, b.criterios.modo, 30)); });
-      bt('Editar', () => abrirFormBusca(b));
+      const bt = (t, fn, cls) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn' + (cls ? ' ' + cls : ''); x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
+      if(achou.length) bt('Ver e enviar', () => { baEdit = null; $('ba-editando').hidden = true; formDe(b.criterios, b.cliente); abaBusca('agora'); }, 'primary');
+      if(achou.length) bt('Lista rápida', () => { if(lst.firstChild) lst.replaceChildren(); else lst.appendChild(listaUnidades(achou, b.criterios.modo, 30)); });
+      bt('Editar', () => editarAviso(b));
       const del = bt(bsExcluir === b.id ? 'Confirmar exclusão' : 'Excluir', async () => {
         if(bsExcluir !== b.id){ bsExcluir = b.id; renderBuscas(); return; }
-        try{ await rpc('busca_remover', {p_codigo: codigo, p_endpoint: bsEp, p_id: b.id}); toast('Busca de ' + b.cliente + ' excluída.'); }catch(e){ toast('Não consegui excluir agora.'); }
+        try{ await rpc('busca_remover', {p_codigo: codigo, p_endpoint: bsEp, p_id: b.id}); toast('Aviso de ' + b.cliente + ' excluído.'); }catch(e){ toast('Não consegui excluir agora.'); }
         bsExcluir = null; carregarBuscas();
       });
       if(bsExcluir === b.id) del.style.color = 'var(--vend-text)';
@@ -1876,90 +2178,595 @@ body.mk-aberto{overflow:hidden}
     }
     atualizarContador();
   }
+  function editarAviso(b){
+    baEdit = b || null;
+    formDe(b ? b.criterios : {}, b ? b.cliente : '');
+    $('ba-ed-t').textContent = b ? 'Editando o aviso de ' + b.cliente + ': ajuste os filtros e toque em "Salvar aviso".' : 'Novo aviso: escolha os filtros, escreva o nome do cliente e toque em "Avisar quando aparecer".';
+    $('ba-editando').hidden = false;
+    abaBusca('agora');
+  }
+  $('ba-ed-cancelar').addEventListener('click', () => { baEdit = null; $('ba-editando').hidden = true; renderBarra(); abaBusca('avisos'); });
+  $('bs-nova').addEventListener('click', () => editarAviso(null));
+  async function salvarAviso(cliDe){
+    const cli = (cliDe || $('ba-cli').value).trim();
+    if(!cli){ toast('Escreva o nome do cliente para salvar o aviso.'); $('ba-cli').focus(); return; }
+    const c = critBusca();
+    if(!temFiltro(c)){ toast('Escolha pelo menos um filtro.'); return; }
+    const btn = $('ba-avisar'); btn.disabled = true;
+    try{
+      if(!bsEp){
+        await ligarAvisos(); bsEp = await meuEndpoint();
+        if(!bsEp) throw new Error('Não consegui ligar as notificações neste aparelho.');
+        $('bs-sem-push').hidden = true;
+      }
+      await rpc('busca_salvar', {p_codigo: codigo, p_endpoint: bsEp, p_cliente: cli, p_criterios: c, p_id: baEdit ? baEdit.id : null});
+      toast(baEdit ? 'Aviso de ' + cli + ' atualizado.' : 'Pronto! Você será avisado quando aparecer unidade para ' + cli + '.', 4500);
+      const eraEdicao = !!baEdit; baEdit = null; $('ba-editando').hidden = true;
+      await carregarBuscas();
+      if(eraEdicao || !baSel.size) abaBusca('avisos');
+    }catch(err){
+      const t = (err && err.body) || '';
+      toast(/sem_notificacoes/.test(t) ? 'Ative as notificações neste aparelho primeiro.' : /limite_buscas/.test(t) ? 'Você chegou ao limite de 40 avisos. Exclua algum antigo.' : (!t && err && err.message) ? err.message : 'Não consegui salvar agora. Confira a internet e tente de novo.', 5500);
+    }finally{ btn.disabled = false; renderBarra(); }
+  }
+  $('ba-avisar').addEventListener('click', () => salvarAviso());
+
+  // ---------- Buscar agora ----------
+  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, ord: 'preco'};
+  let baRes = [], baCrit = {}, baSel = new Set(), baSelManual = false, baAberto = {}, baMaisProj = 12, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora';
+  const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null));
+  function critBusca(){
+    const c = {projetos: ba.projs.slice(), modo: ba.modo};
+    if(ba.grupos.length) c.grupos = ba.grupos.slice();
+    if(ba.fases.length) c.fases = ba.fases.slice();
+    if(ba.tipos.length) c.tipos = ba.tipos.slice();
+    if(ba.bairro) c.regiao = {nome: ba.bairro.nome, lat: Math.round(ba.bairro.lat * 1e5) / 1e5, lng: Math.round(ba.bairro.lng * 1e5) / 1e5, raio: ba.raio};
+    else if(ba.zonas.length) c.zonas = ba.zonas.slice();
+    const a = numArea($('ba-m2a').value), b = numArea($('ba-m2b').value);
+    if(a != null) c.m2_min = a; if(b != null) c.m2_max = b;
+    if(a != null && b != null && a > b){ c.m2_min = b; c.m2_max = a; }
+    const pr = numPreco($('ba-preco').value); if(pr != null) c.preco_max = pr;
+    const an = parseInt($('ba-andar').value, 10); if(an > 0) c.andar_min = an;
+    if(ba.semLoja) c.sem_loja = true;
+    return c;
+  }
+  function indiceBairros(){   // tabela de bairros de SP + bairros dos empreendimentos que não estão nela
+    const m = new Map();
+    for(const b of BAIRROS) m.set(norm(b[0]), {nome: b[0], lat: +b[1], lng: +b[2], zona: b[3]});
+    const soma = new Map();
+    for(const p of (dados ? dados.projetos : [])){
+      const i = infoDe(p); if(!i.bairro || i.lat == null || i.lng == null) continue;
+      const k = norm(i.bairro); if(m.has(k)) continue;
+      const s = soma.get(k) || {nome: i.bairro, lat: 0, lng: 0, n: 0, zona: i.zona}; s.lat += +i.lat; s.lng += +i.lng; s.n++; soma.set(k, s);
+    }
+    for(const [k, s] of soma) m.set(k, {nome: s.nome, lat: s.lat / s.n, lng: s.lng / s.n, zona: s.zona});
+    bairroIdx = m;
+    const dl = $('ba-bairros'); dl.replaceChildren();
+    [...m.values()].sort((x, y) => x.nome.localeCompare(y.nome, 'pt-BR')).forEach(b => { const o = document.createElement('option'); o.value = b.nome; dl.appendChild(o); });
+  }
+  function acharBairro(txt){ const k = norm(txt); if(!k) return null; if(!bairroIdx) indiceBairros(); return bairroIdx.get(k) || null; }
+  function distEd(a, b){   // distância de edição (para "Perdizzes" → Perdizes)
+    const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 9;
+    let ant = Array.from({length: n + 1}, (x, j) => j);
+    for(let i = 1; i <= m; i++){ const cur = [i]; for(let j = 1; j <= n; j++) cur[j] = Math.min(ant[j] + 1, cur[j - 1] + 1, ant[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); ant = cur; }
+    return ant[n];
+  }
+  function sugerirBairros(txt){
+    const box = $('ba-bairro-sug'), k = norm(txt); box.replaceChildren();
+    if(!k || k.length < 3 || acharBairro(txt)){ box.hidden = true; return; }
+    const todos = [...bairroIdx.values()];
+    let c = todos.filter(b => norm(b.nome).includes(k) || k.includes(norm(b.nome)));
+    if(!c.length) c = todos.map(b => [b, distEd(norm(b.nome), k)]).filter(x => x[1] <= 2).sort((x, y) => x[1] - y[1]).map(x => x[0]);
+    const s = document.createElement('span');
+    if(!c.length){ s.textContent = 'Não achei esse bairro. Escolha um da lista ou use a região abaixo.'; box.appendChild(s); box.hidden = false; return; }
+    s.textContent = 'Você quis dizer:'; box.appendChild(s);
+    c.slice(0, 4).forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.textContent = b.nome; x.addEventListener('click', () => { $('ba-bairro').value = b.nome; $('ba-bairro').dispatchEvent(new Event('input')); }); box.appendChild(x); });
+    box.hidden = false;
+  }
+  const marcarSeg = (id, v) => $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  function setRaio(r){
+    ba.raio = +r || 3; const s = $('ba-raio');
+    if(![...s.options].some(o => +o.value === ba.raio)){ const o = document.createElement('option'); o.value = String(ba.raio); o.textContent = 'até ' + fmtKm(ba.raio); s.appendChild(o); }
+    s.value = [...s.options].find(o => +o.value === ba.raio).value;
+  }
+  function chipsSel(box, itens, arr, fn){
+    box.replaceChildren();
+    for(const [v, rot] of itens){
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = rot;
+      const on = arr.includes(v); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.addEventListener('click', () => { const i = arr.indexOf(v); if(i >= 0) arr.splice(i, 1); else arr.push(v); fn(v); });
+      box.appendChild(b);
+    }
+  }
+  function renderChipsBusca(){
+    const mudou = () => { renderChipsBusca(); agendar(); };
+    chipsSel($('ba-zonas'), Object.entries(ZONA_NOME), ba.zonas, () => { if(ba.zonas.length && ($('ba-bairro').value || ba.bairro)){ ba.bairro = null; $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); } mudou(); });
+    chipsSel($('ba-fases'), Object.entries(FASE_NOME), ba.fases, mudou);
+    chipsSel($('ba-tipos'), TIPO_ORDEM.map(k => [k, TIPO_NOME[k]]), ba.tipos, mudou);
+    const gs = [...new Set((dados ? dados.projetos : []).map(grupoDe).filter(Boolean))].sort((x, y) => (GRUPO_NOME[x] || x).localeCompare(GRUPO_NOME[y] || y, 'pt-BR'));
+    chipsSel($('ba-grupos'), gs.map(g => [g, GRUPO_NOME[g] || g]), ba.grupos, mudou);
+    renderChipsProjs();
+    const n = ba.grupos.length + (ba.projs.length ? 1 : 0) + ($('ba-andar').value.trim() ? 1 : 0) + (ba.semLoja ? 0 : 1);
+    $('ba-mais-n').textContent = n ? '· ' + n + (n === 1 ? ' ativo' : ' ativos') : '';
+  }
   function renderChipsProjs(){
-    const box = $('bf-projs'); box.replaceChildren();
+    const box = $('ba-projs'); box.replaceChildren();
     const mk = (id, nome) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = nome;
-      const on = id === null ? !bsProjs.length : bsProjs.includes(id); if(on) b.classList.add('on');
-      b.addEventListener('click', () => { if(id === null) bsProjs = []; else bsProjs = bsProjs.includes(id) ? bsProjs.filter(x => x !== id) : bsProjs.concat(id); renderChipsProjs(); previaBusca(); });
+      const on = id === null ? !ba.projs.length : ba.projs.includes(id); if(on) b.classList.add('on');
+      b.addEventListener('click', () => { if(id === null) ba.projs = []; else ba.projs = ba.projs.includes(id) ? ba.projs.filter(x => x !== id) : ba.projs.concat(id); renderChipsBusca(); agendar(); });
       box.appendChild(b); };
     mk(null, 'Todos');
     const grupos = {};
     for(const p of (dados ? dados.projetos : [])){ if(p.grupo){ (grupos[p.grupo] = grupos[p.grupo] || []).push(p); continue; } mk(p.id, p.nome); }
     for(const g in grupos){
-      const ids = grupos[g].map(p => p.id), n = ids.filter(id => bsProjs.includes(id)).length;
+      const ids = grupos[g].map(p => p.id), n = ids.filter(id => ba.projs.includes(id)).length;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'grp' + (n === ids.length ? ' on' : n ? ' parte' : '');
       b.textContent = (GRUPO_NOME[g] || g) + ' (' + (n && n < ids.length ? n + ' de ' : '') + ids.length + ')';
-      b.addEventListener('click', () => { bsProjs = n === ids.length ? bsProjs.filter(x => !ids.includes(x)) : [...new Set(bsProjs.concat(ids))]; renderChipsProjs(); previaBusca(); });
+      b.addEventListener('click', () => { ba.projs = n === ids.length ? ba.projs.filter(x => !ids.includes(x)) : [...new Set(ba.projs.concat(ids))]; renderChipsBusca(); agendar(); });
       box.appendChild(b);
       const t = document.createElement('button'); t.type = 'button'; t.className = 'ver-grp'; t.textContent = bsGrupoAberto[g] ? 'fechar ▴' : 'escolher ▾';
       t.addEventListener('click', () => { bsGrupoAberto[g] = !bsGrupoAberto[g]; renderChipsProjs(); });
       box.appendChild(t);
       if(bsGrupoAberto[g]){ const sub = document.createElement('div'); sub.className = 'chips sub'; box.appendChild(sub);
         for(const p of grupos[g].slice().sort((a, b) => curto(a).localeCompare(curto(b), 'pt-BR'))){
-          const c = document.createElement('button'); c.type = 'button'; c.textContent = curto(p); if(bsProjs.includes(p.id)) c.classList.add('on');
-          c.addEventListener('click', () => { bsProjs = bsProjs.includes(p.id) ? bsProjs.filter(x => x !== p.id) : bsProjs.concat(p.id); renderChipsProjs(); previaBusca(); });
+          const c = document.createElement('button'); c.type = 'button'; c.textContent = curto(p); if(ba.projs.includes(p.id)) c.classList.add('on');
+          c.addEventListener('click', () => { ba.projs = ba.projs.includes(p.id) ? ba.projs.filter(x => x !== p.id) : ba.projs.concat(p.id); renderChipsBusca(); agendar(); });
           sub.appendChild(c); } }
     }
   }
-  function critDoForm(){
-    const a = numArea($('bf-m2a').value), b = numArea($('bf-m2b').value);
-    const c = { projetos: bsProjs.slice(), modo: bsModo };
-    if(a != null) c.m2_min = a; if(b != null) c.m2_max = b;
-    if(a != null && b != null && a > b){ c.m2_min = b; c.m2_max = a; }
-    const pr = numPreco($('bf-preco').value); if(pr != null) c.preco_max = pr;
-    const an = parseInt($('bf-andar').value, 10); if(an > 0) c.andar_min = an;
-    return c;
+  function formDe(c, cli){   // carrega uma busca (aviso) no formulário
+    c = c || {};
+    $('ba-cli').value = cli || '';
+    ba.projs = (c.projetos || []).slice(); ba.grupos = (c.grupos || []).slice(); ba.fases = (c.fases || []).slice(); ba.tipos = (c.tipos || []).slice(); ba.zonas = (c.zonas || []).slice();
+    ba.bairro = c.regiao ? {nome: c.regiao.nome, lat: +c.regiao.lat, lng: +c.regiao.lng} : null;
+    $('ba-bairro').value = c.regiao ? c.regiao.nome : ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
+    setRaio(c.regiao ? (+c.regiao.raio || 3) : 3);
+    $('ba-m2a').value = c.m2_min != null ? String(c.m2_min).replace('.', ',') : '';
+    $('ba-m2b').value = c.m2_max != null ? String(c.m2_max).replace('.', ',') : '';
+    $('ba-preco').value = c.preco_max != null ? Math.round(c.preco_max).toLocaleString('pt-BR') : '';
+    $('ba-andar').value = c.andar_min != null ? c.andar_min : '';
+    ba.modo = c.modo === 'pp' ? 'pp' : 'pv'; marcarSeg('ba-modo', ba.modo);
+    ba.semLoja = !!c.sem_loja; $('ba-loja').checked = ba.semLoja;
+    ba.ord = 'preco';
+    $('ba-mais').open = !!(ba.grupos.length || ba.projs.length || c.andar_min != null || !ba.semLoja);
+    baSelManual = false; baAberto = {}; baMaisProj = 12;
+    renderChipsBusca();
   }
-  function previaBusca(){
-    const c = critDoForm(), achou = encontrados(c), box = $('bf-previa'); box.replaceChildren();
-    const t = document.createElement('div');
-    t.innerHTML = achou.length ? 'Hoje já há <b>' + achou.length + '</b> ' + (achou.length === 1 ? 'unidade disponível' : 'unidades disponíveis') + ' assim' + (c.preco_max != null ? ' (as mais baratas primeiro)' : '') + ':' : 'Hoje não há nenhuma disponível assim. Assim que aparecer, você recebe o aviso.';
-    box.appendChild(t);
-    if(achou.length){ const pp = document.createElement('div'); pp.className = 'por-proj'; pp.textContent = 'Em ' + porProjeto(achou) + '.'; box.appendChild(pp); }
-    if(achou.length) box.appendChild(listaUnidades(achou, c.modo, 6));
-    const d = document.createElement('div'); d.style.fontSize = '12.5px'; d.textContent = critTexto(c); box.appendChild(d);
+  function limparBusca(){
+    const cli = $('ba-cli').value;
+    formDe({sem_loja: true}, cli);
+    $('ba-mais').open = false;
+    buscarAgora();
   }
-  function setModoBusca(m){ bsModo = m; $('bf-modo').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === m)); }
-  $('bf-modo').querySelectorAll('button').forEach(x => x.addEventListener('click', () => { setModoBusca(x.dataset.v); previaBusca(); }));
-  function abrirFormBusca(b){
-    bsEditando = b || null; const c = b ? b.criterios : {};
-    $('bf-cli').value = b ? b.cliente : '';
-    bsProjs = (c.projetos || []).slice();
-    $('bf-m2a').value = c.m2_min != null ? String(c.m2_min).replace('.', ',') : '';
-    $('bf-m2b').value = c.m2_max != null ? String(c.m2_max).replace('.', ',') : '';
-    $('bf-preco').value = c.preco_max != null ? Math.round(c.preco_max).toLocaleString('pt-BR') : '';
-    $('bf-andar').value = c.andar_min != null ? c.andar_min : '';
-    setModoBusca(c.modo || 'pv');
-    $('bf-msg').hidden = true; $('bf-salvar').textContent = b ? 'Salvar alterações' : (bsEp ? 'Salvar busca' : 'Ligar avisos e salvar');
-    renderChipsProjs(); previaBusca();
-    $('bs-lista-v').hidden = true; $('bs-form').hidden = false; setTimeout(() => $('bf-cli').focus(), 60);
-  }
-  function voltarLista(){ $('bs-form').hidden = true; $('bs-lista-v').hidden = false; }
-  ['bf-m2a', 'bf-m2b', 'bf-preco', 'bf-andar'].forEach(id => $(id).addEventListener('input', previaBusca));
-  $('bf-cancelar').addEventListener('click', voltarLista);
-  $('bs-nova').addEventListener('click', () => abrirFormBusca(null));
-  $('bs-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const cli = $('bf-cli').value.trim(); const m = $('bf-msg');
-    if(!cli){ m.textContent = 'Escreva o nome do cliente.'; m.className = 'aviso bad'; m.hidden = false; return; }
-    $('bf-salvar').disabled = true;
-    if(!bsEp){
-      try{ await ligarAvisos(); bsEp = await meuEndpoint(); }
-      catch(err){ m.textContent = (err && err.message) || 'Não consegui ligar as notificações.'; m.className = 'aviso bad'; m.hidden = false; $('bf-salvar').disabled = false; return; }
-      if(!bsEp){ m.textContent = 'Não consegui ligar as notificações neste aparelho.'; m.className = 'aviso bad'; m.hidden = false; $('bf-salvar').disabled = false; return; }
-      $('bs-sem-push').hidden = true;
-    }
-    try{
-      await rpc('busca_salvar', {p_codigo: codigo, p_endpoint: bsEp, p_cliente: cli, p_criterios: critDoForm(), p_id: bsEditando ? bsEditando.id : null});
-      toast(bsEditando ? 'Busca de ' + cli + ' atualizada.' : 'Pronto! Você será avisado quando aparecer unidade para ' + cli + '.', 4500);
-      voltarLista(); carregarBuscas();
-    }catch(err){
-      const t = err && err.body || ''; m.className = 'aviso bad'; m.hidden = false;
-      m.textContent = /sem_notificacoes/.test(t) ? 'Ative as notificações neste aparelho primeiro.' : /limite_buscas/.test(t) ? 'Você chegou ao limite de 40 buscas. Exclua alguma antiga.' : 'Não consegui salvar agora. Confira a internet e tente de novo.';
-    }finally{ $('bf-salvar').disabled = false; }
+  function agendar(){ clearTimeout(baT); baT = setTimeout(buscarAgora, 140); }
+  $('ba-bairro').addEventListener('input', () => {
+    const v = $('ba-bairro').value, b = acharBairro(v);
+    ba.bairro = b; $('ba-bairro').classList.toggle('bad', !!v.trim() && !b); sugerirBairros(v);
+    if(b && ba.zonas.length){ ba.zonas = []; renderChipsBusca(); }
+    agendar();
   });
-  function abrirBuscas(){ bsExcluir = null; voltarLista(); abrirJanela('pn-buscas'); renderBuscas(); carregarBuscas(); }
-  $('btn-buscas').addEventListener('click', abrirBuscas);
+  $('ba-raio').addEventListener('change', () => { ba.raio = +$('ba-raio').value || 3; agendar(); });
+  ['ba-m2a', 'ba-m2b', 'ba-preco'].forEach(id => $(id).addEventListener('input', agendar));
+  $('ba-andar').addEventListener('input', () => { renderChipsBusca(); agendar(); });
+  $('ba-modo').querySelectorAll('button').forEach(x => x.addEventListener('click', () => { ba.modo = x.dataset.v; marcarSeg('ba-modo', ba.modo); agendar(); }));
+  $('ba-loja').addEventListener('change', () => { ba.semLoja = $('ba-loja').checked; renderChipsBusca(); agendar(); });
+  $('ba-limpar').addEventListener('click', limparBusca);
+  $('ba-cli').addEventListener('input', renderBarra);
+
+  const chave = (p, a) => p.id + '|' + a[0];
+  const pidDe = k => k.slice(0, k.indexOf('|'));
+  function buscarAgora(){
+    clearTimeout(baT);
+    if(!dados) return;
+    const c = critBusca(); baCrit = c;
+    if(!temFiltro(c)){ baRes = []; baSel = new Set(); baSelManual = false; renderIntro(); renderBarra(); return; }
+    const m = new Map();
+    for(const {p, a} of encontrados(c)){ let g = m.get(p.id); if(!g){ g = {p, us: [], d: c.regiao ? distProj(p, c.regiao) : null}; m.set(p.id, g); } g.us.push(a); }
+    const gr = [...m.values()];
+    const pv = (p, a) => { const x = precoDe(p, a, c.modo); return x ? x.v : Infinity; };
+    for(const g of gr){
+      g.us.sort((x, y) => (pv(g.p, x) - pv(g.p, y)) || ((areaDe(x) || 0) - (areaDe(y) || 0)) || String(x[0]).localeCompare(String(y[0]), 'pt-BR', {numeric: true}));
+      g.min = g.us.length ? precoDe(g.p, g.us[0], c.modo) : null;
+    }
+    const porPreco = (x, y) => ((x.min ? x.min.v : Infinity) - (y.min ? y.min.v : Infinity)) || (x.p.nome || '').localeCompare(y.p.nome || '', 'pt-BR');
+    if(ba.ord === 'perto' && c.regiao) gr.sort((x, y) => ((x.d == null ? 999 : x.d) - (y.d == null ? 999 : y.d)) || porPreco(x, y));
+    else gr.sort(porPreco);
+    baRes = gr;
+    const ok = new Set(); gr.forEach(g => g.us.forEach(a => ok.add(chave(g.p, a))));
+    if(baSelManual){ for(const k of [...baSel]) if(!ok.has(k)) baSel.delete(k); if(!baSel.size) baSelManual = false; }
+    if(!baSelManual) selPadrao();
+    renderRes();
+    renderBarra();
+  }
+  function selPadrao(){   // 3 unidades de cada um dos 8 primeiros empreendimentos: a mais barata e, depois, opções diferentes (tipologia, metragem, andar)
+    baSel = new Set();
+    for(const g of baRes.slice(0, 8)){
+      const esc3 = [], tipos = new Set(), andares = new Set();
+      const tk = a => (tipologiaDe(g.p, a) || '') + '|' + Math.round(areaDe(a) || 0);
+      for(const a of g.us){ if(esc3.length >= 3) break; if(tipos.has(tk(a))) continue; esc3.push(a); tipos.add(tk(a)); andares.add(andarNum(a[4])); }
+      if(esc3.length < 3){   // mesma planta: andares diferentes, do mais baixo ao mais alto
+        const resto = g.us.filter(a => !esc3.includes(a));
+        const porAndar = resto.slice().sort((x, y) => andarNum(y[4]) - andarNum(x[4]));
+        for(const a of porAndar){ if(esc3.length >= 3) break; if(andares.has(andarNum(a[4]))) continue; esc3.push(a); andares.add(andarNum(a[4])); }
+        for(const a of resto){ if(esc3.length >= 3) break; if(!esc3.includes(a)) esc3.push(a); }
+      }
+      esc3.forEach(a => baSel.add(chave(g.p, a)));
+    }
+  }
+  function podeAdd(pid){
+    if(baSel.size >= 40){ toast('Cabem até 40 unidades num envio. Desmarque alguma antes.'); return false; }
+    const ps = new Set([...baSel].map(pidDe));
+    if(!ps.has(pid) && ps.size >= 15){ toast('Cabem até 15 empreendimentos num envio.'); return false; }
+    return true;
+  }
+  function renderIntro(){
+    const box = $('ba-res'); box.replaceChildren();
+    const d = document.createElement('div'); d.className = 'ba-intro';
+    d.innerHTML = '<b>O que o cliente procura?</b><p>Escolha o bairro ou a região, a metragem, o preço e a fase da obra. As unidades disponíveis de todos os projetos aparecem aqui na hora, com foto, para você marcar e mandar ao cliente num link só.</p><p class="ex">Exemplo: Perdizes · de 20 a 50 m² · até 250 mil à vista · pronto para morar</p>';
+    box.appendChild(d);
+  }
+  const CORES = [['#3b5bd6', '#18264f'], ['#0f8b8d', '#0b3d4a'], ['#b8955a', '#5a3f17'], ['#7a4fd6', '#2b1a55'], ['#d65a3b', '#4f1f18'], ['#2f9e44', '#15401f']];
+  function hashTxt(s){ let h = 0; for(const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); }
+  function phEl(p){   // sem foto: bloco com as iniciais
+    const c = CORES[hashTxt(p.id) % CORES.length], s = document.createElement('span');
+    s.className = 'ba-img mk-ph'; s.style.setProperty('--c1', c[0]); s.style.setProperty('--c2', c[1]); s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M4 21V8l6-4v17M10 21V10l10 3v8M3 21h18M13 15h1M16 15h1M13 18h1M16 18h1M6.5 10h1M6.5 13h1M6.5 16h1"/></svg>';
+    s.appendChild(document.createTextNode(String(p.nome || '?').split(/\s+/).filter(w => w.length > 2 && !/^(nex|one|the)$/i.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase()));
+    return s;
+  }
+  function capaEl(p){
+    const i = infoDe(p), w = document.createElement('div'); w.className = 'ba-ph';
+    if(i.capa){
+      const im = document.createElement('img'); im.className = 'ba-img'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.referrerPolicy = 'no-referrer';
+      im.addEventListener('error', () => { im.replaceWith(phEl(p)); }, {once: true});
+      im.src = i.capa; w.appendChild(im);
+    } else w.appendChild(phEl(p));
+    return w;
+  }
+  function renderRes(){
+    const c = baCrit, box = $('ba-res'); box.replaceChildren();
+    const nU = baRes.reduce((s, g) => s + g.us.length, 0);
+    const topo = document.createElement('div'); topo.className = 'ba-topo';
+    const cont = document.createElement('div'); cont.className = 'ba-cont';
+    cont.innerHTML = nU ? '<b>' + nU.toLocaleString('pt-BR') + '</b> ' + (nU === 1 ? 'unidade disponível' : 'unidades disponíveis') + ' em <b>' + baRes.length + '</b> ' + (baRes.length === 1 ? 'empreendimento' : 'empreendimentos')
+                        : '<b>Nenhuma unidade disponível</b> com todos esses filtros agora.';
+    topo.appendChild(cont);
+    if(c.regiao && baRes.length > 1){
+      const sg = document.createElement('div'); sg.className = 'seg2 mini';
+      [['preco', 'Menor preço'], ['perto', 'Mais perto']].forEach(([v, t]) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = t; if(ba.ord === v) b.classList.add('on'); b.addEventListener('click', () => { ba.ord = v; buscarAgora(); }); sg.appendChild(b); });
+      topo.appendChild(sg);
+    }
+    box.appendChild(topo);
+    const cr = document.createElement('div'); cr.className = 'ba-crit'; cr.textContent = critTexto(c); box.appendChild(cr);
+    if(!nU){ box.appendChild(sugestoesEl(c, 0)); return; }
+    baRes.slice(0, baMaisProj).forEach(g => box.appendChild(cardProj(g)));
+    if(baRes.length > baMaisProj){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'abtn ba-maisp'; b.textContent = 'Mostrar mais ' + (baRes.length - baMaisProj) + ' empreendimentos';
+      b.addEventListener('click', () => { baMaisProj += 12; renderRes(); }); box.appendChild(b);
+    }
+    if(baRes.length < 3 || nU < 6){ const s = sugestoesEl(c, nU); if(s) box.appendChild(s); }
+  }
+  function cardProj(g){
+    const c = baCrit, p = g.p, i = infoDe(p);
+    const art = document.createElement('article'); art.className = 'ba-proj'; art.dataset.p = p.id;
+    const cab = document.createElement('div'); cab.className = 'ba-cab';
+    cab.appendChild(capaEl(p));
+    const inf = document.createElement('div'); inf.className = 'ba-pi';
+    const h = document.createElement('h3'); h.textContent = p.nome || i.nome || p.id; inf.appendChild(h);
+    const loc = document.createElement('p'); loc.className = 'ba-loc';
+    const dist = g.d != null ? 'a ' + fmtKm(Math.max(0.1, Math.round(g.d * 10) / 10)) + ' de ' + c.regiao.nome : null;
+    if(i.fase && FASE_SELO[i.fase]){ const f = document.createElement('em'); f.className = 'mk-fase f-' + i.fase; f.textContent = FASE_SELO[i.fase]; loc.appendChild(f); }
+    loc.appendChild(document.createTextNode([i.bairro, dist, GRUPO_NOME[grupoDe(p)] || i.construtora].filter(Boolean).join(' · ')));
+    inf.appendChild(loc);
+    const ent = i.fase === 'obras' && i.entrega ? 'Entrega ' + mesAnoC(i.entrega) : null;
+    if(i.destaque || ent){ const d = document.createElement('p'); d.className = 'ba-dest'; d.textContent = [ent, i.destaque].filter(Boolean).join(' · '); inf.appendChild(d); }
+    const mn = document.createElement('p'); mn.className = 'ba-min';
+    mn.innerHTML = '<b>' + g.us.length + '</b> ' + (g.us.length === 1 ? 'unidade' : 'unidades') + (g.min ? ' · a partir de <b>' + esc(BRL(g.min.v)) + '</b> ' + esc(g.min.lbl) : '');
+    inf.appendChild(mn);
+    cab.appendChild(inf); art.appendChild(cab);
+    // unidades: as 3 primeiras (mais baratas) e as marcadas; "ver mais" abre a lista
+    const us = document.createElement('div'); us.className = 'ba-us';
+    const nSel = g.us.filter(a => baSel.has(chave(p, a))).length;
+    const hd = document.createElement('div'); hd.className = 'ba-ush';
+    const hs = document.createElement('span'); hs.textContent = nSel ? nSel + ' de ' + g.us.length + ' marcada' + (nSel > 1 ? 's' : '') : 'Nenhuma marcada';
+    const tg = document.createElement('button'); tg.type = 'button'; tg.className = 'lnk'; tg.textContent = nSel === g.us.length ? 'desmarcar todas' : (g.us.length > 1 ? 'marcar todas' : 'marcar');
+    tg.addEventListener('click', () => {
+      if(nSel === g.us.length){ g.us.forEach(a => baSel.delete(chave(p, a))); }
+      else { for(const a of g.us){ const k = chave(p, a); if(baSel.has(k)) continue; if(!podeAdd(p.id)) break; baSel.add(k); } }
+      baSelManual = true; art.replaceWith(cardProj(g)); renderBarra();
+    });
+    hd.append(hs, tg); us.appendChild(hd);
+    const aberto = !!baAberto[p.id];
+    let vis;
+    if(aberto) vis = g.us.slice(0, 80);
+    else { const sel = g.us.filter(a => baSel.has(chave(p, a))); vis = sel.length >= 3 ? sel : sel.concat(g.us.filter(a => !baSel.has(chave(p, a))).slice(0, 3 - sel.length)); vis.sort((x, y) => g.us.indexOf(x) - g.us.indexOf(y)); }
+    vis.forEach(a => us.appendChild(linhaU(g, a, art)));
+    const resto = g.us.length - vis.length;
+    if(resto > 0 || (aberto && g.us.length > 3)){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-mais';
+      b.textContent = aberto ? (g.us.length > 80 ? 'mostrar menos · há mais ' + (g.us.length - 80) + ' (refine a busca)' : 'mostrar menos') : 'ver mais ' + resto + (resto === 1 ? ' unidade' : ' unidades');
+      b.addEventListener('click', () => { baAberto[p.id] = !aberto; art.replaceWith(cardProj(g)); });
+      us.appendChild(b);
+    }
+    art.appendChild(us);
+    return art;
+  }
+  function linhaU(g, a, art){
+    const c = baCrit, p = g.p, k = chave(p, a), pr = precoDe(p, a, c.modo), tl = tipologiaDe(p, a), ar = areaDe(a);
+    const l = document.createElement('label'); l.className = 'ba-u' + (baSel.has(k) ? ' on' : '');
+    const ck = document.createElement('input'); ck.type = 'checkbox'; ck.checked = baSel.has(k); ck.setAttribute('aria-label', 'Incluir a unidade ' + a[0] + ' no envio');
+    ck.addEventListener('change', () => {
+      if(ck.checked && !podeAdd(p.id)){ ck.checked = false; return; }
+      if(ck.checked) baSel.add(k); else baSel.delete(k);
+      baSelManual = true; art.replaceWith(cardProj(g)); renderBarra();
+    });
+    const n = document.createElement('button'); n.type = 'button'; n.className = 'ba-n'; n.textContent = a[0]; n.title = 'Ver a unidade ' + a[0] + ' no espelho';
+    n.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); irUnidade(p.id, a[0]); });
+    const d = document.createElement('span'); d.className = 'ba-ud';
+    d.textContent = [tl, ar > 0 ? fmtM2(ar) + ' m²' : null, andarTxt(a[4])].filter(Boolean).join(' · ');
+    const v = document.createElement('span'); v.className = 'ba-up';
+    if(pr){ v.textContent = BRL(pr.v); if(pr.k !== (c.modo || 'pv')){ const s = document.createElement('small'); s.textContent = pr.lbl; v.appendChild(s); } }
+    else v.textContent = 'sem preço';
+    l.append(ck, n, d, v);
+    return l;
+  }
+  function sugestoesEl(c, nAtual){   // "chegam perto": o que aparece mudando um filtro só
+    const sug = [];
+    const conta = c2 => { const it = encontrados(c2); const ps = []; for(const x of it) if(!ps.includes(x.p)) ps.push(x.p); return {n: it.length, ps}; };
+    const add = (t, c2, aplicar) => { const r = conta(c2); if(r.n > nAtual) sug.push({t, r, aplicar}); };
+    if(c.preco_max != null){
+      const c2 = Object.assign({}, c); delete c2.preco_max;
+      const vs = encontrados(c2).map(x => { const pr = precoDe(x.p, x.a, c.modo); return pr ? pr.v : null; }).filter(v => v != null && v > c.preco_max).sort((x, y) => x - y);
+      if(vs.length){ const novo = Math.ceil(vs[0] / 5000) * 5000; add('Até ' + BRLmil(novo) + ((c.modo || 'pv') === 'pv' ? ' à vista' : ' parcelado'), Object.assign({}, c, {preco_max: novo}), () => { $('ba-preco').value = Math.round(novo).toLocaleString('pt-BR'); }); }
+    }
+    if(c.fases && c.fases.length){
+      const falta = ['pronto', 'obras', 'lanc'].filter(f => !c.fases.includes(f)), FT = {pronto: 'prontos', obras: 'em obras', lanc: 'lançamentos'};
+      const c2 = Object.assign({}, c); delete c2.fases;
+      add('Incluir ' + falta.map(f => FT[f]).join(' e '), c2, () => { ba.fases = []; });
+    }
+    if(c.regiao){
+      const prox = RAIOS.find(r => r > (+c.regiao.raio || 3));
+      if(prox) add('Até ' + fmtKm(prox) + ' de ' + c.regiao.nome, Object.assign({}, c, {regiao: Object.assign({}, c.regiao, {raio: prox})}), () => setRaio(prox));
+    }
+    if(c.m2_min != null || c.m2_max != null){
+      const c2 = Object.assign({}, c);
+      if(c2.m2_min != null) c2.m2_min = Math.max(1, Math.floor(c.m2_min * 0.85));
+      if(c2.m2_max != null) c2.m2_max = Math.ceil(c.m2_max * 1.15);
+      add('Metragem ' + txtM2(c2), c2, () => { $('ba-m2a').value = c2.m2_min != null ? String(c2.m2_min) : ''; $('ba-m2b').value = c2.m2_max != null ? String(c2.m2_max) : ''; });
+    }
+    if(c.tipos && c.tipos.length){ const c2 = Object.assign({}, c); delete c2.tipos; add('Qualquer tipologia', c2, () => { ba.tipos = []; }); }
+    if(c.zonas && c.zonas.length){ const c2 = Object.assign({}, c); delete c2.zonas; add('Qualquer região', c2, () => { ba.zonas = []; }); }
+    if(c.andar_min != null){ const c2 = Object.assign({}, c); delete c2.andar_min; add('Qualquer andar', c2, () => { $('ba-andar').value = ''; }); }
+    const box = document.createElement('div'); box.className = 'ba-sug';
+    if(!sug.length){
+      if(nAtual) return null;
+      const p = document.createElement('p'); p.textContent = 'Nada parecido agora, nem mudando um filtro. Toque em "Avisar quando aparecer" para receber um aviso assim que surgir uma unidade com estes filtros.'; box.appendChild(p);
+      return box;
+    }
+    const h = document.createElement('p'); h.textContent = nAtual ? 'Para ver mais opções, mude um filtro:' : 'Chegam perto (mudando um filtro só):'; box.appendChild(h);
+    for(const s of sug.slice(0, 5)){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-sg';
+      const t = document.createElement('b'); t.textContent = s.t;
+      const q = document.createElement('span'); const ns = s.r.ps.map(p => p.nome);
+      q.textContent = s.r.n.toLocaleString('pt-BR') + (s.r.n === 1 ? ' unidade' : ' unidades') + ' · ' + ns.slice(0, 2).join(', ') + (ns.length > 2 ? ' e mais ' + (ns.length - 2) : '');
+      b.append(t, q);
+      b.addEventListener('click', () => { s.aplicar(); renderChipsBusca(); buscarAgora(); const pn = document.querySelector('#pn-buscas .painel'); if(pn && window.innerWidth < 900){ const r = $('ba-res'); pn.scrollTo({top: r.offsetTop - 60, behavior: 'smooth'}); } });
+      box.appendChild(b);
+    }
+    if(!nAtual){ const p = document.createElement('p'); p.className = 'ba-sug-av'; p.textContent = 'Ou toque em "Avisar quando aparecer": você recebe um aviso quando surgir uma unidade com estes filtros.'; box.appendChild(p); }
+    return box;
+  }
+  function renderBarra(){
+    const nU = baSel.size, nP = new Set([...baSel].map(pidDe)).size, nR = baRes.reduce((s, g) => s + g.us.length, 0), box = $('ba-sel');
+    box.innerHTML = !temFiltro(baCrit) ? 'Escolha os filtros da busca.'
+      : !nR ? 'Nada disponível agora: salve a busca para ser avisado.'
+      : nU ? '<b>' + nU + '</b> ' + (nU === 1 ? 'marcada' : 'marcadas') + ' (' + nP + ' ' + (nP === 1 ? 'empreendimento' : 'empreendimentos') + ') de <b>' + nR.toLocaleString('pt-BR') + '</b> ' + (nR === 1 ? 'encontrada' : 'encontradas')
+      : '<b>' + nR.toLocaleString('pt-BR') + '</b> ' + (nR === 1 ? 'encontrada' : 'encontradas') + ' · marque as que vão para o cliente';
+    if(nR && window.innerWidth < 900){
+      const v = document.createElement('button'); v.type = 'button'; v.className = 'lnk'; v.textContent = 'ver lista ↓';
+      v.addEventListener('click', () => { const pn = document.querySelector('#pn-buscas .painel'), r = $('ba-res'); if(pn && r) pn.scrollTo({top: r.offsetTop - 64, behavior: 'smooth'}); });
+      box.appendChild(document.createTextNode(' ')); box.appendChild(v);
+    }
+    $('ba-enviar').disabled = !nU;
+    $('ba-avisar').textContent = baEdit ? 'Salvar aviso' : 'Avisar quando aparecer';
+    $('ba-avisar').disabled = !temFiltro(baCrit);
+  }
+
+  // ---------- abas da lupa ----------
+  function abaBusca(a){
+    abaAtual = a;
+    document.querySelectorAll('#pn-buscas .bz-abas button').forEach(b => { const on = b.dataset.aba === a; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    $('bz-agora').hidden = a !== 'agora'; $('bz-envio').hidden = true; $('bz-avisos').hidden = a !== 'avisos'; $('bz-enviadas').hidden = a !== 'enviadas';
+    if(a === 'agora') buscarAgora();
+    if(a === 'avisos'){ bsExcluir = null; renderBuscas(); carregarBuscas(); }
+    if(a === 'enviadas'){ seExcluir = null; carregarEnviadas(); }
+    const pn = document.querySelector('#pn-buscas .painel'); if(pn) pn.scrollTop = 0;
+  }
+  document.querySelectorAll('#pn-buscas .bz-abas button').forEach(b => b.addEventListener('click', () => abaBusca(b.dataset.aba)));
+  function abrirBuscas(aba){
+    indiceBairros(); renderChipsBusca();
+    abrirJanela('pn-buscas');
+    abaBusca(aba || abaAtual || 'agora');
+    if(aba !== 'avisos') carregarBuscas().catch(() => {});
+  }
+  $('btn-buscas').addEventListener('click', () => abrirBuscas());
+
+  // ---------- enviar ao cliente: link de uma página (s.html) ----------
+  const MARCA = '[o link entra aqui]';
+  let beLink = null, beCriando = null, beMsgEd = false, beT = null;
+  function selecionados(){ const out = []; for(const g of baRes) for(const a of g.us) if(baSel.has(chave(g.p, a))) out.push({p: g.p, a}); return out; }
+  const sigItens = () => [...baSel].sort().join(',');
+  const urlSel = id => new URL('s.html?s=' + encodeURIComponent(id), location.href).href;
+  function abrirEnvio(){
+    const its = selecionados(); if(!its.length) return;
+    const sig = sigItens();
+    if(beLink && beLink.sig !== sig){ if(!beLink.usado) rpc('selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: beLink.id}).catch(() => {}); beLink = null; }
+    const cor = corretor();
+    $('be-cli').value = $('ba-cli').value.trim();
+    $('be-cor').value = cor.nome || ''; $('be-mtel').value = cor.tel || '';
+    assinaturaCor(!(cor.nome && cor.tel));
+    $('be-erro').hidden = true;
+    beMsgEd = false; montarMsg();
+    renderResumoEnvio(its);
+    $('bz-agora').hidden = true; $('bz-envio').hidden = false;
+    const pn = document.querySelector('#pn-buscas .painel'); if(pn) pn.scrollTop = 0;
+    estadoLink();
+    if(!beLink && $('be-cli').value.trim()) criarLink();
+    else if(!$('be-cli').value.trim()) setTimeout(() => $('be-cli').focus(), 80);
+  }
+  function assinaturaCor(editar){
+    $('be-cor-t').textContent = [$('be-cor').value.trim(), $('be-mtel').value.trim()].filter(Boolean).join(' · ');
+    $('be-cor-v').hidden = !!editar; $('be-cor-f').hidden = !editar;
+  }
+  $('be-cor-alt').addEventListener('click', () => { assinaturaCor(true); $('be-cor').focus(); });
+  $('ba-enviar').addEventListener('click', abrirEnvio);
+  $('be-voltar').addEventListener('click', () => { $('bz-envio').hidden = true; $('bz-agora').hidden = false; renderBarra(); });
+  function criarLink(){
+    const cli = $('be-cli').value.trim();
+    if(!cli){ estadoLink(); return Promise.resolve(null); }
+    if(beLink) return Promise.resolve(beLink);
+    if(beCriando) return beCriando;
+    const its = selecionados(), sig = sigItens(), c = baCrit, cor = $('be-cor').value.trim(), tel = $('be-mtel').value.trim();
+    estadoLink('criando');
+    beCriando = (async () => {
+      try{
+        const ep = await epRapido();
+        const r = await rpc('selecao_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_cliente: cli, p_corretor: cor, p_whats: tel,
+          p_busca: {texto: textoBusca(c), modo: c.modo || 'pv', criterios: c}, p_itens: its.map(({p, a}) => ({p: p.id, n: String(a[0])}))});
+        beLink = {id: r.id, url: urlSel(r.id), sig, usado: false, avisos: !!r.avisos, cli, cor, tel};
+        montarMsg(); estadoLink();
+        if($('be-cli').value.trim() !== cli || $('be-cor').value.trim() !== cor || $('be-mtel').value.trim() !== tel) sincLink();
+        return beLink;
+      }catch(e){
+        const t = (e && e.body) || '';
+        estadoLink('erro', /unidade_invalida/.test(t) ? 'Uma das unidades saiu do espelho. Volte e refaça a busca.' : /limite_selecoes/.test(t) ? 'Limite de links por dia atingido neste aparelho. Tente amanhã.' : /muitas_unidades|muitos_projetos/.test(t) ? 'Seleção grande demais: até 40 unidades em 15 empreendimentos.' : 'Não consegui criar o link agora. Confira a internet e tente de novo.');
+        return null;
+      }finally{ beCriando = null; }
+    })();
+    return beCriando;
+  }
+  async function sincLink(){
+    const cli = $('be-cli').value.trim();
+    if(!beLink){ if(cli && !beCriando) criarLink(); else if(!cli) estadoLink(); return; }
+    if(!cli) return;
+    const cor = $('be-cor').value.trim(), tel = $('be-mtel').value.trim();
+    if(beLink.cli === cli && beLink.cor === cor && beLink.tel === tel) return;
+    try{ await rpc('selecao_atualizar', {p_codigo: codigo, p_dono: dono(), p_id: beLink.id, p_cliente: cli, p_corretor: cor, p_whats: tel}); beLink.cli = cli; beLink.cor = cor; beLink.tel = tel; }catch(e){}
+  }
+  ['be-cli', 'be-cor', 'be-mtel'].forEach(id => $(id).addEventListener('input', () => {
+    if(id === 'be-cli') $('ba-cli').value = $('be-cli').value;
+    else LS.set(K_COR, JSON.stringify(Object.assign(corretor(), {nome: $('be-cor').value.trim(), tel: $('be-mtel').value.trim()})));
+    if(!beMsgEd) montarMsg();
+    clearTimeout(beT); beT = setTimeout(sincLink, 700);
+  }));
+  $('be-msg').addEventListener('input', () => { beMsgEd = true; });
+  function textoMsg(link){
+    const its = selecionados(), nU = its.length, nP = new Set(its.map(x => x.p.id)).size;
+    const cli = ($('be-cli').value.trim().split(/\s+/)[0]) || '', cor = $('be-cor').value.trim();
+    const desc = textoBusca(baCrit);
+    const L = ['Oi' + (cli ? ', ' + cli : '') + '! Tudo bem?',
+      'Separei ' + (nU === 1 ? '1 opção' : nU + ' opções') + (desc ? ' de ' + desc : ' para você') + (nP > 1 ? ', em ' + nP + ' empreendimentos' : '') + '.',
+      '',
+      nU === 1 ? 'Está aqui, com fotos, metragem, andar e valor:' : 'Estão todas aqui, com fotos, metragem, andar e valores:',
+      link, '',
+      'Qualquer dúvida, é só me chamar!' + (cor ? '\n' + cor : '')];
+    return L.join('\n');
+  }
+  function montarMsg(){
+    const url = beLink ? beLink.url : null, ta = $('be-msg');
+    if(beMsgEd){ if(url && ta.value.includes(MARCA)) ta.value = ta.value.replace(MARCA, url); return; }
+    ta.value = textoMsg(url || MARCA);
+  }
+  function textoFinal(){
+    let t = $('be-msg').value.trim();
+    if(beLink && !t.includes(beLink.url)) t = t.replace(MARCA, '').trim() + '\n' + beLink.url;
+    return t;
+  }
+  function estadoLink(st, msg){
+    const box = $('be-link'), ok = !!beLink && !st;
+    ['be-whats', 'be-copiar'].forEach(id => { $(id).disabled = !ok; });
+    const ver = $('be-ver');
+    if(ok){ ver.href = beLink.url + '&previa=1'; ver.removeAttribute('aria-disabled'); } else { ver.removeAttribute('href'); ver.setAttribute('aria-disabled', 'true'); }
+    box.className = 'be-link' + (st === 'erro' ? ' bad' : ok ? ' ok' : '');
+    box.replaceChildren();
+    if(st === 'criando') box.textContent = 'Criando o link da seleção…';
+    else if(st === 'erro') box.textContent = msg || 'Não consegui criar o link.';
+    else if(ok){
+      const b = document.createElement('b'); b.textContent = 'Link pronto'; const s = document.createElement('span'); s.textContent = beLink.url.replace(/^https?:\/\//, '');
+      box.append(b, s);
+      if(!beLink.avisos){ const n = document.createElement('small'); n.textContent = 'Ligue as notificações (botão Avisos, no topo) para saber quando o cliente abrir.'; box.appendChild(n); }
+    }
+    else box.textContent = 'Escreva o nome do cliente: o link é criado na hora.';
+  }
+  const soDig = s => String(s || '').replace(/\D/g, '');
+  function waNumero(t){ const d = soDig(t); if(!d) return null; if(d.length >= 12 && d.startsWith('55')) return d; if(d.length === 10 || d.length === 11) return '55' + d; return d.length >= 8 ? d : null; }
+  $('be-whats').addEventListener('click', () => {
+    if(!beLink) return;
+    const txt = textoFinal(); beLink.usado = true; sincLink();
+    const n = waNumero($('be-tel').value);
+    window.open('https://wa.me/' + (n || '') + '?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+  });
+  $('be-copiar').addEventListener('click', async () => {
+    if(!beLink) return;
+    const txt = textoFinal(); beLink.usado = true; sincLink();
+    try{ await navigator.clipboard.writeText(txt); toast('Mensagem copiada. É só colar no WhatsApp.'); }
+    catch(e){ const ta = $('be-msg'); ta.focus(); ta.select(); try{ document.execCommand('copy'); toast('Mensagem copiada.'); }catch(e2){ toast('Não consegui copiar. Selecione o texto e copie.'); } }
+  });
+  $('be-ver').addEventListener('click', e => { if(!beLink){ e.preventDefault(); return; } beLink.usado = true; });
+  function renderResumoEnvio(its){
+    const box = $('be-resumo'); box.replaceChildren();
+    const h = document.createElement('p'); h.className = 'be-rt'; h.textContent = 'O cliente vai ver'; box.appendChild(h);
+    const por = new Map(); for(const {p, a} of its){ if(!por.has(p.id)) por.set(p.id, {p, us: []}); por.get(p.id).us.push(a); }
+    for(const {p, us} of por.values()){
+      const d = document.createElement('div'); d.className = 'be-p';
+      d.appendChild(capaEl(p));
+      const t = document.createElement('div'); const b = document.createElement('b'); b.textContent = p.nome; const s = document.createElement('small');
+      s.textContent = us.length + (us.length === 1 ? ' unidade: ' : ' unidades: ') + us.map(a => a[0]).join(', ');
+      t.append(b, s); d.appendChild(t); box.appendChild(d);
+    }
+  }
+
+  // ---------- seleções enviadas ----------
+  let seLista = [], seExcluir = null;
+  async function carregarEnviadas(){
+    const box = $('se-lista');
+    if(!seLista.length){ box.replaceChildren(); const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Carregando…'; box.appendChild(v); }
+    try{
+      const ep = await epRapido();
+      seLista = (await rpc('minhas_selecoes', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep})) || [];
+    }catch(e){ if(!seLista.length && box.firstChild) box.firstChild.textContent = 'Não consegui carregar agora. Confira a internet.'; return; }
+    renderEnviadas();
+  }
+  function renderEnviadas(){
+    const box = $('se-lista'); box.replaceChildren();
+    if(!seLista.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhuma seleção enviada deste aparelho ainda. Em "Buscar agora", marque as unidades e toque em "Enviar ao cliente".'; box.appendChild(v); return; }
+    for(const s of seLista){
+      const card = document.createElement('div'); card.className = 'bs-card se-card' + (s.expirado ? ' exp' : '');
+      card.innerHTML = '<div class="h"><b></b><small class="muted"></small></div><div class="crit"></div><div class="agora"></div><div class="acoes"></div>';
+      card.querySelector('b').textContent = s.cliente;
+      card.querySelector('small').textContent = 'enviada ' + quando(s.criado_em);
+      card.querySelector('.crit').textContent = s.unidades + (s.unidades === 1 ? ' unidade' : ' unidades') + ' em ' + s.projetos + (s.projetos === 1 ? ' empreendimento' : ' empreendimentos') + (s.texto ? ' · ' + s.texto : '');
+      const ag = card.querySelector('.agora');
+      if(s.expirado) ag.textContent = 'Link expirado (cada link vale 60 dias).';
+      else if(s.aberturas){ ag.classList.add('tem'); ag.textContent = 'Abriu ' + (s.aberturas === 1 ? '1 vez' : s.aberturas + ' vezes') + (s.ultimo_acesso ? ' · última ' + quando(s.ultimo_acesso) : '') + (s.interesses ? ' · tocou em "Tenho interesse" ' + (s.interesses === 1 ? '1 vez' : s.interesses + ' vezes') : ''); }
+      else ag.textContent = 'O cliente ainda não abriu.';
+      const ac = card.querySelector('.acoes'), url = urlSel(s.id);
+      const bt = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn'; x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
+      if(!s.expirado){
+        const a = document.createElement('a'); a.className = 'abtn'; a.textContent = 'Ver'; a.href = url + '&previa=1'; a.target = '_blank'; a.rel = 'noopener'; ac.appendChild(a);
+        bt('Copiar link', async () => { try{ await navigator.clipboard.writeText(url); toast('Link copiado.'); }catch(e){ toast(url, 8000); } });
+        bt('Reenviar', () => { const cli = String(s.cliente || '').split(/\s+/)[0]; window.open('https://wa.me/?text=' + encodeURIComponent('Oi' + (cli ? ', ' + cli : '') + '! Segue de novo a seleção de imóveis que separei para você:\n' + url), '_blank', 'noopener'); });
+      }
+      const del = bt(seExcluir === s.id ? 'Confirmar exclusão' : 'Apagar', async () => {
+        if(seExcluir !== s.id){ seExcluir = s.id; renderEnviadas(); return; }
+        try{ await rpc('selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: s.id}); seLista = seLista.filter(x => x.id !== s.id); toast('Seleção de ' + s.cliente + ' apagada. O link deixa de funcionar.'); }catch(e){ toast('Não consegui apagar agora.'); }
+        seExcluir = null; renderEnviadas();
+      });
+      if(seExcluir === s.id) del.style.color = 'var(--vend-text)';
+      box.appendChild(card);
+    }
+  }
+
 
   // =====================================================================
   // 2) Proposta com fluxo de pagamento
@@ -2281,7 +3088,7 @@ body.mk-aberto{overflow:hidden}
   window.addEventListener('appinstalled', () => { $('btn-instalar').hidden = true; toast('App instalado! Agora ative os avisos.'); });
 
   // ---------- service worker, links de notificação ----------
-  function irPara(hash){ const r = /^#?resumo(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(hash || ''); if(r){ if(codigo) abrirResumo(r[1]); return; } const m = /^#?([a-z0-9-]+?)(?:-u(.+))?$/.exec(hash || ''); if(m && window.ESPELHO) ESPELHO.goto(m[1], m[2] ? decodeURIComponent(m[2]) : m[2]); }
+  function irPara(hash){ if(/^#?buscar/.test(hash || '')){ if(codigo) abrirBuscas(/^#?buscar-agora/.test(hash) ? 'agora' : 'enviadas'); return; } const r = /^#?resumo(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(hash || ''); if(r){ if(codigo) abrirResumo(r[1]); return; } const m = /^#?([a-z0-9-]+?)(?:-u(.+))?$/.exec(hash || ''); if(m && window.ESPELHO) ESPELHO.goto(m[1], m[2] ? decodeURIComponent(m[2]) : m[2]); }
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
     navigator.serviceWorker.addEventListener('message', ev => {
@@ -2297,7 +3104,7 @@ body.mk-aberto{overflow:hidden}
   // ---------- início ----------
   try{ const c = JSON.parse(LS.get(K_CACHE) || 'null'); if(c && c.d){ mudou = c.mudou || null; aplicar(c.d); } }catch(e){}
   renderLive();
-  if(!codigo) mostrarGate(''); else carregar(!dados).then(() => { if(/^#resumo/.test(location.hash)) irPara(location.hash); meuEndpoint().then(ep => { if(ep) rpc('meus_avisos', {p_codigo: codigo, p_endpoint: ep}).then(r => { buscas = r.buscas || []; atualizarContador(); }).catch(()=>{}); }); });
+  if(!codigo) mostrarGate(''); else carregar(!dados).then(() => { if(/^#(resumo|buscar)/.test(location.hash)) irPara(location.hash); meuEndpoint().then(ep => { if(ep) rpc('meus_avisos', {p_codigo: codigo, p_endpoint: ep}).then(r => { buscas = r.buscas || []; atualizarContador(); }).catch(()=>{}); }); });
   setInterval(() => { if(document.visibilityState === 'visible' && codigo) carregar(false); else renderLive(); }, 15000);
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') carregar(false); });
   window.addEventListener('online', () => carregar(false));

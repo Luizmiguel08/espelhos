@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Imóveis selecionados para você</title>
+<meta name="description" content="Fotos, metragens, andares e valores dos imóveis que o seu corretor separou para você.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0e0f12">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Imóveis selecionados para você">
+<meta property="og:description" content="Fotos, metragens, andares e valores das unidades que separei para você.">
+<meta property="og:image" content="https://luizmiguel08.github.io/espelhos/og-selecao.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0e0f12; --surface:#16181d; --surface-2:#1e2128; --ink:#f3f2ee; --ink-2:#c3c5cb; --muted:#8c909a; --line:#2a2e36;
+  --accent:#d6b67a; --accent-2:#b8955a; --accent-ink:#1a1407; --good:#8fd26b; --warn:#f0c05a; --bad:#ff8c80;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+body.sem-rolagem{overflow:hidden}
+h1,h2,h3,h4{font-family:"Barlow Condensed","IBM Plex Sans",sans-serif;margin:0;font-weight:600;letter-spacing:.02em}
+img{display:block;max-width:100%}
+button,a{font:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.load{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.erro-pg{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.erro-pg h1{font-size:30px}
+.erro-pg p{color:var(--ink-2);max-width:420px;margin:0}
+.previa{position:fixed;top:0;left:0;right:0;z-index:45;background:var(--accent);color:var(--accent-ink);text-align:center;font-size:13px;font-weight:600;padding:6px 10px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:11px 16px;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.ouro{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* capa: fotos dos empreendimentos lado a lado, texto por cima */
+.capa{position:relative;min-height:72vh;min-height:72svh;display:flex;align-items:flex-end;overflow:hidden;background:#15171c}
+.capa-fotos{position:absolute;inset:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+.capa-fotos img{width:100%;height:100%;object-fit:cover}
+.capa-fotos .ph{background:linear-gradient(160deg,#2b2f38,#0e0f12)}
+.capa::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,15,18,.2) 0%,rgba(14,15,18,.5) 45%,rgba(14,15,18,.97) 100%)}
+.capa-txt{position:relative;z-index:1;padding:28px 20px 30px;max-width:820px;width:100%}
+.ola{margin:0 0 6px;color:var(--accent);font-weight:600;letter-spacing:.02em}
+.capa h1{font-size:44px;line-height:.98;text-transform:uppercase;letter-spacing:.04em}
+.busca{margin:12px 0 0;font-size:17px;max-width:600px}
+.resumo{margin:10px 0 0;color:var(--ink-2);font-size:14px}
+.por{margin:14px 0 0;font-size:13.5px;color:var(--muted)}
+.indice{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.indice a{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.25);background:rgba(14,15,18,.45);border-radius:99px;padding:6px 12px;text-decoration:none;color:var(--ink);font-size:13.5px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.indice a b{font-weight:600;color:var(--accent)}
+@media (min-width:900px){.capa{min-height:64vh}.capa-txt{padding:48px 56px 56px}.capa h1{font-size:68px}}
+
+/* empreendimento */
+.pj{max-width:1120px;margin:0 auto;padding:34px 0 20px;border-top:1px solid var(--line)}
+.pj:first-child{border-top:0}
+.pj-gal{position:relative}
+.trilho{display:grid;grid-auto-flow:column;grid-auto-columns:88%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px 6px;scroll-padding:0 20px;scrollbar-width:none}
+.trilho::-webkit-scrollbar{display:none}
+.sl{position:relative;scroll-snap-align:start;border:0;padding:0;background:var(--surface-2);border-radius:16px;overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;color:var(--ink)}
+.sl .bg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.55);transform:scale(1.05)}
+.sl .fg{position:relative;width:100%;height:100%;object-fit:contain}
+.sl.cobre .fg{object-fit:cover}
+.sl .leg{position:absolute;left:10px;bottom:10px;z-index:1;background:rgba(14,15,18,.7);border-radius:8px;padding:3px 8px;font-size:12.5px;color:var(--ink-2)}
+.sl.ph{cursor:default;display:flex;align-items:flex-end;padding:18px;background:linear-gradient(160deg,var(--c1,#2b2f38),var(--c2,#0e0f12));font-family:"Barlow Condensed",sans-serif;font-size:56px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.9)}
+.gal-n{position:absolute;right:30px;top:12px;background:rgba(14,15,18,.7);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--ink-2);pointer-events:none}
+@media (min-width:900px){
+  .trilho{grid-auto-columns:calc((100% - 40px - 20px) / 2.15);padding:0 32px 6px;scroll-padding:0 32px}
+  .gal-n{right:42px}
+}
+.pj-corpo{padding:18px 20px 0}
+@media (min-width:900px){.pj-corpo{padding:22px 32px 0}}
+.rot{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 6px;font-weight:600}
+.pj h2{font-size:36px;line-height:1;text-transform:uppercase;letter-spacing:.04em}
+@media (min-width:900px){.pj h2{font-size:46px}}
+.selos{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;font-size:14px;color:var(--ink-2)}
+.fase{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--ink)}
+.fase.f-pronto{border-color:rgba(143,210,107,.5);color:var(--good)}
+.fase.f-obras{border-color:rgba(240,192,90,.5);color:var(--warn)}
+.fase.f-lanc,.fase.f-breve{border-color:rgba(214,182,122,.55);color:var(--accent)}
+.pj-dest{margin:12px 0 0;font-size:16.5px;max-width:640px}
+.pj-end{margin:8px 0 0;color:var(--ink-2);font-size:14.5px}
+.pj-end a{white-space:nowrap}
+.pj-cham{margin:12px 0 0;color:var(--ink-2);max-width:680px}
+.fatos{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line);margin-top:16px}
+@media (min-width:720px){.fatos{grid-template-columns:1fr 1fr;column-gap:28px}}
+.fatos div{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.fatos dt{color:var(--muted);white-space:nowrap}
+.fatos dd{margin:0;text-align:right}
+.lazer{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.lazer span{border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:13px;color:var(--ink-2)}
+.perto{margin-top:12px;display:grid;gap:4px;font-size:13.5px;color:var(--ink-2)}
+@media (min-width:720px){.perto{grid-template-columns:1fr 1fr;column-gap:28px}}
+.perto div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:6px 0}
+.perto b{font-weight:500;color:var(--ink);white-space:nowrap}
+.pj-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pj-links .btn{padding:8px 13px;font-size:14px;border-radius:10px}
+
+/* unidades */
+.us-tit{margin:26px 0 12px;font-size:22px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink)}
+.us-tit small{font-family:"IBM Plex Sans",sans-serif;font-size:13px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:500;margin-left:8px}
+.us{display:grid;gap:12px}
+@media (min-width:720px){.us{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1080px){.us{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.u{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.u.fora{opacity:.72}
+.u-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.u-h h3{font-size:26px;text-transform:uppercase;letter-spacing:.04em}
+.st{font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px;white-space:nowrap}
+.st.ok{background:rgba(143,210,107,.14);color:var(--good)}
+.st.res{background:rgba(240,192,90,.14);color:var(--warn)}
+.st.nao{background:rgba(255,140,128,.14);color:var(--bad)}
+.u-m{margin:-4px 0 0;color:var(--ink-2);font-size:14.5px}
+.u-pl{position:relative;border:0;padding:0;background:#fff;border-radius:12px;overflow:hidden;cursor:zoom-in;aspect-ratio:4/3}
+.u-pl img{width:100%;height:100%;object-fit:contain}
+.u-pl span{position:absolute;left:8px;bottom:8px;background:rgba(14,15,18,.78);color:var(--ink);border-radius:8px;padding:3px 8px;font-size:12px}
+.u-pr{margin:0;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:10px}
+.u-pr div{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.u-pr dt{color:var(--muted);font-size:13px}
+.u-pr dd{margin:0;font-weight:600;white-space:nowrap}
+.u-pr div:first-child dt{color:var(--ink-2)}
+.u-pr div:first-child dd{font-family:"Barlow Condensed",sans-serif;font-size:28px;line-height:1.05;color:var(--accent);letter-spacing:.01em}
+.u-sem{color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:10px}
+.u-cat{font-size:12.5px;color:var(--muted);background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.u-cat summary{cursor:pointer;color:var(--ink-2);font-weight:500}
+.u-cat p{margin:6px 0 0}
+.u-int{width:100%;margin-top:auto}
+.btn.ouro.u-int{background:transparent;color:var(--accent);border-color:rgba(214,182,122,.55)}
+.btn.ouro.u-int:hover{background:rgba(214,182,122,.1)}
+.btn.ouro.u-int.feito{border-color:var(--line);color:var(--good)}
+
+footer{max-width:1120px;margin:30px auto 0;padding:26px 20px 120px;color:var(--muted);font-size:11.5px;line-height:1.55;border-top:1px solid var(--line)}
+footer p{margin:0 0 10px}
+@media (min-width:900px){footer{padding:30px 32px 120px}}
+
+.wa-fixo{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:56px;height:56px;background:#1fa855;color:#fff;text-decoration:none;font-weight:600;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap;transition:opacity .2s ease,transform .2s ease}
+.wa-fixo svg{width:28px;height:28px;flex:none}
+.wa-fixo span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (min-width:900px){
+  .wa-fixo{width:auto;height:auto;padding:13px 20px;right:24px;bottom:24px}
+  .wa-fixo svg{width:20px;height:20px}
+  .wa-fixo span{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+}
+
+/* visualizador (o mesmo da central de produto) */
+.vis{position:fixed;inset:0;z-index:80;background:rgba(6,7,9,.97);display:flex;flex-direction:column;color:#fff}
+.vis-top{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
+.vis-t{flex:1;font-size:14px;min-width:0}
+.vis-acoes{display:flex;gap:6px}
+.vis-x{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.vis-area{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;cursor:zoom-in;-webkit-overflow-scrolling:touch}
+.vis-area img{max-width:100%;max-height:100%;object-fit:contain}
+.vis-area.zoom{display:block;cursor:zoom-out}
+.vis-area.zoom img{max-width:none;max-height:none;width:220%}
+.vis-ant,.vis-prox{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:34px;border-radius:10px;cursor:pointer}
+.vis-ant{left:6px}.vis-prox{right:6px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:11px;font-size:14px;z-index:90;max-width:calc(100% - 32px)}
+
+</style>
+</head>
+<body>
+<div class="load" id="load">Carregando a seleção…</div>
+<div class="erro-pg" id="erro" hidden>
+  <h1 id="erro-t">Link não encontrado</h1>
+  <p id="erro-p">Este link não existe ou foi apagado. Peça um novo ao seu corretor.</p>
+  <button class="btn" id="erro-de-novo" type="button" hidden>Tentar de novo</button>
+  <a class="btn ouro" id="erro-wa" hidden target="_blank" rel="noopener">Falar com o corretor</a>
+</div>
+<div class="previa" id="previa" hidden>Prévia do corretor: esta visita não conta como abertura do cliente.</div>
+
+<main id="pg" hidden>
+  <header class="capa">
+    <div class="capa-fotos" id="capa-fotos" aria-hidden="true"></div>
+    <div class="capa-txt">
+      <p class="ola" id="ola"></p>
+      <h1 id="tit">Separei estes imóveis para você</h1>
+      <p class="busca" id="busca"></p>
+      <p class="resumo" id="resumo"></p>
+      <nav class="indice" id="indice" aria-label="Empreendimentos da seleção"></nav>
+      <p class="por" id="por"></p>
+    </div>
+  </header>
+  <div id="pjs"></div>
+  <footer>
+    <p id="rodape-valores"></p>
+    <p>Imagens, perspectivas e plantas ilustrativas, divulgadas pelas incorporadoras. Metragens privativas conforme o espelho de vendas de cada empreendimento. A disponibilidade de cada unidade aparece atualizada quando você abre esta página.</p>
+    <p id="rodape-cor"></p>
+  </footer>
+</main>
+<a class="wa-fixo" id="wa" hidden target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg><span id="wa-t">Falar com o corretor</span></a>
+<script>
+// versão 202609292356
+// Central de produto — utilidades comuns (corretor e cliente)
+window.NEX = (function(){
+  'use strict';
+  const CFG = {
+    url: 'https://dptchfjbotmddaniuzvr.supabase.co',
+    key: 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP',
+    vapid: 'BI8mWAmkgfYL1lUm7gPdQ3JYK-YmFS_drWs7PfvbsU50oBFJKtbULXwWKp3BSE0cnWyAeBBIlXErynB_oQ6QmZo'
+  };
+  const $ = id => document.getElementById(id);
+  const LS = {
+    get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const BRLc = v => 'R$ ' + (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const m2 = v => (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' m²';
+  const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const mesAno = ym => { const [a, m] = String(ym).split('-').map(Number); return MESES[m - 1] + '/' + a; };
+  const somaMeses = (ym, k) => { let [a, m] = String(ym).split('-').map(Number); m += k; while(m > 12){ m -= 12; a++; } return a + '-' + String(m).padStart(2, '0'); };
+
+  async function rpc(fn, args){
+    const r = await fetch(CFG.url + '/rest/v1/rpc/' + fn, {method: 'POST', headers: {'apikey': CFG.key, 'Content-Type': 'application/json'}, body: JSON.stringify(args || {}), cache: 'no-store'});
+    const t = await r.text(); let j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+    if(!r.ok){ const e = new Error((j && (j.message || j.hint)) || ('http_' + r.status)); e.status = r.status; throw e; }
+    return j;
+  }
+
+  // ---------- unidades (formato do espelho: [n, tipo, m2, cat, andar, col, situação, extras]) ----------
+  const andarN = a => (a === 'T' || a === 0 || a === '0') ? 0 : (+a || 0);
+  const andarTxt = a => andarN(a) === 0 ? 'Térreo' : andarN(a) + 'º andar';
+  const andarCurto = a => andarN(a) === 0 ? 'térreo' : andarN(a) + 'º';
+  const areaU = u => (u[7] && u[7].a != null) ? +u[7].a : +u[2];
+  const finalU = u => (+u[5]) + 1;
+  const pad2 = n => String(n).padStart(2, '0');
+  const normTipo = t => String(t || '').toUpperCase().replace(/\s+/g, ' ').trim();
+  // unidade normalizada a partir da linha do espelho
+  function un(u){
+    const col = +u[5], ex = (u[7] && typeof u[7] === 'object') ? u[7] : {};
+    return {n: String(u[0]), u, andar: u[4], an: andarN(u[4]), col, fin: col + 1, tipo: u[1] || null,
+            a: ex.a != null ? +ex.a : (u[2] != null ? +u[2] : null), cat: u[3], st: u[6], ex};
+  }
+  // unidade vinda do link do cliente: {n, andar, col, tipo, a, cat, livre}
+  const unLink = v => ({n: String(v.n), andar: v.andar, an: andarN(v.andar), col: +v.col, fin: (+v.col) + 1, tipo: v.tipo || null, a: v.a != null ? +v.a : null, cat: v.cat, st: v.livre ? 'disponivel' : 'indisponivel', ex: {}});
+  const tipoTxt = t => t ? normTipo(t).replace(/^TIPO\s*/, 'tipo ') : '';
+  const posTxt = x => x.tipo ? tipoTxt(x.tipo) : 'final ' + pad2(x.fin);
+
+  function face(P, x){ return (P.faces || []).find(f => (f.finais && f.finais.indexOf(x.fin) >= 0) || (f.cols && f.cols.indexOf(x.col) >= 0)) || null; }
+  function planta(P, x){
+    const n = x.an, tipo = normTipo(x.tipo), ok = p => (p.de == null || n >= p.de) && (p.ate == null || n <= p.ate);
+    let ex = tipo ? (P.plantas || []).find(p => p.tipos && p.tipos.map(normTipo).indexOf(tipo) >= 0 && ok(p)) : null;
+    if(!ex) ex = (P.plantas || []).find(p => p.finais && p.finais.indexOf(x.fin) >= 0 && ok(p));
+    if(ex) return {p: ex, exata: true};
+    // referências: mesma tipologia em outro andar ou final (podem depender do andar)
+    const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
+    const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
+    const p = r && (P.plantas || []).find(q => q.id === r);
+    return p ? {p, exata: false} : null;
+  }
+  function vista(P, x){
+    const f = face(P, x); if(!f) return null;
+    if(!f.vistas) return {face: f, img: null, andar: null, sem: true};
+    const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
+    return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
+  }
+  const img = (P, id) => (P.pasta || '') + id + '.jpg';
+  const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
+  const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
+
+  // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
+  function fluxo(T, preco){
+    if(!T || !preco) return null;
+    const r = T.arredonda || 10; let soma = 0; const out = [];
+    for(const p of T.partes){
+      if(p.resto) continue;
+      const num = preco * Math.round(p.pct * 10), den = 1000 * p.q * r;     // inteiros: arredonda metade para cima
+      const v = Math.floor((2 * num + den) / (2 * den)) * r;
+      soma += v * p.q; out.push(Object.assign({}, p, {v}));
+    }
+    const f = T.partes.find(p => p.resto);
+    if(f) out.push(Object.assign({}, f, {v: preco - soma}));
+    return out;
+  }
+  // linhas prontas para mostrar: {t, v, s}
+  function linhasFluxo(T, preco){
+    const fx = fluxo(T, preco); if(!fx) return [];
+    return fx.map(p => {
+      if(p.k === 'ato') return {t: 'Ato', v: BRL(p.v), s: 'no fechamento'};
+      if(p.resto) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.q === 1) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.lbl === 'anuais'){ const ds = []; for(let i = 0; i < p.q; i++) ds.push(mesAno(somaMeses(p.ini, 12 * i))); return {t: p.q + ' anuais', v: BRL(p.v), s: ds.join(' e ')}; }
+      return {t: p.q + ' ' + p.lbl, v: BRL(p.v), s: 'a partir de ' + mesAno(p.ini)};
+    });
+  }
+  const cap = s => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
+
+  // ---------- opções de valores de uma unidade: tabela (com fluxo) e preços do espelho ----------
+  function precosCampos(P, E){
+    if(P.precos && P.precos.length) return P.precos;
+    if(E && E.precos_campos && E.precos_campos.length) return E.precos_campos;
+    return [{k: 'pp', label: 'Parcelado'}, {k: 'pv', label: 'À vista'}];
+  }
+  function opcoesPreco(P, E, T, x){
+    const out = [];
+    const chave = String(x.n).toUpperCase();
+    if(T && T.u){
+      const t = T.u[chave] != null ? T.u[chave] : T.u[x.n];
+      if(t != null){
+        if(T.tipo === 'lista'){
+          // tabela da incorporadora com o fluxo pronto por unidade: [total, parcela1, parcela2, ...] na ordem de T.colunas
+          if(Array.isArray(t)) out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t[0], linhas: (T.colunas || []).map((c, i) => ({t: c.t, v: BRLc(t[i + 1]), s: c.s || ''})).filter((l, i) => t[i + 1] != null && +t[i + 1] > 0)});
+          else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t.total, linhas: t.linhas || []});
+        }
+        else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t, linhas: linhasFluxo(T, +t)});
+      }
+    }
+    for(const c of precosCampos(P, E)){
+      const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null, envio: c.envio !== false});
+    }
+    return out;
+  }
+
+  // ---------- planta do andar (esquema) com a unidade em destaque e o sol do estudo de insolação ----------
+  function svgAndar(P, x, opt){
+    opt = opt || {};
+    if(!P.andar_tipo) return P.andar_img ? svgImagemAndar(P, x, opt) : svgFaixa(P, x, opt);
+    const andar = x.andar, fin = x.fin;
+    const n = andarN(andar);
+    const tipo = (P.andar_tipo && (n >= P.andar_tipo.alto.de ? P.andar_tipo.alto : P.andar_tipo.baixo)) || null;
+    if(!tipo) return '';
+    const existe = opt.existe || null;            // Set de finais que existem neste andar (se souber)
+    const sit = opt.sit || {};                     // final -> situação (só para o corretor)
+    const W = 50, H = 58;
+    const cel = [];
+    const base = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5];
+    base.forEach((f, i) => { if(tipo.baixo.indexOf(f) >= 0) cel.push({f, x: i * W, y: 92, w: W, h: H}); });
+    const topo = [15, 16, 17, 18, 19, 20, 21, 22];
+    topo.forEach((f, i) => { if(tipo.cima.indexOf(f) >= 0) cel.push({f, x: i * W, y: f >= 20 ? 0 : 12, w: W, h: f >= 20 ? 70 : 58}); });
+    const lx = 10 * W + 22;
+    [[1, 4, 37], [2, 41, 37], [3, 78, 36], [4, 114, 36]].forEach(([f, y, h]) => { if(tipo.lado.indexOf(f) >= 0) cel.push({f, x: f === 4 ? lx - 22 : lx, y, w: f === 4 ? 92 : 70, h}); });
+    const larg = lx + 70;
+    const cor = f => {
+      if(+f === +fin) return 'var(--svg-alvo)';
+      const st = sit[f]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)';
+      return 'var(--svg-cel)';
+    };
+    const sol = opt.sol !== false;
+    const x0 = sol ? -78 : -8, y0 = -34, w = larg + 30 - x0, hh = (sol ? 238 : 190) - y0;
+    let s = '<svg class="svg-andar" viewBox="' + x0 + ' ' + y0 + ' ' + w + ' ' + hh + '" role="img" aria-label="Posição da unidade ' + String(fin).padStart(2, '0') + ' no andar">';
+    s += '<rect x="0" y="70" width="' + (10 * W) + '" height="22" class="corr"/>';
+    s += '<rect x="' + (8 * W) + '" y="12" width="' + (2 * W + 22) + '" height="58" class="core"/>';
+    for(const c of cel){
+      const ok = !existe || existe.has(c.f);
+      s += '<g class="c' + (+c.f === +fin ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + c.x + '" y="' + c.y + '" width="' + c.w + '" height="' + c.h + '" rx="4" style="fill:' + (ok ? cor(c.f) : 'transparent') + '"/>' +
+           '<text x="' + (c.x + c.w / 2) + '" y="' + (c.y + c.h / 2 + 7) + '" text-anchor="middle">' + String(c.f).padStart(2, '0') + '</text></g>';
+    }
+    s += '<text class="rua" x="' + (larg + 18) + '" y="75" transform="rotate(90 ' + (larg + 18) + ' 75)" text-anchor="middle">R. PEDRO TAQUES</text>';
+    s += '<text class="rua" x="' + (4 * W) + '" y="-12" text-anchor="middle">SENTIDO R. BELA CINTRA</text>';
+    s += '<text class="rua" x="' + (5 * W) + '" y="176" text-anchor="middle">SENTIDO R. DA CONSOLAÇÃO</text>';
+    if(sol){
+      // posições relativas do estudo de insolação da incorporadora (nascente à esquerda, poente embaixo)
+      const ps = [[-52, -14, '6h'], [-58, 116, '10h'], [30, 214, '14h'], [300, 214, '18h']];
+      s += '<path class="arco" d="M-52 -14 Q -80 70 -58 116 Q -34 196 30 214 Q 165 232 300 214" />';
+      for(const [x, y, t] of ps) s += '<g class="sol"><circle cx="' + x + '" cy="' + y + '" r="10"/><text x="' + (x + (x < 0 ? -4 : 15)) + '" y="' + (y + (x < 0 ? 28 : 5)) + '"' + (x < 0 ? ' text-anchor="middle"' : '') + '>' + t + '</text></g>';
+    }
+    return s + '</svg>';
+  }
+
+  // planta real do andar (imagem da incorporadora) com a unidade marcada por cima
+  function svgImagemAndar(P, x, opt){
+    const L = (P.andar_img || []).find(l => x.an >= l.de && x.an <= l.ate); if(!L) return svgFaixa(P, x, opt);
+    const sit = opt.sit || {};
+    const cor = st => st === 'disponivel' ? 'var(--svg-disp)' : (st === 'reservada' || st === 'processo_final') ? 'var(--svg-res)' : st === 'vendida' ? 'var(--svg-vend)' : null;
+    const rects = v => Array.isArray(v[0]) ? v : [v];            // uma unidade pode ter mais de um retângulo (planta em L)
+    const fs = Math.round(L.w / 34), sw = Math.max(4, Math.round(L.w / 300)), rx = Math.round(L.w / 250);
+    const larga = L.w / L.h > 2.2;                               // planta comprida: no celular fica rolável, com altura mínima
+    let s = '<svg class="svg-img" viewBox="0 0 ' + L.w + ' ' + L.h + '"' + (larga ? ' style="min-width:' + Math.round(200 * L.w / L.h) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na planta do andar"><image href="' + esc(img(P, L.img)) + '" x="0" y="0" width="' + L.w + '" height="' + L.h + '"/>';
+    let txt = '', cx0 = null;
+    for(const f of Object.keys(L.cells)){
+      const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
+      if(!alvo && !c) continue;
+      for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
+      // 5º número opcional: altura do rótulo dentro da unidade (0 = topo, 1 = base), para não cobrir o número da planta
+      if(alvo){ const [cx, cy, cw, ch, fy] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch * (fy != null ? fy : 0.5) + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+    }
+    s += txt;
+    if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';
+    return '<div class="andar-img' + (larga ? ' larga' : '') + '"' + (cx0 != null ? ' data-cx="' + (cx0 / L.w).toFixed(3) + '"' : '') + '>' + s + '</svg></div>';
+  }
+  // planta do andar larga: rola até a unidade em destaque
+  function centrarAndar(root){
+    (root || document).querySelectorAll('.andar-img[data-cx]').forEach(el => {
+      if(el.scrollWidth <= el.clientWidth + 2) return;
+      el.scrollLeft = Math.max(0, (+el.dataset.cx) * el.scrollWidth - el.clientWidth / 2);
+    });
+  }
+  // faixa do espelho: a linha do andar com a unidade em destaque e os lados (vistas) marcados
+  function svgFaixa(P, x, opt){
+    const nc = P.colunas || 0; if(!nc) return '';
+    const sit = opt.sitCol || {}, existe = opt.existeCol || null, nums = opt.numCol || null;
+    const W = 40, H = 54, gap = 4, top = (P.faces || []).some(f => f.cols) ? 36 : 6;
+    const largura = nc * (W + gap) - gap, larga = nc > 12;
+    const cor = c => { if(c === x.col) return 'var(--svg-alvo)'; const st = sit[c]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)'; return 'var(--svg-cel)'; };
+    let s = '<svg class="svg-andar faixa" viewBox="-4 0 ' + (largura + 8) + ' ' + (top + H + 40) + '"' + (larga ? ' style="min-width:' + (nc * 30) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na linha do andar">';
+    for(const f of (P.faces || [])){
+      if(!f.cols || !f.cols.length) continue;
+      const a = Math.min.apply(null, f.cols), b = Math.max.apply(null, f.cols), x0 = a * (W + gap), x1 = b * (W + gap) + W;
+      s += '<rect x="' + x0 + '" y="4" width="' + (x1 - x0) + '" height="26" rx="5" class="banda"/><text x="' + ((x0 + x1) / 2) + '" y="22.5" text-anchor="middle" class="banda-t">' + esc(f.curto || f.nome).toUpperCase() + '</text>';
+    }
+    for(let c = 0; c < nc; c++){
+      const ok = !existe || existe.has(c), alvo = c === x.col, n = nums && nums[c];
+      s += '<g class="c' + (alvo ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + (c * (W + gap)) + '" y="' + top + '" width="' + W + '" height="' + H + '" rx="5" style="fill:' + (ok ? cor(c) : 'transparent') + '"/>' +
+           (ok && n != null && String(n).length <= 4 ? '<text x="' + (c * (W + gap) + W / 2) + '" y="' + (top + H / 2 + 5) + '" text-anchor="middle" class="num-c' + (alvo ? ' alvo' : '') + '">' + esc(n) + '</text>' : '') + '</g>';
+    }
+    const cx = x.col * (W + gap) + W / 2;
+    s += '<path d="M' + cx + ' ' + (top + H + 5) + ' l-8 11 h16 z" class="seta"/><text x="' + Math.max(50, Math.min(largura - 50, cx)) + '" y="' + (top + H + 36) + '" text-anchor="middle" class="faixa-t">' + esc(x.n) + '</text></svg>';
+    return larga ? '<div class="andar-img larga faixa-w" data-cx="' + ((cx + 4) / (largura + 8)).toFixed(3) + '">' + s + '</div>' : s;
+  }
+
+
+  // ---------- visualizador de imagens (tocar para ampliar) ----------
+  let vis = null;
+  function visualizador(itens, i, opt){
+    opt = opt || {};
+    if(!vis){
+      vis = document.createElement('div'); vis.className = 'vis'; vis.hidden = true;
+      vis.innerHTML = '<div class="vis-top"><span class="vis-t"></span><span class="vis-acoes"></span><button type="button" class="vis-x" aria-label="Fechar">×</button></div>' +
+        '<div class="vis-area"><img alt=""></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
+      document.body.appendChild(vis);
+      const area = vis.querySelector('.vis-area');
+      vis.querySelector('.vis-x').onclick = () => fechar();
+      area.addEventListener('click', e => { if(e.target.tagName === 'IMG') area.classList.toggle('zoom'); else fechar(); });
+      document.addEventListener('keydown', e => { if(vis.hidden) return; if(e.key === 'Escape') fechar(); if(e.key === 'ArrowRight') mover(1); if(e.key === 'ArrowLeft') mover(-1); });
+      vis.querySelector('.vis-ant').onclick = () => mover(-1);
+      vis.querySelector('.vis-prox').onclick = () => mover(1);
+      let x0 = null; area.addEventListener('touchstart', e => { x0 = e.touches.length === 1 && !area.classList.contains('zoom') ? e.touches[0].clientX : null; }, {passive: true});
+      area.addEventListener('touchend', e => { if(x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if(Math.abs(dx) > 60) mover(dx < 0 ? 1 : -1); x0 = null; });
+    }
+    function fechar(){ vis.hidden = true; document.body.classList.remove('sem-rolagem'); }
+    function mover(d){ if(vis._itens.length < 2) return; vis._i = (vis._i + d + vis._itens.length) % vis._itens.length; mostrar(); }
+    function mostrar(){
+      const it = vis._itens[vis._i]; const area = vis.querySelector('.vis-area'); area.classList.remove('zoom'); area.scrollTo(0, 0);
+      vis.querySelector('img').src = it.src; vis.querySelector('.vis-t').textContent = it.t || '';
+      const ac = vis.querySelector('.vis-acoes'); ac.innerHTML = '';
+      if(vis._opt.acoes) vis._opt.acoes(it, ac);
+      vis.querySelector('.vis-ant').hidden = vis.querySelector('.vis-prox').hidden = vis._itens.length < 2;
+      if(vis._opt.aoVer) vis._opt.aoVer(it);
+    }
+    vis._itens = itens; vis._i = i || 0; vis._opt = opt;
+    vis.hidden = false; document.body.classList.add('sem-rolagem'); mostrar();
+  }
+
+  // ---------- compartilhar arquivos (WhatsApp etc.) com alternativa de baixar ----------
+  async function arquivos(lista){
+    return Promise.all(lista.map(async it => { const r = await fetch(it.src); const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }));
+  }
+  async function compartilhar(lista, texto){
+    try{
+      const fs = await arquivos(lista);
+      if(navigator.canShare && navigator.canShare({files: fs})){ await navigator.share({files: fs, text: texto || undefined}); return 'ok'; }
+      for(const f of fs){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+      return 'baixado';
+    }catch(e){ if(e && e.name === 'AbortError') return 'cancelado'; throw e; }
+  }
+  function toast(t){
+    let el = $('toast'); if(!el){ el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = t; el.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+  const quando = iso => {
+    if(!iso) return '';
+    const d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+    if(s < 60) return 'agora há pouco';
+    if(s < 3600) return 'há ' + Math.floor(s / 60) + ' min';
+    if(s < 86400) return 'há ' + Math.floor(s / 3600) + ' h';
+    return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo'}) + ' às ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'});
+  };
+  const soDigitos = s => String(s || '').replace(/\D/g, '');
+  const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
+
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+})();
+
+// Página do cliente: seleção de imóveis (vários empreendimentos) montada pelo corretor na lupa do app.
+(function(){
+  'use strict';
+  const {$, esc, rpc, andarN, planta, visualizador, toast, waNum} = NEX;
+  const q = new URLSearchParams(location.search);
+  const ID = (q.get('s') || '').trim(), PREVIA = q.get('previa') === '1';
+  let S = null, comCentral = false;
+  const CEN = {};   // fichas da central de produto (nex/p/<id>.json): perspectivas, plantas, lazer, entorno
+  const feitos = new Set();
+  function evento(e, d){   // o que o cliente fez na página (o corretor recebe aviso de "abriu" e de "tenho interesse")
+    if(PREVIA || !S) return;
+    const k = e + '|' + (d || ''); if(feitos.has(k)) return; feitos.add(k);
+    try{ fetch(NEX.CFG.url + '/rest/v1/rpc/selecao_ver', {method: 'POST', keepalive: true, headers: {'apikey': NEX.CFG.key, 'Content-Type': 'application/json'}, body: JSON.stringify({p_id: ID, p_evento: e, p_detalhe: d || null})}).catch(() => {}); }catch(x){}
+  }
+  const primeiro = s => String(s || '').trim().split(/\s+/)[0] || '';
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  const MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const mesAno = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); return m ? MES[+m[2] - 1] + ' de ' + m[1] : ''; };
+  const dataBR = iso => new Date(iso).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo'});
+  const m2t = v => (+v).toLocaleString('pt-BR', {maximumFractionDigits: 2}) + ' m²';
+  const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const FASE = {pronto: 'Pronto para morar', obras: 'Em obras', lanc: 'Lançamento', breve: 'Lançamento em breve'};
+  const ST = {disponivel: ['ok', 'Disponível'], reservada: ['res', 'Reservada agora'], processo_final: ['res', 'Em negociação'], vendida: ['nao', 'Vendida']};
+  const CORES = [['#3a3326', '#121110'], ['#23313a', '#0d1114'], ['#35283a', '#110d13'], ['#2c3524', '#0f120d']];
+  const hashTxt = s => { let h = 0; for(const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
+  const iniciais = n => String(n || '?').split(/\s+/).filter(w => w.length > 2 && !/^(nex|one|the)$/i.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const cImg = (P, id) => 'nex/' + NEX.img(P, id);
+  const cThumb = (P, id) => 'nex/' + NEX.thumb(P, id);
+
+  function erro(tipo, dados){
+    $('load').hidden = true; $('pg').hidden = true; $('erro').hidden = false;
+    if(tipo === 'expirado'){
+      $('erro-t').textContent = 'Este link expirou';
+      $('erro-p').textContent = 'As seleções valem 60 dias. Peça ao seu corretor uma seleção com os valores de hoje.';
+      if(dados && dados.whats){ const w = $('erro-wa'); w.hidden = false; w.href = 'https://wa.me/' + waNum(dados.whats); w.textContent = 'Falar com ' + (primeiro(dados.corretor) || 'o corretor'); }
+    } else if(tipo === 'rede'){
+      $('erro-t').textContent = 'Sem conexão';
+      $('erro-p').textContent = 'Não consegui carregar agora. Confira a internet e tente de novo.';
+      const b = $('erro-de-novo'); b.hidden = false; b.onclick = () => location.reload();
+    }
+  }
+
+  async function iniciar(){
+    if(PREVIA) $('previa').hidden = false;
+    if(!/^[A-Za-z0-9_-]{8,20}$/.test(ID)) return erro('link_invalido');
+    let r;
+    try{ r = await rpc('selecao_ver', {p_id: ID, p_evento: PREVIA ? 'previa' : 'abriu'}); }catch(e){ return erro('rede'); }
+    if(!r || !r.ok) return erro(r && r.erro, r);
+    S = r; S.projetos = S.projetos || [];
+    const cen = carregarCentral();
+    await Promise.race([cen, new Promise(res => setTimeout(res, 2500))]);
+    render();
+    cen.then(() => { if(!comCentral && Object.keys(CEN).length) render(); });
+  }
+  async function carregarCentral(){
+    try{
+      const idx = await fetch('nex/p/index.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : []);
+      const ids = new Set(idx.map(x => x.id));
+      await Promise.all(S.projetos.filter(p => ids.has(p.id)).map(p =>
+        fetch('nex/p/' + encodeURIComponent(p.id) + '.json').then(r => r.ok ? r.json() : null).then(P => { if(P) CEN[p.id] = P; }).catch(() => {})));
+    }catch(e){}
+  }
+
+  function fotosDe(p){
+    const P = CEN[p.id];
+    if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: cImg(P, r.id), th: cThumb(P, r.id), t: r.t, cobre: false}));
+    const out = [];
+    if(p.capa) out.push({src: p.capa, t: 'Fachada'});
+    for(const f of (p.fotos || [])) if(f && f.u && f.u !== p.capa) out.push({src: f.u, t: f.t || ''});
+    return out;
+  }
+  function capaDe(p){ const P = CEN[p.id]; if(P && P.hero) return cImg(P, P.hero); return p.capa || (p.fotos && p.fotos[0] && p.fotos[0].u) || null; }
+
+  function render(){
+    comCentral = Object.keys(CEN).length > 0;
+    const ps = S.projetos, nome = primeiro(S.cliente);
+    const nU = ps.reduce((s, p) => s + (p.unidades || []).length, 0);
+    document.title = 'Imóveis selecionados para ' + nome;
+    $('ola').textContent = 'Olá, ' + nome + '!';
+    $('tit').textContent = nU === 1 ? 'Separei este imóvel para você' : 'Separei estes imóveis para você';
+    $('busca').textContent = cap(S.busca || ''); $('busca').hidden = !S.busca;
+    $('resumo').textContent = (nU === 1 ? '1 unidade' : nU + ' unidades') + (ps.length > 1 ? ' em ' + ps.length + ' empreendimentos' : '') + ' · valores de ' + dataBR(S.criado_em);
+    $('por').textContent = S.corretor ? 'Seleção preparada por ' + S.corretor : '';
+    const cf = $('capa-fotos'); cf.replaceChildren();
+    const capas = ps.map(capaDe).filter(Boolean).slice(0, window.innerWidth >= 900 ? 3 : 2);
+    if(!capas.length){ const d = document.createElement('div'); d.className = 'ph'; cf.appendChild(d); }
+    capas.forEach(u => { const im = document.createElement('img'); im.alt = ''; im.src = u; im.addEventListener('error', () => im.remove()); cf.appendChild(im); });
+    const ix = $('indice'); ix.replaceChildren(); ix.hidden = ps.length < 2;
+    ps.forEach(p => { const a = document.createElement('a'); a.href = '#p-' + p.id; const b = document.createElement('b'); b.textContent = (p.unidades || []).length; a.append(b, document.createTextNode(p.nome)); ix.appendChild(a); });
+    const box = $('pjs'); box.replaceChildren();
+    ps.forEach((p, i) => box.appendChild(secao(p, i, ps.length)));
+    $('rodape-valores').textContent = 'Valores da tabela de ' + dataBR(S.criado_em) + ' (dia em que a seleção foi enviada), sujeitos a alteração sem aviso e à disponibilidade da unidade no momento da reserva. A situação de cada unidade (disponível, reservada ou vendida) é a de agora.';
+    const legais = ps.map(p => CEN[p.id] && CEN[p.id].legal).filter(Boolean);
+    $('rodape-cor').textContent = [S.corretor ? 'Corretor: ' + S.corretor + (S.whats ? ' · ' + S.whats : '') : ''].concat(legais).filter(Boolean).join(' · ');
+    if(S.whats){
+      const w = $('wa'); w.hidden = false;
+      const cor = primeiro(S.corretor);
+      w.href = 'https://wa.me/' + waNum(S.whats) + '?text=' + encodeURIComponent('Olá' + (cor ? ', ' + cor : '') + '! Vi a seleção de imóveis que você me mandou.');
+      $('wa-t').textContent = 'Falar com ' + (cor || 'o corretor'); w.setAttribute('aria-label', $('wa-t').textContent);
+      w.onclick = () => evento('whatsapp');
+    }
+    $('load').hidden = true; $('pg').hidden = false;
+    if(location.hash && document.getElementById(location.hash.slice(1))) setTimeout(() => document.getElementById(location.hash.slice(1)).scrollIntoView(), 80);
+    observar();
+  }
+
+  function secao(p, i, n){
+    const P = CEN[p.id];
+    const s = document.createElement('section'); s.className = 'pj'; s.id = 'p-' + p.id; s.dataset.p = p.id;
+    // galeria
+    const g = document.createElement('div'); g.className = 'pj-gal';
+    const tr = document.createElement('div'); tr.className = 'trilho';
+    const itens = fotosDe(p);
+    const cont = document.createElement('span'); cont.className = 'gal-n';
+    const atual = () => { const sl = tr.querySelectorAll('.sl'); if(sl.length < 2){ cont.hidden = true; return; } const w = sl[0].getBoundingClientRect().width + 10; cont.hidden = false; cont.textContent = Math.min(sl.length, Math.round(tr.scrollLeft / w) + 1) + ' / ' + sl.length; };
+    const ph = () => { const c = CORES[hashTxt(p.id) % CORES.length], d = document.createElement('div'); d.className = 'sl ph'; d.style.setProperty('--c1', c[0]); d.style.setProperty('--c2', c[1]); d.textContent = iniciais(p.nome); return d; };
+    itens.forEach((it, k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'sl' + (it.cobre ? ' cobre' : '');
+      const bg = document.createElement('img'); bg.className = 'bg'; bg.alt = ''; bg.setAttribute('aria-hidden', 'true'); bg.loading = 'lazy'; bg.src = it.th || it.src;
+      const fg = document.createElement('img'); fg.className = 'fg'; fg.alt = it.t ? p.nome + ' · ' + it.t : p.nome; fg.loading = k < 2 ? 'eager' : 'lazy'; fg.src = it.src;
+      b.append(bg, fg);
+      if(it.t){ const l = document.createElement('span'); l.className = 'leg'; l.textContent = it.t; b.appendChild(l); }
+      fg.addEventListener('error', () => { b.remove(); if(!tr.querySelector('.sl')) tr.appendChild(ph()); atual(); });
+      b.addEventListener('click', () => { evento('fotos', p.id); const vis = [...tr.querySelectorAll('button.sl')]; visualizador(vis.map(x => ({src: x.querySelector('.fg').src, t: x.querySelector('.fg').alt})), Math.max(0, vis.indexOf(b))); });
+      tr.appendChild(b);
+    });
+    if(!itens.length) tr.appendChild(ph());
+    let rolou = false;
+    tr.addEventListener('scroll', () => { atual(); if(!rolou && tr.scrollLeft > 60){ rolou = true; evento('fotos', p.id); } }, {passive: true});
+    g.append(tr, cont); s.appendChild(g);
+    requestAnimationFrame(atual);
+    // texto
+    const c = document.createElement('div'); c.className = 'pj-corpo';
+    const rot = document.createElement('p'); rot.className = 'rot'; rot.textContent = (n > 1 ? (i + 1) + ' de ' + n + ' · ' : '') + [p.construtora, p.bairro].filter(Boolean).join(' · '); c.appendChild(rot);
+    const h = document.createElement('h2'); h.textContent = p.nome; c.appendChild(h);
+    const se = document.createElement('div'); se.className = 'selos';
+    if(p.fase && FASE[p.fase]){ const f = document.createElement('span'); f.className = 'fase f-' + p.fase; f.textContent = FASE[p.fase]; se.appendChild(f); }
+    const ent = p.fase === 'obras' && p.entrega ? 'Entrega prevista para ' + mesAno(p.entrega) : (P && P.entrega && p.fase !== 'pronto' ? P.entrega : '');
+    if(ent){ const e = document.createElement('span'); e.textContent = ent; se.appendChild(e); }
+    if(se.firstChild) c.appendChild(se);
+    if(p.destaque){ const d = document.createElement('p'); d.className = 'pj-dest'; d.textContent = p.destaque; c.appendChild(d); }
+    const end = document.createElement('p'); end.className = 'pj-end';
+    const endTxt = p.endereco ? p.endereco + (p.bairro && p.endereco.indexOf(p.bairro) < 0 ? ' · ' + p.bairro : '') : (p.bairro || '');
+    end.appendChild(document.createTextNode(endTxt));
+    const mapa = (P && P.mapa) || (p.endereco ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.endereco.replace(' · ', ' - ') + ', ' + (p.cidade || 'São Paulo')) : (p.lat != null ? 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng : null));
+    if(mapa){ const a = document.createElement('a'); a.href = mapa; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Ver no mapa ↗'; a.addEventListener('click', () => evento('mapa', p.id)); end.appendChild(document.createTextNode(endTxt ? ' · ' : '')); end.appendChild(a); }
+    if(endTxt || mapa) c.appendChild(end);
+    if(P) extrasCentral(P, p, c);
+    // unidades
+    const us = p.unidades || [];
+    const ut = document.createElement('h3'); ut.className = 'us-tit'; ut.textContent = us.length === 1 ? 'A unidade separada' : us.length + ' unidades separadas';
+    const livres = us.filter(u => u.st === 'disponivel').length;
+    if(livres < us.length){ const sm = document.createElement('small'); sm.textContent = livres + ' disponíve' + (livres === 1 ? 'l' : 'is') + ' agora'; ut.appendChild(sm); }
+    c.appendChild(ut);
+    const grid = document.createElement('div'); grid.className = 'us';
+    us.forEach(u => grid.appendChild(cardU(p, u, P)));
+    c.appendChild(grid);
+    s.appendChild(c);
+    return s;
+  }
+  function extrasCentral(P, p, c){
+    if(P.chamada && P.chamada !== p.destaque){ const d = document.createElement('p'); d.className = 'pj-cham'; d.textContent = P.chamada; c.appendChild(d); }
+    const fatos = (P.fatos || []).filter(f => !/^unidades$/i.test(f[0])).slice(0, 4);
+    if(fatos.length){ const dl = document.createElement('dl'); dl.className = 'fatos'; fatos.forEach(([k, v]) => { const d = document.createElement('div'); const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; d.append(dt, dd); dl.appendChild(d); }); c.appendChild(dl); }
+    const lz = []; (P.lazer || []).forEach(l => (l.itens || []).forEach(x => { if(lz.length < 12 && !lz.includes(x)) lz.push(x); }));
+    if(lz.length){ const d = document.createElement('div'); d.className = 'lazer'; lz.forEach(x => { const sp = document.createElement('span'); sp.textContent = x.replace(/\s*\(.*\)\s*$/, ''); d.appendChild(sp); }); c.appendChild(d); }
+    const perto = (P.perto || []).slice(0, 4);
+    if(perto.length){
+      const d = document.createElement('div'); d.className = 'perto';
+      perto.forEach(x => { const r = document.createElement('div'); const t = document.createElement('span'); t.textContent = x.nome; const b = document.createElement('b');
+        b.textContent = x.m != null ? (x.m >= 1000 ? (x.m / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' km' : x.m + ' m') : [x.pe != null ? x.pe + ' min a pé' : null, x.carro != null ? x.carro + ' min de carro' : null].filter(Boolean).join(' · ');
+        r.append(t, b); d.appendChild(r); });
+      c.appendChild(d);
+    }
+    if(P.book){ const l = document.createElement('div'); l.className = 'pj-links'; const a = document.createElement('a'); a.className = 'btn'; a.href = 'nex/' + P.pasta + P.book; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Book do empreendimento (PDF)'; a.addEventListener('click', () => evento('fotos', p.id)); l.appendChild(a); c.appendChild(l); }
+  }
+  function cardU(p, u, P){
+    const st = ST[u.st] || ['nao', 'Indisponível'];
+    const a = document.createElement('article'); a.className = 'u' + (u.st === 'disponivel' ? '' : ' fora'); a.id = 'u-' + p.id + '-' + u.n;
+    const meta = [u.tl, u.a != null ? m2t(u.a) : null, u.andar].filter(Boolean).join(' · ');
+    const h = document.createElement('div'); h.className = 'u-h';
+    const t = document.createElement('h3'); t.textContent = 'Unidade ' + u.n;
+    const sb = document.createElement('span'); sb.className = 'st ' + st[0]; sb.textContent = st[1];
+    h.append(t, sb); a.appendChild(h);
+    if(meta){ const m = document.createElement('p'); m.className = 'u-m'; m.textContent = meta; a.appendChild(m); }
+    const pl = P ? planta(P, {an: andarN(u.an), fin: (+u.col) + 1, col: +u.col, tipo: u.tipo || null}) : null;
+    if(pl){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'u-pl';
+      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = pl.p.t; im.src = cThumb(P, pl.p.id);
+      im.addEventListener('error', () => { if(!im.dataset.f){ im.dataset.f = '1'; im.src = cImg(P, pl.p.id); } else b.remove(); });
+      const l = document.createElement('span'); l.textContent = (pl.exata ? 'Planta' : 'Planta da tipologia') + ' · toque para ampliar';
+      b.append(im, l);
+      b.addEventListener('click', () => { evento('fotos', p.id); visualizador([{src: cImg(P, pl.p.id), t: pl.p.t + ' · unidade ' + u.n + (pl.exata ? '' : ' (mesma tipologia; pode ser espelhada)')}].concat(pl.p.decorado ? [{src: cImg(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}] : []), 0); });
+      a.appendChild(b);
+    }
+    const pr = (u.precos || []).filter(x => x && x.v != null);
+    if(pr.length){
+      const dl = document.createElement('dl'); dl.className = 'u-pr';
+      pr.forEach(x => { const d = document.createElement('div'); const dt = document.createElement('dt'); dt.textContent = x.l || 'Valor'; const dd = document.createElement('dd'); dd.textContent = BRL(x.v); d.append(dt, dd); dl.appendChild(d); });
+      a.appendChild(dl);
+    } else { const s = document.createElement('p'); s.className = 'u-sem'; s.textContent = 'Valores e condições com o seu corretor.'; a.appendChild(s); }
+    if(P && P.cat_info && u.cat && P.cat_info[u.cat]){ const c = document.createElement('details'); c.className = 'u-cat'; const s = document.createElement('summary'); s.textContent = 'Unidade ' + u.cat + ': tem regra de renda (ler)'; const tx = document.createElement('p'); tx.textContent = P.cat_info[u.cat]; c.append(s, tx); a.appendChild(c); }
+    const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn ouro u-int';
+    bt.textContent = u.st === 'disponivel' ? 'Tenho interesse' : 'Quero opções parecidas';
+    bt.addEventListener('click', () => interesse(p, u, meta, bt));
+    a.appendChild(bt);
+    return a;
+  }
+  function interesse(p, u, meta, bt){
+    evento('interesse', p.id + '|' + u.n);
+    const cor = primeiro(S.corretor);
+    const txt = u.st === 'disponivel'
+      ? 'Olá' + (cor ? ', ' + cor : '') + '! Tenho interesse na unidade ' + u.n + ' do ' + p.nome + (meta ? ' (' + meta + ')' : '') + '. Pode me passar mais detalhes?'
+      : 'Olá' + (cor ? ', ' + cor : '') + '! Vi que a unidade ' + u.n + ' do ' + p.nome + ' não está mais disponível. Tem alguma parecida?';
+    if(S.whats) window.open('https://wa.me/' + waNum(S.whats) + '?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+    else toast('Pronto! ' + (cor || 'Seu corretor') + ' foi avisado e vai falar com você.');
+    bt.textContent = 'Pedido enviado ✓'; bt.classList.add('feito');
+  }
+  function observar(){
+    if(!('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(ents => { for(const e of ents){ if(!e.isIntersecting) continue; evento('projeto', e.target.dataset.p); io.unobserve(e.target); } }, {rootMargin: '-45% 0px -45% 0px', threshold: 0});
+    document.querySelectorAll('.pj').forEach(s => io.observe(s));
+  }
+
+  iniciar();
+})();
+
+</script>
+</body>
+</html>
