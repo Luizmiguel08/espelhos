@@ -428,7 +428,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 
   <section class="aba" id="aba-mat" hidden>
     <div class="mat-sec" id="docs-sec" hidden><h3>Material oficial da construtora</h3>
-      <p class="mat-nota">Arquivos originais do Linktree da ONE: abrem no Google Drive e o link pode ser enviado ao cliente.</p>
+      <p class="mat-nota">Arquivos originais da construtora (Linktree e Google Drive): abrem no Drive e o link pode ser enviado ao cliente.</p>
       <div class="docs" id="docs"></div>
     </div>
     <div class="mat-sec" id="book-sec"><h3>Book do cliente</h3>
@@ -485,7 +485,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202609301602
+// versão 202610011442
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -1585,7 +1585,9 @@ window.NEX = (function(){
     for(const v of (P.vistas_rooftop || [])) vs.push({src: img(P, v.id), th: thumb(P, v.id), t: v.t, nome: v.id + '.jpg'});
     galeria('g-vistas', vs);
     galeria('g-lazer', (P.lazer || []).filter(l => l.planta).map(l => ({src: img(P, l.planta), th: thumb(P, l.planta), t: l.onde, nome: l.planta + '.jpg'})));
-    const tours = (P.plantas || []).filter(p => p.tour).map(p => ({t: p.t, u: p.tour})).concat(P.tour_rooftop ? [{t: 'Rooftop', u: P.tour_rooftop}] : []);
+    const vistosT = new Set();   // tours do empreendimento (P.tours: decorados e tour do prédio) + tours por planta, sem repetir o link
+    const tours = (P.tours || []).concat((P.plantas || []).filter(p => p.tour).map(p => ({t: p.t, u: p.tour}))).concat(P.tour_rooftop ? [{t: 'Rooftop', u: P.tour_rooftop}] : [])
+      .filter(z => z && z.u && !vistosT.has(z.u) && vistosT.add(z.u));
     $('tour-sec').hidden = !tours.length;
     $('tours').innerHTML = tours.map(z => '<a class="abtn" target="_blank" rel="noopener" href="' + esc(z.u) + '">' + esc(z.t) + '</a>').join('');
     const docs = P.material_oficial || [];
@@ -1594,8 +1596,9 @@ window.NEX = (function(){
       let h = '', cat = null;
       for(const d of docs){
         if(d.c !== cat){ if(cat !== null) h += '</div>'; cat = d.c; h += '<div class="doc-g"><h4>' + esc(cat) + '</h4>'; }
-        const u = driveUrl(d.id);
-        h += '<div class="doc"><div class="doc-i"><b>' + esc(d.n) + '</b><small>' + esc(String(d.ext || '').toUpperCase()) + ' · ' + String(d.mb).replace('.', ',') + ' MB</small></div>' +
+        const u = d.u || driveUrl(d.id);   // d.u: link direto (pasta do Drive, página externa)
+        const det = [d.pasta ? 'Pasta no Google Drive' : String(d.ext || '').toUpperCase(), d.mb != null ? String(d.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(' · ');
+        h += '<div class="doc"><div class="doc-i"><b>' + esc(d.n) + '</b><small>' + esc(det) + '</small></div>' +
              '<div class="doc-a"><a class="abtn" target="_blank" rel="noopener" href="' + esc(u) + '">Abrir</a><button class="abtn" type="button" data-u="' + esc(u) + '">Copiar link</button></div></div>';
       }
       $('docs').innerHTML = h + '</div>';

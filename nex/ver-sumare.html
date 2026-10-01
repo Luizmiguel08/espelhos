@@ -249,7 +249,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202609301602
+// versão 202610011442
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -632,7 +632,16 @@ window.NEX = (function(){
     $('perto').innerHTML = (P.perto || []).map(p => '<div><span>' + esc(p.nome) + '</span><span class="t">' +
       ['carro', 'pe', 'bike'].filter(k => p[k] != null).map(k => '<span title="' + lbl[k] + '">' + ico[k] + p[k] + ' min<span style="position:absolute;left:-9999px">' + lbl[k] + '</span></span>').join('') +
       (p.min != null ? '<span>' + p.min + ' min</span>' : '') + (p.m != null ? '<span>' + (p.m >= 1000 ? (p.m / 1000).toLocaleString('pt-BR') + ' km' : p.m + ' m') + '</span>' : '') + '</span></div>').join('');
-    $('s-local').hidden = !(P.perto && P.perto.length);
+    const temPerto = !!(P.perto && P.perto.length);
+    $('s-local').hidden = !temPerto && !P.mapa;
+    if(!temPerto) $('s-local').querySelector('h2').textContent = 'Onde fica';
+    // tours 360° do empreendimento (sem tipologia), logo abaixo das imagens do prédio
+    const toursPr = (P.tours || []).filter(z => z && z.u && !z.tl);
+    if(toursPr.length){
+      const box = document.createElement('div'); box.className = 'acoes tours-pr';
+      for(const z of toursPr){ const a = document.createElement('a'); a.className = 'btn tour'; a.target = '_blank'; a.rel = 'noopener'; a.href = z.u; a.textContent = z.cli || z.t; a.addEventListener('click', () => evento('galeria')); box.appendChild(a); }
+      $('renders').after(box);
+    }
     $('perto-fonte').textContent = P.perto_fonte || '';
     if(P.mapa){ $('mapa').href = P.mapa; $('mapa').onclick = () => evento('local'); } else $('mapa').hidden = true;
     const bo = bookOficial(P);
@@ -659,7 +668,9 @@ window.NEX = (function(){
     if(!u.livre) h += '<div class="fora">Esta unidade não está mais disponível. Fale com ' + esc(primeiro(L.corretor) || 'o seu corretor') + ' para ver opções parecidas.</div>';
     h += '<div class="u-grid"><div class="cartao"><h4>Planta</h4>';
     if(pl) h += '<img class="img-planta" data-ev="planta" alt="' + esc(pl.p.t) + '" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + '><div class="leg">' + esc(pl.p.t) + (pl.exata ? '' : ' · planta da mesma tipologia (a unidade pode ser espelhada)') + (difArea(pl, x.a) ? ' · planta ilustrativa; esta unidade tem ' + esc(m2(x.a)) : '') + '</div><div class="dica">Toque na planta para ampliar.</div>' +
-             (pl.exata && pl.p.tour ? '<a class="btn tour" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour virtual 360° desta planta</a>' : '') +
+             (pl.exata && pl.p.tour ? '<a class="btn tour" href="' + esc(pl.p.tour) + '" target="_blank" rel="noopener">Tour virtual 360° desta planta</a>' :
+               (P.tours || []).filter(z => z && z.u && z.tl && new RegExp('(^|[^0-9a-z])' + String(z.tl).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![a-z])', 'i').test(String(pl.p.t || '')))
+                 .map(z => '<a class="btn tour" href="' + esc(z.u) + '" target="_blank" rel="noopener">' + esc(z.cli || z.t) + '</a>').join('')) +
              (pl.p.decorado ? '<img class="img-dec" alt="Decorado" src="' + esc(img(P, pl.p.decorado)) + '"><div class="leg">Decorado desta planta (sugestão de decoração).</div>' : '');
     else h += '<div class="sem">Planta disponível com o seu corretor.</div>';
     h += '</div><div class="u-col">';
