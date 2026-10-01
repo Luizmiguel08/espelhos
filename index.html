@@ -839,6 +839,60 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   .be-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
 }
 @media (max-width:560px){ .bz .top h2{font-size:21px} }
+
+/* toque no projeto → ficha com informações, fotos e material */
+.ba-tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ba-tap:hover .ba-pi h3{text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.ba-tap:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:14px 14px 0 0}
+.ba-ver{margin-top:2px;font-size:12.5px;font-weight:600;color:var(--accent)}
+.bf-fundo{position:fixed;inset:0;z-index:34;background:rgba(10,14,24,.5);display:flex;align-items:flex-end;justify-content:center}
+.bf-fundo[hidden]{display:none}
+@media (min-width:700px){.bf-fundo{align-items:center;padding:16px}}
+.bf{width:min(760px,100%);max-height:94vh;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:700px){.bf{border-radius:18px;max-height:calc(100vh - 32px)}}
+.bf-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.bf-top h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;line-height:1.05;margin:0}
+.bf-top small{font-size:13px;color:var(--ink-2)}
+.bf-corpo{overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:0}
+.bf-corpo > *{flex:none}
+.bf-acoes{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface)}
+.bf-acoes .abtn{flex:1;justify-content:center;height:44px;font-size:14px}
+.bf-gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px}
+.bf-gal figure{flex:none;width:min(360px,80%);margin:0;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px}
+.bf-foto{display:block;width:100%;height:210px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--surface-2);cursor:zoom-in}
+.bf-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.bf-gal figcaption{font-size:12px;color:var(--muted)}
+.bf-cham{margin:0;font-size:14px;color:var(--ink-2);line-height:1.4}
+.bf-nota{margin:0;font-size:12.5px;color:var(--muted)}
+.bf-fatos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:0}
+.bf-fatos div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.bf-fatos dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bf-fatos dd{margin:0;font-size:13.5px;font-weight:600}
+.bf-end{margin:0;font-size:13px;color:var(--ink-2)}
+.bf-end a{color:var(--accent);font-weight:600}
+.bf-sec h4{margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.bf-tags{display:flex;flex-wrap:wrap;gap:6px}
+.bf-tags span{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--ink-2)}
+.bf-perto{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line)}
+.bf-perto b{font-weight:600;white-space:nowrap}
+.bf-tb{margin:0 0 6px;font-size:13.5px;font-weight:600}
+.bf-cond{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.bf-links{display:flex;flex-wrap:wrap;gap:8px}
+.bf-links .abtn{height:40px;font-size:13.5px;text-decoration:none}
+.bf-docs{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+.bf-docs li{display:flex;flex-direction:column;gap:1px;padding:7px 0;border-bottom:1px solid var(--line)}
+.bf-docs a{color:var(--accent);font-weight:600;font-size:13.5px;word-break:break-word}
+.bf-docs small{font-size:12px;color:var(--muted)}
+.bf-zoom{position:absolute;inset:0;z-index:2;background:rgba(6,9,16,.94);display:flex;align-items:center;justify-content:center;padding:56px 12px 24px}
+.bf-zoom[hidden]{display:none}
+.bf-zoom figure{margin:0;max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bf-zoom img{max-width:100%;max-height:calc(100vh - 140px);object-fit:contain;border-radius:8px}
+.bf-zoom figcaption{font-size:13px;color:#d6dbe8;text-align:center}
+.bf-zoom .xbtn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.bf-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:56px;border:0;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:30px;cursor:pointer}
+.bf-nav.ant{left:8px}.bf-nav.prox{right:8px}
+.bf-nav[hidden]{display:none}
+.ba-ush-a{display:flex;align-items:center;gap:14px}
 </style>
 </head>
 <body>
@@ -1096,6 +1150,20 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       <p class="txt">As seleções que você mandou deste aparelho. Você recebe um aviso quando o cliente abre o link ou toca em <b>Tenho interesse</b>. Cada link vale 60 dias.</p>
       <div id="se-lista" class="bs-lista"></div>
     </div>
+  </div>
+</div>
+<!-- Ficha do empreendimento aberta pela lupa (toque no projeto): informações, fotos e material -->
+<div class="bf-fundo" id="bf" hidden>
+  <div class="bf" role="dialog" aria-modal="true" aria-labelledby="bf-t">
+    <div class="bf-top"><div><h3 id="bf-t">—</h3><small id="bf-s"></small></div><button class="xbtn" type="button" id="bf-x" aria-label="Fechar a ficha">×</button></div>
+    <div class="bf-corpo" id="bf-c"></div>
+    <div class="bf-acoes"><button class="abtn" type="button" id="bf-volta">Voltar às unidades</button><button class="abtn primary" type="button" id="bf-esp">Abrir o espelho</button></div>
+  </div>
+  <div class="bf-zoom" id="bf-zoom" hidden>
+    <button class="xbtn" type="button" id="bf-zx" aria-label="Fechar a foto">×</button>
+    <button class="bf-nav ant" type="button" id="bf-zp" aria-label="Foto anterior">‹</button>
+    <figure><img id="bf-zi" alt="" referrerpolicy="no-referrer"><figcaption id="bf-zc"></figcaption></figure>
+    <button class="bf-nav prox" type="button" id="bf-zn" aria-label="Próxima foto">›</button>
   </div>
 </div>
 
@@ -2215,7 +2283,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 
   // ---------- Buscar agora ----------
   const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, ord: 'preco'};
-  let baRes = [], baCrit = {}, baSel = new Set(), baSelManual = false, baAberto = {}, baMaisProj = 12, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora';
+  let baRes = [], baCrit = {}, baSel = new Set(), baAberto = {}, baMaisProj = 12, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora';
   const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null));
   function critBusca(){
     const c = {projetos: ba.projs.slice(), modo: ba.modo};
@@ -2331,7 +2399,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ba.semLoja = !!c.sem_loja; $('ba-loja').checked = ba.semLoja;
     ba.ord = 'preco';
     $('ba-mais').open = !!(ba.grupos.length || ba.projs.length || c.andar_min != null || !ba.semLoja);
-    baSelManual = false; baAberto = {}; baMaisProj = 12;
+    baSel = new Set(); baAberto = {}; baMaisProj = 12;   // busca nova: nada vem marcado
     renderChipsBusca();
   }
   function limparBusca(){
@@ -2361,7 +2429,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     clearTimeout(baT);
     if(!dados) return;
     const c = critBusca(); baCrit = c;
-    if(!temFiltro(c)){ baRes = []; baSel = new Set(); baSelManual = false; renderIntro(); renderBarra(); return; }
+    if(!temFiltro(c)){ baRes = []; baSel = new Set(); renderIntro(); renderBarra(); return; }
     const m = new Map();
     for(const {p, a} of encontrados(c)){ let g = m.get(p.id); if(!g){ g = {p, us: [], d: c.regiao ? distProj(p, c.regiao) : null}; m.set(p.id, g); } g.us.push(a); }
     const gr = [...m.values()];
@@ -2375,25 +2443,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     else gr.sort(porPreco);
     baRes = gr;
     const ok = new Set(); gr.forEach(g => g.us.forEach(a => ok.add(chave(g.p, a))));
-    if(baSelManual){ for(const k of [...baSel]) if(!ok.has(k)) baSel.delete(k); if(!baSel.size) baSelManual = false; }
-    if(!baSelManual) selPadrao();
+    for(const k of [...baSel]) if(!ok.has(k)) baSel.delete(k);   // nada vem marcado: ficam só as que o corretor marcou e que ainda aparecem na busca
     renderRes();
     renderBarra();
-  }
-  function selPadrao(){   // 3 unidades de cada um dos 8 primeiros empreendimentos: a mais barata e, depois, opções diferentes (tipologia, metragem, andar)
-    baSel = new Set();
-    for(const g of baRes.slice(0, 8)){
-      const esc3 = [], tipos = new Set(), andares = new Set();
-      const tk = a => (tipologiaDe(g.p, a) || '') + '|' + Math.round(areaDe(a) || 0);
-      for(const a of g.us){ if(esc3.length >= 3) break; if(tipos.has(tk(a))) continue; esc3.push(a); tipos.add(tk(a)); andares.add(andarNum(a[4])); }
-      if(esc3.length < 3){   // mesma planta: andares diferentes, do mais baixo ao mais alto
-        const resto = g.us.filter(a => !esc3.includes(a));
-        const porAndar = resto.slice().sort((x, y) => andarNum(y[4]) - andarNum(x[4]));
-        for(const a of porAndar){ if(esc3.length >= 3) break; if(andares.has(andarNum(a[4]))) continue; esc3.push(a); andares.add(andarNum(a[4])); }
-        for(const a of resto){ if(esc3.length >= 3) break; if(!esc3.includes(a)) esc3.push(a); }
-      }
-      esc3.forEach(a => baSel.add(chave(g.p, a)));
-    }
   }
   function podeAdd(pid){
     if(baSel.size >= 40){ toast('Cabem até 40 unidades num envio. Desmarque alguma antes.'); return false; }
@@ -2453,6 +2505,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const art = document.createElement('article'); art.className = 'ba-proj'; art.dataset.p = p.id;
     const cab = document.createElement('div'); cab.className = 'ba-cab';
     cab.appendChild(capaEl(p));
+    cab.classList.add('ba-tap'); cab.tabIndex = 0; cab.setAttribute('role', 'button');
+    cab.setAttribute('aria-label', 'Ver informações e material de ' + (p.nome || i.nome || p.id));
+    cab.addEventListener('click', () => abrirFichaProj(g));
+    cab.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); abrirFichaProj(g); } });
     const inf = document.createElement('div'); inf.className = 'ba-pi';
     const h = document.createElement('h3'); h.textContent = p.nome || i.nome || p.id; inf.appendChild(h);
     const loc = document.createElement('p'); loc.className = 'ba-loc';
@@ -2465,6 +2521,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const mn = document.createElement('p'); mn.className = 'ba-min';
     mn.innerHTML = '<b>' + g.us.length + '</b> ' + (g.us.length === 1 ? 'unidade' : 'unidades') + (g.min ? ' · a partir de <b>' + esc(BRL(g.min.v)) + '</b> ' + esc(g.min.lbl) : '');
     inf.appendChild(mn);
+    const ver = document.createElement('span'); ver.className = 'ba-ver'; ver.textContent = 'Ver informações e material ›'; inf.appendChild(ver);
     cab.appendChild(inf); art.appendChild(cab);
     // unidades: as 3 primeiras (mais baratas) e as marcadas; "ver mais" abre a lista
     const us = document.createElement('div'); us.className = 'ba-us';
@@ -2475,9 +2532,16 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     tg.addEventListener('click', () => {
       if(nSel === g.us.length){ g.us.forEach(a => baSel.delete(chave(p, a))); }
       else { for(const a of g.us){ const k = chave(p, a); if(baSel.has(k)) continue; if(!podeAdd(p.id)) break; baSel.add(k); } }
-      baSelManual = true; art.replaceWith(cardProj(g)); renderBarra();
+      art.replaceWith(cardProj(g)); renderBarra();
     });
-    hd.append(hs, tg); us.appendChild(hd);
+    const ac = document.createElement('span'); ac.className = 'ba-ush-a';
+    if(nSel > 0 && nSel < g.us.length){   // algumas marcadas: dá para limpar tudo de uma vez (em projeto grande "marcar todas" para no limite do envio)
+      const lim = document.createElement('button'); lim.type = 'button'; lim.className = 'lnk lim'; lim.textContent = 'desmarcar';
+      lim.addEventListener('click', () => { g.us.forEach(a => baSel.delete(chave(p, a))); art.replaceWith(cardProj(g)); renderBarra(); });
+      ac.appendChild(lim);
+    }
+    ac.appendChild(tg);
+    hd.append(hs, ac); us.appendChild(hd);
     const aberto = !!baAberto[p.id];
     let vis;
     if(aberto) vis = g.us.slice(0, 80);
@@ -2500,7 +2564,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ck.addEventListener('change', () => {
       if(ck.checked && !podeAdd(p.id)){ ck.checked = false; return; }
       if(ck.checked) baSel.add(k); else baSel.delete(k);
-      baSelManual = true; art.replaceWith(cardProj(g)); renderBarra();
+      art.replaceWith(cardProj(g)); renderBarra();
     });
     const n = document.createElement('button'); n.type = 'button'; n.className = 'ba-n'; n.textContent = a[0]; n.title = 'Ver a unidade ' + a[0] + ' no espelho';
     n.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); irUnidade(p.id, a[0]); });
@@ -2512,6 +2576,152 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     l.append(ck, n, d, v);
     return l;
   }
+  // ---------- ficha do empreendimento (toque no projeto): informações, fotos e material ----------
+  const FP = {};   // fichas da central de produto (nex/p/<id>.json), buscadas na hora quando o projeto tem
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; };
+  const comCentral = pid => (window.ESPELHO_CENTRAL || []).includes(pid);
+  const driveUrl = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const urlSegura = u => /^(https?:\/\/|nex\/)/i.test(String(u || '')) ? String(u) : null;
+  async function fichaCentral(pid){
+    if(!comCentral(pid)) return null;
+    if(FP[pid] !== undefined) return FP[pid];
+    try{ const r = await fetch('nex/p/' + encodeURIComponent(pid) + '.json'); FP[pid] = r.ok ? await r.json() : null; }
+    catch(e){ return null; }   // sem rede: tenta de novo na próxima vez
+    return FP[pid];
+  }
+  function fichaFotos(p, P){
+    if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: 'nex/' + (P.pasta || '') + r.id + '.jpg', th: 'nex/' + (P.pasta || '') + 't' + r.id + '.jpg', t: r.t || ''}));
+    const i = infoDe(p), out = [];
+    if(urlSegura(i.capa)) out.push({src: i.capa, t: 'Fachada'});
+    for(const f of (i.fotos || [])) if(f && urlSegura(f.u) && f.u !== i.capa) out.push({src: f.u, t: f.t || ''});
+    return out;
+  }
+  let bfAlvo = null, bfFotos = [], bfZi = 0;
+  function zoomFoto(i){
+    if(!bfFotos.length) return;
+    bfZi = (i + bfFotos.length) % bfFotos.length;
+    const f = bfFotos[bfZi], im = $('bf-zi'); im.src = f.src; im.alt = f.t || '';
+    $('bf-zc').textContent = (f.t ? f.t + ' · ' : '') + (bfZi + 1) + ' de ' + bfFotos.length;
+    $('bf-zp').hidden = $('bf-zn').hidden = bfFotos.length < 2;
+    $('bf-zoom').hidden = false;
+  }
+  function renderFicha(g, P, carregando){
+    const p = g.p, i = infoDe(p), corpo = $('bf-c'); corpo.replaceChildren();
+    // fotos
+    const fotos = fichaFotos(p, P); bfFotos = fotos;
+    if(fotos.length){
+      const gal = el('div', 'bf-gal');
+      fotos.slice(0, 18).forEach((f, k) => {
+        const fg = el('figure'), b = el('button', 'bf-foto'); b.type = 'button'; b.setAttribute('aria-label', 'Ampliar foto' + (f.t ? ': ' + f.t : ''));
+        const im = document.createElement('img'); im.loading = 'lazy'; im.decoding = 'async'; im.alt = f.t || ''; im.referrerPolicy = 'no-referrer';
+        im.addEventListener('error', () => { if(f.th && im.src.indexOf(f.th) >= 0){ im.src = f.src; return; } fg.remove(); if(!gal.children.length) gal.remove(); });
+        im.src = f.th || f.src;
+        b.appendChild(im); b.addEventListener('click', () => zoomFoto(k)); fg.appendChild(b);
+        if(f.t) fg.appendChild(el('figcaption', null, f.t));
+        gal.appendChild(fg);
+      });
+      corpo.appendChild(gal);
+    }
+    if(carregando) corpo.appendChild(el('p', 'bf-nota', 'Carregando a ficha completa do projeto…'));
+    const cham = (P && P.chamada) || i.destaque; if(cham) corpo.appendChild(el('p', 'bf-cham', cham));
+    // fatos
+    const disp = (p.unidades || []).filter(a => a[6] === 'disponivel');
+    const preco = disp.map(a => precoDe(p, a, baCrit.modo)).filter(Boolean).sort((x, y) => x.v - y.v)[0];
+    const fk = faseDe(p), tip = i.tipologias || (P && (P.fatos || []).filter(f => /metragem|tipolog/i.test(f[0])).map(f => f[1])[0]) || null;
+    const fatos = [
+      ['Fase', i.fase === 'breve' ? 'Em breve' : (FASE_NOME[fk] || null)],
+      ['Entrega', fk === 'pronto' ? 'Pronto' : (i.entrega ? mesAnoC(i.entrega) : null)],
+      ['Construtora', GRUPO_NOME[grupoDe(p)] || i.construtora || null],
+      ['Disponíveis no projeto', disp.length + (disp.length === 1 ? ' unidade' : ' unidades') + (preco ? ' · a partir de ' + BRL(preco.v) + ' ' + preco.lbl : '')],
+      ['Tipologias', tip]
+    ].filter(f => f[1]);
+    if(fatos.length){ const dl = el('dl', 'bf-fatos'); fatos.forEach(([k, v]) => { const d = el('div'); d.append(el('dt', null, k), el('dd', null, v)); dl.appendChild(d); }); corpo.appendChild(dl); }
+    // endereço
+    const end = (P && P.endereco) || i.endereco;
+    if(end || (i.lat != null && i.lng != null)){
+      const d = el('p', 'bf-end'); d.appendChild(document.createTextNode(end || [i.bairro, i.cidade].filter(Boolean).join(', ')));
+      const q = i.lat != null && i.lng != null && isFinite(+i.lat) && isFinite(+i.lng) ? i.lat + ',' + i.lng : encodeURIComponent(end || '');
+      if(q){ d.appendChild(document.createTextNode(' · ')); const a = el('a', null, 'ver no mapa'); a.href = 'https://www.google.com/maps/search/?api=1&query=' + q; a.target = '_blank'; a.rel = 'noopener'; d.appendChild(a); }
+      corpo.appendChild(d);
+    }
+    // lazer e entorno (só quando o projeto tem ficha na central)
+    if(P){
+      const lz = []; (P.lazer || []).forEach(l => (l.itens || []).forEach(x => { const t = String(x).replace(/\s*\(.*\)\s*$/, ''); if(lz.length < 14 && !lz.includes(t)) lz.push(t); }));
+      if(lz.length){ const sec = el('section', 'bf-sec'); sec.appendChild(el('h4', null, 'Lazer e diferenciais')); const d = el('div', 'bf-tags'); lz.forEach(x => d.appendChild(el('span', null, x))); sec.appendChild(d); corpo.appendChild(sec); }
+      const perto = (P.perto || []).slice(0, 5);
+      if(perto.length){
+        const sec = el('section', 'bf-sec'); sec.appendChild(el('h4', null, 'Por perto'));
+        perto.forEach(x => { const r = el('div', 'bf-perto'); r.appendChild(el('span', null, x.nome));
+          r.appendChild(el('b', null, x.m != null ? (x.m >= 1000 ? (x.m / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' km' : x.m + ' m') : [x.pe != null ? x.pe + ' min a pé' : null, x.carro != null ? x.carro + ' min de carro' : null].filter(Boolean).join(' · ')));
+          sec.appendChild(r); });
+        corpo.appendChild(sec);
+      }
+    }
+    // condições de pagamento da tabela
+    const tb = p.tabela || {}, cond = (tb.condicoes || []).filter(x => typeof x === 'string' && x.trim());
+    if(cond.length || tb.nome){
+      const sec = el('section', 'bf-sec'); sec.appendChild(el('h4', null, 'Tabela e condições'));
+      if(tb.nome) sec.appendChild(el('p', 'bf-tb', tb.nome));
+      if(cond.length){ const ul = el('ul', 'bf-cond'); cond.slice(0, 6).forEach(x => ul.appendChild(el('li', null, x))); sec.appendChild(ul); }
+      corpo.appendChild(sec);
+    }
+    // material: book, tours, documentos e links oficiais
+    const sec = el('section', 'bf-sec'); sec.appendChild(el('h4', null, 'Material'));
+    const links = el('div', 'bf-links');
+    const lk = (href, txt, cls) => { const a = el('a', 'abtn' + (cls ? ' ' + cls : ''), txt); a.href = href; a.target = '_blank'; a.rel = 'noopener'; links.appendChild(a); return a; };
+    const docs = ((P && P.material_oficial) || []).filter(d => d && (d.u || d.id));
+    const book = P && P.book ? 'nex/' + (P.pasta || '') + P.book : (docs.find(d => d.c === 'Book do cliente' && d.ext === 'pdf') ? driveUrl(docs.find(d => d.c === 'Book do cliente' && d.ext === 'pdf').id) : null);
+    if(book) lk(book, 'Book do empreendimento (PDF)', 'primary');
+    for(const z of ((P && P.tours) || [])) if(z && urlSegura(z.u)) lk(z.u, z.cli || z.t || 'Tour virtual');
+    if(urlSegura(i.pagina)) lk(i.pagina, 'Página oficial ↗');
+    if(P) lk('nex/?p=' + encodeURIComponent(p.id), 'Ficha completa');
+    if(P && docs.length) lk('nex/?p=' + encodeURIComponent(p.id) + '#mat', 'Todo o material (' + docs.length + ')');
+    if(links.children.length) sec.appendChild(links);
+    const peso = d => (d.ext === 'pdf' || d.pasta || d.u) ? 0 : 1;   // PDFs e pastas primeiro; vídeos e imagens por último
+    const pdfs = docs.filter(d => !(d.c === 'Book do cliente' && d.ext === 'pdf')).sort((x, y) => peso(x) - peso(y)).slice(0, 8);
+    if(pdfs.length){
+      const ul = el('ul', 'bf-docs');
+      pdfs.forEach(d => {
+        const u = d.u || driveUrl(d.id), li = el('li'), a = el('a', null, d.n || d.c); a.href = u; a.target = '_blank'; a.rel = 'noopener';
+        li.append(a, el('small', null, [d.c, d.pasta ? 'pasta no Drive' : String(d.ext || '').toUpperCase(), d.mb != null ? String(d.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(' · ')));
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+    }
+    if(!links.children.length && !pdfs.length) sec.appendChild(el('p', 'bf-nota', carregando ? 'Buscando o material do projeto…' : 'Este projeto ainda não tem book nem documentos cadastrados no app.'));
+    corpo.appendChild(sec);
+  }
+  function abrirFichaProj(g){
+    const p = g.p, i = infoDe(p); bfAlvo = p.id;
+    $('bf-t').textContent = p.nome || i.nome || p.id;
+    $('bf-s').textContent = [FASE_SELO[i.fase], i.bairro, GRUPO_NOME[grupoDe(p)] || i.construtora].filter(Boolean).join(' · ');
+    const P0 = FP[p.id] || null, espera = !P0 && comCentral(p.id);
+    renderFicha(g, P0, espera);
+    $('bf').hidden = false; $('bf-c').scrollTop = 0;
+    $('bf-esp').onclick = () => {
+      fecharFichaProj(); document.querySelectorAll('.painel-fundo').forEach(x => x.hidden = true);
+      try{ history.replaceState(null, '', '#' + p.id); }catch(e){}
+      if(window.ESPELHO) ESPELHO.goto(p.id);
+    };
+    if(espera) fichaCentral(p.id).then(P => {
+      if(bfAlvo !== p.id || $('bf').hidden) return;
+      const y = $('bf-c').scrollTop; renderFicha(g, P || null, false); $('bf-c').scrollTop = y;
+    });
+  }
+  function fecharFichaProj(){ $('bf-zoom').hidden = true; $('bf').hidden = true; bfAlvo = null; }
+  $('bf-x').addEventListener('click', fecharFichaProj);
+  $('bf-volta').addEventListener('click', fecharFichaProj);
+  $('bf').addEventListener('click', e => { if(e.target === $('bf')) fecharFichaProj(); });
+  $('bf-zx').addEventListener('click', () => { $('bf-zoom').hidden = true; });
+  $('bf-zp').addEventListener('click', () => zoomFoto(bfZi - 1));
+  $('bf-zn').addEventListener('click', () => zoomFoto(bfZi + 1));
+  $('bf-zoom').addEventListener('click', e => { if(e.target === $('bf-zoom') || e.target.tagName === 'FIGURE') $('bf-zoom').hidden = true; });
+  document.addEventListener('keydown', e => {
+    if($('bf').hidden) return;
+    if(e.key === 'Escape'){ if(!$('bf-zoom').hidden) $('bf-zoom').hidden = true; else fecharFichaProj(); }
+    else if(!$('bf-zoom').hidden && e.key === 'ArrowLeft') zoomFoto(bfZi - 1);
+    else if(!$('bf-zoom').hidden && e.key === 'ArrowRight') zoomFoto(bfZi + 1);
+  });
   function sugestoesEl(c, nAtual){   // "chegam perto": o que aparece mudando um filtro só
     const sug = [];
     const conta = c2 => { const it = encontrados(c2); const ps = []; for(const x of it) if(!ps.includes(x.p)) ps.push(x.p); return {n: it.length, ps}; };
