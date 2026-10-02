@@ -167,6 +167,41 @@ footer p{margin:0 0 10px}
 .vis-ant{left:6px}.vis-prox{right:6px}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:11px;font-size:14px;z-index:90;max-width:calc(100% - 32px)}
 
+/* comparativo: opções parecidas lado a lado (aparece só quando o corretor monta a seleção como comparativo) */
+.cmp{max-width:1120px;margin:0 auto;padding:30px 0 8px}
+.cmp h2{font-size:34px;padding:0 20px;text-transform:uppercase;letter-spacing:.04em}
+.cmp-intro{margin:8px 20px 0;color:var(--ink-2);font-size:14.5px;max-width:720px}
+.cmp-nota{margin:12px 20px 0;color:var(--muted);font-size:12.5px;max-width:720px}
+.cmp-grade{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:16px 20px 10px;scroll-padding:0 20px;scrollbar-width:none}
+.cmp-grade::-webkit-scrollbar{display:none}
+@media (min-width:760px){
+  .cmp h2{padding:0 32px}.cmp-intro,.cmp-nota{margin-left:32px;margin-right:32px}
+  .cmp-grade{grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));overflow:visible;padding:18px 32px 10px}
+}
+.cc{scroll-snap-align:center;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;min-width:0}
+.cc-orig{border-style:dashed;background:var(--surface-2)}
+.cc-foto{position:relative;aspect-ratio:16/10;background:linear-gradient(160deg,#2b2f38,#0e0f12);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cc-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cc-ini{font-family:"Barlow Condensed",sans-serif;font-size:48px;font-weight:700;color:var(--accent);opacity:.5}
+.cc-selo{position:absolute;left:10px;top:10px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px}
+.cc-orig .cc-selo{background:rgba(14,15,18,.8);color:var(--ink-2)}
+.cc-corpo{display:flex;flex-direction:column;gap:6px;padding:14px;flex:1}
+.cc-corpo h3{font-size:26px;line-height:1.05}
+.cc-loc{margin:0;font-size:13.5px;color:var(--ink-2)}
+.cc-fatos{margin:6px 0 0;display:flex;flex-direction:column}
+.cc-fatos>div{display:flex;flex-direction:column;gap:1px;padding:7px 0;border-top:1px solid var(--line)}
+.cc-fatos dt{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.cc-fatos dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.cc-fatos>div:nth-child(3) dd{font-family:"Barlow Condensed",sans-serif;font-size:26px;line-height:1.05;color:var(--accent);letter-spacing:.01em}
+.cc-fatos small{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.cc-fatos small.bom{color:var(--good)}
+.cc-fatos small.ruim{color:var(--bad)}
+.cc-st{margin:2px 0 0;font-size:13px;font-weight:600}
+.cc-st.ok{color:var(--good)}.cc-st.res{color:var(--warn)}.cc-st.nao{color:var(--bad)}
+.cc-ac{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:10px}
+.cc-ac .btn{width:100%;font-size:14.5px}
+.cc-fatos dd small{font-family:"IBM Plex Sans",system-ui,sans-serif;letter-spacing:0}
+
 </style>
 </head>
 <body>
@@ -191,6 +226,7 @@ footer p{margin:0 0 10px}
       <p class="por" id="por"></p>
     </div>
   </header>
+  <section class="cmp" id="cmp" hidden aria-labelledby="cmp-t"></section>
   <div id="pjs"></div>
   <footer>
     <p id="rodape-valores"></p>
@@ -200,7 +236,7 @@ footer p{margin:0 0 10px}
 </main>
 <a class="wa-fixo" id="wa" hidden target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg><span id="wa-t">Falar com o corretor</span></a>
 <script>
-// versão 202610011755
+// versão 202610012121
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -565,22 +601,113 @@ window.NEX = (function(){
   }
   function capaDe(p){ const P = CEN[p.id]; if(P && P.hero) return cImg(P, P.hero); return p.capa || (p.fotos && p.fotos[0] && p.fotos[0].u) || null; }
 
+
+  // ---------- comparativo: "o cliente não gostou de um projeto" → opções parecidas lado a lado (S.cmp vem do corretor) ----------
+  const CMP_INTRO = {parecido: 'opções parecidas', preco: 'opções mais em conta', entrega: 'opções com entrega mais próxima', regiao: 'opções em outra região', tamanho: 'opções com planta maior'};
+  function cmpDados(){
+    const c = S.cmp; if(!c || typeof c !== 'object' || !c.u || typeof c.u !== 'object') return null;
+    const un = id => { const p = S.projetos.find(x => x.id === id); if(!p) return null; const u = (p.unidades || []).find(x => String(x.n) === String(c.u[id])); return u ? {p, u} : null; };
+    const ref = c.o ? un(c.o) : null;
+    const alts = S.projetos.filter(p => p.id !== c.o).map(p => un(p.id)).filter(Boolean);
+    return alts.length ? {ref, alts, m: c.m} : null;
+  }
+  const kmTxt = d => d < 0.95 ? 'a ' + Math.max(100, Math.round(d * 10) * 100) + ' m' : 'a ' + d.toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' km';
+  function distKm(a, b){
+    if(a.lat == null || a.lng == null || b.lat == null || b.lng == null) return null;
+    const R = 6371, rad = x => x * Math.PI / 180, dl = rad(b.lat - a.lat), dg = rad(b.lng - a.lng);
+    const h = Math.sin(dl / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dg / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  const brlMil = v => v >= 1e6 ? 'R$ ' + (Math.round(v / 1e4) / 100).toLocaleString('pt-BR', {maximumFractionDigits: 2}) + ' mi' : v >= 1000 ? 'R$ ' + Math.round(v / 1000).toLocaleString('pt-BR') + ' mil' : BRL(v);
+  function mesesAte(ym){ const m = /^(\d{4})-(\d{2})/.exec(ym || ''); if(!m) return null; const h = new Date(); return Math.max(0, (+m[1] - h.getFullYear()) * 12 + (+m[2] - 1 - h.getMonth())); }
+  const emDe = p => p.fase === 'pronto' ? 0 : mesesAte(p.entrega);
+  function precoCmp(u, k){ const l = (u.precos || []).filter(x => x && x.v != null); return (k && l.find(x => x.k === k)) || l[0] || null; }
+  function cmpLinha(dl, rot, val, d){
+    const x = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
+    dt.textContent = rot; dd.textContent = val; x.append(dt, dd);
+    if(d){ const sm = document.createElement('small'); sm.className = d.c; sm.textContent = d.t; dd.appendChild(sm); }
+    dl.appendChild(x);
+  }
+  function cmpCard(it, ref, k){
+    const {p, u} = it, orig = !k, a = document.createElement('article'); a.className = 'cc' + (orig ? ' cc-orig' : '');
+    const f = document.createElement('div'); f.className = 'cc-foto';
+    const ini = document.createElement('span'); ini.className = 'cc-ini'; ini.textContent = iniciais(p.nome); f.appendChild(ini);
+    const cv = capaDe(p); if(cv){ const im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.src = cv; im.addEventListener('error', () => im.remove()); f.appendChild(im); }
+    const sl = document.createElement('span'); sl.className = 'cc-selo'; sl.textContent = orig ? 'O que você viu' : 'Opção ' + k; f.appendChild(sl);
+    a.appendChild(f);
+    const b = document.createElement('div'); b.className = 'cc-corpo';
+    const h = document.createElement('h3'); h.textContent = p.nome; b.appendChild(h);
+    const d = !orig && ref ? distKm(ref.p, p) : null;
+    const lc = document.createElement('p'); lc.className = 'cc-loc'; lc.textContent = [p.bairro, d != null ? kmTxt(d) + ' do que você viu' : null].filter(Boolean).join(' · '); b.appendChild(lc);
+    const em = emDe(p);
+    const dl = document.createElement('dl'); dl.className = 'cc-fatos';
+    const R = ref && !orig ? ref.u : null, ps = precoCmp(u), pr = R && ps ? precoCmp(R, ps.k) : null, par = pr && pr.k === ps.k ? pr : null;
+    const dv = par && ps ? (ps.v - par.v) / par.v * 100 : null;
+    cmpLinha(dl, 'Unidade', u.n + (u.andar ? ' · ' + u.andar : ''));
+    const da = R && u.a != null && R.a != null ? u.a - R.a : null;
+    cmpLinha(dl, 'Metragem', (u.a != null ? m2t(u.a) : '—') + (u.tl ? ' · ' + u.tl : ''), da != null ? (Math.abs(da) < .3 ? {c: '', t: 'mesma metragem'} : {c: da > 0 ? 'bom' : 'ruim', t: m2t(Math.round(Math.abs(da) * 10) / 10) + (da > 0 ? ' a mais' : ' a menos')}) : null);
+    if(ps){
+      cmpLinha(dl, ps.l || 'Valor', BRL(ps.v), dv != null ? (Math.abs(dv) < .5 ? {c: '', t: 'mesmo valor'} : {c: dv < 0 ? 'bom' : 'ruim', t: brlMil(Math.abs(ps.v - par.v)) + (dv < 0 ? ' a menos' : ' a mais') + ' (' + Math.round(Math.abs(dv)) + '%)'}) : null);
+      if(u.a > 0){
+        const m2 = ps.v / u.a, dm = par && R.a > 0 ? (m2 - par.v / R.a) / (par.v / R.a) * 100 : null;
+        cmpLinha(dl, 'Por m²', BRL(m2), dm != null ? (Math.abs(dm) < 1 ? {c: '', t: 'igual'} : {c: dm < 0 ? 'bom' : 'ruim', t: Math.round(Math.abs(dm)) + '% ' + (dm < 0 ? 'menos' : 'mais') + ' por m²'}) : null);
+      }
+      const outro = (u.precos || []).find(x => x && x.v != null && x.k !== ps.k);
+      if(outro){ const bx = Math.min(outro.v, ps.v), ax = Math.max(outro.v, ps.v), dsc = ax > 0 ? Math.round((1 - bx / ax) * 100) : 0, pvBaixo = outro.k === 'pv' ? outro.v <= ps.v : ps.v <= outro.v; cmpLinha(dl, outro.l || 'Outro valor', BRL(outro.v), dsc >= 1 && pvBaixo ? {c: '', t: 'à vista fica ' + dsc + '% abaixo'} : null); }
+    } else cmpLinha(dl, 'Valor', 'Fale com o corretor');
+    const er = ref && !orig ? emDe(ref.p) : null;
+    cmpLinha(dl, 'Entrega', p.fase === 'pronto' ? 'Pronto para morar' : p.entrega ? mesAno(p.entrega) + (em === 0 ? ' (este mês)' : em === 1 ? ' (em 1 mês)' : em != null ? ' (em ' + em + ' meses)' : '') : (FASE[p.fase] ? FASE[p.fase] + ' · ' : '') + 'a confirmar',
+      !orig && em != null && er != null ? (em === er ? {c: '', t: er === 0 ? 'também pronto' : 'mesmo prazo'} : {c: em < er ? 'bom' : 'ruim', t: Math.abs(em - er) + (Math.abs(em - er) === 1 ? ' mês ' : ' meses ') + (em < er ? 'antes' : 'depois')}) : null);
+    cmpLinha(dl, 'Construtora', p.construtora || '—');
+    b.appendChild(dl);
+    const st = ST[u.st] || ['nao', 'Indisponível'];
+    const ss = document.createElement('p'); ss.className = 'cc-st ' + st[0]; ss.textContent = 'Unidade ' + st[1].toLowerCase(); b.appendChild(ss);
+    const ac = document.createElement('div'); ac.className = 'cc-ac';
+    if(!orig){
+      const meta = [u.tl, u.a != null ? m2t(u.a) : null, u.andar].filter(Boolean).join(' · ');
+      const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn ouro';
+      bt.textContent = u.st === 'disponivel' ? 'Tenho interesse' : 'Quero opções parecidas';
+      bt.addEventListener('click', () => interesse(p, u, meta, bt)); ac.appendChild(bt);
+    }
+    const ver = document.createElement('a'); ver.className = 'btn'; ver.href = '#p-' + p.id; ver.textContent = 'Fotos e detalhes'; ac.appendChild(ver);
+    b.appendChild(ac); a.appendChild(b);
+    return a;
+  }
+  function comparativo(CM){
+    const box = $('cmp'); box.replaceChildren();
+    const its = (CM.ref ? [CM.ref] : []).concat(CM.alts);
+    const t = document.createElement('h2'); t.id = 'cmp-t'; t.textContent = 'Lado a lado'; box.appendChild(t);
+    const ref = CM.ref, ur = ref ? ref.u : null, pr = ur ? precoCmp(ur) : null;
+    const ip = document.createElement('p'); ip.className = 'cmp-intro';
+    ip.textContent = ref ? 'Cada opção foi comparada com a unidade ' + ur.n + ' do ' + ref.p.nome + (ur.a != null ? ' (' + m2t(ur.a) : ' (') + (pr ? (ur.a != null ? ' · ' : '') + BRL(pr.v) + ' ' + String(pr.l || '').toLowerCase() : '') + '). Em verde, o que é melhor do que o projeto que você viu.' : 'Comparação entre ' + (CM.alts.length === 1 ? 'a opção' : 'as ' + CM.alts.length + ' opções') + ' que separei, com a unidade mais parecida de cada empreendimento.';
+    box.appendChild(ip);
+    const gr = document.createElement('div'); gr.className = 'cmp-grade' + ' n' + its.length;
+    its.forEach((it, k) => gr.appendChild(cmpCard(it, ref, ref ? k : k + 1)));
+    box.appendChild(gr);
+    const nt = document.createElement('p'); nt.className = 'cmp-nota'; nt.textContent = 'Valores da tabela de ' + dataBR(S.criado_em) + ', sujeitos a alteração sem aviso. A situação de cada unidade é a de agora. Abaixo, fotos, plantas e todas as informações de cada empreendimento.';
+    box.appendChild(nt);
+    box.hidden = false;
+  }
+
   function render(){
     comCentral = Object.keys(CEN).length > 0;
-    const ps = S.projetos, nome = primeiro(S.cliente);
+    const CM = cmpDados(), ps = CM && CM.ref ? S.projetos.filter(p => p.id !== CM.ref.p.id).concat(CM.ref.p) : S.projetos, nome = primeiro(S.cliente);
     const nU = ps.reduce((s, p) => s + (p.unidades || []).length, 0);
     document.title = 'Imóveis selecionados para ' + nome;
     $('ola').textContent = 'Olá, ' + nome + '!';
-    $('tit').textContent = nU === 1 ? 'Separei este imóvel para você' : 'Separei estes imóveis para você';
-    $('busca').textContent = cap(S.busca || ''); $('busca').hidden = !S.busca;
-    $('resumo').textContent = (nU === 1 ? '1 unidade' : nU + ' unidades') + (ps.length > 1 ? ' em ' + ps.length + ' empreendimentos' : '') + ' · valores de ' + dataBR(S.criado_em);
+    $('tit').textContent = CM ? (CM.alts.length === 1 ? 'Separei esta opção para você comparar' : 'Separei estas opções para você comparar') : nU === 1 ? 'Separei este imóvel para você' : 'Separei estes imóveis para você';
+    const bTxt = CM ? String(S.busca || '').replace(/^Comparativo:\s*/i, '') : S.busca;
+    $('busca').textContent = cap(bTxt || ''); $('busca').hidden = !bTxt;
+    $('resumo').textContent = CM ? CM.alts.length + (CM.alts.length === 1 ? ' opção' : ' opções') + ' para comparar' + (CM.ref ? ' com o ' + CM.ref.p.nome : '') + ' · valores de ' + dataBR(S.criado_em)
+      : (nU === 1 ? '1 unidade' : nU + ' unidades') + (ps.length > 1 ? ' em ' + ps.length + ' empreendimentos' : '') + ' · valores de ' + dataBR(S.criado_em);
     $('por').textContent = S.corretor ? 'Seleção preparada por ' + S.corretor : '';
     const cf = $('capa-fotos'); cf.replaceChildren();
-    const capas = ps.map(capaDe).filter(Boolean).slice(0, window.innerWidth >= 900 ? 3 : 2);
+    const capas = ps.filter(p => !(CM && CM.ref && p.id === CM.ref.p.id)).map(capaDe).filter(Boolean).slice(0, window.innerWidth >= 900 ? 3 : 2);
     if(!capas.length){ const d = document.createElement('div'); d.className = 'ph'; cf.appendChild(d); }
     capas.forEach(u => { const im = document.createElement('img'); im.alt = ''; im.src = u; im.addEventListener('error', () => im.remove()); cf.appendChild(im); });
     const ix = $('indice'); ix.replaceChildren(); ix.hidden = ps.length < 2;
     ps.forEach(p => { const a = document.createElement('a'); a.href = '#p-' + p.id; const b = document.createElement('b'); b.textContent = (p.unidades || []).length; a.append(b, document.createTextNode(p.nome)); ix.appendChild(a); });
+    if(CM) comparativo(CM); else $('cmp').hidden = true;
     const box = $('pjs'); box.replaceChildren();
     ps.forEach((p, i) => box.appendChild(secao(p, i, ps.length)));
     $('rodape-valores').textContent = 'Valores da tabela de ' + dataBR(S.criado_em) + ' (dia em que a seleção foi enviada), sujeitos a alteração sem aviso e à disponibilidade da unidade no momento da reserva. A situação de cada unidade (disponível, reservada ou vendida) é a de agora.';
