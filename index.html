@@ -949,6 +949,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 .cp-sair[hidden]{display:none}
 #cp-ver[aria-disabled="true"]{pointer-events:auto;cursor:pointer;opacity:.8}
 @media (max-width:640px){ .cp-top .cp-ajuda{display:none} }
+.cp-fora{margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface-2)}
+.cp-fora summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-2)}
+.cp-fora .cp-nota{margin:6px 0}
+.cp-fora-l{margin:4px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:3px}
 </style>
 </head>
 <body>
@@ -1687,8 +1691,21 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const fmtBRL2 = v => 'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const MES3 = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   const mesAno = iso => { if(!iso) return ''; const [y,m] = iso.split('-'); return MES3[+m-1]+'/'+y.slice(2); };
-  function fluxosDe(u){ // fluxos de pagamento da tabela (projetos com tabela.fluxos): [{k, rotulo, txt, tabela, linhas}]
-    const F = P.tabela && P.tabela.fluxos; if(!F || !u.extra || !forSale(u)) return [];
+  function fxTxt(linhas){ return linhas.map(l => l.fin ? 'financiamento '+fmtBRL2(l.v)+(l.d ? ' ('+mesAno(l.d)+')' : '') : l.tipo ? l.t.toLowerCase()+' '+(l.n>1 ? l.n+'× ' : '')+fmtBRL2(l.v) : l.t==='Ato' ? 'ato '+(l.n>1 ? l.n+'× ' : '')+fmtBRL2(l.v) : l.n+'× '+fmtBRL2(l.v)).join(' · '); }
+  function fluxoPct(u){ // fluxo em % da tabela (projetos com info.fluxo, ex.: ONE e RAJ): o valor de cada parcela sai do preço parcelado da unidade
+    const F = P.info && P.info.fluxo; if(!F || F.aprox || !u.extra || !forSale(u)) return [];
+    const k = F.base || 'pp', tot = u.extra[k]; if(!tot) return [];
+    const c = PC().find(x => x.k===k); if(!c) return [];
+    const Ts = F.tabelas || [], T = Ts.find(t => t.tipos && t.tipos.includes(u.cat)) || Ts.find(t => t.padrao) || Ts[0];
+    if(!T || !T.cols || !T.cols.length) return [];
+    const r2 = x => Math.round(x*100)/100, linhas = []; let usado = 0;
+    T.cols.forEach(col => { if(col.t==='fin') return; const v = r2(tot*col.p/100/col.n); usado += v*col.n; linhas.push({t:col.rot, n:col.n, v, d:col.d, tipo:col.t}); });
+    const fin = T.cols.find(col => col.t==='fin');
+    if(fin) linhas.push({t:'Financiamento '+(fin.m==='assoc' ? 'associativo' : 'SFH'), n:1, v:r2(tot-usado), d:fin.d, fin:true});
+    return [{k, rotulo:c.label, txt:fxTxt(linhas), tabela:F.fonte || 'tabela', linhas, total:tot}];
+  }
+  function fluxosDe(u){ // fluxos de pagamento da tabela (projetos com tabela.fluxos ou info.fluxo): [{k, rotulo, txt, tabela, linhas}]
+    const F = P.tabela && P.tabela.fluxos; if(!F) return fluxoPct(u); if(!u.extra || !forSale(u)) return [];
     const out = [];
     for(const c of PC()){
       const f = u.extra[c.k==='pa' ? 'fa' : c.k==='pp' ? 'fs' : null]; if(!f || !F[f[0]]) continue;
@@ -1698,7 +1715,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
         else if(col.rot) linhas.push({t:col.rot, n:col.n||1, v, d:col.d, tipo:col.t});   // tabelas com colunas nomeadas (ex.: Canopus: sinal, 30/60/90, mensais, semestrais, anuais, chaves, habite-se)
         else if(col.t==='ato') linhas.push({t:'Ato', n:col.n, v, d:col.d});
         else if(col.t==='mensal') linhas.push({t:'Mensais', n:col.n, v, d:col.d}); });
-      const txt = linhas.map(l => l.fin ? 'financiamento '+fmtBRL2(l.v)+(l.d ? ' ('+mesAno(l.d)+')' : '') : l.tipo ? l.t.toLowerCase()+' '+(l.n>1 ? l.n+'× ' : '')+fmtBRL2(l.v) : l.t==='Ato' ? 'ato '+(l.n>1 ? l.n+'× ' : '')+fmtBRL2(l.v) : l.n+'× '+fmtBRL2(l.v)).join(' · ');
+      const txt = fxTxt(linhas);
       out.push({k:c.k, rotulo:c.label, txt, tabela:T.nome, linhas, total:u.extra[c.k]});
     }
     return out;
@@ -1746,7 +1763,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
         sc.replaceChildren();
         for(const f of fx){ const d = document.createElement('span'); d.className = 'fx'; d.innerHTML = '<b></b> '; d.firstChild.textContent = f.rotulo+':'; d.appendChild(document.createTextNode(f.txt)); sc.appendChild(d); }
         const t = document.createElement('span'); t.className = 'fx'; t.textContent = 'Tabela vigente de '+P.tabela.nome.toLowerCase()+(u.extra.pt ? ' (condição promocional)' : ''); t.title = [...new Set(fx.map(f=>f.tabela))].join(' · '); sc.appendChild(t);
-        for(const extra of [P.tabela.regra_curta, P.tabela.correcao]){ if(!extra) continue; const e = document.createElement('span'); e.className = 'fx'; e.textContent = extra; sc.appendChild(e); }
+        const FI = !P.tabela.fluxos && P.info && P.info.fluxo ? P.info.fluxo : null;
+        for(const extra of [P.tabela.regra_curta, P.tabela.correcao, FI && FI.correcao, FI && 'Fluxo: '+FI.fonte+'; o valor de cada parcela é proporcional ao preço da unidade.', FI && FI.obs]){ if(!extra) continue; const e = document.createElement('span'); e.className = 'fx'; e.textContent = extra; sc.appendChild(e); }
         sc.hidden = false;
       } else {
         const cond = P.tabela && P.tabela.condicoes && u.extra.c!=null ? P.tabela.condicoes[u.extra.c] : null;
@@ -3108,32 +3126,111 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const entregaTxt = p => { const v = entregaVal(p); return v === 'Pronto para morar' ? v : /a confirmar$/.test(v) ? v.replace(/a confirmar$/, 'entrega a confirmar') : 'Entrega ' + v; };
   const mesesTxt = n => n + (n === 1 ? ' mês' : ' meses');
 
+  // ---------- fluxo de pagamento (no parcelado, só compara fluxos de prazo parecido) ----------
+  // Fontes: tabela.fluxos (Nurban/Canopus, valores por unidade) ou info.fluxo (ONE/RAJ/SCP, em % da tabela; gravado em projetos_info).
+  const CP_PRAZO_MIN = 6, CP_RAZAO = 1.43;
+  const ymd = d => { const m = /^(\d{4})-(\d{2})/.exec(d || ''); return m ? +m[1] * 12 + (+m[2] - 1) : null; };
+  const cpPer = c => c.t === 'semestral' ? 6 : c.t === 'anual' ? 12 : (c.t === 'mensal' || c.t === 'parc') ? 1 : 0;
+  function cpPreco(p, a, modo){   // valor da unidade no modo pedido; projetos com fluxo em outra coluna (ex.: SCP em 12x = p12) usam essa coluna no parcelado
+    const FI = infoDe(p).fluxo;
+    if(modo === 'pp' && FI && FI.base && FI.base !== 'pp'){
+      const v = exDe(a)[FI.base];
+      if(v != null){ const pc = (p.precos_campos || []).find(x => x.k === FI.base); return {v, k: 'pp', lbl: pc ? minus(pc.label) : 'parcelado'}; }
+    }
+    return precoDe(p, a, modo);
+  }
+  function cpPrazoDatas(T){   // meses de hoje até a última parcela antes do financiamento (tabelas com datas)
+    const h = new Date(), hoje = h.getFullYear() * 12 + h.getMonth();
+    let fim = null, n = 0;
+    for(const c of T.cols){
+      if(c.t === 'fin') continue;
+      const per = cpPer(c), d = ymd(c.d), k = c.n || 1;
+      if(per) n += k;
+      if(d != null){ const e = d + (k - 1) * per; if(fim == null || e > fim) fim = e; }
+    }
+    return fim != null ? Math.max(0, fim - hoje) : n;
+  }
+  let _cpTab = new Map();
+  function cpTabela(P, a){   // tabela de fluxo que vale para a unidade e o prazo dela: {key, src, T, prazo, aprox} (null = sem fluxo cadastrado)
+    const ex = exDe(a), F = P.tabela && P.tabela.fluxos, FI = infoDe(P).fluxo;
+    let T = null, key = null, src = null;
+    if(F){ const f = ex.fs || ex.fa; if(f && F[f[0]]){ T = F[f[0]]; key = P.id + ':T' + f[0]; src = 'T'; } }
+    if(!T && FI && FI.tabelas && FI.tabelas.length){
+      T = FI.tabelas.find(t => t.tipos && t.tipos.includes(a[3])) || FI.tabelas.find(t => t.padrao) || FI.tabelas[0];
+      key = P.id + ':I' + FI.tabelas.indexOf(T); src = 'I';
+    }
+    if(!T) return null;
+    let r = _cpTab.get(key);
+    if(!r){ r = {key, src, T, prazo: T.prazo != null ? T.prazo : cpPrazoDatas(T), aprox: src === 'I' && !!FI.aprox}; _cpTab.set(key, r); }
+    return r;
+  }
+  function cpComparavel(x, y){   // 12x (SCP) não entra com 37x; sem fluxo cadastrado não dá para afirmar, então entra
+    if(!x || !y) return true;
+    const a = Math.max(x.prazo, CP_PRAZO_MIN), b = Math.max(y.prazo, CP_PRAZO_MIN);
+    return Math.max(a, b) / Math.min(a, b) <= CP_RAZAO;
+  }
+  function cpPerfil(P, a){   // fluxo da unidade em números: entrada, parcelas, financiamento e quanto se paga até as chaves
+    const tb = cpTabela(P, a); if(!tb) return null;
+    const ex = exDe(a), L = [];
+    if(tb.src === 'T'){ const f = ex.fs || ex.fa; tb.T.cols.forEach((c, i) => { const v = f[i + 1]; if(v) L.push({n: c.n || 1, v, d: c.d, tipo: c.t, fin: c.t === 'fin'}); }); }
+    else {
+      const FI = infoDe(P).fluxo, tot = ex[FI.base || 'pp'];
+      if(!FI.aprox && tot && tb.T.cols.length){
+        let usado = 0;
+        tb.T.cols.forEach(c => { if(c.t === 'fin') return; const v = tot * c.p / 100 / c.n; usado += v * c.n; L.push({n: c.n, v, d: c.d, tipo: c.t}); });
+        const f = tb.T.cols.find(c => c.t === 'fin'); if(f) L.push({n: 1, v: tot - usado, d: f.d, tipo: 'fin', fin: true});
+      }
+    }
+    const o = {tb, prazo: tb.prazo, aprox: tb.aprox, linhas: L};
+    const tot = L.reduce((s, l) => s + l.v * l.n, 0); if(!(tot > 0)) return o;
+    const fin = L.filter(l => l.fin), ato = L.filter(l => l.tipo === 'ato' || l.tipo === 'sinal'), resto = L.filter(l => !l.fin && l.tipo !== 'ato' && l.tipo !== 'sinal');
+    const soma = ls => ls.reduce((s, l) => s + l.v * l.n, 0);
+    Object.assign(o, {tot, atoV: soma(ato), atoN: ato.reduce((s, l) => s + l.n, 0), parcN: resto.reduce((s, l) => s + l.n, 0), finV: soma(fin)});
+    const kd = fin.length ? ymd(fin[0].d) : null;
+    if(kd != null){   // o que já foi pago quando o financiamento entra (parcelas com data até lá; sem data, conta como paga antes)
+      let ate = 0;
+      for(const l of L){ if(l.fin) continue; const d = ymd(l.d), per = cpPer(l); let k = l.n; if(d != null && per) k = Math.max(0, Math.min(l.n, Math.floor((kd - d) / per) + 1)); else if(d != null && d > kd) k = 0; ate += l.v * k; }
+      o.ate = ate;
+    }
+    return o;
+  }
+  const pc1 = x => x.toLocaleString('pt-BR', {maximumFractionDigits: 1}) + '%';
+  function cpFluxoTxt(pf){
+    if(!pf || !pf.tot) return null;
+    const t = [];
+    if(pf.atoV) t.push(pc1(pf.atoV / pf.tot * 100) + ' de entrada' + (pf.atoN > 1 ? ' em ' + pf.atoN + 'x' : ''));
+    if(pf.parcN) t.push(pf.parcN + (pf.parcN === 1 ? ' parcela' : ' parcelas'));
+    t.push(pf.finV ? pc1(pf.finV / pf.tot * 100) + ' no financiamento' : 'sem financiamento');
+    return t.join(' · ');
+  }
+  const cpPrazoTxt = pf => !pf ? null : pf.prazo >= 1 ? 'até ' + mesesTxt(pf.prazo) + (pf.aprox ? ' (aprox.)' : '') : 'entrada + financiamento';
+
   // ---------- números de uma unidade ----------
   function cpMetr(p, a, modo){
-    const pr = precoDe(p, a, modo), ar = areaDe(a), tl = tipologiaDe(p, a);
-    return {p, a, n: String(a[0]), ar, tl, tk: tipoK(tl), pr, v: pr ? pr.v : null, pm2: pr && ar > 0 ? pr.v / ar : null, em: entregaMeses(p), fase: faseDe(p)};
+    const pr = cpPreco(p, a, modo), ar = areaDe(a), tl = tipologiaDe(p, a);
+    return {p, a, n: String(a[0]), ar, tl, tk: tipoK(tl), pr, v: pr ? pr.v : null, pm2: pr && ar > 0 ? pr.v / ar : null, em: entregaMeses(p), fase: faseDe(p), tb: modo === 'pp' ? cpTabela(p, a) : null};
   }
   function cpUnidades(p){   // unidades que podem ser a referência: as disponíveis (sem loja); se não houver, as que têm valor
     const com = p.unidades.filter(a => !ehLoja(a)), disp = com.filter(a => a[6] === 'disponivel');
-    return (disp.length ? disp : com).filter(a => precoDe(p, a, cp.modo));
+    return (disp.length ? disp : com).filter(a => cpPreco(p, a, cp.modo));
   }
   function cpTipica(p){   // a do meio (pelo valor) da tipologia com mais unidades disponíveis
     const us = cpUnidades(p); if(!us.length) return null;
     const g = new Map(); us.forEach(a => { const k = tipoK(tipologiaDe(p, a)) || '?'; if(!g.has(k)) g.set(k, []); g.get(k).push(a); });
     const maior = [...g.values()].sort((x, y) => y.length - x.length)[0];
-    maior.sort((x, y) => precoDe(p, x, cp.modo).v - precoDe(p, y, cp.modo).v);
+    maior.sort((x, y) => cpPreco(p, x, cp.modo).v - cpPreco(p, y, cp.modo).v);
     return maior[Math.floor((maior.length - 1) / 2)];
   }
   function cpRef(){
     const p = cpProj(cp.pid); if(!p) return null;
     let a = cp.n != null ? p.unidades.find(x => String(x[0]) === String(cp.n)) : null;
-    if(!a || !precoDe(p, a, cp.modo)) a = cpTipica(p);
+    if(!a || !cpPreco(p, a, cp.modo)) a = cpTipica(p);
     return a ? cpMetr(p, a, cp.modo) : null;
   }
 
   // ---------- as alternativas ----------
   function cpAlternativas(ref, motivo, raio){
-    const P = ref.p, IO = infoDe(P), bo = norm(IO.bairro || ''), out = [], W = CP_PESOS[motivo] || CP_PESOS.parecido;
+    const P = ref.p, IO = infoDe(P), bo = norm(IO.bairro || ''), out = [], fora = [], W = CP_PESOS[motivo] || CP_PESOS.parecido;
     const filtraTipo = TIPO_ORDEM.includes(ref.tk), ixT = TIPO_ORDEM.indexOf(ref.tk);
     for(const Q of dados.projetos){
       if(Q.id === P.id) continue;
@@ -3141,7 +3238,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       let d = distKm(IO.lat, IO.lng, iq.lat, iq.lng);
       if(d == null){ if(!mesmoBairro) continue; d = 0; } else if(d > raio) continue;
       if(motivo === 'regiao' && mesmoBairro) continue;
-      let melhor = null, nTipo = 0, nDisp = 0;
+      let melhor = null, nTipo = 0, nDisp = 0, foraUn = null;
       for(const a of Q.unidades){
         if(a[6] !== 'disponivel' || ehLoja(a)) continue;
         nDisp++;
@@ -3157,6 +3254,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
           if(m.em == null) continue;
           if(ref.em != null ? (ref.em === 0 ? m.em !== 0 : m.em >= ref.em) : m.em > 12) continue;
         }
+        if(cp.modo === 'pp' && !cpComparavel(ref.tb, m.tb)){ if(!foraUn) foraUn = m; continue; }
         const sA = motivo === 'tamanho' ? clamp01(1 - Math.abs(rA - 1.2) / .25) : clamp01(1 - Math.abs(rA - 1) / .30);
         const sP = motivo === 'preco' ? clamp01((1 - rP) / .2) : clamp01(1 - Math.abs(rP - 1) / .25);
         const sE = ref.em == null || m.em == null ? .5 : motivo === 'entrega' ? clamp01((ref.em - m.em) / 12 + (ref.em === 0 ? 1 : 0)) : clamp01(1 - Math.abs(m.em - ref.em) / 18);
@@ -3166,16 +3264,19 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
         if(!melhor || s > melhor.s + 1e-9 || (Math.abs(s - melhor.s) <= 1e-9 && dv < melhor.dv)) melhor = {m, s, dv};
       }
       if(melhor && melhor.s >= .35) out.push({m: melhor.m, s: melhor.s, d, nTipo, nDisp, q: Q});
+      else if(!melhor && foraUn) fora.push({q: Q, m: foraUn, d});
     }
-    out.sort((x, y) => y.s - x.s || x.d - y.d);
+    out.sort((x, y) => y.s - x.s || x.d - y.d); fora.sort((x, y) => x.d - y.d);
+    out.fora = fora;
     return out;
   }
   function cpBuscar(){
+    _cpTab = new Map();
     const ref = cpRef(); if(!ref) return null;
     const base = cp.motivo === 'regiao' ? Math.max(cp.raio, 5) : cp.raio, seq = [base].concat([3, 5, 8, 12].filter(r => r > base));
     let alts = [], usado = base;
     for(const r of seq){ alts = cpAlternativas(ref, cp.motivo, r); usado = r; if(alts.length >= 3) break; }
-    return {ref, alts: alts.slice(0, 4), raio: usado, base, ampliou: usado > base};
+    return {ref, alts: alts.slice(0, 4), fora: alts.fora || [], raio: usado, base, ampliou: usado > base};
   }
 
   // ---------- diferenças para o projeto original ----------
@@ -3234,13 +3335,19 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(m.pr){
       cpLinha(dl, cap1(m.pr.lbl), BRL(m.v), o.v);
       cpLinha(dl, 'Por m²', BRL(m.pm2), o.m);
-      const outro = precoDe(P, m.a, cp.modo === 'pv' ? 'pp' : 'pv');
+      const outro = cpPreco(P, m.a, cp.modo === 'pv' ? 'pp' : 'pv');
       if(outro && outro.k !== m.pr.k){
         const baixo = Math.min(outro.v, m.v), alto = Math.max(outro.v, m.v), dsc = alto > 0 ? Math.round((1 - baixo / alto) * 100) : 0;
         const pvBaixo = (outro.k === 'pv' ? outro.v <= m.v : m.v <= outro.v);
         cpLinha(dl, cap1(outro.lbl), BRL(outro.v), dsc >= 1 && pvBaixo ? {t: 'à vista fica ' + dsc + '% abaixo', c: ''} : null);
       }
     } else cpLinha(dl, 'Valor', 'Consulte a tabela');
+    if(cp.modo === 'pp'){
+      const pf = cpPerfil(P, m.a), tx = cpFluxoTxt(pf);
+      if(tx) cpLinha(dl, 'Fluxo', tx); else if(!pf) cpLinha(dl, 'Fluxo', 'Consulte a tabela');
+      if(pf && (tx || pf.aprox)) cpLinha(dl, 'Prazo das parcelas', cpPrazoTxt(pf));
+      if(pf && pf.ate != null && pf.tot) cpLinha(dl, 'Pago até as chaves', BRL(Math.round(pf.ate)) + ' (' + pc1(pf.ate / pf.tot * 100) + ')');
+    }
     cpLinha(dl, 'Entrega', entregaVal(P), o.e);
     cpLinha(dl, 'Construtora', GRUPO_NOME[grupoDe(P)] || i.construtora || '—');
     if(item) cpLinha(dl, 'Disponíveis', item.nTipo + ' de ' + (TIPO_NOME[m.tk] ? TIPO_NOME[m.tk].toLowerCase() : 'mesmo tipo') + ' · ' + item.nDisp + ' no projeto');
@@ -3258,6 +3365,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     b.appendChild(ac); c.appendChild(b);
     return c;
   }
+  function cpForaBloco(r){   // projetos que casariam em tudo, mas têm prazo de pagamento muito diferente do original
+    if(cp.modo !== 'pp' || !r.fora || !r.fora.length) return null;
+    const det = el('details', 'cp-fora cp-int'), ref = r.ref.tb ? cpPrazoTxt(cpPerfil(r.ref.p, r.ref.a)) : null;
+    det.appendChild(el('summary', null, 'Fora do comparativo no parcelado (' + r.fora.length + ')'));
+    det.appendChild(el('p', 'cp-nota', 'Casam em região, metragem e valor, mas o prazo de pagamento é muito diferente' + (ref ? ' do projeto original, que paga ' + ref : '') + ', então comparar a parcela direto não é justo. No à vista a comparação é direta.'));
+    const ul = el('ul', 'cp-fora-l');
+    r.fora.slice(0, 8).forEach(x => { const pf = cpPerfil(x.q, x.m.a); ul.appendChild(el('li', null, x.q.nome + (cpFluxoTxt(pf) ? ' · ' + cpFluxoTxt(pf) : '') + (pf ? ' · ' + cpPrazoTxt(pf) : ''))); });
+    det.appendChild(ul); return det;
+  }
   function cpRender(){
     const box = $('cp-res'); box.replaceChildren(); $('cp-env').hidden = true;
     const proj = cpProj(cp.pid);
@@ -3272,15 +3388,17 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ctx.querySelector('b').textContent = proj.nome + ' · unidade ' + r.ref.n + ' · ' + fmtM2(r.ref.ar) + ' m²' + (r.ref.tl ? ' · ' + r.ref.tl : '') + (r.ref.v ? ' · ' + BRL(r.ref.v) + ' ' + r.ref.pr.lbl : '');
     box.appendChild(ctx);
     if(r.ampliou && r.alts.length) box.appendChild(el('div', 'aviso cp-int', 'Não achei opções suficientes até ' + fmtKm(r.base) + ' do projeto: ampliei a busca para ' + fmtKm(r.raio) + '.'));
+    if(cp.modo === 'pp' && !r.ref.tb) box.appendChild(el('div', 'aviso cp-int', 'Este projeto ainda não tem o fluxo de pagamento cadastrado. No parcelado a comparação usa só o valor da tabela, sem checar o prazo das parcelas.'));
     if(!r.alts.length){
       const v = el('div', 'vazio', 'Nenhuma opção parecida' + (cp.motivo === 'parecido' ? '' : ' com esse motivo') + ' até ' + fmtKm(r.raio) + '. Tente outro motivo, o outro valor (à vista ou parcelado) ou uma distância maior.');
-      box.appendChild(v); return;
+      box.appendChild(v); const f0 = cpForaBloco(r); if(f0) box.appendChild(f0); return;
     }
     const grade = el('div', 'cp-grade');
     grade.appendChild(cpCard(null, r.ref, 0, cp.sel));
     r.alts.forEach((x, k) => grade.appendChild(cpCard(x, r.ref, k + 1, cp.sel)));
     box.appendChild(grade);
-    box.appendChild(el('p', 'cp-nota', 'Comparação feita com a unidade disponível mais parecida de cada projeto. Valores da tabela de hoje; a situação de cada unidade vem do espelho ao vivo.' + (cp.modo === 'pv' ? '' : ' Valores parcelados.')));
+    box.appendChild(el('p', 'cp-nota', 'Comparação feita com a unidade disponível mais parecida de cada projeto. Valores da tabela de hoje; a situação de cada unidade vem do espelho ao vivo.' + (cp.modo === 'pv' ? '' : ' Valores parcelados; só entram projetos com prazo de pagamento parecido com o do original.')));
+    const f1 = cpForaBloco(r); if(f1) box.appendChild(f1);
     $('cp-env').hidden = false; cpEnvioEstado(true);
   }
 
@@ -3298,9 +3416,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const p = cpProj(cp.pid);
     if(p){
       const ix = a => { const k = TIPO_ORDEM.indexOf(tipoK(tipologiaDe(p, a))); return k < 0 ? 9 : k; };
-      cpUnidades(p).sort((x, y) => ix(x) - ix(y) || precoDe(p, x, cp.modo).v - precoDe(p, y, cp.modo).v).slice(0, 400).forEach(a => {
+      cpUnidades(p).sort((x, y) => ix(x) - ix(y) || cpPreco(p, x, cp.modo).v - cpPreco(p, y, cp.modo).v).slice(0, 400).forEach(a => {
         const o = document.createElement('option'); o.value = String(a[0]);
-        o.textContent = a[0] + ' · ' + fmtM2(areaDe(a)) + ' m² · ' + andarTxt(a[4]) + ' · ' + BRL(precoDe(p, a, cp.modo).v) + (a[6] === 'disponivel' ? '' : ' (indisponível)'); su.appendChild(o); });
+        o.textContent = a[0] + ' · ' + fmtM2(areaDe(a)) + ' m² · ' + andarTxt(a[4]) + ' · ' + BRL(cpPreco(p, a, cp.modo).v) + (a[6] === 'disponivel' ? '' : ' (indisponível)'); su.appendChild(o); });
     }
     su.value = cp.n != null ? String(cp.n) : '';
     if(su.value !== (cp.n != null ? String(cp.n) : '')){ cp.n = null; su.value = ''; }
@@ -3419,6 +3537,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       L.push('   ' + [fmtM2(x.m.ar) + ' m²' + (x.m.tl ? ' ' + x.m.tl : ''), x.m.v ? BRL(x.m.v) + ' ' + x.m.pr.lbl : null, entregaTxt(x.q)].filter(Boolean).join(' · '));
       const d = [o.v && o.v.c && o.v.t, o.a && o.a.c && o.a.t, o.e && o.e.c && 'entrega ' + o.e.t].filter(Boolean);
       if(d.length) L.push('   ' + cap1(d.join(' · ')));
+      if(cp.modo === 'pp'){ const pf = cpPerfil(x.q, x.m.a), tx = cpFluxoTxt(pf); if(tx) L.push('   Fluxo: ' + tx + (pf.prazo >= 1 ? ' · ' + cpPrazoTxt(pf) : '')); }
     });
     try{ await navigator.clipboard.writeText(L.join('\n')); toast('Resumo copiado.'); }catch(e){ toast('Não consegui copiar o resumo.'); }
   });
