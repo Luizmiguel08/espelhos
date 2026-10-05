@@ -254,6 +254,23 @@ img{display:block;max-width:100%}
 .fe-neg input{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:9px 10px;font-size:15px;min-width:0}
 .fe-neg .abtn{flex:1 1 150px}
 .fe-bts{margin-top:12px;justify-content:flex-end}
+.fe-ln.fecha{border-color:var(--accent);background:var(--accent-soft)}
+.fe-ln.fecha .fe-v input{background:transparent;border-style:dashed;color:var(--accent);cursor:default}
+.fe-auto{display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:600;color:var(--ink-2);margin:0 0 10px;cursor:pointer}
+.fe-auto input{accent-color:var(--accent);width:17px;height:17px;margin:0;flex:none}
+.fe-tot small.ok{color:var(--good)}
+.fe-tot small#fe-fin.alerta{color:var(--warn)}
+.fe-tot small#fe-fin.erro{color:var(--bad);font-weight:600}
+.fe-tot small:empty{display:none}
+.en-res{display:grid;gap:6px;margin-top:8px}
+.en-res[hidden]{display:none}
+.en-res .r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);font-size:13.5px}
+.en-res .r b{font-size:15px}
+.en-res .r span{color:var(--ink-2);font-weight:600;min-width:0}
+.en-res .r small{grid-column:1 / -1;color:var(--muted);font-size:12.5px;line-height:1.35}
+.en-res .r.alerta{border-color:var(--warn)}
+.en-res .r.alerta small{color:var(--warn)}
+.en-res .r button{border:1px solid var(--line-2);background:var(--surface-2);border-radius:99px;padding:4px 11px;font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer}
 .fe-bts .abtn{flex:1 1 0}
 .fe-bts .abtn.primary{flex:1.4 1 0}
 .bloco .erro{color:var(--bad);font-size:13px;margin-top:6px}
@@ -462,7 +479,8 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
         <div class="campo"><span>Unidades na apresentação</span><div class="unid-sel" id="en-unids"></div>
           <div class="row" style="margin-top:4px"><select id="en-add" aria-label="Adicionar outra unidade"></select></div></div>
         <div class="campo"><span>Valores</span>
-          <div class="opcoes" id="en-val"></div></div>
+          <div class="opcoes" id="en-val"></div>
+          <div class="en-res" id="en-res" hidden></div></div>
         <div class="duo">
           <label class="campo"><span>Seu nome</span><input id="en-cor" maxlength="40" placeholder="Corretor"></label>
           <label class="campo"><span>Seu WhatsApp</span><input id="en-tel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
@@ -485,7 +503,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202610011442
+// versão 202610051335
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -796,7 +814,8 @@ window.NEX = (function(){
   let PID = null, P = null, E = null, T = null;
   let U = [], porN = new Map(), BASES = [];
   let atual = null, baseFicha = null, mostrando = 30, links = [];
-  let edicao = null;   // fluxo sendo editado na ficha: {n, linhas, ref, refRotulo, alvo}
+  let edicao = null;   // fluxo sendo editado na ficha: {n, linhas, ref, refRotulo, alvo, auto, limite}
+  let envRetorno = null;   // envio em andamento enquanto o corretor ajusta o fluxo de uma das unidades: {unids, cli, n}
   let F = {};
   const disponiveis = new Set();   // projetos com página de apresentação publicada
 
@@ -842,9 +861,52 @@ window.NEX = (function(){
   const opPers = pz => ({k: 'personalizado', rotulo: 'Fluxo personalizado', total: totalDe(pz.linhas), linhas: linhasDe(pz.linhas), envio: true, pers: pz});
   function opsDaUnidade(x){
     const ops = opcoesPreco(P, E, T, x);
-    const pz = PERS[persKey(PID, x.n)];
-    if(pz && Array.isArray(pz.linhas) && pz.linhas.length) ops.unshift(opPers(pz));
+    let pz = PERS[persKey(PID, x.n)];
+    if(pz && Array.isArray(pz.linhas) && pz.linhas.length){
+      // fluxo que fecha sozinho e sem total negociado acompanha o valor atual da tabela (ex.: tabela nova do mês)
+      if(pz.auto && !pz.alvo){
+        const r = refDe({ops});
+        if(r){ const ls = pz.linhas.map(l => Object.assign({}, l)); if(fecharConta(ls, r.total).resto > 0) pz = Object.assign({}, pz, {linhas: ls}); }
+      }
+      ops.unshift(opPers(pz));
+    }
     return ops;
+  }
+
+  // ---------------- fechar a conta ----------------
+  // a linha de fechamento (financiamento, chaves ou saldo) é o valor de referência menos as demais parcelas
+  const ehFin = l => /financ|repasse/i.test(String(l.nome || ''));
+  const pctTxt = p => p.toLocaleString('pt-BR', {maximumFractionDigits: 1}) + '%';
+  // valor que o fluxo personalizado fecha: o total da tabela (ou o primeiro preço sem personalização)
+  function refDe(x){
+    const r = x.ops.find(z => z.k === 'tabela') || x.ops.find(z => !z.pers);
+    return r && r.total > 0 ? {total: r.total, rotulo: r.k === 'tabela' ? 'da tabela' : 'do ' + r.rotulo.toLowerCase(), op: r} : null;
+  }
+  function idxFin(ls){ for(let j = ls.length - 1; j >= 0; j--) if(ehFin(ls[j])) return j; return -1; }
+  // financiamento de um fluxo: valor e % do total
+  function infoFin(ls, total){
+    const i = idxFin(ls); if(i < 0 || !(total > 0)) return null;
+    const v = Math.round((+ls[i].q || 1) * (+ls[i].valor || 0) * 100) / 100;
+    return {v, pct: Math.round(v / total * 1000) / 10};
+  }
+  // % do valor que a tabela financia (referência do aviso de limite)
+  function pctFinTabela(x){
+    const r = refDe(x); if(!r || !r.op.linhas || !r.op.linhas.length) return null;
+    const f = infoFin(linhasEditaveis(r.op), r.total); return f ? f.pct : null;
+  }
+  // fecha a conta em "alvo" mudando só a linha de fechamento; resto <= 0: as demais parcelas já passam do alvo
+  function fecharConta(ls, alvo){
+    const i = linhaFechamento(ls), l = ls[i], q = +l.q || 1;
+    const resto = Math.round((alvo - (totalDe(ls) - q * (+l.valor || 0))) * 100) / 100;
+    l.valor = resto > 0 ? Math.round(resto / q * 100) / 100 : 0;
+    return {i, resto, alvo};
+  }
+  // a condição personalizada de uma unidade aplicada a outra: mesma entrada e parcelas; a linha de fechamento acompanha o valor
+  function derivarPers(x, pz){
+    const ref = refDe(x); if(!ref || !pz || !Array.isArray(pz.linhas) || !pz.linhas.length) return null;
+    const ls = pz.linhas.map(l => Object.assign({}, l)), r = fecharConta(ls, ref.total);
+    if(r.resto <= 0) return {erro: 'As parcelas passam do valor ' + ref.rotulo + ' desta unidade (' + BRL(ref.total) + ').', linhas: ls};
+    return {linhas: ls, total: totalDe(ls)};
   }
 
   function dono(){
@@ -1092,7 +1154,7 @@ window.NEX = (function(){
     $('fi-corpo').scrollTop = 0; NEX.centrarAndar($('fi-corpo'));
     try{ history.replaceState(null, '', location.pathname + location.search + '#u' + x.n); }catch(e){}
   }
-  function fecharFicha(){ $('ficha').hidden = true; document.body.classList.remove('sem-rolagem'); try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
+  function fecharFicha(){ envRetorno = null; $('ficha').hidden = true; document.body.classList.remove('sem-rolagem'); try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
   const pctAbaixo = (o, tab) => tab && o !== tab && o.total < tab.total ? (Math.round((1 - o.total / tab.total) * 1000) / 10).toLocaleString('pt-BR') + '%' : '';
   const listaNotas = cs => '<ul class="notas">' + cs.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>';
   function notaCat(x){
@@ -1141,46 +1203,74 @@ window.NEX = (function(){
     for(let i = ls.length - 1; i >= 0; i--) if((+ls[i].q || 1) === 1) return i;
     return ls.length - 1;
   }
-  function abrirEditor(x){
+  // linhasIniciais: fluxo já montado (ex.: a condição de outra unidade, vinda do "Enviar ao cliente")
+  function abrirEditor(x, linhasIniciais){
     const o = x.ops.find(z => z.k === baseFicha) || x.ops[0];
-    const tab = x.ops.find(z => z.k === 'tabela');
-    const base = o && o.pers ? o.pers.linhas.map(l => Object.assign({}, l)) : linhasEditaveis(o);
-    const ref = tab || x.ops.find(z => !z.pers) || null;
-    edicao = {n: x.n, linhas: base.slice(0, MAX_LINHAS), ref: ref ? ref.total : null, refRotulo: ref ? (ref.k === 'tabela' ? 'da tabela' : 'do ' + ref.rotulo.toLowerCase()) : '', alvo: ''};
+    const pers = !linhasIniciais && o && o.pers ? o.pers : null, ref = refDe(x);
+    const base = linhasIniciais ? linhasIniciais.map(l => Object.assign({}, l)) : pers ? pers.linhas.map(l => Object.assign({}, l)) : linhasEditaveis(o);
+    // fluxo salvo antes de a conta fechar sozinha: se o total ficou longe da referência, ele vira o total negociado
+    let alvo = '';
+    if(pers && pers.alvo) alvo = numTxt(pers.alvo);
+    else if(pers && pers.auto === undefined && ref && Math.abs(totalDe(pers.linhas) - ref.total) >= 1) alvo = numTxt(totalDe(pers.linhas));
+    edicao = {n: x.n, linhas: base.slice(0, MAX_LINHAS), ref: ref ? ref.total : null, refRotulo: ref ? ref.rotulo : '', alvo,
+              auto: pers ? pers.auto !== false : true, limite: pctFinTabela(x), fechaIdx: -1};
     renderFicha(); rolarAteValores();
   }
   function rolarAteValores(){ requestAnimationFrame(() => { const b = $('fi-valores'); if(b) $('fi-corpo').scrollTop = Math.max(0, b.offsetTop - 8); }); }
   function blocoEditor(x){
-    const cheio = edicao.linhas.length >= MAX_LINHAS;
+    const fc = recalcular(), ls = edicao.linhas, cheio = ls.length >= MAX_LINHAS;
+    edicao.fechaIdx = fc ? fc.i : -1;
+    const lf = ls[linhaFechamento(ls)] || {}, ondeFecha = ehFin(lf) ? 'no financiamento' : 'em “' + tituloLinha(lf) + '”';
     let h = '<div class="bloco editor" id="fi-valores"><h3>Personalizar fluxo<span class="acoes-h"><button class="acao" type="button" data-fe="restaurar">' + (x.ops.some(z => z.k === 'tabela') ? 'Voltar ao da tabela' : 'Voltar ao original') + '</button></span></h3>' +
-      '<p class="fe-dica">Mude quantidade, valor e data de cada parcela, inclua ou tire linhas. O total soma sozinho e o cliente recebe exatamente este fluxo.</p>' +
-      '<div class="fe">' + edicao.linhas.map((l, i) =>
-        '<div class="fe-ln" data-i="' + i + '">' +
+      '<p class="fe-dica">' + (fc ? 'Digite o que o cliente paga (ato, mensais, anuais). A linha destacada fecha a conta sozinha, no valor ' + esc(edicao.refRotulo || 'de referência') + ' ou no total negociado.'
+                                  : 'Mude quantidade, valor e data de cada parcela, inclua ou tire linhas. O total soma sozinho e o cliente recebe exatamente este fluxo.') + '</p>' +
+      '<div class="fe">' + ls.map((l, i) => { const fecha = fc && i === fc.i;
+        return '<div class="fe-ln' + (fecha ? ' fecha' : '') + '" data-i="' + i + '">' +
           '<label class="fe-q"><span>Qtd.</span><input type="number" inputmode="numeric" min="1" max="480" step="1" value="' + (+l.q || 1) + '" aria-label="Quantidade de parcelas"></label>' +
           '<label class="fe-n"><span>Parcela</span><input maxlength="40" value="' + esc(l.nome) + '" aria-label="Nome da parcela"></label>' +
-          '<label class="fe-v"><span>Valor de cada</span><input inputmode="decimal" value="' + esc(numTxt(+l.valor || 0)) + '" aria-label="Valor de cada parcela"></label>' +
-          '<button type="button" class="fe-x" data-fe-del="' + i + '" aria-label="Tirar esta linha"' + (edicao.linhas.length < 2 ? ' disabled' : '') + '>×</button>' +
+          '<label class="fe-v"><span>' + (fecha ? 'Fecha a conta' : 'Valor de cada') + '</span><input inputmode="decimal" value="' + esc(numTxt(+l.valor || 0)) + '"' +
+            (fecha ? ' readonly tabindex="-1" aria-label="Valor calculado para fechar a conta"' : ' aria-label="Valor de cada parcela"') + '></label>' +
+          '<button type="button" class="fe-x" data-fe-del="' + i + '" aria-label="Tirar esta linha"' + (ls.length < 2 ? ' disabled' : '') + '>×</button>' +
           '<label class="fe-s"><span>Quando</span><input maxlength="60" value="' + esc(l.quando || '') + '" placeholder="ex.: a partir de out/2026" aria-label="Quando"></label>' +
           '<small class="fe-sub"></small>' +
-        '</div>').join('') + '</div>' +
+        '</div>'; }).join('') + '</div>' +
       '<div class="fe-add"><span>' + (cheio ? 'Máximo de ' + MAX_LINHAS + ' linhas' : 'Incluir') + '</span>' + MODELOS.map((m, i) => '<button type="button" data-fe-add="' + i + '"' + (cheio ? ' disabled' : '') + '>+ ' + esc(m.rot) + '</button>').join('') + '</div>' +
-      '<div class="fe-tot"><span>Total do fluxo</span><b id="fe-total">—</b><small id="fe-dif"></small></div>' +
-      '<div class="fe-neg"><label><span>Fechar o total em</span><input id="fe-alvo" inputmode="decimal" value="' + esc(edicao.alvo || '') + '" placeholder="ex.: 295.000"></label>' +
-      '<button type="button" class="abtn" data-fe="ajustar">Ajustar no ' + esc(/financ/i.test((edicao.linhas[linhaFechamento(edicao.linhas)] || {}).nome || '') ? 'financiamento' : 'última parcela') + '</button></div>' +
+      '<label class="fe-auto"><input type="checkbox" id="fe-auto"' + (edicao.auto ? ' checked' : '') + '><span>Fechar a conta sozinho ' + esc(ondeFecha) + '</span></label>' +
+      '<div class="fe-tot"><span>Total do fluxo</span><b id="fe-total">—</b><small id="fe-dif"></small><small id="fe-fin"></small></div>' +
+      '<div class="fe-neg"><label><span>' + (edicao.auto ? 'Total negociado (opcional)' : 'Fechar o total em') + '</span><input id="fe-alvo" inputmode="decimal" value="' + esc(edicao.alvo || '') + '" placeholder="' +
+        (edicao.auto ? 'em branco: valor ' + esc(edicao.refRotulo || 'de referência') : 'ex.: 295.000') + '"></label>' +
+      (edicao.auto ? '' : '<button type="button" class="abtn" data-fe="ajustar">Ajustar ' + esc(ondeFecha) + '</button>') + '</div>' +
       '<div class="row fe-bts"><button class="abtn" type="button" data-fe="cancelar">Cancelar</button><button class="abtn primary" type="button" data-fe="salvar">Salvar fluxo</button></div>' +
       '<div class="erro" id="fe-erro" role="alert"></div>';
     return h + notaCat(x) + '</div>';
   }
+  // com "fechar a conta" ligado, a linha de fechamento é sempre o alvo (total negociado ou valor de referência) menos as demais
+  function recalcular(){
+    if(!edicao || !edicao.auto || !edicao.linhas.length) return null;
+    const alvo = numBR(edicao.alvo) || edicao.ref; if(!(alvo > 0)) return null;
+    return fecharConta(edicao.linhas, alvo);
+  }
   function atualizarTotais(){
     if(!edicao) return;
-    const tot = totalDe(edicao.linhas), el = $('fe-total'); if(!el) return;
+    const el = $('fe-total'); if(!el) return;
+    const fc = recalcular(), tot = totalDe(edicao.linhas);
     el.textContent = fmtV(tot);
-    const ref = edicao.ref, dif = $('fe-dif');
+    if(fc){ const inp = document.querySelector('#fi-corpo .fe-ln[data-i="' + fc.i + '"] .fe-v input'); if(inp) inp.value = numTxt(+edicao.linhas[fc.i].valor || 0); }
+    const ref = edicao.ref, dif = $('fe-dif'), neg = fc && numBR(edicao.alvo);
     if(ref){
       const d = Math.round((tot - ref) * 100) / 100, pct = (Math.round(Math.abs(d) / ref * 1000) / 10).toLocaleString('pt-BR') + '%';
-      dif.textContent = Math.abs(d) < 1 ? 'igual ao total ' + edicao.refRotulo : fmtV(Math.abs(d)) + (d < 0 ? ' abaixo' : ' acima') + ' ' + edicao.refRotulo + ' (' + (d < 0 ? '−' : '+') + pct + ')';
-      dif.className = Math.abs(d) < 1 ? '' : d < 0 ? 'abaixo' : 'acima';
+      dif.textContent = Math.abs(d) < 1 ? (fc ? 'Fecha no valor ' : 'Igual ao total ') + edicao.refRotulo + ' ✓'
+        : fmtV(Math.abs(d)) + (d < 0 ? ' abaixo' : ' acima') + ' ' + edicao.refRotulo + ' (' + (d < 0 ? '−' : '+') + pct + ')' + (neg ? ', total negociado' : '');
+      dif.className = Math.abs(d) < 1 ? 'ok' : d < 0 ? 'abaixo' : 'acima';
     } else dif.textContent = '';
+    // financiamento: quanto do valor e o limite da tabela
+    const fin = $('fe-fin'), inf = infoFin(edicao.linhas, tot);
+    if(fc && fc.resto <= 0){ fin.textContent = 'As outras parcelas já passam de ' + fmtV(fc.alvo) + '. Diminua alguma delas.'; fin.className = 'erro'; }
+    else if(inf){
+      const acima = edicao.limite != null && inf.pct > edicao.limite + 0.05;
+      fin.textContent = 'Financiamento: ' + fmtV(inf.v) + ' · ' + pctTxt(inf.pct) + ' do valor' + (acima ? '. Acima dos ' + pctTxt(edicao.limite) + ' da tabela: confirme com o banco e a incorporadora.' : '');
+      fin.className = acima ? 'alerta' : '';
+    } else { fin.textContent = ''; fin.className = ''; }
     document.querySelectorAll('#fi-corpo .fe-ln').forEach(r => {
       const l = edicao.linhas[+r.dataset.i]; if(!l) return;
       const q = +l.q || 1; r.querySelector('.fe-sub').textContent = q > 1 && l.valor ? q + ' × ' + fmtV(+l.valor) + ' = ' + fmtV(q * l.valor) : '';
@@ -1189,6 +1279,7 @@ window.NEX = (function(){
   function validarEdicao(){
     const ls = edicao.linhas;
     if(!ls.length) return 'Inclua pelo menos uma parcela.';
+    const fc = recalcular(); if(fc && fc.resto <= 0) return 'As outras parcelas já passam de ' + fmtV(fc.alvo) + '. Diminua alguma delas.';
     for(const l of ls){
       if(!String(l.nome || '').trim()) return 'Dê um nome a cada parcela (ex.: Ato, mensais, Financiamento).';
       if(!(+l.q >= 1 && +l.q <= 480 && Number.isInteger(+l.q))) return 'A quantidade de "' + tituloLinha(l) + '" precisa ser um número inteiro de 1 a 480.';
@@ -1199,10 +1290,12 @@ window.NEX = (function(){
   function salvarEdicao(){
     const e = validarEdicao(); if(e){ const b = $('fe-erro'); if(b) b.textContent = e; return false; }
     const x = porN.get(edicao.n); if(!x) return false;
-    PERS[persKey(PID, x.n)] = {linhas: edicao.linhas.map(l => ({q: +l.q || 1, nome: String(l.nome).trim(), valor: Math.round((+l.valor) * 100) / 100, quando: String(l.quando || '').trim()})), em: new Date().toISOString()};
+    PERS[persKey(PID, x.n)] = {linhas: edicao.linhas.map(l => ({q: +l.q || 1, nome: String(l.nome).trim(), valor: Math.round((+l.valor) * 100) / 100, quando: String(l.quando || '').trim()})),
+                               em: new Date().toISOString(), auto: !!edicao.auto, alvo: edicao.auto ? (numBR(edicao.alvo) || null) : null};
     gravarPers();
     x.ops = opsDaUnidade(x); edicao = null; baseFicha = 'personalizado';
     renderFicha(); renderLista(); rolarAteValores();
+    if(envRetorno && envRetorno.n === x.n) voltarAoEnvio();
     return true;
   }
   function textoFluxo(x, o){
@@ -1259,13 +1352,16 @@ window.NEX = (function(){
         if(Math.abs(totalDe(edicao.linhas) - alvo) >= 0.01) toast('Arredondei centavos: o total ficou ' + fmtV(totalDe(edicao.linhas)) + '.');
         return;
       }
-      if(acao === 'cancelar'){ edicao = null; renderFicha(); rolarAteValores(); return; }
-      if(acao === 'salvar'){ if(salvarEdicao()) toast('Fluxo salvo. Toque em “Enviar ao cliente” para mandar.'); }
+      if(acao === 'cancelar'){ edicao = null; renderFicha(); rolarAteValores(); if(envRetorno) voltarAoEnvio(); return; }
+      if(acao === 'salvar'){
+        const volta = !!(envRetorno && envRetorno.n === x.n);
+        if(salvarEdicao()) toast(volta ? 'Fluxo da ' + x.n + ' salvo. Confira o envio.' : 'Fluxo salvo. Toque em “Enviar ao cliente” para mandar.');
+      }
     });
     if(!edicao) return;
     box.addEventListener('input', ev => {
       const t = ev.target; if(!(t instanceof HTMLInputElement)) return;
-      if(t.id === 'fe-alvo'){ edicao.alvo = t.value; return; }
+      if(t.id === 'fe-alvo'){ edicao.alvo = t.value; atualizarTotais(); return; }
       const r = t.closest('.fe-ln'); if(!r) return;
       const l = edicao.linhas[+r.dataset.i]; if(!l) return;
       const c = t.closest('label').className;
@@ -1275,6 +1371,13 @@ window.NEX = (function(){
       else if(c === 'fe-s') l.quando = t.value;
       const err = $('fe-erro'); if(err) err.textContent = '';
       atualizarTotais();
+    });
+    box.addEventListener('change', ev => {
+      const t = ev.target; if(!(t instanceof HTMLInputElement) || !edicao) return;
+      const y = $('fi-corpo').scrollTop;
+      if(t.id === 'fe-auto'){ edicao.auto = t.checked; renderFicha(); $('fi-corpo').scrollTop = y; return; }
+      // o nome define qual linha fecha a conta (ex.: "Financiamento"): redesenha se ela mudou
+      if(edicao.auto && t.closest('label.fe-n') && linhaFechamento(edicao.linhas) !== edicao.fechaIdx){ renderFicha(); $('fi-corpo').scrollTop = y; }
     });
     // ao sair do campo de valor, mostra o número já formatado (ex.: 1502,4 -> 1.502,40)
     box.addEventListener('focusout', ev => {
@@ -1400,6 +1503,9 @@ window.NEX = (function(){
     const xs = envUnids.map(n => porN.get(n)).filter(Boolean);
     const x0 = xs[0]; box.innerHTML = '';
     const ops = x0 ? x0.ops.filter(o => o.envio !== false) : [];   // projeções (ex.: valor futuro) não vão para o cliente
+    // o fluxo personalizado pode estar em qualquer unidade do envio: a condição dele vale para as outras
+    const src = fontePers();
+    if(src && !ops.some(o => o.pers)){ const po = ((porN.get(src.n) || {}).ops || []).find(o => o.pers); if(po) ops.unshift(po); }
     let marcado = false;
     const add = (v, titulo, sub, ok) => {
       const l = document.createElement('label'); l.innerHTML = '<input type="radio" name="val"><span></span>';
@@ -1407,19 +1513,81 @@ window.NEX = (function(){
       l.querySelector('span').innerHTML = esc(titulo) + '<small>' + esc(sub) + '</small>';
       box.appendChild(l); return i;
     };
-    // com fluxo personalizado na 1ª unidade, ele vem marcado ao abrir o envio (mesmo que antes tenha ido outra opção);
-    // ao incluir/tirar unidades no mesmo envio, fica a opção escolhida. Unidades sem fluxo próprio vão pela tabela.
+    // com fluxo personalizado no envio, ele vem marcado ao abrir (mesmo que antes tenha ido outra opção);
+    // ao incluir/tirar unidades no mesmo envio, fica a opção escolhida. Sem fluxo próprio, a unidade recebe a mesma condição.
     const temPers = ops.some(o => o.pers);
     const pref = envNovo && temPers ? 'personalizado' : antes || (temPers ? 'personalizado' : null);
     envNovo = false;
     for(const o of ops){
       const todos = o.pers ? true : xs.every(z => z.ops.some(q => q.k === o.k));
-      const semPers = o.pers ? xs.filter(z => !z.ops.some(q => q.pers)).length : 0;
-      const i = add(o.k, o.rotulo, (o.linhas && o.linhas.length ? 'Fluxo completo · ' : 'Valor · ') + BRL(o.total) + (xs.length > 1 ? ' (1ª unidade' + (semPers ? '; ' + (semPers === 1 ? 'a outra vai' : 'as outras vão') + ' pela tabela' : '') + ')' : ''), todos);
+      const sub = o.pers
+        ? 'Fluxo completo · ' + BRL(o.total) + (xs.length > 1 ? ' (unidade ' + (src ? src.n : xs[0].n) + '). Nas outras, a mesma entrada e parcelas, com a conta fechada no valor de cada uma.' : '')
+        : (o.linhas && o.linhas.length ? 'Fluxo completo · ' : 'Valor · ') + BRL(o.total) + (xs.length > 1 ? ' (1ª unidade)' : '');
+      const i = add(o.k, o.rotulo, sub, todos);
       if(todos && !marcado && (o.k === pref || (!pref && o.linhas && o.linhas.length))){ i.checked = true; marcado = true; }
     }
     const nao = add('nao', 'Não mostrar valores', 'O cliente vê planta, vista e o prédio', true);
     if(!marcado){ const prim = box.querySelector('input:not(:disabled)'); if(antes === 'nao') nao.checked = true; else if(prim) prim.checked = true; }
+    renderResumoEnvio();
+  }
+  // unidade do envio com fluxo personalizado próprio: a condição dela vale para as outras
+  function fontePers(){
+    for(const n of envUnids){ const pz = PERS[persKey(PID, n)]; if(pz && Array.isArray(pz.linhas) && pz.linhas.length) return {n, pz}; }
+    return null;
+  }
+  // fluxo de uma unidade num envio "personalizado": o dela, a condição aplicada a ela, ou nada (vai pela tabela)
+  function persDoEnvio(n){
+    const x = porN.get(n); if(!x) return null;
+    const pr = x.ops.find(z => z.pers); if(pr) return {tipo: 'proprio', op: pr, linhas: pr.pers.linhas};
+    const src = fontePers(); if(!src) return null;
+    const d = derivarPers(x, src.pz); if(!d) return null;
+    if(d.erro) return {tipo: 'erro', erro: d.erro, de: src.n, linhas: d.linhas};
+    return {tipo: 'derivado', de: src.n, linhas: d.linhas,
+            op: {k: 'personalizado', rotulo: 'Fluxo personalizado', total: d.total, linhas: linhasDe(d.linhas), envio: true, pers: {linhas: d.linhas, derivado: src.n}}};
+  }
+  // resumo por unidade quando o envio leva fluxo personalizado e mais de uma unidade
+  function renderResumoEnvio(){
+    const box = $('en-res'); if(!box) return;
+    const modo = (document.querySelector('#en-val input:checked') || {}).value;
+    box.innerHTML = '';
+    box.hidden = !(modo === 'personalizado' && envUnids.length > 1);
+    if(box.hidden) return;
+    for(const n of envUnids){
+      const x = porN.get(n); if(!x) continue;
+      const pd = persDoEnvio(n), ref = refDe(x), r = document.createElement('div');
+      let tit, det = '', alerta = false, ajustar = false;
+      if(pd && pd.op){
+        const inf = infoFin(pd.linhas, pd.op.total), lim = pctFinTabela(x), d = ref ? Math.round((pd.op.total - ref.total) * 100) / 100 : 0;
+        tit = pd.tipo === 'proprio' ? 'fluxo montado nesta unidade' : 'mesma condição da ' + pd.de;
+        det = BRL(pd.op.total) + (ref ? (Math.abs(d) < 1 ? ', fecha no valor ' + ref.rotulo : ', ' + fmtV(Math.abs(d)) + (d < 0 ? ' abaixo' : ' acima') + ' ' + ref.rotulo) : '') +
+              (inf ? ' · financiamento ' + fmtV(inf.v) + ' (' + pctTxt(inf.pct) + ')' : '');
+        if(inf && lim != null && inf.pct > lim + 0.05){ alerta = true; det += ', acima dos ' + pctTxt(lim) + ' da tabela'; }
+        ajustar = pd.tipo === 'derivado';
+      } else if(pd && pd.tipo === 'erro'){ tit = 'vai pela tabela'; det = pd.erro + ' Toque em Ajustar para montar o fluxo desta unidade.'; alerta = true; ajustar = true; }
+      else { tit = 'vai pela tabela'; det = 'Sem fluxo personalizado.'; }
+      r.className = 'r' + (alerta ? ' alerta' : '');
+      r.innerHTML = '<b>' + esc(n) + '</b><span>' + esc(tit) + '</span>' + (ajustar ? '<button type="button" data-ajustar="' + esc(n) + '">Ajustar</button>' : '') + '<small>' + esc(det) + '</small>';
+      box.appendChild(r);
+    }
+  }
+  $('en-val').addEventListener('change', renderResumoEnvio);
+  $('en-res').addEventListener('click', e => { const b = e.target.closest('[data-ajustar]'); if(b) ajustarNoEnvio(b.dataset.ajustar); });
+  // abre a ficha da unidade com a condição já aplicada; ao salvar (ou cancelar), volta para o envio
+  function ajustarNoEnvio(n){
+    const x = porN.get(n); if(!x) return;
+    const pd = persDoEnvio(n);
+    envRetorno = {unids: envUnids.slice(), cli: $('en-cli').value, n};
+    $('envio').hidden = true;
+    abrirFicha(n);
+    abrirEditor(x, pd && pd.linhas ? pd.linhas : null);
+    toast('Ajuste o fluxo da ' + n + ' e toque em “Salvar fluxo” para voltar ao envio.');
+  }
+  function voltarAoEnvio(){
+    const r = envRetorno; envRetorno = null; if(!r) return;
+    abrirEnvio(r.unids);
+    $('en-cli').value = r.cli || '';
+    const i = document.querySelector('#en-val input[value="personalizado"]');
+    if(i && !i.disabled && !i.checked){ i.checked = true; renderResumoEnvio(); }
   }
   function renderEnvUnids(){
     const box = $('en-unids'); box.innerHTML = '';
@@ -1452,7 +1620,9 @@ window.NEX = (function(){
   function valoresPara(n, k){
     const x = porN.get(n); if(!x || k === 'nao') return null;
     let o = x.ops.find(z => z.k === k);
-    // unidade sem fluxo personalizado num envio "personalizado": vai pela tabela (ou pelo primeiro preço com fluxo)
+    // sem fluxo próprio num envio "personalizado": a mesma condição da unidade personalizada, fechada no valor desta
+    if(!o && k === 'personalizado'){ const pd = persDoEnvio(n); if(pd && pd.op) o = pd.op; }
+    // sem como aplicar a condição: vai pela tabela (ou pelo primeiro preço com fluxo)
     if(!o && k === 'personalizado') o = x.ops.find(z => z.k === 'tabela') || x.ops.find(z => !z.pers && z.linhas && z.linhas.length) || x.ops.find(z => !z.pers && z.envio !== false);
     if(!o) return null;
     const fluxo = !!(o.linhas && o.linhas.length);
