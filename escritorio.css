@@ -16,7 +16,7 @@ body.ec-aberto{overflow:hidden}
 .ec-rooms{display:flex;border:1px solid var(--ec-line);border-radius:8px;padding:3px;gap:3px;background:#101c2a}.ec-room{min-height:40px;border:0;background:transparent;color:var(--ec-muted);border-radius:5px;padding:9px 14px;font-size:12px!important;font-weight:600!important}.ec-room[aria-pressed=true]{background:#e3bc77;color:#14202e}.ec-room:hover:not([aria-pressed=true]){background:#263442;color:#fff}
 .ec-stage-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
 .ec-scene-block{min-width:0}.ec-scene-shell{position:relative;border:1px solid #344355;border-radius:12px;overflow:hidden;background:#101c29}
-.ec-rolagem{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#c8a267 #0b1522;touch-action:pan-x;overscroll-behavior-x:contain;cursor:grab}.ec-rolagem:active{cursor:grabbing}.ec-rolagem.is-dragging{user-select:none}
+.ec-rolagem{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#c8a267 #0b1522;touch-action:auto;overscroll-behavior-x:contain;cursor:grab}.ec-rolagem:active{cursor:grabbing}.ec-rolagem.is-dragging{user-select:none}
 .ec-cena{position:relative;width:100%;aspect-ratio:16/9;min-height:180px;isolation:isolate;transform:translateZ(0)}
 .ec-cena[data-view=genio],.ec-cena[data-view=espelho]{width:200%;min-height:0}
 #ec-canvas{display:block;width:100%;height:100%;image-rendering:auto}
