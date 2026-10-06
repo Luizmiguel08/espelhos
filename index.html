@@ -5279,7 +5279,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       case 'flavia': return e.t === 'card' ? 'Fez o card da proposta' : e.t === 'rentabilidade' ? 'Fez um estudo de rentabilidade' : 'Montou um fluxo de pagamento';
       case 'sergio': return e.t === 'google' ? 'Cuidou da conexão com o Google Agenda' : e.t === 'visita' ? 'Registrou uma visita' : 'Anotou um compromisso';
       case 'otto': return e.t === 'conferencia' ? (n > 1 ? 'Conferiu ' + n + ' projetos' : 'Conferiu o' + p) : e.t === 'aviso' ? 'Avisou uma busca salva' : e.t === 'mudancas' ? 'Contou o que mudou nos projetos' : e.t === 'relatorio' ? 'Montou o relatório da curadoria' : 'Anotou um ajuste para a curadoria';
-      case 'teo': return 'Carregou tabela nova' + (p ? ' do' + p : '');
+      case 'teo': return e.t === 'revenda' ? 'Atualizou a revenda One' : 'Carregou tabela nova' + (p ? ' do' + p : '');
       case 'ro': return (n === 1 ? '1 mudança' : n + ' mudanças') + ' de status' + (p ? ' no' + p : '');
       case 'murilo': return e.t === 'mercado' ? 'Respondeu sobre o Mercado' : e.t === 'webhook' ? 'Recebeu aviso da Órulo' : 'Atualizou o Mercado com a Órulo' + (e.ok === false ? ', com falha' : '');
       case 'dora': return e.t === 'documento' ? 'Mandou documento da central' : 'Atualizou a central de documentos' + (p ? ' da' + p : '');
@@ -5294,7 +5294,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       case 'flavia': return t === 'card' ? 'Fazendo o card da proposta.' : t === 'rentabilidade' ? 'Fazendo o estudo de rentabilidade.' : 'Montando o fluxo de pagamento.';
       case 'sergio': return 'Anotando na agenda.';
       case 'otto': return t === 'conferencia' ? 'Conferindo projetos.' : t === 'aviso' ? 'Avisando uma busca salva.' : 'Organizando a base.';
-      case 'teo': return 'Carregando tabela nova.';
+      case 'teo': return t === 'revenda' ? 'Lendo a revenda da One.' : 'Carregando tabela nova.';
       case 'ro': return 'Atualizando o status das unidades.';
       case 'murilo': return 'Atualizando o Mercado.';
       case 'dora': return 'Cuidando dos documentos.';
