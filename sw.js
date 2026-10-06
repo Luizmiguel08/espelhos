@@ -1,6 +1,6 @@
 // Espelhos de Vendas — service worker (app offline + notificações)
-const V = 'espelhos-202610061835';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png', './favicon-64.png'];
+const V = 'espelhos-20261006-escritorio3d-1';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './badge-96.png', './favicon-64.png', './escritorio.css?v=20261006-3d', './escritorio.js?v=20261006-3d'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
