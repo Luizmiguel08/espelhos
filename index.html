@@ -2809,12 +2809,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     catch(e){ return null; }   // sem rede: tenta de novo na próxima vez
     return FP[pid];
   }
+  // material novo que o administrador mandou pelo WhatsApp (info.material): planta, foto, pdf ou video
+  const materialDe = (p, tipos) => { const m = infoDe(p).material; return Array.isArray(m) ? m.filter(x => x && tipos.includes(x.tipo) && /^https:\/\//i.test(String(x.u || ''))) : []; };
   function fichaFotos(p, P){
-    if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: 'nex/' + (P.pasta || '') + r.id + '.jpg', th: 'nex/' + (P.pasta || '') + 't' + r.id + '.jpg', t: r.t || ''}));
+    const novos = materialDe(p, ['planta', 'foto']).map(m => ({src: m.u, t: m.t || ''}));
+    if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: 'nex/' + (P.pasta || '') + r.id + '.jpg', th: 'nex/' + (P.pasta || '') + 't' + r.id + '.jpg', t: r.t || ''})).concat(novos);
     const i = infoDe(p), out = [];
     if(urlSegura(i.capa)) out.push({src: i.capa, t: 'Fachada'});
     for(const f of (i.fotos || [])) if(f && urlSegura(f.u) && f.u !== i.capa) out.push({src: f.u, t: f.t || ''});
-    return out;
+    return out.concat(novos);
   }
   let bfAlvo = null, bfFotos = [], bfZi = 0;
   function zoomFoto(i){
@@ -2899,7 +2902,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(P && docs.length) lk('nex/?p=' + encodeURIComponent(p.id) + '#mat', 'Todo o material (' + docs.length + ')');
     if(links.children.length) sec.appendChild(links);
     const peso = d => (d.ext === 'pdf' || d.pasta || d.u) ? 0 : 1;   // PDFs e pastas primeiro; vídeos e imagens por último
-    const pdfs = docs.filter(d => !(d.c === 'Book do cliente' && d.ext === 'pdf')).sort((x, y) => peso(x) - peso(y)).slice(0, 8);
+    const novosDocs = materialDe(p, ['pdf', 'video']).slice(-4).reverse().map(m => ({u: m.u, n: m.t, c: 'Enviado pelo WhatsApp', ext: m.tipo === 'pdf' ? 'pdf' : 'vídeo', mb: m.tam ? Math.round(m.tam / 1e5) / 10 : null}));
+    const pdfs = novosDocs.concat(docs.filter(d => !(d.c === 'Book do cliente' && d.ext === 'pdf')).sort((x, y) => peso(x) - peso(y))).slice(0, 10);
     if(pdfs.length){
       const ul = el('ul', 'bf-docs');
       pdfs.forEach(d => {
