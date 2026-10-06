@@ -109,6 +109,8 @@ button{font:inherit;color:inherit}
 .head .meta strong{color:var(--ink);font-weight:600}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--disp-line);margin-right:6px;vertical-align:1px}
 .hint{font-size:12.5px;color:var(--ink-2)}
+.vaga-info{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.35}
+.vaga-info b{color:var(--ink);font-weight:600}
 .hint b{color:var(--ink);font-weight:600}
 
 /* KPI tiles = status filter */
@@ -706,6 +708,60 @@ body.mk-aberto{overflow:hidden}
   .mk-nome{font-size:18px}
 }
 
+/* ---------- Documentação (central de documentos por construtora e projeto) ---------- */
+.tabs .tab.dc-tab{border-style:dashed}
+.tabs .tab.dc-tab b svg{width:.85em;height:.85em;margin-right:5px;vertical-align:-.08em}
+body.dc-aberto{overflow:hidden}
+.dc{position:fixed;inset:0;z-index:26;background:var(--bg);display:flex;flex-direction:column;color:var(--ink)}
+.dc[hidden]{display:none}
+.dc-top{display:flex;align-items:center;gap:12px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.dc-voltar{border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;white-space:nowrap}
+.dc-tit{flex:1;min-width:0;display:flex;flex-direction:column}
+.dc-tit h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;line-height:1;margin:0}
+.dc-tit small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-corpo{flex:1;min-height:0;overflow:auto;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+.dc-corpo > *{max-width:920px;margin-left:auto;margin-right:auto}
+.dc-busca{display:flex;flex-direction:column;gap:10px;position:sticky;top:-14px;z-index:2;background:var(--bg);padding:14px 0 10px;margin-top:-14px}
+.dc-busca input{height:44px;border:1px solid var(--line-2);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--surface);color:var(--ink);width:100%}
+.dc-busca input:focus{outline:2px solid var(--focus);outline-offset:1px}
+.dc-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.dc-chips::-webkit-scrollbar{display:none}
+.dc-chips:empty{display:none}
+.dc-chips .chip{white-space:nowrap;flex:none;padding:6px 11px;font-size:13px}
+.dc-cont{font-size:13px;color:var(--muted);margin:2px auto 10px}
+.dc-lista{display:flex;flex-direction:column;gap:12px}
+.dc-proj{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.dc-proj > header{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 8px}
+.dc-proj h3{flex:1;min-width:0;margin:0;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:21px;font-weight:700;line-height:1.1}
+.dc-proj h3 small{display:block;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:12px;font-weight:500;color:var(--muted);margin-top:3px}
+.dc-proj header a,.dc-proj header button{flex:none;font-size:12.5px;font-weight:600;color:var(--accent);text-decoration:none;border:0;background:none;font-family:inherit;cursor:pointer;padding:4px 0}
+.dc-docs{list-style:none;margin:0;padding:0 6px 6px}
+.dc-doc{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;padding:8px;border-radius:10px}
+.dc-doc:hover{background:var(--surface-2)}
+.dc-doc + .dc-doc{border-top:1px solid var(--line)}
+.dc-ext{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:color-mix(in srgb,#d93025 14%,var(--surface));color:#b3261e}
+.dc-ext.x-mp4,.dc-ext.x-pptx,.dc-ext.x-xlsx,.dc-ext.x-rar,.dc-ext.x-jpeg{background:var(--surface-2);color:var(--ink-2)}
+.dc-dt{min-width:0}
+.dc-dt b{display:block;font-size:14.5px;font-weight:600;line-height:1.25}
+.dc-dt small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.dc-ac{display:flex;gap:6px}
+.dc-ac a,.dc-ac button{height:34px;padding:0 11px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;text-decoration:none;cursor:pointer;white-space:nowrap}
+.dc-ac a.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.dc-pastas{display:flex;flex-wrap:wrap;gap:6px;padding:4px 14px 12px}
+.dc-pastas a{font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:none;border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;background:var(--surface)}
+.dc-pastas a:hover{border-color:var(--accent);color:var(--accent)}
+.dc-vazio{padding:4px 14px 14px;font-size:13.5px;color:var(--muted)}
+.dc-nada{padding:28px 6px;text-align:center;color:var(--muted);font-size:14px}
+.dc-fonte{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.45}
+.dc-proj.alvo{box-shadow:0 0 0 2px var(--accent)}
+.h-docs{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--accent);text-decoration:none;cursor:pointer;border:0;background:none;padding:0;font-family:inherit}
+@media (max-width:640px){
+  .dc-doc{grid-template-columns:34px 1fr;row-gap:6px}
+  .dc-ext{width:34px;height:34px}
+  .dc-ac{grid-column:2}
+  .dc-ac a,.dc-ac button{height:32px;font-size:12.5px;padding:0 10px}
+}
+
 
 /* ===== lupa: buscar para o cliente (buscar agora, avisos, enviadas) ===== */
 .painel.bz{gap:12px;padding-bottom:0}
@@ -960,6 +1016,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   <div class="brand"><img src="icon-192.png" alt=""><b><span class="b-long">Espelhos de Vendas</span><span class="b-curto">Espelhos</span></b></div>
   <span class="live" id="live" title="Situação da atualização automática"><i></i><span id="live-t">Carregando…</span></span>
   <button class="abtn" id="btn-instalar" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span class="lbl">Instalar</span></button>
+  <button class="abtn" id="btn-docs" type="button" aria-label="Documentação das construtoras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Documentos</span></button>
   <button class="abtn" id="btn-buscas" type="button" aria-label="Buscar para o cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg><span class="lbl">Buscar</span><span class="contador" id="buscas-n" hidden></span></button>
   <button class="abtn" id="btn-avisos" type="button" aria-label="Avisos e ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="lbl" id="btn-avisos-t">Avisos</span></button>
 </div>
@@ -972,6 +1029,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     <div class="titles">
       <span class="eyebrow" id="h-sub">—</span>
       <h1><span class="proj" id="h-nome">—</span></h1>
+      <div class="vaga-info" id="h-vaga" hidden></div>
       <div class="hint" id="h-hint">Toque num filtro para ver <b>só ele</b> no prédio: os andares com unidade disponível ganham um contador verde na lateral.</div>
     </div>
     <div class="meta">
@@ -1148,6 +1206,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
           <div class="campo"><span>Preço máximo</span><div class="duo"><input id="ba-preco" inputmode="numeric" placeholder="Ex.: 250 mil"><div class="seg2" id="ba-modo"><button type="button" data-v="pv" class="on">À vista</button><button type="button" data-v="pp">Parcelado</button></div></div></div>
           <div class="campo"><span>Fase da obra</span><div class="chips" id="ba-fases"></div></div>
           <div class="campo"><span>Tipologia</span><div class="chips" id="ba-tipos"></div></div>
+          <label class="ck"><input type="checkbox" id="ba-vaga"> Só com vaga de garagem</label>
           <details class="bz-mais" id="ba-mais">
             <summary>Mais filtros <small id="ba-mais-n"></small></summary>
             <div class="campo"><span>Construtora</span><div class="chips" id="ba-grupos"></div></div>
@@ -1386,6 +1445,24 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   </div>
 </div>
 
+<!-- Documentação: central de documentos das construtoras (book, memorial, convenção, contrato, matrícula, certidões), por construtora e projeto. -->
+<div class="dc" id="docs" hidden role="dialog" aria-label="Documentação">
+  <header class="dc-top">
+    <button class="dc-voltar" type="button" id="dc-voltar" aria-label="Voltar aos espelhos">‹ Espelhos</button>
+    <div class="dc-tit"><h2>Documentação</h2><small id="dc-sub">Carregando…</small></div>
+  </header>
+  <div class="dc-corpo" id="dc-corpo">
+    <div class="dc-busca">
+      <input id="dc-q" type="search" placeholder="Buscar: convenção, memorial, Consolação…" aria-label="Buscar documento ou projeto" autocomplete="off" enterkeyhint="search">
+      <div class="dc-chips" id="dc-cons" role="group" aria-label="Construtora"></div>
+      <div class="dc-chips dc-tipos" id="dc-tipos" role="group" aria-label="Tipo de documento"></div>
+    </div>
+    <p class="dc-cont" id="dc-cont" aria-live="polite"></p>
+    <div class="dc-lista" id="dc-lista"></div>
+    <p class="dc-fonte" id="dc-fonte"></p>
+  </div>
+</div>
+
 <script>window.ESPELHO_FAIXAS={"consolacao": [[19.7, "17 a 20 m²"], [26, "23 a 26 m²"], [30, "28 a 30 m²"], [40, "37 m²"], [999, "Loja 60 m²"]], "moby-life-pacaembu": [[25, "24 m²"], [26.5, "26 m²"], [27.5, "27 m²"], [29.5, "29 m²"], [30.5, "30 m²"], [31.5, "31 m²"], [38, "33 a 38 m²"], [999, "46 a 55 m²"]], "myone-conceicao": [[37.5, "36,9 a 37,4 m²"], [999, "37,7 a 37,9 m²"]], "nex-angelica": [[22.99, "22 m²"], [27.99, "27 a 28 m²"], [29.99, "29 m² (1º pavimento)"], [999, "45 m²"]], "nex-balthazar": [[21.99, "20 a 21 m²"], [24.99, "22 a 24 m²"], [27.99, "26 a 27 m²"], [999, "Garden 31 a 61 m²"]], "nex-bandeira-paulista": [[22.5, "21 a 22 m²"], [26.5, "24 a 26 m²"], [33, "31 m²"], [36, "35 m² (1 dorm.)"], [999, "44 a 54 m²"]], "nex-bela-cintra": [[21.99, "20 m²"], [26.99, "23 a 26 m²"], [30.99, "27 a 30 m²"], [999, "31 m² ou mais"]], "nex-caiubi": [[21.99, "Studio 20 a 22 m²"], [24.52, "Studio 23 a 24 m²"], [25.49, "1 dorm. 24,5 a 25 m²"], [32.99, "Studio 28 a 32 m²"], [999, "36 a 48 m²"]], "nex-capote-valente": [[23.5, "22 a 23 m²"], [24.8, "24 m²"], [25.5, "25 m²"], [30, "27 m²"], [999, "35 m²"]], "nex-estacao-clinicas": [[24.5, "24 m²"], [31.0, "30 a 31 m²"], [32.0, "31 a 32 m²"], [34.0, "32 a 34 m²"], [40.0, "35 a 40 m²"], [999, "41 a 66 m²"]], "nex-estacao-eucaliptos": [[22.5, "21 a 22 m²"], [23.5, "23 m²"], [25.2, "24 a 25 m²"], [27, "26 m²"], [999, "34 m²"]], "nex-japao-liberdade": [[21, "19 a 20 m²"], [23, "22 m²"], [25, "24 m² (studio e 1 dorm.)"], [99, "42 m² (garden)"]], "nex-miguel-calfat": [[22, "21 m²"], [24.3, "23 m²"], [25, "24 m²"], [26, "25 m²"], [27.5, "26 m²"], [999, "28 m²"]], "nex-parque-augusta": [[27.5, "Studio 26 m²"], [38, "Studio Garden 36 a 37 m²"], [41, "2 dorm. 39 a 40 m²"], [999, "2 dorm. Garden 107 m²"]], "nex-sarutaia": [[21.99, "Studio 20 a 21 m²"], [24.05, "Studio 23 a 24 m²"], [24.5, "Studio 24 m²"], [25.05, "1 dorm. 24 a 25 m²"], [30.5, "27 a 30 m²"], [32.5, "1 dorm. 31 m²"], [999, "40 a 56 m²"]], "raj-2": [[17, "17 m²"], [20, "20 m²"], [26, "26 m²"], [99, "37 e 40 m²"]], "raj-mendes": [[23, "21 a 23 m²"], [26, "26 m²"], [33, "30 a 33 m²"], [99, "39 m² (2 dorms)"]], "sumare": [[18.5, "18 m²"], [22, "21 m²"], [99, "24 a 25 m²"]], "sync-ibirapuera": [[26.1, "Studio 24,5 a 26 m²"], [30.5, "1 dorm 29,7 a 30,5 m²"], [35, "Studio garden 31,7 a 34,8 m²"], [50, "1 dorm garden 42 e 49 m²"], [999, "Garden 63 m²"]], "today-alto-da-boa-vista": [[30.5, "29 a 30 m²"], [40, "38 a 39 m² · 2 dorms."], [43, "42 a 43 m² · 1º pav."], [45, "44 a 45 m²"], [999, "Lojas 132 a 179 m²"]], "today-campo-belo": [[30.5, "Studio e 1 dorm. · 29,9 a 30,3 m²"], [31.5, "1 dorm. · 30,7 a 31,3 m²"], [45, "2 dorms · 39,8 a 40,3 m²"], [9999, "Lojas · 66 a 344 m²"]], "today-centro": [[30.1, "29 a 30 m²"], [36.3, "31 a 36 m²"], [37.9, "37 a 38 m²"], [40.6, "39 a 40 m²"], [60, "58 a 59 m²"], [999, "299 m² (loja)"]], "today-chacara-santo-antonio": [[30.99, "1 dorm. 29 a 30 m²"], [999, "2 dorms. 39 a 40 m²"]], "today-gomes-de-carvalho": [[26.0, "25 a 26 m²"], [27.0, "26 a 27 m²"], [28.0, "27 a 28 m²"], [31.0, "30 a 31 m²"], [39.0, "35 a 39 m²"], [46.0, "40 a 46 m²"], [61.0, "59 a 61 m²"]], "today-ibirapuera": [[29.6, "1 dorm 29,59 m²"], [30.2, "1 dorm 30 a 30,2 m²"], [32, "1 dorm 31,90 m²"], [999, "Loja 81,84 m²"]], "today-joaquim-tavora": [[29.99, "26 a 29 m²"], [32.99, "30 a 32 m²"], [36.99, "34 a 36 m²"], [41.99, "38 a 41 m²"], [44.99, "43 a 44 m²"], [999, "Loja 161 m²"]], "today-moema": [[28, "Studio 26,6 a 27,5 m²"], [32, "1 dorm 31 a 31,6 m²"], [41, "2 dorms 38,7 a 40,4 m²"], [9999, "Lojas 82 a 392 m²"]], "today-paraiso": [[29.99, "29 a 30 m²"], [37.1, "36 a 37 m²"], [42.2, "42 m²"], [80, "70 a 79 m²"], [999, "148 m²"]], "today-paulista": [[30.7, "Studio e 1 dorm · 30,02 a 30,66 m²"], [999, "Lojas · 33,68 e 98,77 m²"]], "today-perdizes": [[29.0, "27 a 29 m²"], [30.6, "30 a 30,6 m²"], [39.31, "38 a 39,3 m²"], [41.7, "41 a 41,7 m²"], [49.0, "48,8 m²"], [64.0, "63 m²"], [999, "Lojas de 200 a 400 m²"]], "today-platina": [[29.99, "1 dorm. 28,85 a 29,64 m²"], [30.99, "1 dorm. 30,03 a 30,76 m²"], [39.99, "1 dorm. garden 36,46 a 37,19 m²"], [40.99, "2 dorms. 40,31 e 40,82 m²"], [45.99, "1 dorm. garden 43,03 a 45,14 m²"], [69.99, "2 dorms. garden 69,00 m²"], [999, "Loja 131,03 m²"]], "today-pompeia": [[29.8, "1 dorm e studio 29 a 30 m²"], [39.5, "2 dorms 37 a 39 m²"], [56, "Loja 55 m²"], [76, "2 dorms 75 m²"], [999, "Loja 186 m²"]], "today-saude": [[29.99, "1 dorm 28 a 30 m²"], [36.0, "32 a 36 m²"], [39.99, "2 dorms 39 a 40 m²"], [59.99, "2 dorms 50 a 53 m² (1º andar)"], [99.99, "2 dorms R2V 63 m²"], [999.0, "Loja 233 m²"]], "today-tatuape": [[31.3, "30 a 31 m²"], [36, "32 a 36 m² · lojas"], [43, "40 a 43 m²"], [62, "51 a 61 m² · garden"], [78, "76 a 77 m² · garden"], [999, "142 m² · loja"]], "today-vila-clementino": [[29.99, "1 dorm. 29 a 30 m²"], [31.99, "1 dorm. 30 a 31,5 m²"], [34.99, "1 dorm. 33 a 34 m²"], [60, "1 dorm. 36 a 60 m² (1º pav.)"], [999, "Loja 101,61 m²"]], "today-vila-mariana": [[25.6, "24,5 a 25,5 m²"], [28.0, "26 a 28 m²"], [31.7, "28,5 a 31,5 m²"], [35.0, "32 a 35 m²"], [40.0, "38 a 40 m²"], [60.0, "55 m²"], [999, "Loja"]], "urby-paulista": [[24, "20 a 24 m²"], [27, "26 m²"], [30, "28 a 30 m²"], [34, "32 a 33 m²"], [999, "48 a 56 m²"]], "very-faria-lima": [[22.99, "Studio 22 m²"], [30.99, "1 dorm. 30 m²"], [33.99, "1 dorm. 31 a 33 m²"], [999, "2 dorms. 39 m²"]]};window.ESPELHO_NOMES={"consolacao": {"curto": "Consolação", "longo": "Nurban Consolação"}, "moby-life-pacaembu": {"curto": "Moby Pacaembu", "longo": "Moby Life Pacaembu"}, "myone-conceicao": {"curto": "My One Conceição", "longo": "My One Estação Conceição"}, "nex-angelica": {"curto": "NEX Angélica", "longo": "NEX One Angélica"}, "nex-balthazar": {"curto": "NEX Balthazar", "longo": "NEX One Balthazar"}, "nex-bandeira-paulista": {"curto": "NEX Bandeira Paulista", "longo": "NEX One Bandeira Paulista"}, "nex-bela-cintra": {"curto": "NEX Bela Cintra", "longo": "NEX One Bela Cintra"}, "nex-caiubi": {"curto": "NEX Caiubi", "longo": "NEX One Caiubi"}, "nex-capote-valente": {"curto": "NEX Capote Valente", "longo": "NEX One Capote Valente"}, "nex-estacao-clinicas": {"curto": "NEX Estação Clínicas", "longo": "NEX One Estação Clínicas"}, "nex-estacao-eucaliptos": {"curto": "NEX Estação Eucaliptos", "longo": "NEX One Estação Eucaliptos"}, "nex-japao-liberdade": {"curto": "NEX Japão-Liberdade", "longo": "NEX One Estação Japão-Liberdade"}, "nex-miguel-calfat": {"curto": "NEX Miguel Calfat", "longo": "NEX One Miguel Calfat"}, "nex-parque-augusta": {"curto": "NEX Parque Augusta", "longo": "NEX One Parque Augusta"}, "nex-sarutaia": {"curto": "NEX Sarutaiá", "longo": "NEX One Sarutaiá Jardins"}, "raj-2": {"curto": "RAJ 2", "longo": "RAJ Home II"}, "raj-mendes": {"curto": "RAJ Mendes", "longo": "RAJ Mendes"}, "sumare": {"curto": "Sumaré", "longo": "Nurban Avenida Sumaré"}, "sync-ibirapuera": {"curto": "Sync Ibirapuera", "longo": "Sync Ibirapuera"}, "today-alto-da-boa-vista": {"curto": "Today Alto da Boa Vista", "longo": "Today Alto da Boa Vista"}, "today-campo-belo": {"curto": "Today Campo Belo", "longo": "Today Campo Belo"}, "today-centro": {"curto": "Today Centro", "longo": "Today Centro"}, "today-chacara-santo-antonio": {"curto": "Today Chácara Sto. Antônio", "longo": "Today Chácara Santo Antônio"}, "today-gomes-de-carvalho": {"curto": "Today Gomes de Carvalho", "longo": "Today Gomes de Carvalho"}, "today-ibirapuera": {"curto": "Today Ibirapuera", "longo": "Today Ibirapuera"}, "today-joaquim-tavora": {"curto": "Today Joaquim Távora", "longo": "Today Joaquim Távora"}, "today-moema": {"curto": "Today Moema", "longo": "Today Moema"}, "today-paraiso": {"curto": "Today Paraíso", "longo": "Today Paraíso"}, "today-paulista": {"curto": "Today Paulista", "longo": "Today Paulista"}, "today-perdizes": {"curto": "Today Perdizes", "longo": "Today Perdizes"}, "today-platina": {"curto": "Today Platina", "longo": "Today Platina"}, "today-pompeia": {"curto": "Today Pompéia", "longo": "Today Pompéia"}, "today-saude": {"curto": "Today Saúde", "longo": "Today Saúde"}, "today-tatuape": {"curto": "Today Tatuapé", "longo": "Today Tatuapé"}, "today-vila-clementino": {"curto": "Today Vila Clementino", "longo": "Today Vila Clementino"}, "today-vila-mariana": {"curto": "Today Vila Mariana", "longo": "Today Vila Mariana"}, "urby-paulista": {"curto": "Urby Paulista", "longo": "Urby Paulista"}, "very-faria-lima": {"curto": "Very Faria Lima", "longo": "Very Estação Faria Lima"}};window.ESPELHO_CENTRAL=["raj-mendes", "consolacao", "sumare", "nex-bela-cintra", "raj-2", "moby-life-pacaembu", "myone-conceicao", "nex-angelica", "nex-balthazar", "nex-bandeira-paulista", "nex-caiubi", "nex-capote-valente", "nex-estacao-clinicas", "nex-estacao-eucaliptos", "nex-japao-liberdade", "nex-miguel-calfat", "nex-parque-augusta", "nex-sarutaia", "urby-paulista", "very-faria-lima", "today-platina", "sync-ibirapuera", "today-vila-clementino", "today-chacara-santo-antonio", "today-ibirapuera", "today-alto-da-boa-vista", "today-campo-belo", "today-gomes-de-carvalho", "today-vila-mariana", "today-joaquim-tavora", "today-saude", "today-moema", "today-paraiso", "today-paulista", "today-centro", "today-perdizes", "today-pompeia", "today-tatuape"];</script>
 <script>
 (function(){
@@ -1398,8 +1475,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const fmtDate = iso => { if(!iso) return '—'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
   const floorLabel = f => f==='T' ? 'Térreo' : f==='S' ? 'Subsolo' : f==='G' ? 'Garden' : f==='L' ? 'Lojas (térreo)' : f+'º';
   const floorShort = f => f==='T' ? 'T' : f==='S' ? 'S' : f==='G' ? 'G' : f==='L' ? 'Lj' : f+'º';
-  const CAMPO_LBL = {tb:'Tipologia', m2:'Metragem', tipo:'Tipo', cat:'Categoria', vista:'Vista', final:'Final'};
-  const CAMPOS = ['tb','m2','tipo','cat','vista','final'];
+  const CAMPO_LBL = {tb:'Tipologia', m2:'Metragem', tipo:'Tipo', cat:'Categoria', vista:'Vista', final:'Final', vaga:'Vaga'};
+  const CAMPOS = ['tb','m2','tipo','cat','vista','final','vaga'];
   const TB_ORDEM = ['Studio','1 dorm','2 dorms','3 dorms','Loja'];
   const tbDe = tl => !tl ? null : /^studio/i.test(tl) ? 'Studio' : /^1 dorm/i.test(tl) ? '1 dorm' : /^2 dorm/i.test(tl) ? '2 dorms' : /^3 dorm/i.test(tl) ? '3 dorms' : /^loja/i.test(tl) ? 'Loja' : tl;
   const GRUPO_NOME = {vitaurbana:'VitaUrbana', one:'Construtora One', jra:'Construtora JRA'};
@@ -1425,11 +1502,11 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   // ---------- persisted state ----------
   let store = {};
   try{ store = JSON.parse(localStorage.getItem('espelhos-filtros')||'{}') || {}; }catch(e){ store = {}; }
-  function persist(){ try{ store.proj = P.id; if(P.grupo) store['grupo:'+P.grupo] = P.id; store[P.id] = {tb:state.tb,m2:state.m2,tipo:state.tipo,cat:state.cat,vista:state.vista,final:state.final,st:state.st,zoom2:state.zoomManual?state.zoom:0,pm:state.pm}; localStorage.setItem('espelhos-filtros', JSON.stringify(store)); }catch(e){} }
+  function persist(){ try{ store.proj = P.id; if(P.grupo) store['grupo:'+P.grupo] = P.id; store[P.id] = {tb:state.tb,m2:state.m2,tipo:state.tipo,cat:state.cat,vista:state.vista,final:state.final,vaga:state.vaga,st:state.st,zoom2:state.zoomManual?state.zoom:0,pm:state.pm}; localStorage.setItem('espelhos-filtros', JSON.stringify(store)); }catch(e){} }
 
   // ---------- current project ----------
   let P = null, U = [], byN = new Map(), byUp = new Map(), cells = new Map(), badges = {}, svg = null, W = 0, H = 0, hasPrices = false;
-  const state = {tb:null, m2:null, tipo:null, cat:null, vista:null, final:null, st:'todos', sel:null, zoom:1, pm:'pp'};
+  const state = {tb:null, m2:null, tipo:null, cat:null, vista:null, final:null, vaga:null, st:'todos', sel:null, zoom:1, pm:'pp'};
   const scroll = $('mapscroll'), sheet = $('sheet'), busca = $('busca'), tip = $('tip');
   const forSale = u => u.st !== 'vendida';   // preço só aparece em unidade que ainda está à venda
   const priceOf = (u, mode) => (forSale(u) && u.extra && mode!=='none' && u.extra[mode]!=null) ? u.extra[mode] : null;
@@ -1516,6 +1593,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     }
   }
 
+  // vaga de garagem (info.vagas do app): nº da unidade, rótulo e texto do projeto; sem informação = null
+  const vagasP = () => { const v = P && P.info && P.info.vagas; return v && typeof v === 'object' && ['todas','algumas','nenhuma'].includes(v.r) ? v : null; };
+  function vagaN(u){ const v = vagasP(); if(!v) return null; const n = v.u && typeof v.u === 'object' ? +v.u[u.key] : NaN; return n > 0 ? n : 0; }
+  const vagaLbl = n => n == null ? null : n > 0 ? n + (n === 1 ? ' vaga' : ' vagas') : 'Sem vaga';
   function loadProject(id){
     const trocou = !P || P.id !== id;
     P = PROJS.find(p=>p.id===id) || PROJS[0];
@@ -1523,13 +1604,21 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(trocou) scroll.scrollLeft = 0;
     U = P.unidades.map(a => ({n:a[0], tipo:a[1], m2:a[2], cat:a[3], andar:a[4], col:a[5], st:a[6], extra:(a[7]&&typeof a[7]==='object')?a[7]:null}));
     FX = (Array.isArray(FAIXAS[P.id]) && FAIXAS[P.id].length) ? FAIXAS[P.id] : (Array.isArray(P.faixas) && P.faixas.length ? P.faixas : null);
-    for(const u of U){ u.key = String(u.n); u.tb = tbDe(u.extra && u.extra.tl); u.vista = null; for(const v of (P.vistas||[])){ if(u.col>=v.col_ini && u.col<=v.col_fim) u.vista = v.id; } u.final = P.grade.rotulos_colunas && u.andar!=='L' && u.tb!=='Loja' ? P.grade.rotulos_colunas[u.col] : null; u.fx = faixaDe(u.extra && u.extra.a!=null ? u.extra.a : u.m2); }
+    for(const u of U){ u.key = String(u.n); u.tb = tbDe(u.extra && u.extra.tl); u.vg = null; u.vista = null; for(const v of (P.vistas||[])){ if(u.col>=v.col_ini && u.col<=v.col_fim) u.vista = v.id; } u.final = P.grade.rotulos_colunas && u.andar!=='L' && u.tb!=='Loja' ? P.grade.rotulos_colunas[u.col] : null; u.fx = faixaDe(u.extra && u.extra.a!=null ? u.extra.a : u.m2); }
     byN = new Map(U.map(u => [u.key, u])); byUp = new Map(U.map(u => [u.key.toUpperCase().replace(/\s+/g,' '), u.key]));
+    { const v = vagasP(); for(const u of U){ const n = u.tb==='Loja' || u.andar==='L' ? null : vagaN(u); u.vg = n; u.vaga = v && v.r !== 'nenhuma' && n != null ? vagaLbl(n) : null; }
+      const usaVaga = U.some(u => u.vaga && u.vaga !== 'Sem vaga') && new Set(U.map(u => u.vaga).filter(Boolean)).size > 1;
+      if(usaVaga && !(P.campos||[]).includes('vaga')) P.campos = (P.campos||[]).concat('vaga');
+      const hv = $('h-vaga');
+      if(hv){ const t = v ? String(v.t||'').trim() : ''; hv.hidden = !v; hv.replaceChildren();
+        if(v){ const b = document.createElement('b'); b.textContent = v.r === 'nenhuma' ? 'Sem vaga de garagem' : 'Vaga'; hv.appendChild(b);
+          const rest = v.r === 'nenhuma' ? (/^sem vaga de garagem/i.test(t) || !t ? '' : ': ' + t.charAt(0).toLowerCase() + t.slice(1)) : ': ' + (t ? t.charAt(0).toLowerCase() + t.slice(1) : (v.r === 'todas' ? 'todas as unidades têm' : 'algumas unidades têm'));
+          if(rest) hv.appendChild(document.createTextNode(rest.replace(/[.]?$/, '.'))); else hv.lastChild.textContent += '.'; } } }
     hasPrices = U.some(u => u.extra && PC().some(c => u.extra[c.k]!=null));
     const s = store[P.id] || {};
     const pmOk = PC().map(c=>c.k).concat(['none']);
     let m2s = s.m2??null; if(FX && typeof m2s==='number') m2s = faixaDe(m2s); if(!FX && typeof m2s==='string') m2s = null; if(FX && m2s!==null && !FX.some(f=>f[1]===m2s)) m2s = null;
-    Object.assign(state, {tb:s.tb??null, m2:m2s, tipo:s.tipo??null, cat:s.cat??null, vista:s.vista??null, final:s.final??null, st:s.st||'todos', sel:null, zoom:s.zoom2||0, zoomManual:!!s.zoom2, pm:(pmOk.includes(s.pm)?s.pm:PC()[0].k)});
+    Object.assign(state, {tb:s.tb??null, m2:m2s, tipo:s.tipo??null, cat:s.cat??null, vista:s.vista??null, final:s.final??null, vaga:s.vaga??null, st:s.st||'todos', sel:null, zoom:s.zoom2||0, zoomManual:!!s.zoom2, pm:(pmOk.includes(s.pm)?s.pm:PC()[0].k)});
     const seg = $('pm'); seg.replaceChildren();
     PC().concat([{k:'none',label:'Ocultar'}]).forEach(c => { const b=document.createElement('button'); b.type='button'; b.dataset.pm=c.k; b.textContent=c.label; b.addEventListener('click', ()=>{ state.pm = c.k; relayoutCells(); persist(); update(); }); seg.appendChild(b); });
     seg.hidden = !hasPrices; $('pm-lbl').hidden = !hasPrices;
@@ -1568,7 +1657,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
 
   // ---------- filters ----------
-  function baseMatch(u){ return (state.tb===null||u.tb===state.tb) && (state.m2===null||valDe(u,'m2')===state.m2) && (state.tipo===null||u.tipo===state.tipo) && (state.cat===null||u.cat===state.cat) && (state.vista===null||u.vista===state.vista) && (state.final===null||u.final===state.final); }
+  function baseMatch(u){ return (state.tb===null||u.tb===state.tb) && (state.m2===null||valDe(u,'m2')===state.m2) && (state.tipo===null||u.tipo===state.tipo) && (state.cat===null||u.cat===state.cat) && (state.vista===null||u.vista===state.vista) && (state.final===null||u.final===state.final) && (state.vaga===null||u.vaga===state.vaga); }
   function fullMatch(u){ return baseMatch(u) && (state.st==='todos' || u.st===state.st); }
   function countDisp(pred){ let c=0; for(const u of U){ if(u.st==='disponivel' && pred(u)) c++; } return c; }
   function others(except){ return u => CAMPOS.every(k => k===except || state[k]===null || valDe(u,k)===state[k]); }
@@ -1598,9 +1687,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       else if(k==='cat') vals = [...new Set(U.map(u=>u.cat).filter(Boolean))].sort((a,b)=>catName(a).localeCompare(catName(b),'pt-BR'));
       else if(k==='vista') vals = (P.vistas||[]).map(v=>v.id);
       else if(k==='final') vals = [...new Set(U.map(u=>u.final).filter(Boolean))].sort();
+      else if(k==='vaga') vals = [...new Set(U.map(u=>u.vaga).filter(Boolean))].sort((a,b)=>(a==='Sem vaga'?9:parseInt(a,10))-(b==='Sem vaga'?9:parseInt(b,10)));
       else vals = [];
       for(const v of vals){
-        const lbl = k==='tb' ? v : k==='m2' ? (FX ? v : M2(v)+' m²') : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
+        const lbl = k==='tb' || k==='vaga' ? v : k==='m2' ? (FX ? v : M2(v)+' m²') : k==='tipo' ? v.replace('TIPO ','Tipo ')+' · '+tipoM2.get(v)+' m²' : k==='cat' ? catName(v) : k==='vista' ? (P.vistas.find(x=>x.id===v)||{}).label : 'Final '+v;
         const c = countDisp(u => valDe(u,k)===v && others(k)(u));
         if(c===0 && esconderZero && state[k]!==v) continue;   // opção sem nenhuma disponível: some (volta ao filtrar outra situação)
         box.appendChild(chip(lbl, state[k]===v, c, ()=>{ state[k] = (state[k]===v? null : v); if(k==='m2' && state.tipo!==null && m2Chave(tipoM2.get(state.tipo))!==state.m2) state.tipo=null; if(k==='tipo' && state.tipo!==null) state.m2 = m2Chave(tipoM2.get(state.tipo)); update(); }));
@@ -1747,7 +1837,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     state.sel = key; const u = byN.get(key); const g = cells.get(key); if(g) g.classList.add('sel');
     document.querySelectorAll('.uc[data-n="'+CSS.escape(key)+'"]').forEach(x=>x.classList.add('sel'));
     $('s-num').textContent = u.key; $('s-num').className = 'big st-'+u.st;
-    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat), u.extra&&u.extra.pcd ? 'PCD / adaptável' : null, u.extra&&u.extra.dist ? 'previamente distratada' : null].filter(Boolean).join(' · ');
+    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat), u.vg!=null ? (u.vg>0 ? vagaLbl(u.vg) : 'sem vaga') : null, u.extra&&u.extra.pcd ? 'PCD / adaptável' : null, u.extra&&u.extra.dist ? 'previamente distratada' : null].filter(Boolean).join(' · ');
     const pos = u.final ? 'Final '+u.final : (u.tb==='Loja' ? null : 'posição '+(u.col+1)+' de '+P.grade.colunas);
     const vista = u.vista ? (P.vistas.find(v=>v.id===u.vista)||{}).label : null;
     $('s-s').textContent = [floorLabel(u.andar), vista, pos].filter(Boolean).join(' · ');
@@ -1804,7 +1894,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       const vv = single ? ST_VAR[state.st] : null; const rect=b.g.querySelector('rect');
       rect.style.fill = vv ? `var(--${vv})` : ''; rect.style.stroke = vv ? `var(--${vv}-line)` : ''; b.t.style.fill = vv ? `var(--${vv}-ink)` : '';
     }
-    const parts=[]; if(state.tb!==null) parts.push(state.tb); if(state.m2!==null) parts.push(FX ? state.m2 : M2(state.m2)+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(single) parts.push((P.status[state.st]||'').toLowerCase());
+    const parts=[]; if(state.tb!==null) parts.push(state.tb); if(state.m2!==null) parts.push(FX ? state.m2 : M2(state.m2)+' m²'); if(state.tipo!==null) parts.push(state.tipo); if(state.final!==null) parts.push('Final '+state.final); if(state.cat!==null) parts.push(catName(state.cat)); if(state.vista!==null) parts.push((P.vistas.find(v=>v.id===state.vista)||{}).label); if(state.vaga!==null) parts.push(state.vaga.toLowerCase()); if(single) parts.push((P.status[state.st]||'').toLowerCase());
     $('f-resumo').textContent = parts.length ? 'Mostrando: '+parts.join(' · ') : 'Mostrando todas as '+U.length+' unidades';
     $('map-title').textContent = parts.length ? 'Mapa · '+parts.join(' · ') : 'Mapa de unidades';
     $('limpar').hidden = !parts.length;
@@ -1821,7 +1911,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       const row = document.createElement('div'); row.className='floor';
       const fn = document.createElement('div'); fn.className='fn'; fn.innerHTML='<span></span><small></small>'; fn.firstChild.textContent = floorShort(f); fn.lastChild.textContent = us.length+' unid.';
       const units = document.createElement('div'); units.className='units';
-      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pc = priceCell(u, pmk), pr = pc ? pc.v : null, pk = pc && pc.alt ? pc.k : pmk; c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.extra&&u.extra.tl?u.extra.tl:null, u.m2?M2(u.m2)+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), pr!=null ? fmtMil(pr)+((pk!==PC()[0].k || (P.preco_alt && PC().length>1))?' '+minus(pcLabel(pk)):'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
+      for(const u of us){ const c=document.createElement('button'); c.type='button'; c.className='uc st-'+u.st+(state.sel===u.key?' sel':''); c.dataset.n=u.key; c.innerHTML='<b></b><span class="d"></span>'; c.firstChild.textContent=u.key; const pmk = state.pm==='none' ? PC()[0].k : state.pm; const pc = priceCell(u, pmk), pr = pc ? pc.v : null, pk = pc && pc.alt ? pc.k : pmk; c.lastChild.textContent=[u.tipo?u.tipo.replace('TIPO ','T'):null, u.extra&&u.extra.tl?u.extra.tl:null, u.m2?M2(u.m2)+' m²':null, u.final?'Final '+u.final:null, catShort(u.cat), u.vg>0 ? vagaLbl(u.vg) : null, pr!=null ? fmtMil(pr)+((pk!==PC()[0].k || (P.preco_alt && PC().length>1))?' '+minus(pcLabel(pk)):'') : null].filter(Boolean).join(' · '); c.addEventListener('click', ()=>select(u.key,true)); units.appendChild(c); }
       row.appendChild(fn); row.appendChild(units); floorsBox.appendChild(row);
     }
     if(!total){ const e=document.createElement('div'); e.className='empty'; e.textContent = 'Nenhuma unidade '+(P.status[listSt]||listSt).toLowerCase()+' com esses filtros.'; floorsBox.appendChild(e); }
@@ -2237,6 +2327,16 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     return 'outro';
   }
   const ehLoja = a => a[4] === 'L' || /loja/i.test(a[1] || '') || /^\s*loja/i.test(exDe(a).tl || '');
+  // vaga de garagem (projetos_info.info.vagas): nº da unidade (0 = sem vaga; null = não sabemos) e o texto do projeto
+  const vagasInfo = p => { const v = infoDe(p).vagas; return v && typeof v === 'object' && ['todas', 'algumas', 'nenhuma'].includes(v.r) ? v : null; };
+  function vagasDe(p, a){ const v = vagasInfo(p); if(!v) return null; const n = v.u && typeof v.u === 'object' ? +v.u[String(a[0])] : NaN; return n > 0 ? n : 0; }
+  const vagaTxt = n => n > 0 ? n + (n === 1 ? ' vaga' : ' vagas') : '';
+  function vagaProjTxt(p){
+    const v = vagasInfo(p); if(!v) return null;
+    const t = String(v.t || '').trim().replace(/[.]$/, ''), lc = x => x.charAt(0).toLowerCase() + x.slice(1);
+    if(v.r === 'nenhuma') return !t || /^sem vaga de garagem/i.test(t) ? 'Sem vaga de garagem' : 'Sem vaga de garagem (' + lc(t) + ')';
+    return t || (v.r === 'todas' ? 'Todas as unidades têm vaga' : 'Algumas unidades têm vaga');
+  }
   function distKm(la1, lo1, la2, lo2){
     if([la1, lo1, la2, lo2].some(v => v == null || v === '' || !isFinite(+v))) return null;
     const x = (lo1 - lo2) * 111.32 * Math.cos((+la1 + +la2) / 2 * Math.PI / 180), y = (la1 - la2) * 110.57;
@@ -2264,6 +2364,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(c.preco_max != null){ const pr = precoDe(p, a, c.modo); if(!pr || pr.v > c.preco_max) return false; }
     if(c.tipos && c.tipos.length && !c.tipos.includes(tipoK(tipologiaDe(p, a)))) return false;
     if(c.sem_loja && ehLoja(a)) return false;
+    if(c.vaga_min && !((vagasDe(p, a) || 0) >= c.vaga_min)) return false;
     return true;
   }
   const casa = (c, p, a) => casaProj(c, p) && casaUni(c, p, a);
@@ -2304,13 +2405,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const m2 = txtM2(c); if(m2) partes.push(m2);
     if(c.preco_max != null) partes.push('até ' + BRL(c.preco_max) + ((c.modo || 'pv') === 'pv' ? ' à vista' : ' parcelado'));
     if(c.andar_min != null) partes.push('do ' + c.andar_min + 'º andar para cima');
+    if(c.vaga_min) partes.push(c.vaga_min > 1 ? 'com ' + c.vaga_min + ' vagas ou mais' : 'com vaga');
     return partes.join(' · ');
   }
   function textoBusca(c){   // em português corrido, para o cliente: "apartamentos prontos para morar perto de Perdizes, de 20 a 50 m², até R$ 250 mil à vista"
     const t = c.tipos || [], studio = t.includes('studio'), ns = t.filter(x => x !== 'studio').map(Number).sort((a, b) => a - b);
     let dTxt = '';
     if(ns.length){ dTxt = ns.includes(3) ? (ns.length === 1 ? '3 ou mais dormitórios' : ns[0] + ' ou mais dormitórios') : ns.join(' e ') + (ns.length === 1 && ns[0] === 1 ? ' dormitório' : ' dormitórios'); }
-    const tipo = studio && dTxt ? 'studios e apartamentos de ' + dTxt : studio ? 'studios' : dTxt ? 'apartamentos de ' + dTxt : 'apartamentos';
+    const tipo = (studio && dTxt ? 'studios e apartamentos de ' + dTxt : studio ? 'studios' : dTxt ? 'apartamentos de ' + dTxt : 'apartamentos') + (c.vaga_min ? ' com vaga' : '');
     const f = c.fases || [], FT = {pronto: 'prontos para morar', obras: 'em obras', lanc: 'em lançamento'};
     const fase = f.length && f.length < 3 ? ['pronto', 'obras', 'lanc'].filter(x => f.includes(x)).map(x => FT[x]).join(' ou ') : '';
     const onde = c.regiao ? 'perto de ' + c.regiao.nome : (c.zonas && c.zonas.length ? c.zonas.map(z => ZONA_EM[z] || z).join(' ou ') : '');
@@ -2396,9 +2498,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('ba-avisar').addEventListener('click', () => salvarAviso());
 
   // ---------- Buscar agora ----------
-  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, ord: 'preco'};
+  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, vaga: false, ord: 'preco'};
   let baRes = [], baCrit = {}, baSel = new Set(), baAberto = {}, baMaisProj = 12, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora';
-  const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null));
+  const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null || c.vaga_min));
   function critBusca(){
     const c = {projetos: ba.projs.slice(), modo: ba.modo};
     if(ba.grupos.length) c.grupos = ba.grupos.slice();
@@ -2412,6 +2514,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const pr = numPreco($('ba-preco').value); if(pr != null) c.preco_max = pr;
     const an = parseInt($('ba-andar').value, 10); if(an > 0) c.andar_min = an;
     if(ba.semLoja) c.sem_loja = true;
+    if(ba.vaga) c.vaga_min = 1;
     return c;
   }
   function indiceBairros(){   // tabela de bairros de SP + bairros dos empreendimentos que não estão nela
@@ -2511,6 +2614,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('ba-andar').value = c.andar_min != null ? c.andar_min : '';
     ba.modo = c.modo === 'pp' ? 'pp' : 'pv'; marcarSeg('ba-modo', ba.modo);
     ba.semLoja = !!c.sem_loja; $('ba-loja').checked = ba.semLoja;
+    ba.vaga = !!c.vaga_min; $('ba-vaga').checked = ba.vaga;
     ba.ord = 'preco';
     $('ba-mais').open = !!(ba.grupos.length || ba.projs.length || c.andar_min != null || !ba.semLoja);
     baSel = new Set(); baAberto = {}; baMaisProj = 12;   // busca nova: nada vem marcado
@@ -2534,6 +2638,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('ba-andar').addEventListener('input', () => { renderChipsBusca(); agendar(); });
   $('ba-modo').querySelectorAll('button').forEach(x => x.addEventListener('click', () => { ba.modo = x.dataset.v; marcarSeg('ba-modo', ba.modo); agendar(); }));
   $('ba-loja').addEventListener('change', () => { ba.semLoja = $('ba-loja').checked; renderChipsBusca(); agendar(); });
+  $('ba-vaga').addEventListener('change', () => { ba.vaga = $('ba-vaga').checked; agendar(); });
   $('ba-limpar').addEventListener('click', limparBusca);
   $('ba-cli').addEventListener('input', renderBarra);
 
@@ -2683,7 +2788,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const n = document.createElement('button'); n.type = 'button'; n.className = 'ba-n'; n.textContent = a[0]; n.title = 'Ver a unidade ' + a[0] + ' no espelho';
     n.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); irUnidade(p.id, a[0]); });
     const d = document.createElement('span'); d.className = 'ba-ud';
-    d.textContent = [tl, ar > 0 ? fmtM2(ar) + ' m²' : null, andarTxt(a[4])].filter(Boolean).join(' · ');
+    const vg = vagasDe(p, a);
+    d.textContent = [tl, ar > 0 ? fmtM2(ar) + ' m²' : null, andarTxt(a[4]), vg > 0 ? vagaTxt(vg) : null].filter(Boolean).join(' · ');
     const v = document.createElement('span'); v.className = 'ba-up';
     if(pr){ v.textContent = BRL(pr.v); if(pr.k !== (c.modo || 'pv')){ const s = document.createElement('small'); s.textContent = pr.lbl; v.appendChild(s); } }
     else v.textContent = 'sem preço';
@@ -2747,7 +2853,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       ['Entrega', fk === 'pronto' ? 'Pronto' : (i.entrega ? mesAnoC(i.entrega) : null)],
       ['Construtora', GRUPO_NOME[grupoDe(p)] || i.construtora || null],
       ['Disponíveis no projeto', disp.length + (disp.length === 1 ? ' unidade' : ' unidades') + (preco ? ' · a partir de ' + BRL(preco.v) + ' ' + preco.lbl : '')],
-      ['Tipologias', tip]
+      ['Tipologias', tip],
+      ['Vaga de garagem', vagaProjTxt(p)]
     ].filter(f => f[1]);
     if(fatos.length){ const dl = el('dl', 'bf-fatos'); fatos.forEach(([k, v]) => { const d = el('div'); d.append(el('dt', null, k), el('dd', null, v)); dl.appendChild(d); }); corpo.appendChild(dl); }
     // endereço
@@ -2863,6 +2970,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(c.tipos && c.tipos.length){ const c2 = Object.assign({}, c); delete c2.tipos; add('Qualquer tipologia', c2, () => { ba.tipos = []; }); }
     if(c.zonas && c.zonas.length){ const c2 = Object.assign({}, c); delete c2.zonas; add('Qualquer região', c2, () => { ba.zonas = []; }); }
     if(c.andar_min != null){ const c2 = Object.assign({}, c); delete c2.andar_min; add('Qualquer andar', c2, () => { $('ba-andar').value = ''; }); }
+    if(c.vaga_min){ const c2 = Object.assign({}, c); delete c2.vaga_min; add('Sem exigir vaga', c2, () => { ba.vaga = false; $('ba-vaga').checked = false; }); }
     const box = document.createElement('div'); box.className = 'ba-sug';
     if(!sug.length){
       if(nAtual) return null;
@@ -4531,6 +4639,202 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   pegarPendente();
   window.addEventListener('hashchange', () => { if(/^#orulo_(ok$|erro=)/.test(location.hash)){ lerRetorno(); pegarPendente(); } });
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ pegarPendente(); if(ST && Date.now() - ST._t > 10 * 60e3) conferirTab(); } });
+})();
+</script>
+<script>// Documentação: central de documentos das construtoras, por construtora e projeto (book, memorial descritivo, convenção
+// de condomínio, minuta do contrato, matrícula, certidões, SCP) e as pastas de imagens, plantas e vídeos. O índice vem do
+// servidor (função "documentos"); os arquivos ficam no Drive da construtora e abrem por lá.
+(function(){
+  'use strict';
+  const A = window.APP; if(!A) return;
+  const $ = id => document.getElementById(id);
+  const LS = {get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }};
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const K_CACHE = 'espelhos-docs';
+  const urlDoc = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const urlPasta = id => 'https://drive.google.com/drive/folders/' + encodeURIComponent(id);
+  const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const TIPOS = [['book', 'Book'], ['memorial', 'Memorial'], ['convencao', 'Convenção'], ['contrato', 'Contrato'], ['matricula', 'Matrícula'],
+    ['certidoes', 'Certidões'], ['scp', 'SCP'], ['credito', 'Crédito e cadastro']];
+  const SINONIMOS = {book: 'book apresentacao folder', memorial: 'memorial descritivo acabamento', convencao: 'convencao condominio minuta regimento',
+    contrato: 'contrato minuta quadro resumo qr compra venda compromisso enquadrado', matricula: 'matricula registro ri imovel cartorio averbacao',
+    certidoes: 'certidao certidoes negativa trabalhista fgts protesto processos spe', scp: 'scp sociedade cessao investimento investidor',
+    credito: 'credito cadastro ficha', institucional: 'institucional apresentacao vita',
+    lojas: 'lojas loja', prefeitura: 'prefeitura alvara', condominio: 'condominio valor estimativa', treinamento: 'treinamento'};
+  const PARADA = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'o', 'a', 'os', 'as', 'para', 'pra', 'no', 'na', 'em', 'um', 'uma', 'nurban']);
+  let IDX = null, carregando = null, cons = null, tipo = null, q = '', dcPush = false, alvo = null;
+
+  // ---------- dados ----------
+  function aplicar(d){
+    if(!d || !Array.isArray(d.construtoras)) return;
+    IDX = d;
+    for(const c of IDX.construtoras){
+      for(const p of (c.projetos || [])){ p._k = norm(p.n + ' ' + String(p.n).replace(/^nurban\s+/i, '')); for(const x of (p.docs || [])) x._k = norm(x.t + ' ' + x.a + ' ' + (SINONIMOS[x.c] || '')); }
+      for(const x of (c.geral || [])) x._k = norm(x.t + ' ' + x.a + ' ' + (SINONIMOS[x.c] || ''));
+    }
+    if(!cons || !IDX.construtoras.some(c => c.id === cons)) cons = IDX.construtoras.length ? IDX.construtoras[0].id : null;
+    atualizarTab(); linkProjeto();
+  }
+  function carregar(forcar){
+    if(carregando && !forcar) return carregando;
+    const cod = A.codigo(); if(!cod) return Promise.resolve(null);
+    carregando = A.rpc('documentos', {p_codigo: cod}).then(d => { aplicar(d); LS.set(K_CACHE, JSON.stringify(d)); return IDX; })
+      .catch(() => IDX).finally(() => { setTimeout(() => { carregando = null; }, 10 * 60e3); });
+    return carregando;
+  }
+  const consAtual = () => IDX && IDX.construtoras.find(c => c.id === cons);
+  // documentos do projeto do app (pelo id do espelho), em todas as construtoras
+  function docsDoProjeto(pid){
+    if(!IDX || !pid) return null;
+    for(const c of IDX.construtoras) for(const p of (c.projetos || [])) if(p.id === pid) return {c, p};
+    return null;
+  }
+
+  // ---------- lista ----------
+  function casa(x, toks){ return toks.every(t => x._k.includes(t)); }
+  function render(){
+    const C = consAtual(), lista = $('dc-lista');
+    $('dc-cons').replaceChildren(...(IDX ? IDX.construtoras : []).map(c => chip(c.nome, c.id === cons, () => { cons = c.id; render(); })));
+    $('dc-cons').hidden = !IDX || IDX.construtoras.length < 2;
+    $('dc-tipos').replaceChildren(chip('Todos', !tipo, () => { tipo = null; render(); }), ...TIPOS.map(([k, t]) => chip(t, tipo === k, () => { tipo = tipo === k ? null : k; render(); })));
+    if(!C){ $('dc-sub').textContent = IDX ? 'Nenhuma construtora com documentos' : 'Carregando…'; $('dc-cont').textContent = ''; lista.replaceChildren(); return; }
+    const nDocs = (C.projetos || []).reduce((s, p) => s + (p.docs || []).length, 0) + (C.geral || []).length;
+    $('dc-sub').textContent = C.nome + ' · ' + (C.projetos || []).length + ' projetos · ' + nDocs + ' documentos' + (C.lido_em ? ' · lido em ' + C.lido_em.split('-').reverse().slice(0, 2).join('/') : '');
+    const toks = norm(q).split(' ').filter(t => t.length > 1 && !PARADA.has(t));
+    // cada palavra tem que estar no documento ou no nome do projeto ("convenção consolação")
+    const escolhe = (docs, nomeK) => {
+      const doNome = toks.length && toks.every(t => nomeK.includes(t));
+      const ds = (docs || []).filter(x => (!tipo || x.c === tipo) && (doNome || !toks.length || (toks.every(t => x._k.includes(t) || nomeK.includes(t)) && toks.some(t => x._k.includes(t)))));
+      return {ds, doNome};
+    };
+    const blocos = [];
+    const G = escolhe(C.geral, norm('geral ' + C.nome + ' vita urbana'));
+    let nProj = 0, nDoc = G.ds.length;
+    // os projetos com documento primeiro; pasta vazia no fim
+    const ordem = (C.projetos || []).slice().sort((x, y) => (!(x.docs || []).length) - (!(y.docs || []).length));
+    for(const p of ordem){
+      const r = escolhe(p.docs, p._k);
+      const mostra = r.ds.length || (r.doNome && !tipo) || (!toks.length && !tipo);
+      if(!mostra) continue;
+      nProj++; nDoc += r.ds.length;
+      blocos.push(card(p, r.ds, !tipo && (r.doNome || !toks.length)));
+    }
+    // o que vale para todos os projetos da construtora (crédito, cadastro, institucional) fica no fim
+    if(G.ds.length) blocos.push(card({n: 'Geral ' + C.nome, sub: 'Crédito, cadastro, institucional e lojas', docs: G.ds, pastas: toks.length || tipo ? [] : (C.pastas_gerais || [])}, G.ds, true));
+    const nG = nProj + (G.ds.length ? 1 : 0);
+    $('dc-cont').textContent = toks.length || tipo ? (nDoc ? nDoc + (nDoc === 1 ? ' documento' : ' documentos') + (nG > 1 ? ' em ' + nG + ' projetos' : '') : '') : 'Toque em Abrir para ver no Drive ou em Copiar link para mandar ao cliente.';
+    if(!blocos.length) lista.innerHTML = '<div class="dc-nada">Nenhum documento com "' + esc(q) + '"' + (tipo ? ' nesse tipo' : '') + '. Tente outra palavra, como convenção, memorial, matrícula ou o nome do projeto.</div>';
+    else lista.replaceChildren(...blocos);
+    $('dc-fonte').innerHTML = 'Fonte: ' + (C.fonte && C.fonte.u ? '<a href="' + esc(C.fonte.u) + '" target="_blank" rel="noopener">' + esc(C.fonte.t || C.fonte.u) + '</a>' : esc(C.nome)) + '. Os arquivos ficam no Drive da construtora; se um link não abrir, a construtora pode ter trocado o arquivo. Peça também pelo Gênio: "convenção do Nurban Consolação" chega em PDF no WhatsApp.';
+    if(alvo){ const el = lista.querySelector('[data-p="' + alvo + '"]'); if(el){ el.classList.add('alvo'); const c = $('dc-corpo'); requestAnimationFrame(() => { c.scrollTop = Math.max(0, el.offsetTop - c.offsetTop - 120); }); } }
+  }
+  function chip(t, on, fn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (on ? ' on' : ''); b.textContent = t; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.addEventListener('click', fn); return b; }
+  function card(p, docs, comPastas){
+    const el = document.createElement('section'); el.className = 'dc-proj'; el.dataset.p = p.id || slug(p.n);
+    const h = document.createElement('header');
+    const t = document.createElement('h3'); t.textContent = p.n;
+    const nd = (p.docs || []).length;
+    const sub = document.createElement('small'); sub.textContent = p.sub || ((nd ? nd + (nd === 1 ? ' documento' : ' documentos') : 'Sem documentos') + (!p.id ? ' · ainda não está no app' : '')); t.appendChild(sub);
+    h.appendChild(t);
+    if(p.id && A.dados() && (A.dados().projetos || []).some(x => x.id === p.id)){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Espelho ›'; b.addEventListener('click', () => irProjeto(p.id)); h.appendChild(b); }
+    if(p.lt){ const a = document.createElement('a'); a.href = p.lt; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Linktree ›'; h.appendChild(a); }
+    el.appendChild(h);
+    const ds = docs || [];
+    if(ds.length){
+      const ul = document.createElement('ul'); ul.className = 'dc-docs';
+      for(const x of ds) ul.appendChild(linha(x, p));
+      el.appendChild(ul);
+    } else if(!(p.pastas || []).length) { const v = document.createElement('p'); v.className = 'dc-vazio'; v.textContent = 'A pasta deste projeto está vazia no Linktree da construtora.'; el.appendChild(v); }
+    const ps = comPastas === false ? [] : (p.pastas || []);
+    if(ps.length){
+      const box = document.createElement('div'); box.className = 'dc-pastas';
+      for(const f of ps){ const a = document.createElement('a'); a.href = urlPasta(f.id); a.target = '_blank'; a.rel = 'noopener'; a.textContent = f.c + (f.q ? ' · ' + f.q : ''); box.appendChild(a); }
+      el.appendChild(box);
+    }
+    return el;
+  }
+  function linha(x, p){
+    const li = document.createElement('li'); li.className = 'dc-doc';
+    const e = document.createElement('span'); e.className = 'dc-ext x-' + esc(x.x || 'pdf'); e.textContent = (x.x || 'pdf').slice(0, 4); li.appendChild(e);
+    const d = document.createElement('div'); d.className = 'dc-dt';
+    const b = document.createElement('b'); b.textContent = x.t; d.appendChild(b);
+    const s = document.createElement('small'); s.textContent = [x.a, x.d].filter(Boolean).join(' · '); s.title = x.a || ''; d.appendChild(s);
+    li.appendChild(d);
+    const ac = document.createElement('div'); ac.className = 'dc-ac';
+    const ab = document.createElement('a'); ab.className = 'pri'; ab.href = urlDoc(x.id); ab.target = '_blank'; ab.rel = 'noopener'; ab.textContent = 'Abrir'; ab.setAttribute('aria-label', 'Abrir ' + x.t + (p && p.n ? ' do ' + p.n : '') + ' no Drive');
+    const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = 'Copiar link';
+    cp.addEventListener('click', () => copiar((p && p.n ? p.n + ' · ' : '') + x.t + ': ' + urlDoc(x.id)));
+    ac.append(ab, cp); li.appendChild(ac);
+    return li;
+  }
+  function copiar(t){
+    const ok = () => A.toast('Link copiado. É só colar no WhatsApp do cliente.');
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, () => A.toast(t, 8000));
+    else A.toast(t, 8000);
+  }
+
+  // ---------- abrir / fechar ----------
+  function abrir(pid){
+    const m = $('docs');
+    alvo = pid || null;
+    if(m.hidden){
+      m.hidden = false; document.body.classList.add('dc-aberto');
+      if(!/^#docs/.test(location.hash)){ try{ history.pushState({dc: 1}, '', '#docs' + (pid ? '-' + pid : '')); dcPush = true; }catch(e){} }
+    }
+    render();
+    carregar().then(() => { render(); alvo = null; });
+  }
+  function fecharUI(){ $('docs').hidden = true; document.body.classList.remove('dc-aberto'); }
+  function fecharPeloUsuario(){
+    if(dcPush){ history.back(); return; }
+    fecharUI(); if(/^#docs/.test(location.hash)){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
+  }
+  function irProjeto(id){ fecharUI(); dcPush = false; try{ history.replaceState(null, '', '#' + id); }catch(e){} A.goto(id); }
+  window.addEventListener('popstate', () => { if(dcPush && !$('docs').hidden){ dcPush = false; fecharUI(); } });
+
+  // ---------- aba "Documentação" na barra de projetos ----------
+  function atualizarTab(){
+    const b = document.querySelector('#tabs .dc-tab'); if(!b) return;
+    const n = IDX ? IDX.construtoras.reduce((s, c) => s + (c.projetos || []).reduce((t, p) => t + (p.docs || []).length, 0) + (c.geral || []).length, 0) : 0;
+    b.querySelector('i').textContent = n ? n.toLocaleString('pt-BR') : '';
+    b.querySelector('span').textContent = n ? 'documentos' : 'das construtoras';
+  }
+  function addTab(){
+    const nav = $('tabs'); if(!nav || nav.querySelector('.dc-tab')) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab dc-tab'; b.title = 'Documentos das construtoras: book, memorial, convenção, contrato, matrícula';
+    b.innerHTML = '<b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Documentação</b><small><i></i> <span></span></small>';
+    b.addEventListener('click', () => abrir(null));
+    const mk = nav.querySelector('.mk-tab'); if(mk) nav.insertBefore(b, mk); else nav.appendChild(b);
+    nav.hidden = false; atualizarTab();
+  }
+  // no espelho do projeto: "Documentos do projeto (6) ›" embaixo do nome
+  function linkProjeto(){
+    const pid = window.ESPELHO && ESPELHO.current ? ESPELHO.current() : null;
+    let a = $('h-docs'); const r = docsDoProjeto(pid);
+    if(!r || !(r.p.docs || []).length){ if(a) a.hidden = true; return; }
+    if(!a){
+      const ref = $('h-vaga') || $('h-nome'); if(!ref) return;
+      a = document.createElement('button'); a.type = 'button'; a.id = 'h-docs'; a.className = 'h-docs';
+      a.addEventListener('click', () => { const x = docsDoProjeto(window.ESPELHO.current()); abrir(x ? x.p.id : null); });
+      (ref.id === 'h-nome' ? ref.parentElement : ref).insertAdjacentElement('afterend', a);
+    }
+    a.hidden = false; a.textContent = 'Documentos do projeto (' + r.p.docs.length + ') ›';
+  }
+
+  // ---------- início ----------
+  $('dc-voltar').addEventListener('click', fecharPeloUsuario);
+  if($('btn-docs')) $('btn-docs').addEventListener('click', () => { const pid = window.ESPELHO && ESPELHO.current ? ESPELHO.current() : null; abrir(docsDoProjeto(pid) ? pid : null); });
+  let qT = null;
+  $('dc-q').addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(() => { q = $('dc-q').value; render(); }, 120); });
+  document.addEventListener('keydown', ev => { if(ev.key === 'Escape' && !$('docs').hidden) fecharPeloUsuario(); });
+  const antes = window.__onProjeto;
+  window.__onProjeto = id => { try{ if(antes) antes(id); }catch(e){} addTab(); linkProjeto(); };
+  try{ const c = JSON.parse(LS.get(K_CACHE) || 'null'); if(c) aplicar(c); }catch(e){}
+  addTab();
+  setTimeout(() => carregar().then(() => { if(/^#docs/.test(location.hash)) abrir((/^#docs-(.+)$/.exec(location.hash) || [])[1] || null); }), 1500);
+  window.addEventListener('hashchange', () => { const m = /^#docs(?:-(.+))?$/.exec(location.hash); if(m && $('docs').hidden) abrir(m[1] || null); });
+  window.DOCS = {abrir, docsDoProjeto};
 })();
 </script>
 </body>
