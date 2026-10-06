@@ -1944,7 +1944,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     state.sel = key; const u = byN.get(key); const g = cells.get(key); if(g) g.classList.add('sel');
     document.querySelectorAll('.uc[data-n="'+CSS.escape(key)+'"]').forEach(x=>x.classList.add('sel'));
     $('s-num').textContent = u.key; $('s-num').className = 'big st-'+u.st;
-    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat), u.vg!=null ? (u.vg>0 ? vagaLbl(u.vg) : 'sem vaga') : null, u.extra&&u.extra.pcd ? 'PCD / adaptável' : null, u.extra&&u.extra.dist ? 'previamente distratada' : null].filter(Boolean).join(' · ');
+    $('s-t').textContent = [u.tipo, u.extra&&u.extra.tl ? u.extra.tl : null, u.extra&&u.extra.a!=null ? fmtArea(u.extra.a) : (u.m2?M2(u.m2)+' m²':null), catName(u.cat), u.vg!=null ? (u.vg>0 ? vagaLbl(u.vg) : 'sem vaga') : null, u.extra&&u.extra.pcd ? 'PCD / adaptável' : null, u.extra&&u.extra.dist ? 'previamente distratada' : null, u.extra&&u.extra.gd ? 'garden' : null, u.extra&&u.extra.mob ? 'mobiliado' : null].filter(Boolean).join(' · ');
     const pos = u.final ? 'Final '+u.final : (u.tb==='Loja' ? null : 'posição '+(u.col+1)+' de '+P.grade.colunas);
     const vista = u.vista ? (P.vistas.find(v=>v.id===u.vista)||{}).label : null;
     $('s-s').textContent = [floorLabel(u.andar), vista, pos].filter(Boolean).join(' · ');
@@ -1971,6 +1971,13 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       sp.hidden = true;
       const semp = u.st==='disponivel' ? (P.sem_tabela || (P.tabela && P.tabela.fluxos ? 'Sem valor na tabela de '+P.tabela.nome.toLowerCase()+' (a unidade não estava na tabela). Confirme o preço com a incorporadora.' : '')) : '';
       sc.textContent = semp; sc.hidden = !semp;
+    }
+    if(u.extra && (u.extra.cond || u.extra.iptu || u.extra.fu)){
+      const bx = document.createElement('span'); bx.className = 'fx';
+      const partes = [u.extra.cond ? 'Condomínio '+fmtBRL(u.extra.cond)+' por mês' : null, u.extra.iptu ? 'IPTU '+fmtBRL(u.extra.iptu) : null].filter(Boolean);
+      if(partes.length) bx.appendChild(document.createTextNode(partes.join(' · ')));
+      if(u.extra.fu && /^https:\/\/drive\.google\.com\//.test(u.extra.fu)){ if(partes.length) bx.appendChild(document.createTextNode(' · ')); const a = document.createElement('a'); a.href = u.extra.fu; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Fotos da unidade'; bx.appendChild(a); }
+      sc.appendChild(bx); sc.hidden = false;
     }
     sheet.hidden = false;
     if(window.__onUnidade) window.__onUnidade(u);
@@ -4846,7 +4853,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const h = document.createElement('header');
     const t = document.createElement('h3'); t.textContent = p.n;
     const nd = (p.docs || []).length;
-    const sub = document.createElement('small'); sub.textContent = p.sub || ((nd ? nd + (nd === 1 ? ' documento' : ' documentos') : 'Sem documentos') + (!p.id ? ' · ainda não está no app' : '')); t.appendChild(sub);
+    const sub = document.createElement('small'); sub.textContent = p.sub || ((nd ? nd + (nd === 1 ? ' documento' : ' documentos') : (p.pastas || []).length ? 'Pastas no Drive' : 'Sem documentos') + (!p.id ? ' · ainda não está no app' : '')); t.appendChild(sub);
     h.appendChild(t);
     if(p.id && A.dados() && (A.dados().projetos || []).some(x => x.id === p.id)){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Espelho ›'; b.addEventListener('click', () => irProjeto(p.id)); h.appendChild(b); }
     if(p.lt){ const a = document.createElement('a'); a.href = p.lt; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Linktree ›'; h.appendChild(a); }
@@ -4923,14 +4930,17 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   function linkProjeto(){
     const pid = window.ESPELHO && ESPELHO.current ? ESPELHO.current() : null;
     let a = $('h-docs'); const r = docsDoProjeto(pid);
-    if(!r || !(r.p.docs || []).length){ if(a) a.hidden = true; return; }
+    const nDocs = r ? (r.p.docs || []).length : 0, nPastas = r ? (r.p.pastas || []).length : 0;
+    if(!nDocs && !nPastas){ if(a) a.hidden = true; return; }
     if(!a){
       const ref = $('h-vaga') || $('h-nome'); if(!ref) return;
       a = document.createElement('button'); a.type = 'button'; a.id = 'h-docs'; a.className = 'h-docs';
       a.addEventListener('click', () => { const x = docsDoProjeto(window.ESPELHO.current()); abrir(x ? x.p.id : null); });
       (ref.id === 'h-nome' ? ref.parentElement : ref).insertAdjacentElement('afterend', a);
     }
-    a.hidden = false; a.textContent = 'Documentos do projeto (' + r.p.docs.length + ') ›';
+    const cs = (r.p.pastas || []).map(f => f.c), bf = cs.every(c => c === 'Book' || c === 'Fotos');   // revenda: só pastas de book e fotos
+    a.hidden = false; a.textContent = nDocs ? 'Documentos do projeto (' + nDocs + ') ›'
+      : !bf ? 'Pastas no Drive (' + nPastas + ') ›' : cs.includes('Book') && cs.includes('Fotos') ? 'Book e fotos no Drive ›' : cs.includes('Book') ? 'Book no Drive ›' : 'Fotos no Drive ›';
   }
 
   // ---------- início ----------
