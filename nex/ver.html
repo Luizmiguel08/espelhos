@@ -183,6 +183,13 @@ footer p{margin:0 0 10px}
 
 .svg-andar.faixa .num-c{font:600 12px "IBM Plex Sans",sans-serif;fill:#1d2533;opacity:.75}.svg-andar.faixa .num-c.alvo{fill:#fff;opacity:1}
 .andar-img.faixa-w{background:transparent;padding-bottom:2px}
+/* fotos do apartamento (revenda One, pasta do Drive da unidade) */
+.u-fotos{margin-top:12px}
+.u-fotos-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media (min-width:720px){.u-fotos-g{grid-template-columns:repeat(4,1fr)}}
+.u-fotos-g button{position:relative;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;aspect-ratio:4/3;background:var(--surface-2,#eaedf2);cursor:zoom-in}
+.u-fotos-g img{width:100%;height:100%;object-fit:cover;display:block}
+.u-fotos-g span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,22,.55);color:#fff;font-weight:600;font-size:18px}
 
 </style>
 </head>
@@ -250,7 +257,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202610071723
+// versão 202610071818
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -321,7 +328,11 @@ window.NEX = (function(){
   const ehUrl = s => /^https?:\/\//i.test(String(s || ''));
   const img = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
-  const thumb = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + 't' + id + '.jpg';
+  // miniatura: foto do Drive (lh3) no tamanho pequeno; outras fotos com endereço completo vão como estão
+  const thumb = (P, id) => ehUrl(id) ? String(id).replace(/(googleusercontent\.com\/d\/[A-Za-z0-9_-]+)=w\d+$/, '$1=w480') : (P.pasta || '') + 't' + id + '.jpg';
+  // fotos e arquivos das pastas do Drive (revenda One): endereço público do Google, sem copiar arquivo
+  const fotoDrive = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + (w || 1600);
+  const arquivoDrive = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
   const nomeImg = (id, k) => ehUrl(id) ? 'foto-' + ((k || 0) + 1) + '.jpg' : id + '.jpg';
   // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
   // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
@@ -619,7 +630,7 @@ window.NEX = (function(){
     };
   }
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe};
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe, fotoDrive, arquivoDrive};
 })();
 
 (function(){
@@ -628,7 +639,7 @@ window.NEX = (function(){
   const q = new URLSearchParams(location.search);
   const id = (q.get('l') || '').trim();
   const previa = q.get('previa') === '1';
-  let L = null, P = null, waHref = '', waTxt = '';
+  let L = null, P = null, waHref = '', waTxt = '', FOTOS_U = {};   // FOTOS_U: fotos de cada unidade do link (pasta do Drive)
   const feitos = new Set();
   function evento(e){ if(previa || !L || feitos.has(e)) return; feitos.add(e); rpc('link_ver', {p_id: id, p_evento: e}).catch(() => {}); }
   const primeiro = s => String(s || '').trim().split(/\s+/)[0] || '';
@@ -654,7 +665,14 @@ window.NEX = (function(){
     try{
       const r = await fetch('p/' + encodeURIComponent(L.projeto) + '.json');
       if(r.ok) P = await r.json();
-      else if(r.status === 404 && L.proj) P = NEX.fichaAuto({id: L.projeto, nome: L.proj.nome, info: L.proj.info || {}, colunas: L.proj.colunas, faixas: L.proj.faixas, endereco: L.proj.endereco}, {});
+      else if(r.status === 404 && L.proj){
+        // fotos das pastas do Drive (revenda One): do empreendimento e de cada unidade do link
+        const lf = await rpc('link_fotos', {p_id: id}).catch(() => null);
+        if(lf && lf.ok && lf.unidades && typeof lf.unidades === 'object') FOTOS_U = lf.unidades;
+        const info = L.proj.info || {}, doDrive = lf && lf.ok && Array.isArray(lf.projeto) ? lf.projeto.map(f => ({u: NEX.fotoDrive(f.id), t: f.t || ''})) : [];
+        P = NEX.fichaAuto({id: L.projeto, nome: L.proj.nome, info, colunas: L.proj.colunas, faixas: L.proj.faixas, endereco: L.proj.endereco},
+                          doDrive.length ? {fotos: (Array.isArray(info.fotos) ? info.fotos : []).concat(doDrive)} : {});
+      }
       else throw new Error('http_' + r.status);
     }catch(e){ return erro('rede'); }
     render();
@@ -778,7 +796,18 @@ window.NEX = (function(){
     const svg = svgAndar(P, x, {});
     if(svg) h += '<div class="cartao" data-ev="andar"><h4>Onde fica no andar</h4>' + svg + '<div class="leg">Sua unidade em destaque. ' + esc(P.andar_legenda_cliente || (P.andar_tipo ? 'O sol segue o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar.')) + '</div></div>';
     h += '</div></div>';
+    // fotos do apartamento (revenda One): as da pasta do Drive da unidade
+    const fu = Array.isArray(FOTOS_U[u.n]) ? FOTOS_U[u.n] : [];
+    if(fu.length) h += '<div class="cartao u-fotos" data-ev="galeria"><h4>Fotos do apartamento<small>' + fu.length + (fu.length === 1 ? ' foto' : ' fotos') + '</small></h4><div class="u-fotos-g">' +
+      fu.slice(0, 12).map((f, i) => '<button type="button" data-i="' + i + '" aria-label="Ampliar a foto ' + (i + 1) + '"><img alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + esc(NEX.fotoDrive(f.id, 480)) + '">' + (i === 11 && fu.length > 12 ? '<span>+' + (fu.length - 12) + '</span>' : '') + '</button>').join('') + '</div></div>';
     a.innerHTML = h;
+    if(fu.length){
+      const itens = fu.map((f, i) => ({src: NEX.fotoDrive(f.id), t: f.t || 'Unidade ' + u.n + ' · foto ' + (i + 1)}));
+      a.querySelectorAll('.u-fotos-g button').forEach(b => {
+        b.querySelector('img').addEventListener('error', () => b.remove(), {once: true});
+        b.addEventListener('click', () => { evento('galeria'); visualizador(itens, +b.dataset.i); });
+      });
+    }
     const ip = a.querySelector('.img-planta'); if(ip) ip.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.id), t: pl.p.t + ' · unidade ' + u.n}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}] : []), 0); });
     const idc = a.querySelector('.img-dec'); if(idc) idc.addEventListener('click', () => { evento('planta'); visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}, {src: img(P, pl.p.id), t: pl.p.t}], 0); });
     a.querySelectorAll('.tour').forEach(t => t.addEventListener('click', () => evento(t.classList.contains('tour-roof') ? 'vista' : 'planta')));

@@ -391,6 +391,16 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 
 .nota-aj{margin-top:8px;font-size:13px;font-weight:600;color:#8a5a00;background:#fff4d6;border-radius:8px;padding:6px 10px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nota-aj{color:#ffd98a;background:#3b2e10}}
+/* fotos da unidade (revenda One, pasta do Drive) */
+.bloco .fu-n{font-size:12px;font-weight:600;color:var(--muted);margin-left:6px}
+.fu-grade{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media (min-width:720px){.fu-grade{grid-template-columns:repeat(4,1fr)}}
+.fu-grade button{padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:var(--surface-2);cursor:zoom-in}
+.fu-grade button:hover,.fu-grade button:focus-visible{border-color:var(--accent);outline:none}
+.fu-grade img{width:100%;height:100%;object-fit:cover;display:block}
+.fu-arqs{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.fu-arqs li{display:flex;align-items:baseline;gap:8px;font-size:13.5px}
+.fu-arqs small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 
 </style>
 </head>
@@ -527,7 +537,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202610071723
+// versão 202610071818
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -598,7 +608,11 @@ window.NEX = (function(){
   const ehUrl = s => /^https?:\/\//i.test(String(s || ''));
   const img = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
-  const thumb = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + 't' + id + '.jpg';
+  // miniatura: foto do Drive (lh3) no tamanho pequeno; outras fotos com endereço completo vão como estão
+  const thumb = (P, id) => ehUrl(id) ? String(id).replace(/(googleusercontent\.com\/d\/[A-Za-z0-9_-]+)=w\d+$/, '$1=w480') : (P.pasta || '') + 't' + id + '.jpg';
+  // fotos e arquivos das pastas do Drive (revenda One): endereço público do Google, sem copiar arquivo
+  const fotoDrive = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + (w || 1600);
+  const arquivoDrive = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
   const nomeImg = (id, k) => ehUrl(id) ? 'foto-' + ((k || 0) + 1) + '.jpg' : id + '.jpg';
   // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
   // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
@@ -896,7 +910,7 @@ window.NEX = (function(){
     };
   }
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe};
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe, fotoDrive, arquivoDrive};
 })();
 
 (function(){
@@ -1643,11 +1657,14 @@ window.NEX = (function(){
     const par = comPar ? U.filter(z => z.n !== x.n && z.st === 'disponivel' && parecida(z)).sort((a, b) => Math.abs(a.an - x.an) - Math.abs(b.an - x.an)).slice(0, 12) : [];
     const bPar = comPar ? '<div class="bloco"><h3>' + (pl ? 'Mesma planta, disponíveis' : 'Parecidas, disponíveis') + '</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + (pl ? '' : z.a ? ' · ' + esc(m2(z.a)) : '') + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">' + (pl ? 'Nenhuma outra disponível com esta planta.' : 'Nenhuma outra disponível parecida com esta.') + '</div>') + '</div>' : '';
     const bVal = blocoValores(x);
+    // fotos da unidade (revenda One): pasta do Drive da unidade, preenchida depois de abrir
+    const bFu = x.ex && /^https:\/\/drive\.google\.com\//.test(String(x.ex.fu || '')) ? '<div class="bloco" id="fi-fu" hidden></div>' : '';
     $('fi-corpo').innerHTML = tags + (telaLarga.matches
-      ? '<div class="fx-grid"><div class="col">' + bPl + bAnd + bVi + '</div><div class="col">' + bVal + bPar + '</div></div>'
-      : '<div class="col">' + bPl + bVal + bAnd + bVi + bPar + '</div>');
+      ? '<div class="fx-grid"><div class="col">' + bPl + bFu + bAnd + bVi + '</div><div class="col">' + bVal + bPar + '</div></div>'
+      : '<div class="col">' + bPl + bFu + bVal + bAnd + bVi + bPar + '</div>');
     requestAnimationFrame(() => NEX.centrarAndar($('fi-corpo')));
     ligarValores(x);
+    if(bFu) fotosUnidade(x);
     const plImg = $('fi-pl'); if(plImg) plImg.addEventListener('click', () => visualizador([{src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}].concat(pl.p.decorado ? [{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}] : []), 0, {acoes: acoesImg}));
     const dec = $('fi-dec'); if(dec) dec.addEventListener('click', () => visualizador([{src: img(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t, nome: 'decorado-' + x.n + '.jpg'}, {src: img(P, pl.p.id), t: pl.p.t, nome: 'planta-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
     const viImg = $('fi-vi'); if(viImg) viImg.addEventListener('click', () => visualizador([{src: img(P, vi.img), t: 'Vista · ' + vi.face.nome + ' · ' + vi.andar + 'º pavimento', nome: 'vista-' + x.n + '.jpg'}], 0, {acoes: acoesImg}));
@@ -1656,6 +1673,30 @@ window.NEX = (function(){
     const vr = $('fi-vr'); if(vr) vr.addEventListener('click', roofs);
     document.querySelectorAll('#fi-corpo .pr-alts button').forEach(b => b.addEventListener('click', () => { baseFicha = b.dataset.v; const y = $('fi-corpo').scrollTop; renderFicha(); $('fi-corpo').scrollTop = y; }));
     document.querySelectorAll('#fi-corpo .parecidas button').forEach(b => b.addEventListener('click', () => abrirFicha(b.dataset.n)));
+  }
+  // fotos e arquivos (planta em PDF, vídeo) da pasta do Drive da unidade; sem a lista no servidor, fica o link da pasta
+  const FU = new Map();
+  async function fotosUnidade(x){
+    let r = FU.get(PID + '|' + x.n);
+    if(!r){
+      try{ r = await rpc('fotos_unidade', {p_codigo: codigo, p_projeto: PID, p_unidade: x.n}); }
+      catch(e){ r = {ok: false}; if(!(e && e.status)) r.rede = true; }
+      if(!r.rede) FU.set(PID + '|' + x.n, r);
+    }
+    const box = $('fi-fu'); if(!box || !atual || atual.n !== x.n) return;
+    const fotos = r.ok && Array.isArray(r.fotos) ? r.fotos : [], arqs = r.ok && Array.isArray(r.arquivos) ? r.arquivos : [];
+    const pasta = r.ok && r.pasta ? r.pasta : x.ex.fu;
+    let h = '<h3>Fotos da unidade' + (fotos.length ? ' <small class="fu-n">' + fotos.length + '</small>' : '') +
+            '<span class="acoes-h"><a class="acao" href="' + esc(pasta) + '" target="_blank" rel="noopener">Pasta no Drive</a></span></h3>';
+    if(fotos.length) h += '<div class="fu-grade">' + fotos.map((f, i) => '<button type="button" data-i="' + i + '" aria-label="Ampliar a foto ' + (i + 1) + '"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="" src="' + esc(NEX.fotoDrive(f.id, 480)) + '"></button>').join('') + '</div>';
+    else h += '<div class="leg">' + (r.rede ? 'Não consegui carregar as fotos agora.' : 'As fotos desta unidade estão na pasta do Drive.') + '</div>';
+    if(arqs.length) h += '<ul class="fu-arqs">' + arqs.map(a => '<li><a href="' + esc(NEX.arquivoDrive(a.id)) + '" target="_blank" rel="noopener">' + esc(a.t || (a.k === 'pdf' ? 'Arquivo PDF' : 'Vídeo')) + '</a><small>' + (a.k === 'pdf' ? 'PDF' : 'vídeo') + '</small></li>').join('') + '</ul>';
+    box.innerHTML = h; box.hidden = false;
+    const itens = fotos.map((f, i) => ({src: NEX.fotoDrive(f.id), t: f.t || 'Unidade ' + x.n + ' · foto ' + (i + 1), nome: 'unidade-' + x.n + '-foto-' + (i + 1) + '.jpg'}));
+    box.querySelectorAll('.fu-grade button').forEach(b => {
+      b.querySelector('img').addEventListener('error', () => b.remove(), {once: true});
+      b.addEventListener('click', () => visualizador(itens, +b.dataset.i, {acoes: acoesImg}));
+    });
   }
   function imagensDaUnidade(x){
     const l = []; const pl = x.pl, vi = vista(P, x);
@@ -1683,7 +1724,9 @@ window.NEX = (function(){
     if(!atual) return;
     // fluxo aberto no editor: salva antes de enviar (se faltar algo, avisa e fica no editor)
     if(edicao && edicao.n === atual.n && !salvarEdicao()){ rolarAteValores(); toast('Confira o fluxo antes de enviar.'); return; }
-    abrirEnvio([atual.n]);
+    // as outras unidades marcadas no Buscar entram junto (a unidade do fluxo vai primeiro)
+    const extra = envExtra.includes(atual.n) ? envExtra.filter(n => n !== atual.n) : []; envExtra = [];
+    abrirEnvio([atual.n].concat(extra));
   });
   document.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => { const f = b.closest('.fundo'); if(f.id === 'ficha') fecharFicha(); else { f.hidden = true; if($('ficha').hidden) document.body.classList.remove('sem-rolagem'); } }));
   ['ficha', 'envio'].forEach(id => $(id).addEventListener('click', e => { if(e.target === $(id)){ if(id === 'ficha') fecharFicha(); else $(id).hidden = true; } }));
@@ -2011,6 +2054,18 @@ window.NEX = (function(){
     const m = /^#u([0-9A-Za-z %]+)$/.exec(h); if(m){ const n = decodeURIComponent(m[1]); if(porN.get(n)) abrirFicha(n); }
   }
   function fecharTudo(){ $('envio').hidden = true; if(!$('ficha').hidden) fecharFicha(); }
+  // vindo do Buscar ("Montar fluxo e enviar"): abre o editor do fluxo da unidade marcada e guarda as outras
+  // marcadas do mesmo projeto para o "Enviar ao cliente" desta unidade
+  let envExtra = [];
+  function abrirFluxoPedido(){
+    const q = new URLSearchParams(location.search); if(q.get('fluxo') !== '1') return;
+    envExtra = String(q.get('env') || '').split(',').map(s => s.trim()).filter(n => n && porN.get(n)).slice(0, 3);
+    q.delete('fluxo'); q.delete('env');
+    try{ history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : '') + location.hash); }catch(e){}
+    if(!atual || $('ficha').hidden) return;
+    const b = document.querySelector('#fi-corpo [data-fe="editar"]');
+    if(b){ b.click(); rolarAteValores(); }
+  }
   window.addEventListener('hashchange', () => { if(U.length) irPara(location.hash); });
 
   if('serviceWorker' in navigator){
@@ -2035,6 +2090,7 @@ window.NEX = (function(){
       const ini = (pedido && disponiveis.has(pedido)) ? pedido : (disponiveis.has(LS.get(K_PROJ)) ? LS.get(K_PROJ) : LISTA[0].id);
       await trocarProjeto(ini, true);
       irPara();
+      abrirFluxoPedido();
       setInterval(verificarVersao, 60000);
       document.addEventListener('visibilitychange', () => { if(!document.hidden) verificarVersao(); });
       carregarLinks();
