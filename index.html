@@ -568,6 +568,8 @@ svg.map .u.flash rect.c{animation:flash 1.1s ease-in-out 5}
 .sheet .fu-tira button{flex:none;width:76px;height:58px;padding:0;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--surface-2);cursor:pointer}
 .sheet .fu-tira button:hover,.sheet .fu-tira button:focus-visible{border-color:var(--accent);outline:none}
 .sheet .fu-tira img{width:100%;height:100%;object-fit:cover;display:block}
+/* o aviso curto (toast) sobe quando há uma ficha com botões no rodapé, para não cobrir os botões */
+body:has(.mk-ficha-fundo:not([hidden])) .toast,body:has(#bf:not([hidden])) .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 
 /* ---------- Mercado (busca no resto do mercado, base da Órulo) ---------- */
 .tabs .tab.mk-tab{border-style:dashed}
@@ -727,6 +729,32 @@ body.mk-aberto{overflow:hidden}
   .mk-img{width:96px;height:96px}
   .mk-nome{font-size:18px}
 }
+/* enviar ao cliente: ficha completa do Mercado (formulário por cima da ficha) */
+.mk-ficha{position:relative}
+.mk-env{position:absolute;inset:0;z-index:3;background:var(--surface);overflow-y:auto;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+.mk-env[hidden],.mk-env-c[hidden]{display:none}
+.mk-env-c{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.mk-env h4{margin:0;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:24px;font-weight:700}
+.mk-env-s{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.mk-env-l{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-2);min-width:0}
+.mk-env-l input{height:44px;border:1px solid var(--line-2);border-radius:10px;padding:0 12px;font:inherit;font-size:16px;font-weight:400;color:var(--ink);background:var(--surface);min-width:0}
+.mk-env-l input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mk-env-tips{border:1px solid var(--line);border-radius:12px;padding:6px 12px 8px;margin:0;min-width:0}
+.mk-env-tips legend{font-size:12.5px;font-weight:600;color:var(--ink-2);padding:0 4px}
+.mk-env-tips label{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;border-bottom:1px solid var(--line);cursor:pointer}
+.mk-env-tips label:last-child{border-bottom:0}
+.mk-env-tips label b{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mk-env-tips label small{color:var(--muted);font-size:12px}
+.mk-env-tips input,.mk-env-ck input{width:18px;height:18px;flex:none;accent-color:var(--accent)}
+.mk-env-ck{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
+.mk-env-cor{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mk-env-erro{margin:0;color:var(--vend-text);font-size:13px}
+.mk-env-erro:empty{display:none}
+.mk-env-acoes{display:flex;gap:8px}
+.mk-env-acoes .abtn{flex:1;justify-content:center;height:44px;text-decoration:none}
+.mk-env-acoes.col{flex-direction:column}
+.mk-env-url{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all;background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.mk-env-fim{align-self:center;min-width:160px;justify-content:center}
 
 /* ---------- Documentação (central de documentos por construtora e projeto) ---------- */
 .tabs .tab.dc-tab{border-style:dashed}
@@ -1608,6 +1636,26 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       <div class="mk-ficha-top"><div><h3 id="mk-fi-tit">—</h3><small id="mk-fi-sub"></small></div><button class="xbtn" type="button" id="mk-fi-x" aria-label="Fechar">×</button></div>
       <div class="mk-fi-corpo" id="mk-fi-corpo"></div>
       <div class="mk-fi-acoes"><button class="abtn primary" type="button" id="mk-fi-enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Enviar ao cliente</button><button class="abtn" type="button" id="mk-fi-mat">Book e tabela</button></div>
+      <!-- enviar ao cliente: ficha completa (nex/m.html) com fotos, plantas, opções escolhidas, lazer e mapa -->
+      <div class="mk-env" id="mk-env" hidden>
+        <form class="mk-env-c" id="mk-env-form" autocomplete="off">
+          <h4>Enviar a ficha completa</h4>
+          <p class="mk-env-s">O cliente recebe um link com fotos, plantas, as opções marcadas, lazer e mapa. Comissão, contato da construtora, book e tabela não aparecem.</p>
+          <label class="mk-env-l">Nome do cliente<input id="mk-env-cli" maxlength="60" placeholder="Ex.: Maria"></label>
+          <fieldset class="mk-env-tips"><legend>Opções na ficha</legend><div id="mk-env-tips"></div></fieldset>
+          <label class="mk-env-ck"><input type="checkbox" id="mk-env-val" checked> Mostrar o valor "a partir de" de cada opção</label>
+          <div class="mk-env-cor"><label class="mk-env-l">Seu nome<input id="mk-env-cor" maxlength="40"></label><label class="mk-env-l">Seu WhatsApp<input id="mk-env-tel" inputmode="tel" maxlength="20"></label></div>
+          <p class="mk-env-erro" id="mk-env-erro" role="alert"></p>
+          <div class="mk-env-acoes"><button type="button" class="abtn" id="mk-env-volta">Voltar</button><button type="submit" class="abtn primary" id="mk-env-ok">Criar link da ficha</button></div>
+        </form>
+        <div class="mk-env-c" id="mk-env-pronto" hidden>
+          <h4>Link da ficha criado</h4>
+          <p class="mk-env-s" id="mk-env-aviso"></p>
+          <p class="mk-env-url" id="mk-env-url"></p>
+          <div class="mk-env-acoes col"><a class="abtn primary" id="mk-env-wa" target="_blank" rel="noopener">Enviar no WhatsApp</a><button type="button" class="abtn" id="mk-env-copiar">Copiar a mensagem</button><a class="abtn" id="mk-env-ver" target="_blank" rel="noopener">Ver como o cliente</a></div>
+          <button type="button" class="abtn mk-env-fim" id="mk-env-fim">Fechar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -3028,6 +3076,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const tq = normQ(q).split(' ').filter(Boolean), casaCli = nome => { const k = ' ' + normQ(nome) + ' '; return tq.every(t => k.includes(' ' + t)); };
     const cs = [];
     for(const s of seLista) if(casaCli(s.cliente)) cs.push({t: s.cliente, s: (s.origem === 'genio' ? 'Seleção do Gênio ' : 'Seleção enviada ') + quando(s.criado_em) + (s.aberturas ? ' · abriu ' + s.aberturas + '×' : ' · ainda não abriu'), ir: () => irEnviadaQ('sel:' + s.id)});
+    for(const l of seMerc) if(casaCli(l.cliente)) cs.push({t: l.cliente, s: 'Ficha do ' + l.nome + ' (Mercado) enviada ' + quando(l.criado_em) + (l.aberturas ? ' · abriu ' + l.aberturas + '×' : ' · ainda não abriu'), ir: () => irEnviadaQ('mer:' + l.id)});
     for(const l of seLinks) if(casaCli(l.cliente)) cs.push({t: l.cliente, s: 'Ficha do ' + nomeProjQ(l.projeto) + ' enviada ' + quando(l.criado_em) + (l.aberturas ? ' · abriu ' + l.aberturas + '×' : ' · ainda não abriu'), ir: () => irEnviadaQ('fic:' + l.id)});
     for(const b of buscas) if(casaCli(b.cliente)) cs.push({t: b.cliente, s: 'Aviso salvo · ' + critTexto(b.criterios), ir: () => { bsAlvo = 'av:' + b.id; abaBusca('avisos'); }});
     if(cs.length){ cab('Clientes'); cs.slice(0, 5).forEach(x => itens.push(x)); }
@@ -3646,7 +3695,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 
   // ---------- enviadas: seleções da busca, fichas da central e, com o app ligado, o que o Gênio mandou ----------
   const GENIO_WA = '5511978134764', K_GENIO = 'espelhos-genio';
-  let seLista = [], seLinks = [], seExcluir = null, seCarregado = 0, sePedido = null, seAlvo = null, bsAlvo = null, vinc = null;
+  let seLista = [], seLinks = [], seMerc = [], seExcluir = null, seCarregado = 0, sePedido = null, seAlvo = null, bsAlvo = null, vinc = null;
   // o servidor já tem a ligação com o Gênio? null = ainda não conferiu; sem a função (404), o quadro fica escondido
   let genioPronto = null;
   async function conferirGenio(){
@@ -3658,9 +3707,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const urlFicha = l => new URL('nex/' + ((window.ESPELHO_PAGINAS || {})[l.projeto] || 'ver.html') + '?l=' + encodeURIComponent(l.id), location.href).href;
   async function buscarEnviadas(){
     const ep = await epRapido();
-    const [s, l] = await Promise.all([rpc('minhas_selecoes', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}),
-      rpc('meus_links', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}).catch(() => null)]);
-    seLista = Array.isArray(s) ? s : []; if(Array.isArray(l)) seLinks = l;
+    const [s, l, m] = await Promise.all([rpc('minhas_selecoes', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}),
+      rpc('meus_links', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}).catch(() => null),
+      rpc('meus_links_mercado', {p_codigo: codigo, p_dono: dono()}).catch(() => null)]);   // fichas do Mercado (Órulo)
+    seLista = Array.isArray(s) ? s : []; if(Array.isArray(l)) seLinks = l; if(Array.isArray(m)) seMerc = m;
     seCarregado = Date.now();
   }
   // a busca em tudo procura os clientes sem esperar: carrega uma vez e refaz as sugestões quando chegar
@@ -3678,20 +3728,23 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   async function carregarEnviadas(){
     const box = $('se-lista'); renderGenio();
-    if(!seLista.length && !seLinks.length){ box.replaceChildren(); const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Carregando…'; box.appendChild(v); }
+    if(!seLista.length && !seLinks.length && !seMerc.length){ box.replaceChildren(); const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Carregando…'; box.appendChild(v); }
     try{ await Promise.all([buscarEnviadas(), conferirGenio()]); }
-    catch(e){ renderGenio(); if(!seLista.length && !seLinks.length && box.firstChild) box.firstChild.textContent = 'Não consegui carregar agora. Confira a internet.'; return; }
+    catch(e){ renderGenio(); if(!seLista.length && !seLinks.length && !seMerc.length && box.firstChild) box.firstChild.textContent = 'Não consegui carregar agora. Confira a internet.'; return; }
     if(seLista.some(s => s.origem === 'genio')) LS.set(K_GENIO, '1');
     renderGenio(); renderEnviadas();
   }
   const EV_FICHA = {planta: 'planta', vista: 'vista', valores: 'valores', galeria: 'fotos', local: 'localização', andar: 'posição no andar', whatsapp: 'tocou no WhatsApp'};
+  const EV_MERC = {galeria: 'fotos', planta: 'plantas', valores: 'valores', local: 'localização', whatsapp: 'tocou no WhatsApp'};
+  const urlMerc = l => new URL('nex/m.html?l=' + encodeURIComponent(l.id), location.href).href;
   function renderEnviadas(){
     const box = $('se-lista'); box.replaceChildren();
     const todos = seLista.map(s => ({k: 'sel:' + s.id, tipo: 'sel', em: s.criado_em, s})).concat(seLinks.map(l => ({k: 'fic:' + l.id, tipo: 'fic', em: l.criado_em, s: l})))
+      .concat(seMerc.map(l => ({k: 'mer:' + l.id, tipo: 'mer', em: l.criado_em, s: l})))
       .sort((x, y) => String(y.em || '').localeCompare(String(x.em || '')));
     if(!todos.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nada enviado deste aparelho ainda. Em "Buscar agora", marque as unidades e toque em "Enviar ao cliente". Na Ficha completa, use "Enviar ao cliente".'; box.appendChild(v); return; }
     for(const it of todos){
-      const s = it.s, ficha = it.tipo === 'fic';
+      const s = it.s, ficha = it.tipo === 'fic', merc = it.tipo === 'mer', link = ficha || merc;
       const card = document.createElement('div'); card.className = 'bs-card se-card' + (s.expirado ? ' exp' : ''); card.dataset.k = it.k;
       card.innerHTML = '<div class="h"><b></b><small class="muted"></small></div><div class="crit"></div><div class="agora"></div><div class="acoes"></div>';
       const h = card.querySelector('.h');
@@ -3699,26 +3752,27 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       if(s.origem === 'genio'){ const g = el('span', 'se-tag', 'Gênio'); g.title = 'Mandado pelo Gênio no WhatsApp'; h.querySelector('b').appendChild(g); }
       card.querySelector('small').textContent = 'enviada ' + quando(s.criado_em);
       const us = s.unidades || [];
-      card.querySelector('.crit').textContent = ficha ? 'Ficha do ' + nomeProjQ(s.projeto) + ' · ' + (us.length === 1 ? 'unidade ' + us[0] : 'unidades ' + us.join(', '))
+      card.querySelector('.crit').textContent = merc ? 'Ficha do ' + (s.nome || 'empreendimento') + ' (Mercado)' + (s.tipos ? ' · ' + s.tipos + (s.tipos === 1 ? ' opção' : ' opções') : '')
+        : ficha ? 'Ficha do ' + nomeProjQ(s.projeto) + ' · ' + (us.length === 1 ? 'unidade ' + us[0] : 'unidades ' + us.join(', '))
         : s.unidades + (s.unidades === 1 ? ' unidade' : ' unidades') + ' em ' + s.projetos + (s.projetos === 1 ? ' empreendimento' : ' empreendimentos') + (s.texto ? ' · ' + s.texto : '');
       const ag = card.querySelector('.agora');
-      const vistos = ficha ? Object.keys(s.vistos || {}).filter(k => EV_FICHA[k]).map(k => EV_FICHA[k]) : [];
-      if(s.expirado) ag.textContent = 'Link expirado (cada link vale ' + (ficha ? 90 : 60) + ' dias).';
+      const EV = merc ? EV_MERC : EV_FICHA, vistos = link ? Object.keys(s.vistos || {}).filter(k => EV[k]).map(k => EV[k]) : [];
+      if(s.expirado) ag.textContent = 'Link expirado (cada link vale ' + (link ? 90 : 60) + ' dias).';
       else if(s.aberturas){ ag.classList.add('tem'); ag.textContent = 'Abriu ' + (s.aberturas === 1 ? '1 vez' : s.aberturas + ' vezes') + (s.ultimo_acesso ? ' · última ' + quando(s.ultimo_acesso) : '') + (s.interesses ? ' · tocou em "Tenho interesse" ' + (s.interesses === 1 ? '1 vez' : s.interesses + ' vezes') : '') + (vistos.length ? ' · viu ' + vistos.join(', ') : ''); }
       else ag.textContent = 'O cliente ainda não abriu.';
-      const ac = card.querySelector('.acoes'), url = ficha ? urlFicha(s) : urlSel(s.id);
+      const ac = card.querySelector('.acoes'), url = merc ? urlMerc(s) : ficha ? urlFicha(s) : urlSel(s.id);
       const bt = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn'; x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
       if(!s.expirado){
         const a = document.createElement('a'); a.className = 'abtn'; a.textContent = 'Ver'; a.href = url + '&previa=1'; a.target = '_blank'; a.rel = 'noopener'; ac.appendChild(a);
         bt('Copiar link', async () => { try{ await navigator.clipboard.writeText(url); toast('Link copiado.'); }catch(e){ toast(url, 8000); } });
-        bt('Reenviar', () => { const cli = String(s.cliente || '').split(/\s+/)[0]; window.open('https://wa.me/?text=' + encodeURIComponent('Oi' + (cli ? ', ' + cli : '') + '! Segue de novo ' + (ficha ? 'a apresentação do ' + nomeProjQ(s.projeto) : 'a seleção de imóveis') + ' que separei para você:\n' + url), '_blank', 'noopener'); });
+        bt('Reenviar', () => { const cli = String(s.cliente || '').split(/\s+/)[0]; window.open('https://wa.me/?text=' + encodeURIComponent('Oi' + (cli ? ', ' + cli : '') + '! Segue de novo ' + (link ? 'a apresentação do ' + (merc ? s.nome : nomeProjQ(s.projeto)) : 'a seleção de imóveis') + ' que separei para você:\n' + url), '_blank', 'noopener'); });
       }
       const del = bt(seExcluir === it.k ? 'Confirmar exclusão' : 'Apagar', async () => {
         if(seExcluir !== it.k){ seExcluir = it.k; renderEnviadas(); return; }
         try{
-          await rpc(ficha ? 'link_apagar' : 'selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: s.id});
-          if(ficha) seLinks = seLinks.filter(x => x.id !== s.id); else seLista = seLista.filter(x => x.id !== s.id);
-          toast((ficha ? 'Ficha' : 'Seleção') + ' de ' + s.cliente + ' apagada. O link deixa de funcionar.');
+          await rpc(merc ? 'mercado_link_apagar' : ficha ? 'link_apagar' : 'selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: s.id});
+          if(merc) seMerc = seMerc.filter(x => x.id !== s.id); else if(ficha) seLinks = seLinks.filter(x => x.id !== s.id); else seLista = seLista.filter(x => x.id !== s.id);
+          toast((link ? 'Ficha' : 'Seleção') + ' de ' + s.cliente + ' apagada. O link deixa de funcionar.');
         }catch(e){ toast('Não consegui apagar agora.'); }
         seExcluir = null; renderEnviadas();
       });
@@ -4628,7 +4682,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   window.addEventListener('hashchange', () => irPara(location.hash));
   // para a aba Mercado (app_parts/mercado.js)
-  window.APP = {rpc, codigo: () => codigo, dados: () => dados, nivel: () => nivel, url: CFG.url, toast, goto: id => { if(window.ESPELHO) ESPELHO.goto(id); }};
+  window.APP = {rpc, codigo: () => codigo, dados: () => dados, nivel: () => nivel, url: CFG.url, toast, goto: id => { if(window.ESPELHO) ESPELHO.goto(id); },
+    // ficha do Mercado para o cliente: mesmo dono e mesmo aviso deste aparelho que as seleções e as fichas da central
+    dono, ep: epRapido, corretor, salvarCorretor: c => LS.set(K_COR, JSON.stringify(Object.assign(corretor(), c || {}))), enviadasMudou: () => { seCarregado = 0; }};
 
   // ---------- início ----------
   try{ const c = JSON.parse(LS.get(K_CACHE) || 'null'); if(c && c.d){ mudou = c.mudou || null; aplicar(c.d); } }catch(e){}
@@ -4896,10 +4952,13 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('mk-voltar').addEventListener('click', fecharPeloUsuario);
     $('mk-fi-x').addEventListener('click', fecharFichaPeloUsuario);
     $('mk-ficha').addEventListener('click', ev => { if(ev.target === $('mk-ficha')) fecharFichaPeloUsuario(); });
-    $('mk-fi-enviar').addEventListener('click', enviar);
+    $('mk-fi-enviar').addEventListener('click', abrirEnvio);
+    $('mk-env-form').addEventListener('submit', criarLinkFicha);
+    $('mk-env-volta').addEventListener('click', fecharEnvio);
+    $('mk-env-fim').addEventListener('click', fecharEnvio);
     $('mk-fi-mat').addEventListener('click', botaoMaterial);
     $('mk-fi-corpo').addEventListener('click', cliqueFicha);
-    document.addEventListener('keydown', ev => { if(ev.key !== 'Escape' || $('mercado').hidden) return; if(!$('mk-ficha').hidden) fecharFichaPeloUsuario(); else if($('mercado').classList.contains('filtros')) fecharFiltros(); else fecharPeloUsuario(); });
+    document.addEventListener('keydown', ev => { if(ev.key !== 'Escape' || $('mercado').hidden) return; if(!$('mk-env').hidden) fecharEnvio(); else if(!$('mk-ficha').hidden) fecharFichaPeloUsuario(); else if($('mercado').classList.contains('filtros')) fecharFiltros(); else fecharPeloUsuario(); });
   }
   let bairrosCache = null;
   function bairros(){
@@ -5032,27 +5091,69 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       if(ficha !== alvo) return; const g = $('mk-fi-corpo').querySelector('.mk-gal figcaption'); if(g) g.textContent = 'Não consegui carregar fotos e plantas agora.';
     }).finally(() => { if(ficha === alvo) carregarMaterial(); });
   }
-  function fecharFichaUI(){ $('mk-ficha').hidden = true; ficha = null; }
+  function fecharFichaUI(){ $('mk-ficha').hidden = true; $('mk-env').hidden = true; envAlvo = null; ficha = null; }
   function fecharFichaPeloUsuario(){ if(fiPush){ history.back(); return; } fecharFichaUI(); }
-  function textoCliente(x){
-    const e = x.e, fk = faseK(e);
-    const lista = (x.ts && x.ts.length ? x.ts : tipsOk(e)).filter(t => t[5] > 0).slice(0, 6);
-    const linhas = [
-      '*' + e.n + '*',
-      [e.b, e.c].filter(Boolean).join(' · '),
-      (FASE_NOME[fk] + (fk === 'pronto' ? '' : e.en ? ' · entrega ' + mesAno(e.en) : '')),
-      ''
-    ];
-    if(lista.length){ linhas.push('Opções:'); lista.forEach(t => linhas.push('• ' + tipTxt(t) + ' — a partir de ' + BRL(t[5]))); linhas.push(''); }
-    linhas.push('Valores a partir de, sujeitos a alteração e à disponibilidade.');
-    return linhas.join('\n');
-  }
-  async function enviar(){
+  // ---------- enviar ao cliente: ficha completa (nex/m.html) com fotos, plantas, as opções marcadas, lazer e mapa ----------
+  // comissão, contato da construtora, book e tabela ficam só para o corretor (não entram no link)
+  const primeiroNome = s => String(s || '').trim().split(/\s+/)[0] || '';
+  let envAlvo = null;
+  function abrirEnvio(){
     if(!ficha) return;
-    const txt = textoCliente(ficha);
-    if(navigator.share && matchMedia('(pointer:coarse)').matches){ try{ await navigator.share({title: ficha.e.n, text: txt}); return; }catch(err){ if(err && err.name === 'AbortError') return; } }
-    try{ await navigator.clipboard.writeText(txt); A.toast('Texto copiado. Cole na conversa com o cliente.'); }
-    catch(err){ window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener'); }
+    const e = ficha.e, todas = Array.isArray(e.t) ? e.t : [];
+    const daBusca = new Set((ficha.ts && ficha.ts.length ? ficha.ts : tipsOk(e)).map(t => todas.indexOf(t)).filter(i => i >= 0));
+    envAlvo = ficha;
+    const box = $('mk-env-tips'); box.replaceChildren();
+    todas.forEach((t, i) => {
+      const l = document.createElement('label'), ck = document.createElement('input'); ck.type = 'checkbox'; ck.value = String(i);
+      ck.checked = daBusca.size ? daBusca.has(i) : true;
+      const tx = document.createElement('span'); tx.textContent = tipTxt(t) + (t[4] > 0 ? ' · ' + t[4] + (t[4] === 1 ? ' vaga' : ' vagas') : '');
+      const pr = document.createElement('b'); pr.textContent = +t[5] > 0 ? 'a partir de ' + BRL(+t[5]) : '';
+      l.append(ck, tx, pr);
+      if(t[6] != null && !(t[6] > 0)){ const sm = document.createElement('small'); sm.textContent = 'sem estoque'; l.appendChild(sm); }
+      box.appendChild(l);
+    });
+    $('mk-env-tips').closest('fieldset').hidden = !todas.length;
+    const c = A.corretor ? A.corretor() : {};
+    $('mk-env-cli').value = ''; $('mk-env-cor').value = c.nome || ''; $('mk-env-tel').value = c.tel || '';
+    $('mk-env-val').checked = true; $('mk-env-erro').textContent = '';
+    $('mk-env-form').hidden = false; $('mk-env-pronto').hidden = true; $('mk-env-ok').disabled = false;
+    $('mk-env').hidden = false; $('mk-env').scrollTop = 0;
+    setTimeout(() => $('mk-env-cli').focus(), 60);
+  }
+  function fecharEnvio(){ $('mk-env').hidden = true; envAlvo = null; }
+  async function criarLinkFicha(ev){
+    ev.preventDefault();
+    const x = envAlvo; if(!x) return;
+    const cli = $('mk-env-cli').value.trim(), nome = $('mk-env-cor').value.trim(), tel = $('mk-env-tel').value.trim();
+    const tipos = [...$('mk-env-tips').querySelectorAll('input:checked')].map(c => +c.value);
+    const erro = m => { $('mk-env-erro').textContent = m; };
+    if(!cli){ erro('Digite o nome do cliente.'); $('mk-env-cli').focus(); return; }
+    if((x.e.t || []).length && !tipos.length){ erro('Marque ao menos uma opção para a ficha.'); return; }
+    if(A.salvarCorretor) A.salvarCorretor({nome, tel});
+    $('mk-env-ok').disabled = true; erro('');
+    try{
+      const ep = A.ep ? await A.ep() : null;
+      const r = await A.rpc('mercado_link_criar', {p_codigo: A.codigo(), p_dono: A.dono(), p_endpoint: ep, p_id: x.e.i, p_cliente: cli,
+        p_corretor: nome, p_whats: tel, p_tipos: tipos, p_valores: $('mk-env-val').checked});
+      if(envAlvo !== x) return;
+      const url = new URL('nex/m.html?l=' + encodeURIComponent(r.id), location.href).href;
+      const txt = 'Olá, ' + primeiroNome(cli) + '! Separei a apresentação do ' + x.e.n + ' para você, com fotos, plantas e as opções: ' + url;
+      $('mk-env-url').textContent = url;
+      $('mk-env-wa').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+      $('mk-env-ver').href = url + '&previa=1';
+      $('mk-env-copiar').onclick = async () => { try{ await navigator.clipboard.writeText(txt); A.toast('Mensagem com o link copiada.'); }catch(err){ A.toast(url, 8000); } };
+      $('mk-env-aviso').textContent = r.avisos ? 'Você recebe um aviso neste aparelho quando ' + primeiroNome(cli) + ' abrir. A ficha fica em Buscar › Enviadas.'
+        : 'Os avisos não estão ligados neste aparelho: acompanhe as aberturas em Buscar › Enviadas.';
+      $('mk-env-form').hidden = true; $('mk-env-pronto').hidden = false; $('mk-env').scrollTop = 0;
+      if(A.enviadasMudou) A.enviadasMudou();
+    }catch(err){
+      const b = String((err && (err.body || err.message)) || '');
+      erro(err && err.status === 404 ? 'A ficha completa do Mercado ainda não está ativa no servidor.'
+        : /codigo_invalido/.test(b) ? 'Código do time inválido. Saia e entre de novo.'
+        : /sem_acesso/.test(b) ? 'A ficha do Mercado ainda não está liberada para o time.'
+        : /limite_links/.test(b) ? 'Limite de links por dia atingido.'
+        : 'Não consegui criar o link agora. Confira a internet e tente de novo.');
+    }finally{ $('mk-env-ok').disabled = false; }
   }
 
   // ---------- book, tabela, contato e comissão: Órulo na hora, com o login de cada corretor ----------
