@@ -762,77 +762,42 @@ body.dc-aberto{overflow:hidden}
   .dc-ac a,.dc-ac button{height:32px;font-size:12.5px;padding:0 10px}
 }
 
-/* Escritório: os agentes trabalhando ao vivo (só administrador). Cores da cena em tokens próprios, nos dois temas. */
-.tabs .tab.ec-tab{border-style:dashed}
-.tabs .tab.ec-tab b svg{width:.85em;height:.85em;margin-right:5px;vertical-align:-.08em}
-:root{
-  --ec-parede:#e6e1d6; --ec-parede2:#dfe3ea; --ec-rodape:#b7ac97; --ec-divisa:#9c9282;
-  --ec-piso1:#d9ccb2; --ec-piso2:#d1c3a7; --ec-carpete1:#c9d0db; --ec-carpete2:#c1c8d4;
-  --ec-mesa:#b4865b; --ec-mesa-frente:#8c6342; --ec-monitor:#3f4a57; --ec-metal:#59626e;
-  --ec-planta:#4e7a50; --ec-planta2:#3c6140; --ec-vaso:#9c5f3d; --ec-tapete:#cdbb93;
-  --ec-sombra:rgba(52,38,24,.18); --ec-papel:#fffdf6; --ec-quadro:#f7f5ef; --ec-placa:#1d2633; --ec-ouro:#c8a24a;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ec-parede:#1c2631; --ec-parede2:#1a2330; --ec-rodape:#0f1720; --ec-divisa:#2c3846;
-    --ec-piso1:#2a2e33; --ec-piso2:#25292e; --ec-carpete1:#232b38; --ec-carpete2:#1f2733;
-    --ec-mesa:#6e5038; --ec-mesa-frente:#523b29; --ec-monitor:#1b222b; --ec-metal:#3a434f;
-    --ec-planta:#3e6a45; --ec-planta2:#2f5236; --ec-vaso:#7a4a31; --ec-tapete:#3a3628;
-    --ec-sombra:rgba(0,0,0,.35); --ec-papel:#f4efe2; --ec-quadro:#2b3542; --ec-placa:#0d1218; --ec-ouro:#d2ae57;
-  }
-}
-:root[data-theme="dark"]{
-  --ec-parede:#1c2631; --ec-parede2:#1a2330; --ec-rodape:#0f1720; --ec-divisa:#2c3846;
-  --ec-piso1:#2a2e33; --ec-piso2:#25292e; --ec-carpete1:#232b38; --ec-carpete2:#1f2733;
-  --ec-mesa:#6e5038; --ec-mesa-frente:#523b29; --ec-monitor:#1b222b; --ec-metal:#3a434f;
-  --ec-planta:#3e6a45; --ec-planta2:#2f5236; --ec-vaso:#7a4a31; --ec-tapete:#3a3628;
-  --ec-sombra:rgba(0,0,0,.35); --ec-papel:#f4efe2; --ec-quadro:#2b3542; --ec-placa:#0d1218; --ec-ouro:#d2ae57;
-}
+/* Escritório Fortal — estilos isolados da cena e do diário de atividade. */
 body.ec-aberto{overflow:hidden}
-.ec{position:fixed;inset:0;z-index:26;background:var(--bg);display:flex;flex-direction:column;color:var(--ink)}
-.ec[hidden]{display:none}
-.ec-top{display:flex;align-items:center;gap:12px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line)}
-.ec-voltar{border:0;background:none;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:6px 0;white-space:nowrap}
-.ec-tit{flex:1;min-width:0;display:flex;flex-direction:column}
-.ec-tit h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;line-height:1;margin:0}
-.ec-tit small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ec-corpo{flex:1;min-height:0;overflow:auto;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0px))}
-.ec-grade{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
-@media (max-width:1000px){.ec-grade{grid-template-columns:minmax(0,1fr)}}
-.ec-cena-col{min-width:0}
-.ec-rolagem{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-.ec-palco{position:relative}
-.ec-palco canvas{display:block;width:100%;height:auto;aspect-ratio:480/216;image-rendering:pixelated}
-.ec-dica{display:none;font-size:12px;color:var(--muted);margin:6px 2px 0}
-@media (max-width:760px){.ec-cena{min-width:860px}.ec-dica{display:block}}
-.ec-placa{position:absolute;transform:translate(-50%,-50%);font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600;letter-spacing:.3px;
-  color:#f3efe6;background:var(--ec-placa);padding:0 .45em;line-height:1.3;border-radius:2px;pointer-events:none;white-space:nowrap}
-.ec-sala{position:absolute;transform:translate(-50%,0);font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600;font-size:13px;
-  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);background:color-mix(in srgb,var(--surface) 82%,transparent);padding:1px 8px;border-radius:999px;pointer-events:none;white-space:nowrap}
-.ec-palco.miuda .ec-placa{display:none}
-.ec-cena:fullscreen{background:var(--bg);display:flex;align-items:center;justify-content:center}
-.ec-cena:fullscreen .ec-palco{width:min(100vw,calc(100vh * 480 / 216))}
-.ec-lado{display:grid;gap:18px;min-width:0}
-.ec-lado h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:19px;font-weight:700;margin:0 0 6px}
-.ec-grupo{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
-.ec-grupo:first-child{margin-top:0}
-.ec-ag{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:4px 10px;padding:8px 0;border-top:1px solid var(--line);align-items:start}
-.ec-grupo + .ec-ag{border-top:0}
-.ec-ag .cor{width:12px;height:12px;border-radius:3px;background:var(--cor);margin-top:4px}
-.ec-ag .nm{font-weight:600;font-size:14px;min-width:0}
-.ec-ag .nm small{font-weight:500;color:var(--muted);margin-left:6px;font-size:13px}
-.ec-ag .hj{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:2px}
-.ec-ag .st{grid-column:2 / 4;font-size:13px;color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
-.ec-ag .st.ativo{color:var(--ink);font-weight:600}
-.ec-ag .st.ativo::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:1px}
-.ec-mov{list-style:none;margin:0;padding:0}
-.ec-mov li{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
-.ec-mov li:first-child{border-top:0;padding-top:0}
-.ec-mov time{color:var(--muted);font-variant-numeric:tabular-nums}
-.ec-mov p{margin:0;min-width:0;overflow-wrap:anywhere}
-.ec-mov b{font-weight:600}
-.ec-vazio{font-size:13px;color:var(--muted);margin:0}
-@media (prefers-reduced-motion: reduce){.ec-ag .st.ativo::before{animation:none}}
+.ec[hidden]{display:none!important}
+.ec{--ec-bg:#0b1522;--ec-panel:#111f2e;--ec-ink:#f4f1e9;--ec-muted:#afbac5;--ec-line:#2d3b49;--ec-gold:#e3bc77;--ec-green:#87d5ad;position:fixed;inset:0;z-index:1300;background:var(--ec-bg);color:var(--ec-ink);overflow:auto;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark}
+.ec *{box-sizing:border-box}
+.ec button{font:inherit;cursor:pointer}
+.ec button:focus-visible,.ec a:focus-visible,.ec-rolagem:focus-visible{outline:3px solid #f2cc8c;outline-offset:4px}
+.ec-top{position:sticky;top:0;z-index:8;display:flex;align-items:center;gap:22px;padding:18px 28px;background:#0b1522f5;border-bottom:1px solid var(--ec-line)}
+.ec-back,.ec-outline{border:1px solid var(--ec-line);color:var(--ec-ink);background:transparent;min-height:44px;border-radius:8px;padding:9px 14px;white-space:nowrap}
+.ec-back:hover,.ec-outline:hover{background:#213042;border-color:#64717d}
+.ec-tit{flex:1;min-width:0}.ec-tit h2{font-size:23px;letter-spacing:-.5px;margin:0;font-weight:620;line-height:1.3}.ec-tit p{margin:4px 0 0;font-size:13px;color:var(--ec-muted)}
+.ec-network{display:flex;align-items:center;gap:9px;max-width:330px}.ec-network-dot{width:7px;height:7px;background:#8493a2;border-radius:50%;flex:none}.ec-network[data-state=ok] .ec-network-dot{background:var(--ec-green)}.ec-network[data-state=error] .ec-network-dot{background:#f1b07c}.ec-network[data-state=loading] .ec-network-dot{background:var(--ec-gold)}
+#ec-sub{color:var(--ec-muted);font-size:12px;line-height:1.5}.ec-retry{border:0;background:transparent;color:var(--ec-gold);text-decoration:underline;text-underline-offset:3px;min-height:44px;padding:7px}
+.ec-main{max-width:1920px;margin:auto;padding:24px 28px 38px}
+.ec-scene-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:13px}.ec-scene-header h3{font-size:14px;font-weight:500;margin:0;color:var(--ec-muted)}
+.ec-rooms{display:flex;border:1px solid var(--ec-line);border-radius:8px;padding:3px;gap:3px;background:#101c2a}.ec-room{min-height:40px;border:0;background:transparent;color:var(--ec-muted);border-radius:5px;padding:9px 14px;font-size:12px!important;font-weight:600!important}.ec-room[aria-pressed=true]{background:#e3bc77;color:#14202e}.ec-room:hover:not([aria-pressed=true]){background:#263442;color:#fff}
+.ec-stage-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.ec-scene-block{min-width:0}.ec-scene-shell{position:relative;border:1px solid #344355;border-radius:12px;overflow:hidden;background:#101c29}
+.ec-rolagem{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#c8a267 #0b1522;touch-action:auto;overscroll-behavior-x:contain;cursor:grab}.ec-rolagem:active{cursor:grabbing}.ec-rolagem.is-dragging{user-select:none}
+.ec-cena{position:relative;width:100%;aspect-ratio:16/9;min-height:180px;isolation:isolate;transform:translateZ(0)}
+.ec-cena[data-view=genio],.ec-cena[data-view=espelho]{width:200%;min-height:0}
+#ec-canvas{display:block;width:100%;height:100%;image-rendering:auto}
+.ec-scene-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ec-muted);font-size:14px;background:radial-gradient(ellipse at 50% 50%,#1b3047,#101c29)}.ec-scene-loading[hidden]{display:none}
+.ec-hotspots{position:absolute;inset:0}.ec-hotspot{position:absolute;width:5%;height:10%;padding:0;transform:translate(-50%,-50%);border:1px solid transparent;border-radius:40%;background:transparent;color:#fff;min-width:26px;min-height:26px}.ec-hotspot span{position:absolute;left:50%;top:-27px;transform:translateX(-50%);padding:5px 8px;background:#101d2f;box-shadow:0 2px 9px #0004;font-size:11px;white-space:nowrap;border:1px solid var(--ec-gold);border-radius:4px;opacity:0;pointer-events:none}.ec-hotspot:focus-visible,.ec-hotspot:hover{background:#e3bc7712;border-color:#e3bc7799}.ec-hotspot:focus-visible span,.ec-hotspot:hover span{opacity:1}.ec-hotspot[aria-pressed=true]::after{content:"";position:absolute;bottom:-3px;left:50%;width:21px;height:3px;border-radius:2px;transform:translateX(-50%);background:#f3ca82;box-shadow:0 0 12px #e3bc7777}
+.ec-scene-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 12px;padding:12px 1px;font-size:11px;color:var(--ec-muted);line-height:1.5}.ec-drag-hint{white-space:nowrap}.ec-motion-note{margin:0;max-width:650px}.ec-stock{margin:0;flex-basis:100%;color:#c9d2da}.ec-selected{scroll-margin-top:160px}
+.ec-selected{border:1px solid var(--ec-line);border-radius:10px;padding:18px 20px;display:flex;gap:17px;align-items:center;background:#101d2b}.ec-selected-mark{font-size:25px;color:var(--ec-gold);flex:none;border-right:1px solid #3a4551;padding-right:18px;letter-spacing:-1px}.ec-selected-main{flex:1;min-width:0}.ec-selected h3{font-size:17px;margin:0;font-weight:600}.ec-selected h3 small{font-size:12px;font-weight:400;color:var(--ec-muted);margin-left:7px}.ec-selected p{font-size:13px;color:#d0d7df;margin:6px 0;line-height:1.5}.ec-selected time{font-size:11px;color:var(--ec-muted)}
+.ec-agents{background:var(--ec-panel);border:1px solid var(--ec-line);border-radius:10px;overflow:hidden}.ec-aside-head{padding:17px 18px 13px;border-bottom:1px solid var(--ec-line);display:flex;align-items:baseline;justify-content:space-between}.ec-aside-head h3{margin:0;font-size:16px;font-weight:550}.ec-aside-head span{font-size:11px;color:var(--ec-muted)}
+.ec-team-room{padding:13px 17px 5px;font-size:11px;letter-spacing:1.35px;text-transform:uppercase;color:var(--ec-gold);margin:0;font-weight:600}
+.ec-ag{width:100%;border:0;border-left:3px solid transparent;display:grid;grid-template-columns:30px minmax(0,1fr) 24px;gap:10px;align-items:center;background:transparent;text-align:left;color:var(--ec-ink);padding:9px 15px 9px 13px;min-height:55px}.ec-ag:hover{background:#1b2c3d}.ec-ag[aria-pressed=true]{border-left-color:var(--ec-gold);background:#243342}.ec-initial{height:29px;width:29px;border-radius:50%;background:#2b3b4c;color:#ebcf9c;font-size:12px;display:grid;place-items:center}.ec-ag strong{display:block;font-size:13px;font-weight:550}.ec-ag small{display:block;color:var(--ec-muted);font-size:11px;margin-top:2px;line-height:1.35}.ec-ag .ec-count{color:var(--ec-muted);font-size:11px;text-align:right}.ec-ag.is-active .ec-initial{background:#6a5434;color:#ffe2ad}.ec-team-foot{margin:12px 17px 17px;color:var(--ec-muted);font-size:11px;line-height:1.5}
+.ec-journal{margin-top:25px}.ec-journal-head{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--ec-line);padding-bottom:12px;margin-bottom:0}.ec-journal-head h3{font-size:17px;font-weight:550;margin:0}.ec-journal-head p{color:var(--ec-muted);font-size:12px;margin:0}.ec-mov{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:30px}.ec-mov li{display:grid;grid-template-columns:47px minmax(0,1fr);gap:14px;padding:15px 0;border-bottom:1px solid #253441;align-items:baseline}.ec-mov time{font-size:12px;font-variant-numeric:tabular-nums;color:#aab8c5}.ec-event-line{font-size:13px;line-height:1.5;color:#d2d9df;overflow-wrap:anywhere}.ec-event-line strong{color:var(--ec-ink);font-weight:550}.ec-origin{font-size:11px;color:#aeb9c4;display:block;margin-top:3px}.ec-vazio{font-size:14px;line-height:1.7;color:var(--ec-muted);margin:22px 0}.ec-vazio[hidden]{display:none}
+.ec-tab b{display:flex;align-items:center;gap:7px}.ec-tab b svg{height:17px;width:17px}.ec-tab i{font-style:normal}
+@media(min-width:1600px){.ec-stage-layout{grid-template-columns:minmax(0,1fr) 320px}.ec-ag{min-height:62px}}
+@media(max-width:1100px){.ec-stage-layout{grid-template-columns:minmax(0,1fr) 260px}.ec-main{padding:20px}.ec-top{padding:16px 20px}.ec-network{max-width:210px}.ec-selected{padding:14px}.ec-drag-hint{display:none}}
+@media(max-width:820px){.ec-stage-layout{grid-template-columns:1fr}.ec-top{gap:12px;flex-wrap:wrap;padding:13px 16px}.ec-tit h2{font-size:21px}.ec-tit p{font-size:11px}.ec-tv{margin-left:auto}.ec-network{order:5;max-width:none;width:100%;min-height:20px}.ec-network #ec-sub{font-size:11px}.ec-network .ec-retry{min-height:30px;padding:0 7px}.ec-main{padding:17px 16px 28px}.ec-scene-header{display:block}.ec-scene-header h3{font-size:12px;margin-bottom:12px}.ec-rooms{width:100%;display:flex}.ec-room{flex:1;padding:8px 7px;font-size:11px!important}.ec-cena[data-view=genio],.ec-cena[data-view=espelho]{width:200%;min-height:0}.ec-cena[data-view=geral]{min-height:0}.ec-scene-shell{border-radius:8px}.ec-hotspot{min-height:32px;min-width:28px}.ec-scene-footer{font-size:11px}.ec-drag-hint{display:block}.ec-selected-mark{font-size:21px;padding-right:12px}.ec-selected{gap:12px}.ec-selected h3 small{display:block;margin:3px 0 0}.ec-selected p{font-size:12px}.ec-selected time{font-size:11px}.ec-team-room{grid-column:1/-1}#ec-equipe{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ec-ag{grid-template-columns:28px minmax(0,1fr) 20px;padding-left:11px;padding-right:11px}.ec-ag small{font-size:11px}.ec-team-foot{font-size:11px}.ec-mov{grid-template-columns:1fr}.ec-journal-head{display:block}.ec-journal-head p{margin-top:6px}.ec-journal{margin-top:22px}}
+@media(max-width:390px){.ec-top{padding:12px}.ec-main{padding:15px 12px 24px}.ec-back{padding:8px 10px;font-size:12px!important}.ec-tit h2{font-size:19px}.ec-tv{padding:8px 10px;font-size:11px!important}.ec-tit p{display:none}.ec-ag{grid-template-columns:25px minmax(0,1fr) 17px;gap:7px}.ec-initial{width:25px;height:25px}.ec-scene-footer{display:block}.ec-drag-hint{margin-top:4px}.ec-selected-mark{display:none}}
+@media(prefers-reduced-motion:reduce){.ec *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 
 /* ===== lupa: buscar para o cliente (buscar agora, avisos, enviadas) ===== */
@@ -1607,40 +1572,28 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   </div>
 </div>
 
-<!-- Escritório: os agentes do Gênio (WhatsApp) e do Espelho (base e app) trabalhando ao vivo. Só com o código de administrador.
-     O movimento vem do diário de atividade (RPC escritorio_atividade): quem fez, o tipo e quando, sem texto de conversa. -->
-<div class="ec" id="escritorio" hidden role="dialog" aria-label="Escritório">
+<!-- Escritório Fortal. A cena representa somente registros do diário de atividade. -->
+<div class="ec" id="escritorio" hidden role="dialog" aria-modal="true" aria-labelledby="ec-title" tabindex="-1">
   <header class="ec-top">
-    <button class="ec-voltar" type="button" id="ec-voltar" aria-label="Voltar aos espelhos">‹ Espelhos</button>
-    <div class="ec-tit"><h2>Escritório</h2><small id="ec-sub">Carregando…</small></div>
-    <button class="abtn ec-tv" type="button" id="ec-tv" hidden>Tela cheia</button>
+    <button class="ec-back" type="button" id="ec-voltar" aria-label="Voltar aos espelhos">← Espelhos</button>
+    <div class="ec-tit"><h2 id="ec-title">Escritório Fortal</h2><p>Gênio &amp; Espelho · uma equipe, duas salas</p></div>
+    <div class="ec-network" id="ec-network" data-state="loading"><span class="ec-network-dot" aria-hidden="true"></span><span id="ec-sub" role="status" aria-live="polite">Aguardando consulta.</span><button class="ec-retry" type="button" id="ec-retry" hidden>Tentar de novo</button></div>
+    <button class="ec-outline ec-tv" type="button" id="ec-tv" hidden>Tela cheia</button>
   </header>
-  <div class="ec-corpo">
-    <div class="ec-grade">
-      <section class="ec-cena-col" aria-label="Escritório">
-        <div class="ec-rolagem" id="ec-rolagem">
-          <div class="ec-cena" id="ec-cena">
-            <div class="ec-palco" id="ec-palco">
-            <canvas id="ec-canvas" width="480" height="216" role="img" aria-label="Escritório em pixel art com duas salas. Na sala do Gênio ficam a recepção com o Gênio e as mesas de Mila, Flávia e Sérgio. Na sala do Espelho ficam Otto, Téo, Rô, Murilo, Dora e Lia. Os bonecos andam quando chega um pedido."></canvas>
-            </div>
-          </div>
-        </div>
-        <p class="ec-dica">Arraste para o lado para ver as duas salas.</p>
+  <div class="ec-main">
+    <div class="ec-scene-header"><h3>Selecione alguém para acompanhar sua atividade</h3><div class="ec-rooms" role="group" aria-label="Visão do escritório"><button type="button" class="ec-room" data-room="geral" aria-pressed="true">Visão geral</button><button type="button" class="ec-room" data-room="genio" aria-pressed="false">Sala Gênio</button><button type="button" class="ec-room" data-room="espelho" aria-pressed="false">Sala Espelho</button></div></div>
+    <div class="ec-stage-layout">
+      <section class="ec-scene-block" aria-label="As duas salas">
+        <div class="ec-scene-shell" id="ec-scene-shell"><div class="ec-rolagem" id="ec-rolagem" tabindex="0" aria-label="Panorama do escritório. Use as setas para navegar pelas salas."><div class="ec-cena" id="ec-cena" data-view="geral"><canvas id="ec-canvas" width="1680" height="945" role="img" aria-label="Escritório Fortal com ambientes em azul marinho, vidro e iluminação dourada. Gênio, Mila, Flávia e Sérgio na sala do Gênio; Otto, Téo, Rô, Murilo, Dora e Lia na sala do Espelho."></canvas><div class="ec-hotspots" id="ec-hotspots"></div><div class="ec-scene-loading" id="ec-scene-loading">Carregando o escritório…</div></div></div></div>
+        <div class="ec-scene-footer"><p class="ec-motion-note" id="ec-motion-note">Movimentos representam registros do diário, sem reproduzir a duração real das tarefas.</p><span class="ec-drag-hint">Arraste para explorar →</span></div>
+        <section class="ec-selected" aria-label="Agente selecionado"><span class="ec-selected-mark" id="ec-selected-mark" aria-hidden="true">G</span><div class="ec-selected-main"><h3><span id="ec-selected-name">Gênio</span><small id="ec-selected-role">Recepção</small></h3><p id="ec-selected-text">Recebe os pedidos do WhatsApp e encaminha à equipe.</p><time id="ec-selected-time">Aguardando o diário de atividade.</time></div></section>
       </section>
-      <aside class="ec-lado">
-        <section>
-          <h3>Agora</h3>
-          <div id="ec-equipe"></div>
-        </section>
-        <section>
-          <h3>Últimos movimentos</h3>
-          <ol class="ec-mov" id="ec-mov"></ol>
-          <p class="ec-vazio" id="ec-vazio">Nenhum movimento hoje ainda.</p>
-        </section>
-      </aside>
+      <aside class="ec-agents" aria-labelledby="ec-agents-title"><div class="ec-aside-head"><h3 id="ec-agents-title">Agora</h3><span>10 agentes</span></div><div id="ec-equipe"></div><p class="ec-team-foot">Os números contam registros recebidos hoje, não tarefas ainda em execução.</p></aside>
     </div>
+    <section class="ec-journal" aria-labelledby="ec-journal-title"><div class="ec-journal-head"><h3 id="ec-journal-title">Últimos movimentos</h3><p id="ec-journal-summary">Diário da equipe</p></div><ol class="ec-mov" id="ec-mov"></ol><p class="ec-vazio" id="ec-vazio">Consultando o diário de atividade…</p></section>
   </div>
 </div>
+
 
 <script>window.ESPELHO_FAIXAS={"consolacao": [[19.7, "17 a 20 m²"], [26, "23 a 26 m²"], [30, "28 a 30 m²"], [40, "37 m²"], [999, "Loja 60 m²"]], "moby-life-pacaembu": [[25, "24 m²"], [26.5, "26 m²"], [27.5, "27 m²"], [29.5, "29 m²"], [30.5, "30 m²"], [31.5, "31 m²"], [38, "33 a 38 m²"], [999, "46 a 55 m²"]], "myone-conceicao": [[37.5, "36,9 a 37,4 m²"], [999, "37,7 a 37,9 m²"]], "nex-angelica": [[22.99, "22 m²"], [27.99, "27 a 28 m²"], [29.99, "29 m² (1º pavimento)"], [999, "45 m²"]], "nex-balthazar": [[21.99, "20 a 21 m²"], [24.99, "22 a 24 m²"], [27.99, "26 a 27 m²"], [999, "Garden 31 a 61 m²"]], "nex-bandeira-paulista": [[22.5, "21 a 22 m²"], [26.5, "24 a 26 m²"], [33, "31 m²"], [36, "35 m² (1 dorm.)"], [999, "44 a 54 m²"]], "nex-bela-cintra": [[21.99, "20 m²"], [26.99, "23 a 26 m²"], [30.99, "27 a 30 m²"], [999, "31 m² ou mais"]], "nex-caiubi": [[21.99, "Studio 20 a 22 m²"], [24.52, "Studio 23 a 24 m²"], [25.49, "1 dorm. 24,5 a 25 m²"], [32.99, "Studio 28 a 32 m²"], [999, "36 a 48 m²"]], "nex-capote-valente": [[23.5, "22 a 23 m²"], [24.8, "24 m²"], [25.5, "25 m²"], [30, "27 m²"], [999, "35 m²"]], "nex-estacao-clinicas": [[24.5, "24 m²"], [31.0, "30 a 31 m²"], [32.0, "31 a 32 m²"], [34.0, "32 a 34 m²"], [40.0, "35 a 40 m²"], [999, "41 a 66 m²"]], "nex-estacao-eucaliptos": [[22.5, "21 a 22 m²"], [23.5, "23 m²"], [25.2, "24 a 25 m²"], [27, "26 m²"], [999, "34 m²"]], "nex-japao-liberdade": [[21, "19 a 20 m²"], [23, "22 m²"], [25, "24 m² (studio e 1 dorm.)"], [99, "42 m² (garden)"]], "nex-miguel-calfat": [[22, "21 m²"], [24.3, "23 m²"], [25, "24 m²"], [26, "25 m²"], [27.5, "26 m²"], [999, "28 m²"]], "nex-parque-augusta": [[27.5, "Studio 26 m²"], [38, "Studio Garden 36 a 37 m²"], [41, "2 dorm. 39 a 40 m²"], [999, "2 dorm. Garden 107 m²"]], "nex-sarutaia": [[21.99, "Studio 20 a 21 m²"], [24.05, "Studio 23 a 24 m²"], [24.5, "Studio 24 m²"], [25.05, "1 dorm. 24 a 25 m²"], [30.5, "27 a 30 m²"], [32.5, "1 dorm. 31 m²"], [999, "40 a 56 m²"]], "raj-2": [[17, "17 m²"], [20, "20 m²"], [26, "26 m²"], [99, "37 e 40 m²"]], "raj-mendes": [[23, "21 a 23 m²"], [26, "26 m²"], [33, "30 a 33 m²"], [99, "39 m² (2 dorms)"]], "sumare": [[18.5, "18 m²"], [22, "21 m²"], [99, "24 a 25 m²"]], "sync-ibirapuera": [[26.1, "Studio 24,5 a 26 m²"], [30.5, "1 dorm 29,7 a 30,5 m²"], [35, "Studio garden 31,7 a 34,8 m²"], [50, "1 dorm garden 42 e 49 m²"], [999, "Garden 63 m²"]], "today-alto-da-boa-vista": [[30.5, "29 a 30 m²"], [40, "38 a 39 m² · 2 dorms."], [43, "42 a 43 m² · 1º pav."], [45, "44 a 45 m²"], [999, "Lojas 132 a 179 m²"]], "today-campo-belo": [[30.5, "Studio e 1 dorm. · 29,9 a 30,3 m²"], [31.5, "1 dorm. · 30,7 a 31,3 m²"], [45, "2 dorms · 39,8 a 40,3 m²"], [9999, "Lojas · 66 a 344 m²"]], "today-centro": [[30.1, "29 a 30 m²"], [36.3, "31 a 36 m²"], [37.9, "37 a 38 m²"], [40.6, "39 a 40 m²"], [60, "58 a 59 m²"], [999, "299 m² (loja)"]], "today-chacara-santo-antonio": [[30.99, "1 dorm. 29 a 30 m²"], [999, "2 dorms. 39 a 40 m²"]], "today-gomes-de-carvalho": [[26.0, "25 a 26 m²"], [27.0, "26 a 27 m²"], [28.0, "27 a 28 m²"], [31.0, "30 a 31 m²"], [39.0, "35 a 39 m²"], [46.0, "40 a 46 m²"], [61.0, "59 a 61 m²"]], "today-ibirapuera": [[29.6, "1 dorm 29,59 m²"], [30.2, "1 dorm 30 a 30,2 m²"], [32, "1 dorm 31,90 m²"], [999, "Loja 81,84 m²"]], "today-joaquim-tavora": [[29.99, "26 a 29 m²"], [32.99, "30 a 32 m²"], [36.99, "34 a 36 m²"], [41.99, "38 a 41 m²"], [44.99, "43 a 44 m²"], [999, "Loja 161 m²"]], "today-moema": [[28, "Studio 26,6 a 27,5 m²"], [32, "1 dorm 31 a 31,6 m²"], [41, "2 dorms 38,7 a 40,4 m²"], [9999, "Lojas 82 a 392 m²"]], "today-paraiso": [[29.99, "29 a 30 m²"], [37.1, "36 a 37 m²"], [42.2, "42 m²"], [80, "70 a 79 m²"], [999, "148 m²"]], "today-paulista": [[30.7, "Studio e 1 dorm · 30,02 a 30,66 m²"], [999, "Lojas · 33,68 e 98,77 m²"]], "today-perdizes": [[29.0, "27 a 29 m²"], [30.6, "30 a 30,6 m²"], [39.31, "38 a 39,3 m²"], [41.7, "41 a 41,7 m²"], [49.0, "48,8 m²"], [64.0, "63 m²"], [999, "Lojas de 200 a 400 m²"]], "today-platina": [[29.99, "1 dorm. 28,85 a 29,64 m²"], [30.99, "1 dorm. 30,03 a 30,76 m²"], [39.99, "1 dorm. garden 36,46 a 37,19 m²"], [40.99, "2 dorms. 40,31 e 40,82 m²"], [45.99, "1 dorm. garden 43,03 a 45,14 m²"], [69.99, "2 dorms. garden 69,00 m²"], [999, "Loja 131,03 m²"]], "today-pompeia": [[29.8, "1 dorm e studio 29 a 30 m²"], [39.5, "2 dorms 37 a 39 m²"], [56, "Loja 55 m²"], [76, "2 dorms 75 m²"], [999, "Loja 186 m²"]], "today-saude": [[29.99, "1 dorm 28 a 30 m²"], [36.0, "32 a 36 m²"], [39.99, "2 dorms 39 a 40 m²"], [59.99, "2 dorms 50 a 53 m² (1º andar)"], [99.99, "2 dorms R2V 63 m²"], [999.0, "Loja 233 m²"]], "today-tatuape": [[31.3, "30 a 31 m²"], [36, "32 a 36 m² · lojas"], [43, "40 a 43 m²"], [62, "51 a 61 m² · garden"], [78, "76 a 77 m² · garden"], [999, "142 m² · loja"]], "today-vila-clementino": [[29.99, "1 dorm. 29 a 30 m²"], [31.99, "1 dorm. 30 a 31,5 m²"], [34.99, "1 dorm. 33 a 34 m²"], [60, "1 dorm. 36 a 60 m² (1º pav.)"], [999, "Loja 101,61 m²"]], "today-vila-mariana": [[25.6, "24,5 a 25,5 m²"], [28.0, "26 a 28 m²"], [31.7, "28,5 a 31,5 m²"], [35.0, "32 a 35 m²"], [40.0, "38 a 40 m²"], [60.0, "55 m²"], [999, "Loja"]], "urby-paulista": [[24, "20 a 24 m²"], [27, "26 m²"], [30, "28 a 30 m²"], [34, "32 a 33 m²"], [999, "48 a 56 m²"]], "very-faria-lima": [[22.99, "Studio 22 m²"], [30.99, "1 dorm. 30 m²"], [33.99, "1 dorm. 31 a 33 m²"], [999, "2 dorms. 39 m²"]]};window.ESPELHO_NOMES={"consolacao": {"curto": "Consolação", "longo": "Nurban Consolação"}, "moby-life-pacaembu": {"curto": "Moby Pacaembu", "longo": "Moby Life Pacaembu"}, "myone-conceicao": {"curto": "My One Conceição", "longo": "My One Estação Conceição"}, "nex-angelica": {"curto": "NEX Angélica", "longo": "NEX One Angélica"}, "nex-balthazar": {"curto": "NEX Balthazar", "longo": "NEX One Balthazar"}, "nex-bandeira-paulista": {"curto": "NEX Bandeira Paulista", "longo": "NEX One Bandeira Paulista"}, "nex-bela-cintra": {"curto": "NEX Bela Cintra", "longo": "NEX One Bela Cintra"}, "nex-caiubi": {"curto": "NEX Caiubi", "longo": "NEX One Caiubi"}, "nex-capote-valente": {"curto": "NEX Capote Valente", "longo": "NEX One Capote Valente"}, "nex-estacao-clinicas": {"curto": "NEX Estação Clínicas", "longo": "NEX One Estação Clínicas"}, "nex-estacao-eucaliptos": {"curto": "NEX Estação Eucaliptos", "longo": "NEX One Estação Eucaliptos"}, "nex-japao-liberdade": {"curto": "NEX Japão-Liberdade", "longo": "NEX One Estação Japão-Liberdade"}, "nex-miguel-calfat": {"curto": "NEX Miguel Calfat", "longo": "NEX One Miguel Calfat"}, "nex-parque-augusta": {"curto": "NEX Parque Augusta", "longo": "NEX One Parque Augusta"}, "nex-sarutaia": {"curto": "NEX Sarutaiá", "longo": "NEX One Sarutaiá Jardins"}, "raj-2": {"curto": "RAJ 2", "longo": "RAJ Home II"}, "raj-mendes": {"curto": "RAJ Mendes", "longo": "RAJ Mendes"}, "sumare": {"curto": "Sumaré", "longo": "Nurban Avenida Sumaré"}, "sync-ibirapuera": {"curto": "Sync Ibirapuera", "longo": "Sync Ibirapuera"}, "today-alto-da-boa-vista": {"curto": "Today Alto da Boa Vista", "longo": "Today Alto da Boa Vista"}, "today-campo-belo": {"curto": "Today Campo Belo", "longo": "Today Campo Belo"}, "today-centro": {"curto": "Today Centro", "longo": "Today Centro"}, "today-chacara-santo-antonio": {"curto": "Today Chácara Sto. Antônio", "longo": "Today Chácara Santo Antônio"}, "today-gomes-de-carvalho": {"curto": "Today Gomes de Carvalho", "longo": "Today Gomes de Carvalho"}, "today-ibirapuera": {"curto": "Today Ibirapuera", "longo": "Today Ibirapuera"}, "today-joaquim-tavora": {"curto": "Today Joaquim Távora", "longo": "Today Joaquim Távora"}, "today-moema": {"curto": "Today Moema", "longo": "Today Moema"}, "today-paraiso": {"curto": "Today Paraíso", "longo": "Today Paraíso"}, "today-paulista": {"curto": "Today Paulista", "longo": "Today Paulista"}, "today-perdizes": {"curto": "Today Perdizes", "longo": "Today Perdizes"}, "today-platina": {"curto": "Today Platina", "longo": "Today Platina"}, "today-pompeia": {"curto": "Today Pompéia", "longo": "Today Pompéia"}, "today-saude": {"curto": "Today Saúde", "longo": "Today Saúde"}, "today-tatuape": {"curto": "Today Tatuapé", "longo": "Today Tatuapé"}, "today-vila-clementino": {"curto": "Today Vila Clementino", "longo": "Today Vila Clementino"}, "today-vila-mariana": {"curto": "Today Vila Mariana", "longo": "Today Vila Mariana"}, "urby-paulista": {"curto": "Urby Paulista", "longo": "Urby Paulista"}, "very-faria-lima": {"curto": "Very Faria Lima", "longo": "Very Estação Faria Lima"}};window.ESPELHO_CENTRAL=["raj-mendes", "consolacao", "sumare", "nex-bela-cintra", "raj-2", "moby-life-pacaembu", "myone-conceicao", "nex-angelica", "nex-balthazar", "nex-bandeira-paulista", "nex-caiubi", "nex-capote-valente", "nex-estacao-clinicas", "nex-estacao-eucaliptos", "nex-japao-liberdade", "nex-miguel-calfat", "nex-parque-augusta", "nex-sarutaia", "urby-paulista", "very-faria-lima", "today-platina", "sync-ibirapuera", "today-vila-clementino", "today-chacara-santo-antonio", "today-ibirapuera", "today-alto-da-boa-vista", "today-campo-belo", "today-gomes-de-carvalho", "today-vila-mariana", "today-joaquim-tavora", "today-saude", "today-moema", "today-paraiso", "today-paulista", "today-centro", "today-perdizes", "today-pompeia", "today-tatuape"];</script>
 <script>
@@ -5118,613 +5071,400 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   window.DOCS = {abrir, docsDoProjeto};
 })();
 </script>
-<script>// Escritório: os agentes do Gênio (WhatsApp) e do Espelho (base e app) trabalhando ao vivo. Só com o código de administrador.
-// O movimento vem do diário (RPC escritorio_atividade): quem fez, o tipo e quando. Nada de texto de conversa ou dado de cliente.
-(function(){
+<script>/* Escritório Fortal: apresentação do diário existente, sem produzir atividade. */
+(function () {
   'use strict';
-  const A = window.APP; if(!A) return;
+  const A = window.APP;
   const $ = id => document.getElementById(id);
-  const W = 480, H = 216, CEL = 4, COLS = W / CEL, ROWS = Math.ceil(H / CEL);
-  const reduz = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : {matches: false};
-  const calmo = () => reduz.matches;
-  const P = (x, y) => ({x, y});
-  const hhmm = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-
-  // ---------- equipe ----------
-  const pele = {e: '#2a1e16', o: '#7de3f4', m: '#aab3bf', a: '#c8a24a'};
+  const dialog = $('escritorio');
+  if (!A || !dialog) return;
+  const W = 1672, H = 941;
   const EQUIPE = [
-    {id: 'genio', nome: 'Gênio', art: 'o', papel: 'recepção', sala: 0, faz: 'Recebe as mensagens do WhatsApp e leva cada pedido para quem resolve.',
-      pal: {h: '#2b2118', s: '#e2b48c', c: '#22324a', g: '#8e7334', p: '#1b2433', f: '#111821'}, balcao: {x: 46, top: 132}},
-    {id: 'mila', nome: 'Mila', art: 'a', papel: 'material', sala: 0, faz: 'Espelho, fotos, plantas, book e link para o cliente.',
-      pal: {h: '#6b3b22', s: '#f0c6a0', c: '#2f7f78', g: '#24635e', p: '#3a4250', f: '#22262d'}, mesa: {x: 112, top: 84}},
-    {id: 'flavia', nome: 'Flávia', art: 'a', papel: 'fluxo', sala: 0, faz: 'Fluxo de pagamento, card da proposta e rentabilidade.',
-      pal: {h: '#3a2416', s: '#8c5a3c', c: '#557a3d', g: '#43612f', p: '#33302a', f: '#1d1b18'}, mesa: {x: 184, top: 84}},
-    {id: 'sergio', nome: 'Sérgio', art: 'o', papel: 'secretário', sala: 0, faz: 'Compromissos, avisos no WhatsApp e Google Agenda.',
-      pal: {h: '#1e1a17', s: '#b9805a', c: '#8a3346', g: '#6e2838', p: '#2b2f36', f: '#18191c'}, mesa: {x: 148, top: 140}},
-    {id: 'otto', nome: 'Otto', art: 'o', papel: 'organização', sala: 1, faz: 'Confere os projetos, avisa as buscas salvas e conta o que mudou.',
-      pal: {h: '#d8c9a8', s: '#d9a47e', c: '#4a5f8c', g: '#3a4c72', p: '#2e3440', f: '#1e2229'}, mesa: {x: 274, top: 84}, vai: 'quadro'},
-    {id: 'teo', nome: 'Téo', art: 'o', papel: 'tabelas', sala: 1, faz: 'Carrega as tabelas novas de preço e confere as somas.',
-      pal: {h: '#4a2c1a', s: '#e8b98f', c: '#b0602e', g: '#8f4c22', p: '#2f3338', f: '#1c1d20'}, mesa: {x: 344, top: 84}, vai: 'arquivo'},
-    {id: 'ro', nome: 'Rô', art: 'o', papel: 'robô de status', sala: 1, faz: 'Acompanha o sistema das construtoras: disponível, reservada e vendida.',
-      pal: {h: '#aab3bf', s: '#aab3bf', c: '#6b7480', g: '#4f5864', p: '#4f5864', f: '#2f353d'}, mesa: {x: 414, top: 84}, vai: 'servidor', robo: true},
-    {id: 'murilo', nome: 'Murilo', art: 'o', papel: 'mercado', sala: 1, faz: 'Recebe a Órulo e atualiza as outras incorporadoras.',
-      pal: {h: '#2a1f1a', s: '#c99168', c: '#6a4c93', g: '#523a73', p: '#2b2d35', f: '#1a1b1f'}, mesa: {x: 274, top: 140}, vai: 'servidor'},
-    {id: 'dora', nome: 'Dora', art: 'a', papel: 'documentos', sala: 1, faz: 'Fichas, plantas, books e a central de documentação.',
-      pal: {h: '#8a5a2b', s: '#f2cfae', c: '#a8577a', g: '#8a4362', p: '#33303a', f: '#1f1c22'}, mesa: {x: 344, top: 140}, vai: 'arquivo'},
-    {id: 'lia', nome: 'Lia', art: 'a', papel: 'lupa', sala: 1, faz: 'Busca para o cliente e links de seleção.',
-      pal: {h: '#1a1412', s: '#a86f4c', c: '#3d86b8', g: '#2f6c95', p: '#2b3038', f: '#191b1f'}, mesa: {x: 414, top: 140}},
+    {id:'genio', nome:'Gênio', papel:'Recepção', sala:0, desc:'Recebe os pedidos do WhatsApp e encaminha à equipe.', box:[224,300,132,124], home:[442,551], exit:[[450,605],[559,661]]},
+    {id:'mila', nome:'Mila', papel:'Material', sala:0, desc:'Espelho, fotos, plantas, book e link para o cliente.', box:[398,214,83,93], home:[566,406], exit:[[450,427],[450,605],[559,661]]},
+    {id:'flavia', nome:'Flávia', papel:'Fluxo', sala:0, desc:'Fluxo de pagamento, card da proposta e rentabilidade.', box:[648,227,71,94], home:[767,441], exit:[[777,593],[783,665]]},
+    {id:'sergio', nome:'Sérgio', papel:'Secretário', sala:0, desc:'Compromissos, avisos no WhatsApp e Google Agenda.', box:[570,336,115,110], home:[753,581], exit:[[783,665]]},
+    {id:'otto', nome:'Otto', papel:'Organização', sala:1, desc:'Confere os projetos, avisa buscas salvas e conta o que mudou.', box:[1024,239,88,95], home:[1142,445], exit:[[1143,514],[1120,669],[1040,686]]},
+    {id:'teo', nome:'Téo', papel:'Tabelas', sala:1, desc:'Carrega tabelas novas de preço, confere as somas e atualiza a revenda One todo dia.', box:[1205,248,106,94], home:[1357,463], exit:[[1351,534],[1350,672],[1040,686]]},
+    {id:'ro', nome:'Rô', papel:'Robô de status', sala:1, desc:'Acompanha disponível, reservada e vendida nos sistemas das construtoras.', box:[1425,269,103,92], home:[1587,490], exit:[[1593,602],[1562,698],[1350,692],[1040,686]]},
+    {id:'murilo', nome:'Murilo', papel:'Mercado', sala:1, desc:'Recebe a Órulo e atualiza as outras incorporadoras.', box:[953,357,118,121], home:[1117,593], exit:[[1120,669],[1040,686]]},
+    {id:'dora', nome:'Dora', papel:'Documentos', sala:1, desc:'Fichas, plantas, books e central de documentação.', box:[1192,383,102,119], home:[1351,633], exit:[[1350,681],[1040,686]]},
+    {id:'lia', nome:'Lia', papel:'Lupa', sala:1, desc:'Busca para o cliente e links de seleção.', box:[1430,400,129,136], home:[1580,670], exit:[[1546,707],[1350,692],[1040,686]]}
   ];
-  const AG = {};
-  for(const a of EQUIPE){
-    const m = a.mesa || a.balcao;
-    Object.assign(a, {pal: Object.assign({}, pele, a.pal), sentado: P(m.x, m.top + 5), frente: P(m.x, m.top + 25), placa: P(m.x, m.top + 13.5),
-      x: m.x, y: m.top + 5, dir: 'baixo', quadro: 0, tAnda: 0, vel: a.id === 'genio' ? 58 : 50, path: [], aoChegar: null,
-      estado: 'sentado', fila: [], job: null, t: 0, bolha: null, carrega: false, papeis: 0, ocioso: 0, hoje: 0});
-    AG[a.id] = a;
-  }
-  const FORA = P(-12, 176), PORTA = P(8, 176);
-  const LUGAR = {cafe: P(207, 68), servidor: P(465, 84), arquivo: P(246, 76), quadro: P(298, 50)};
+  const AG = Object.fromEntries(EQUIPE.map((a,i) => [a.id,{...a,index:i,count:0,last:null}]));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const mobile = matchMedia('(max-width: 820px)');
+  const canvas = $('ec-canvas'), ctx = canvas.getContext('2d');
+  const scene = $('ec-cena'), viewport = $('ec-rolagem');
+  const state = {open:false, epoch:0, code:null, revoked:null, inFlight:null, poll:null, authTimer:null,
+    events:[], seen:new Set(), cursor:null, loaded:false, selected:'genio', lastSignal:null, countDay:new Date().toLocaleDateString('en-CA'),
+    queue:[], active:null, raf:null, view:mobile.matches?'genio':'geral', focus:null, pushed:false,
+    images:null, imagePromise:null, imageError:false, motionReady:false, stock:null, stockAt:0};
+  const scriptURL = document.currentScript && document.currentScript.src || location.href;
+  const asset = name => new URL(name, scriptURL).href;
+  const visible = () => document.visibilityState === 'visible';
+  const currentCode = () => typeof A.codigo === 'function' ? String(A.codigo() || '') : '';
+  const authorized = () => !!currentCode() && typeof A.nivel === 'function' && A.nivel() === 'admin' && state.revoked !== currentCode();
+  const day = d => new Date(d).toLocaleDateString('en-CA');
+  const clock = d => new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const stamp = d => new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const safe = (s, max=160) => typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g,' ').slice(0,max) : '';
+  const keyOf = e => [e.a,e.t,e.em,e.p || '',e.n == null ? '' : e.n].join('|');
 
-  // ---------- chão onde dá para andar (células de 4 px) ----------
-  const livre = new Uint8Array(COLS * ROWS).fill(1);
-  function bloqueia(x0, y0, x1, y1){
-    for(let cy = Math.max(0, Math.floor(y0 / CEL)); cy <= Math.min(ROWS - 1, Math.floor((y1 - 1) / CEL)); cy++)
-      for(let cx = Math.max(0, Math.floor(x0 / CEL)); cx <= Math.min(COLS - 1, Math.floor((x1 - 1) / CEL)); cx++) livre[cy * COLS + cx] = 0;
-  }
-  bloqueia(0, 0, W, 46);
-  bloqueia(226, 0, 238, 150); bloqueia(226, 186, 238, H);
-  bloqueia(0, 0, 4, 162); bloqueia(0, 190, 4, H); bloqueia(W - 4, 0, W, H);
-  for(const a of EQUIPE){ if(a.mesa) bloqueia(a.mesa.x - 22, a.mesa.top + 8, a.mesa.x + 22, a.mesa.top + 21); }
-  bloqueia(20, 140, 72, 153);
-  bloqueia(198, 0, 216, 62); bloqueia(454, 0, 476, 78); bloqueia(236, 0, 256, 70);
-  bloqueia(2, 50, 16, 68); bloqueia(214, 198, 228, 214); bloqueia(464, 198, 478, 214); bloqueia(10, 150, 18, 160);
-
-  function cel(p){ return Math.max(0, Math.min(ROWS - 1, Math.floor(p.y / CEL))) * COLS + Math.max(0, Math.min(COLS - 1, Math.floor(p.x / CEL))); }
-  function reta(x0, y0, x1, y1){
-    if(x0 === x1){ const s = y1 > y0 ? 1 : -1; for(let y = y0; ; y += s){ if(!livre[y * COLS + x0]) return false; if(y === y1) return true; } }
-    if(y0 === y1){ const s = x1 > x0 ? 1 : -1; for(let x = x0; ; x += s){ if(!livre[y0 * COLS + x]) return false; if(x === x1) return true; } }
-    return false;
-  }
-  function rota(de, para){
-    const ini = cel(de), fim = cel(para);
-    if(ini === fim) return [P(para.x, para.y)];
-    const veio = new Int32Array(COLS * ROWS).fill(-1); veio[ini] = ini;
-    const fila = [ini]; let k = 0;
-    while(k < fila.length){
-      const i = fila[k++]; if(i === fim) break;
-      const cx = i % COLS, cy = (i / COLS) | 0;
-      for(const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){
-        const nx = cx + dx, ny = cy + dy; if(nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
-        const j = ny * COLS + nx; if(veio[j] !== -1 || (!livre[j] && j !== fim)) continue;
-        veio[j] = i; fila.push(j);
-      }
+  function text(e) {
+    const p = e.p ? ' · '+e.p : '', n = e.n || 1;
+    let s;
+    switch (e.a) {
+      case 'genio': s=e.t==='esclarecimento'?'Explicou a última resposta':e.t==='ajuda'?'Explicou como usar o Gênio':e.t==='nome_cliente'?'Anotou o nome do cliente':'Respondeu uma conversa no WhatsApp'; break;
+      case 'mila': s=/^(sugerir|buscar|unidades|mais)$/.test(e.t)?'Enviou unidades no WhatsApp':e.t==='comparar'?'Comparou unidades':e.t==='link'?'Montou um link de seleção':e.t==='material'?'Guardou material novo':'Enviou informação de projeto'; break;
+      case 'flavia': s=e.t==='card'?'Fez o card da proposta':e.t==='rentabilidade'?'Fez um estudo de rentabilidade':'Montou um fluxo de pagamento'; break;
+      case 'sergio': s=e.t==='google'?'Cuidou da conexão com Google Agenda':e.t==='visita'?'Registrou uma visita':'Anotou um compromisso'; break;
+      case 'otto': s=e.t==='conferencia'?'Conferiu '+(n===1?'um projeto':n+' projetos'):e.t==='aviso'?'Avisou uma busca salva':e.t==='mudancas'?'Contou o que mudou nos projetos':e.t==='relatorio'?'Montou o relatório da curadoria':'Anotou um ajuste para a curadoria'; break;
+      case 'teo': s=e.t==='revenda'?'Atualizou a revenda One':'Carregou uma tabela nova'; break;
+      case 'ro': s='Registrou '+n+(n===1?' mudança de status':' mudanças de status'); break;
+      case 'murilo': s=e.t==='mercado'?'Respondeu sobre o Mercado':e.t==='webhook'?'Recebeu aviso da Órulo':'Atualizou o Mercado com a Órulo'; break;
+      case 'dora': s=e.t==='documento'?'Enviou documento da central':'Atualizou a central de documentos'; break;
+      case 'lia': s=e.t==='abriu'?'Registrou a abertura de um link':'Criou um link para cliente'; break;
+      default: s='Registrou uma atividade';
     }
-    if(veio[fim] === -1) return [P(para.x, para.y)];
-    const cs = []; for(let i = fim; i !== ini; i = veio[i]) cs.push(i); cs.push(ini); cs.reverse();
-    // caminho em "L": do ponto atual, o mais longe que dá para chegar com uma reta ou uma curva
-    const pts = []; let i = 0;
-    const xy = c => [c % COLS, (c / COLS) | 0], centro = (x, y) => P(x * CEL + CEL / 2, y * CEL + CEL / 2);
-    while(i < cs.length - 1){
-      let j = cs.length - 1, curva = null;
-      for(; j > i + 1; j--){
-        const [ax, ay] = xy(cs[i]), [bx, by] = xy(cs[j]);
-        if((ax === bx || ay === by) && reta(ax, ay, bx, by)) break;
-        if(ax !== bx && ay !== by){
-          if(reta(ax, ay, bx, ay) && reta(bx, ay, bx, by)){ curva = centro(bx, ay); break; }
-          if(reta(ax, ay, ax, by) && reta(ax, by, bx, by)){ curva = centro(ax, by); break; }
-        }
-      }
-      if(j <= i + 1) j = i + 1;
-      if(curva) pts.push(curva);
-      const [x, y] = xy(cs[j]); pts.push(centro(x, y)); i = j;
-    }
-    pts.push(P(para.x, para.y));
-    return pts;
+    return (e.ok===false?'Registro com falha: ':'')+s+p;
   }
-  function mover(a, para, aoChegar){
-    a.path = calmo() ? [P(para.x, para.y)] : rota(a, para);
-    a.aoChegar = aoChegar || null;
-    if(calmo()){ a.x = para.x; a.y = para.y; a.path = []; a.dir = 'baixo'; const cb = a.aoChegar; a.aoChegar = null; if(cb) cb(); }
+  function network(status, message) {
+    $('ec-network').dataset.state=status;
+    $('ec-sub').textContent=message;
+    $('ec-retry').hidden=status!=='error';
   }
-  const noLugar = a => !a.path.length && Math.abs(a.x - a.sentado.x) < .5 && Math.abs(a.y - a.sentado.y) < .5;
-
-  // ---------- bonecos (10 x 14 px) ----------
-  const CAB = {
-    baixo: ['...hhhh...', '..hhhhhh..', '..hssssh..', '..sesses..', '..ssssss..', '...ssss...'],
-    cima: ['...hhhh...', '..hhhhhh..', '..hhhhhh..', '..hhhhhh..', '..hhhhhh..', '...ssss...'],
-    lado: ['...hhhh...', '..hhhhhh..', '..hhhsss..', '..hhssse..', '..hsssss..', '...ssss...'],
-  };
-  const ROBO = {
-    baixo: ['....a.....', '..mmmmmm..', '..mmmmmm..', '..mommom..', '..mmmmmm..', '...mmmm...'],
-    cima: ['....a.....', '..mmmmmm..', '..mmmmmm..', '..mmmmmm..', '..mmmmmm..', '...mmmm...'],
-    lado: ['....a.....', '..mmmmmm..', '..mmmmmm..', '..mmmmmo..', '..mmmmmm..', '...mmmm...'],
-  };
-  const CORPO = {
-    baixo: ['..cccccc..', '.cccggccc.', '.sccggccs.', '..cccccc..'],
-    cima: ['..cccccc..', '.cccccccc.', '.sccccccs.', '..cccccc..'],
-    lado: ['...cccc...', '..cccccc..', '..ccccsc..', '...cccc...'],
-  };
-  const PERNAS = {
-    frente: [['..pppppp..', '..pp..pp..', '..pp..pp..', '..ff..ff..'], ['..pppppp..', '..pp..pp..', '..ff..pp..', '......ff..'], ['..pppppp..', '..pp..pp..', '..pp..ff..', '..ff......']],
-    lado: [['...pppp...', '...pp.pp..', '..pp...pp.', '..ff...ff.'], ['...pppp...', '....pp....', '....pp....', '....ff....']],
-  };
-  function linhas(a, dir, q){
-    const d = dir === 'esq' || dir === 'dir' ? 'lado' : dir;
-    const pernas = d === 'lado' ? PERNAS.lado[q % 2] : PERNAS.frente[[0, 1, 0, 2][q % 4]];
-    return (a.robo ? ROBO : CAB)[d].concat(CORPO[d], pernas);
+  function resetData() {
+    state.events=[]; state.seen.clear(); state.cursor=null; state.loaded=false; state.lastSignal=null; state.countDay=day(Date.now());
+    state.queue=[]; state.active=null; state.stock=null; state.stockAt=0;
+    for (const a of Object.values(AG)) { a.count=0; a.last=null; }
+    update(); draw();
   }
-
-  // ---------- canvas ----------
-  const cv = $('ec-canvas'), ctx = cv.getContext('2d');
-  const C = {};
-  function lerCores(){
-    const s = getComputedStyle(document.documentElement);
-    for(const k of ['parede', 'parede2', 'rodape', 'divisa', 'piso1', 'piso2', 'carpete1', 'carpete2', 'mesa', 'mesa-frente', 'monitor', 'metal', 'planta', 'planta2', 'vaso', 'tapete', 'sombra', 'papel', 'quadro', 'placa', 'ouro'])
-      C[k] = s.getPropertyValue('--ec-' + k).trim();
-    for(const k of ['disp', 'res', 'vend', 'off']) C[k] = s.getPropertyValue('--' + k).trim();
+  function checkAccess() {
+    const code=currentCode();
+    if (!authorized()) { closeUI(); resetData(); document.querySelector('#tabs .ec-tab')?.remove(); state.code=null; return false; }
+    if (state.code && state.code!==code) { closeUI(); resetData(); state.code=code; return false; }
+    state.code=code;
+    if (rollDay()) update();
+    return true;
   }
-  lerCores();
-  const temaEscuro = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
-  if(temaEscuro && temaEscuro.addEventListener) temaEscuro.addEventListener('change', lerCores);
-  if(window.MutationObserver) new MutationObserver(lerCores).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
-  const logo = new Image(); let logoOk = false; logo.onload = () => { logoOk = true; }; logo.src = 'fortal-logo.png';
-  const ret = (cor, x, y, w, h) => { ctx.fillStyle = cor; ctx.fillRect(x, y, w, h); };
-
-  function pinta(rows, x, y, pal, flip){
-    const h = rows.length, x0 = Math.round(x) - 5, y0 = Math.round(y) - h;
-    for(let r = 0; r < h; r++){ const row = rows[r];
-      for(let c = 0; c < 10; c++){ const ch = row[c]; if(ch === '.') continue; ctx.fillStyle = pal[ch]; ctx.fillRect(x0 + (flip ? 9 - c : c), y0 + r, 1, 1); } }
+  function rollDay() {
+    if (state.countDay===day(Date.now())) return false;
+    state.countDay=day(Date.now());
+    for (const a of Object.values(AG)) a.count=0;
+    for (const e of state.events) if (day(e.em)===state.countDay) AG[e.a].count++;
+    return true;
   }
-  function ceu(){
-    const d = new Date(), h = d.getHours() + d.getMinutes() / 60;
-    if(h >= 6.5 && h < 17.5) return {ceu: '#bcd6ec', predio: '#93a9bc', luz: 0};
-    if((h >= 5.5 && h < 6.5) || (h >= 17.5 && h < 19)) return {ceu: '#e9b48a', predio: '#6f6378', luz: .25};
-    return {ceu: '#0e1a2b', predio: '#22324a', luz: .45};
-  }
-  function janela(x, y, w, h, semente){
-    const c = ceu();
-    ret(C.rodape, x - 1, y - 1, w + 2, h + 2); ret(c.ceu, x, y, w, h);
-    let s = semente; const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-    for(let bx = x; bx < x + w;){
-      const bw = 6 + Math.floor(rnd() * 8), bh = 6 + Math.floor(rnd() * (h - 7)), ww = Math.min(bw, x + w - bx);
-      ret(c.predio, bx, y + h - bh, ww, bh);
-      for(let jy = y + h - bh + 2; jy < y + h - 1; jy += 3) for(let jx = bx + 1; jx < bx + ww - 1; jx += 2) if(rnd() < c.luz) ret('#e3c065', jx, jy, 1, 1);
-      bx += bw + 1;
-    }
-    ret(C.rodape, x + Math.floor(w / 2), y, 1, h);
-  }
-  function relogio(cx, cy){
-    ret(C.rodape, cx - 6, cy - 5, 12, 10); ret(C.rodape, cx - 5, cy - 6, 10, 12);
-    ret(C.papel, cx - 5, cy - 4, 10, 8); ret(C.papel, cx - 4, cy - 5, 8, 10);
-    const d = new Date(), m = d.getMinutes() / 60 * Math.PI * 2, hr = ((d.getHours() % 12) + d.getMinutes() / 60) / 12 * Math.PI * 2;
-    for(let i = 1; i <= 4; i++) ret(C.placa, cx + Math.round(Math.sin(m) * i), cy - Math.round(Math.cos(m) * i), 1, 1);
-    for(let i = 1; i <= 2; i++) ret(C.placa, cx + Math.round(Math.sin(hr) * i), cy - Math.round(Math.cos(hr) * i), 1, 1);
-    ret(C.placa, cx, cy, 1, 1);
-  }
-  // quadro da sala do Espelho: as unidades de todos os projetos, na proporção disponível / reservada / vendida
-  let quadroCache = null, quadroT = 0;
-  function proporcoes(){
-    if(quadroCache && Date.now() - quadroT < 60e3) return quadroCache;
-    let d = 0, r = 0, v = 0;
-    const dados = A.dados && A.dados();
-    for(const p of (dados && dados.projetos) || []) for(const u of p.unidades || []){ const st = u[6]; if(st === 'disponivel') d++; else if(st === 'reservada') r++; else if(st === 'vendida') v++; }
-    quadroCache = {d, r, v}; quadroT = Date.now(); return quadroCache;
-  }
-  function quadroEspelho(x, y, w, h){
-    ret(C.rodape, x - 1, y - 1, w + 2, h + 2); ret(C.quadro, x, y, w, h);
-    const {d, r, v} = proporcoes(), tot = d + r + v, n = 6 * 13;
-    const nd = tot ? Math.round(n * d / tot) : 0, nr = tot ? Math.round(n * r / tot) : 0;
-    for(let i = 0; i < n; i++){
-      const cor = !tot ? C.off : i < nd ? C.disp : i < nd + nr ? C.res : C.vend;
-      ret(cor, x + 3 + (i % 13) * 5, y + 3 + Math.floor(i / 13) * 4, 4, 3);
-    }
-  }
-  function placaLogo(x, y, w, h){
-    ret(C.placa, x, y, w, h);
-    if(logoOk){ const lh = h - 4, lw = Math.round(lh * 193 / 200); ctx.drawImage(logo, x + Math.round((w - lw) / 2), y + 2, lw, lh); }
-  }
-  function bandeira(agora){
-    ret(C.placa, 13, 92, 2, 66); ret(C.ouro, 12, 90, 4, 2); ret(C.sombra, 10, 157, 8, 2);
-    const fx = 15, fy = 94, fw = 28, fh = 19;
-    for(let i = 0; i < fw; i++){
-      const dy = calmo() ? 0 : Math.round(Math.sin(agora / 420 + i / 5) * (i / fw) * 1.6);
-      ret('#1b2a44', fx + i, fy + dy, 1, fh);
-      ret(C.ouro, fx + i, fy + dy + fh - 2, 1, 1);
-    }
-    if(logoOk) ctx.drawImage(logo, fx + 8, fy + 2, 13, 13);
-  }
-  function planta(x, y){
-    ret(C.sombra, x - 5, y - 1, 10, 2); ret(C.vaso, x - 4, y - 6, 8, 6);
-    ret(C.planta2, x - 6, y - 13, 12, 7); ret(C.planta, x - 4, y - 16, 8, 6); ret(C.planta, x - 7, y - 11, 4, 3); ret(C.planta, x + 3, y - 12, 4, 3);
-  }
-  function cafeteira(agora){
-    const x = 200, y = 44;
-    ret(C.sombra, x - 1, y + 17, 16, 2); ret(C.monitor, x, y, 14, 17); ret(C.placa, x, y, 14, 3); ret(C.papel, x + 5, y + 12, 4, 3);
-    if(EQUIPE.some(a => a.estado === 'no-cafe') && !calmo()){ const f = Math.floor(agora / 250) % 3; ret(C.papel, x + 6 + (f % 2), y + 9 - f, 1, 1); }
-  }
-  function servidor(agora){
-    const x = 456, y = 44, ativo = EQUIPE.some(a => (a.id === 'ro' || a.id === 'murilo') && (a.estado === 'consultando' || a.estado === 'trabalhando'));
-    ret(C.sombra, x - 1, y + 33, 20, 2); ret(C.monitor, x, y, 18, 33);
-    for(let i = 0; i < 5; i++){
-      ret(C.metal, x + 2, y + 3 + i * 6, 14, 4);
-      const pisca = ativo && !calmo() ? (Math.floor(agora / 180) + i) % 3 === 0 : i % 2 === 0;
-      ret(pisca ? C.ouro : '#4caf6a', x + 13, y + 4 + i * 6, 1, 1);
-    }
-  }
-  function arquivo(){
-    const x = 238, y = 44;
-    ret(C.sombra, x - 1, y + 25, 18, 2); ret(C.metal, x, y, 16, 25);
-    for(let i = 0; i < 3; i++){ ret(C.monitor, x + 1, y + 2 + i * 8, 14, 1); ret(C.papel, x + 6, y + 5 + i * 8, 4, 1); }
-  }
-  function balcao(){
-    const {x, top} = AG.genio.balcao;
-    ret(C.mesa, x - 24, top, 48, 10); ret(C['mesa-frente'], x - 24, top + 10, 48, 7); ret(C.sombra, x - 24, top + 17, 48, 2);
-    const n = Math.min(AG.genio.fila.filter(j => j.tipo === 'entrega').length, 5);
-    for(let i = 0; i < n; i++) envelope(x - 12 + i * 5, top + 3 - (i % 2));
-  }
-  function mesa(a, agora){
-    const {x, top} = a.mesa;
-    ret(C.mesa, x - 20, top, 40, 10); ret(C['mesa-frente'], x - 20, top + 10, 40, 7); ret(C.sombra, x - 20, top + 17, 40, 2);
-    ret(C.monitor, x + 8, top - 7, 11, 8); ret(C.monitor, x + 12, top + 1, 3, 2);
-    const ativo = a.estado === 'trabalhando';
-    ret(ativo && (calmo() || Math.floor(agora / 300) % 2) ? C.ouro : C.sombra, x + 13, top - 4, 1, 1);
-    if(a.id === 'mila'){ ret(C.papel, x - 18, top + 2, 6, 4); ret(C.papel, x - 15, top + 3, 6, 4); }
-    if(a.id === 'flavia'){ ret(C.monitor, x - 17, top + 1, 6, 7); for(let i = 0; i < 4; i++) ret(C.papel, x - 16 + (i % 2) * 3, top + 4 + Math.floor(i / 2) * 2, 1, 1); }
-    if(a.id === 'sergio'){ ret(C.papel, x - 17, top + 1, 7, 6); ret(C.placa, x - 17, top + 1, 7, 2); }
-    if(a.id === 'otto'){ ret(C['mesa-frente'], x - 18, top - 4, 8, 6); ret(C.papel, x - 16, top - 2, 4, 1); }
-    if(a.id === 'teo'){ ret(C.papel, x - 18, top + 1, 8, 6); for(let i = 0; i < 3; i++) ret(C.metal, x - 17, top + 2 + i * 2, 6, 1); }
-    if(a.id === 'ro'){ ret(C.metal, x - 18, top - 3, 7, 5); ret('#4caf6a', x - 16, top - 2, 1, 1); }
-    if(a.id === 'murilo'){ ret(C.papel, x - 18, top + 1, 7, 6); ret('#3d86b8', x - 17, top + 2, 5, 3); }
-    if(a.id === 'dora'){ ret('#3d86b8', x - 18, top + 6, 9, 2); ret(C.papel, x - 17, top + 1, 6, 4); }
-    if(a.id === 'lia'){ ret(C.metal, x - 16, top + 2, 4, 4); ret(C.papel, x - 15, top + 3, 2, 2); ret(C.metal, x - 13, top + 6, 3, 1); }
-    for(let i = 0; i < Math.min(a.papeis, 3); i++){ ret(C.papel, x - 8 - i, top + 3 - i, 6, 5); ret(C.ouro, x - 8 - i, top + 3 - i, 6, 1); }
-    if(ativo && noLugar(a)){
-      const f = calmo() ? 0 : Math.floor(agora / 150) % 2;
-      ret(a.pal.s, x - 3, top + 1 + f, 2, 1); ret(a.pal.s, x + 2, top + 2 - f, 2, 1);
-    }
-  }
-  function envelope(x, y){
-    ret(C.papel, x - 3, y - 2, 7, 5);
-    ret(C.metal, x - 3, y - 2, 1, 1); ret(C.metal, x + 3, y - 2, 1, 1); ret(C.metal, x - 2, y - 1, 1, 1); ret(C.metal, x + 2, y - 1, 1, 1);
-    ret(C.ouro, x, y, 1, 1);
-  }
-  function boneco(a, agora){
-    const andando = a.path.length > 0 && !calmo();
-    ret(C.sombra, Math.round(a.x) - 4, Math.round(a.y) - 1, 8, 2);
-    pinta(linhas(a, a.dir, andando ? a.quadro : 0), a.x, a.y, a.pal, a.dir === 'esq');
-    const x = Math.round(a.x), y = Math.round(a.y);
-    if(a.carrega){ const lx = a.dir === 'esq' ? -7 : a.dir === 'dir' ? 3 : 2; ret(C.papel, x + lx, y - 8, 4, 5); ret(C.ouro, x + lx, y - 8, 4, 1); }
-    if(a.bolha){ const bx = x - 5, by = y - 25; ret(C.metal, bx - 1, by - 1, 12, 9); ret(C.papel, bx, by, 10, 7); ret(C.papel, bx + 3, by + 7, 2, 2); ret(a.bolha, bx + 3, by + 2, 4, 3); }
-    if((a.estado === 'trabalhando' || a.estado === 'consultando') && !a.path.length){
-      const f = calmo() ? 2 : Math.floor(agora / 260) % 3;
-      for(let i = 0; i <= f; i++) ret(C.ouro, x - 3 + i * 3, y - 18, 2, 2);
-    }
-  }
-  let envelopes = [], avioes = [];
-  function desenha(agora){
-    ret(C.parede, 0, 0, 226, 41); ret(C.parede2, 238, 0, W - 238, 41);
-    placaLogo(18, 3, 40, 35);
-    janela(92, 8, 80, 24, 7); relogio(196, 20);
-    quadroEspelho(262, 7, 70, 28); placaLogo(340, 9, 22, 22); janela(370, 8, 74, 24, 23);
-    ret(C.rodape, 0, 39, W, 4);
-    for(let y = 43, i = 0; y < H; y += 6, i++){
-      ret(i % 2 ? C.piso1 : C.piso2, 0, y, 232, 6);
-      for(let x = (i % 2) * 14; x < 232; x += 28) ret(C.sombra, x, y, 1, 6);
-    }
-    for(let y = 43; y < H; y += 8) for(let x = 232; x < W; x += 8) ret(((x + y) / 8) % 2 ? C.carpete1 : C.carpete2, x, y, 8, 8);
-    ret(C.divisa, 226, 0, 12, 150); ret(C.divisa, 226, 186, 12, H - 186); ret(C.rodape, 226, 146, 12, 4);
-    ret(C.placa, 0, 160, 3, 30); ret(C.tapete, 3, 163, 14, 25);
-    const itens = [
-      {b: 158, f: () => bandeira(agora)}, {b: 62, f: () => cafeteira(agora)}, {b: 78, f: () => servidor(agora)}, {b: 70, f: arquivo},
-      {b: 68, f: () => planta(9, 68)}, {b: 214, f: () => planta(221, 214)}, {b: 214, f: () => planta(471, 214)}, {b: 151, f: balcao},
-    ];
-    for(const a of EQUIPE){ if(a.mesa) itens.push({b: a.mesa.top + 19, f: () => mesa(a, agora)}); }
-    for(const a of EQUIPE){ if(a.x > -8) itens.push({b: a.y, f: () => boneco(a, agora)}); }
-    itens.sort((m, n) => m.b - n.b);
-    for(const it of itens) it.f();
-    for(const e of envelopes){ const t = Math.min(1, e.t); envelope(Math.round(-6 + 40 * t), Math.round(170 - 35 * t - Math.sin(t * Math.PI) * 14)); }
-    for(const v of avioes){
-      const t = Math.min(1, v.t / 1.3), x = Math.round(v.x0 + (-12 - v.x0) * t), y = Math.round(v.y0 + (170 - v.y0) * t - Math.sin(t * Math.PI) * 26);
-      ret(C.papel, x, y, 5, 1); ret(C.papel, x + 1, y + 1, 3, 1); ret(C.papel, x + 1, y - 1, 1, 1);
-    }
-  }
-
-  // ---------- o que cada movimento quer dizer ----------
-  const WHATS = new Set(['w']);
-  function texto(e){
-    const p = e.p ? ' ' + e.p : '', n = +e.n || 1;
-    switch(e.a){
-      case 'genio': return e.t === 'esclarecimento' ? 'Explicou a última resposta' : e.t === 'ajuda' ? 'Explicou como usar o Gênio' : e.t === 'nome_cliente' ? 'Anotou o nome do cliente' : 'Respondeu uma conversa no WhatsApp';
-      case 'mila': return /^(sugerir|buscar|unidades|mais)$/.test(e.t) ? 'Mandou unidades no WhatsApp' : e.t === 'comparar' ? 'Comparou unidades' : e.t === 'link' ? 'Montou link com as unidades escolhidas' : e.t === 'material' ? 'Guardou material novo de projeto' : 'Mandou informação de projeto';
-      case 'flavia': return e.t === 'card' ? 'Fez o card da proposta' : e.t === 'rentabilidade' ? 'Fez um estudo de rentabilidade' : 'Montou um fluxo de pagamento';
-      case 'sergio': return e.t === 'google' ? 'Cuidou da conexão com o Google Agenda' : e.t === 'visita' ? 'Registrou uma visita' : 'Anotou um compromisso';
-      case 'otto': return e.t === 'conferencia' ? (n > 1 ? 'Conferiu ' + n + ' projetos' : 'Conferiu o' + p) : e.t === 'aviso' ? 'Avisou uma busca salva' : e.t === 'mudancas' ? 'Contou o que mudou nos projetos' : e.t === 'relatorio' ? 'Montou o relatório da curadoria' : 'Anotou um ajuste para a curadoria';
-      case 'teo': return e.t === 'revenda' ? 'Atualizou a revenda One' : 'Carregou tabela nova' + (p ? ' do' + p : '');
-      case 'ro': return (n === 1 ? '1 mudança' : n + ' mudanças') + ' de status' + (p ? ' no' + p : '');
-      case 'murilo': return e.t === 'mercado' ? 'Respondeu sobre o Mercado' : e.t === 'webhook' ? 'Recebeu aviso da Órulo' : 'Atualizou o Mercado com a Órulo' + (e.ok === false ? ', com falha' : '');
-      case 'dora': return e.t === 'documento' ? 'Mandou documento da central' : 'Atualizou a central de documentos' + (p ? ' da' + p : '');
-      case 'lia': return e.t === 'abriu' ? 'Um cliente abriu um link' : 'Criou um link para cliente';
-    }
-    return 'Movimento';
-  }
-  function fazendo(a){
-    const t = a.job && a.job.ev ? a.job.ev.t : '';
-    switch(a.id){
-      case 'mila': return 'Separando material para o corretor.';
-      case 'flavia': return t === 'card' ? 'Fazendo o card da proposta.' : t === 'rentabilidade' ? 'Fazendo o estudo de rentabilidade.' : 'Montando o fluxo de pagamento.';
-      case 'sergio': return 'Anotando na agenda.';
-      case 'otto': return t === 'conferencia' ? 'Conferindo projetos.' : t === 'aviso' ? 'Avisando uma busca salva.' : 'Organizando a base.';
-      case 'teo': return t === 'revenda' ? 'Lendo a revenda da One.' : 'Carregando tabela nova.';
-      case 'ro': return 'Atualizando o status das unidades.';
-      case 'murilo': return 'Atualizando o Mercado.';
-      case 'dora': return 'Cuidando dos documentos.';
-      case 'lia': return t === 'abriu' ? 'Acompanhando um cliente no link.' : 'Montando um link para cliente.';
-    }
-    return 'Trabalhando.';
-  }
-
-  // ---------- movimento ----------
-  function sentar(a){ a.x = a.sentado.x; a.y = a.sentado.y; a.path = []; a.dir = 'baixo'; a.estado = 'sentado'; }
-  function chegarTodos(){
-    EQUIPE.forEach((a, i) => { a.x = FORA.x; a.y = FORA.y; a.path = []; a.estado = 'fora'; a.t = 0.3 + i * 0.55; a.fila = []; a.job = null; a.papeis = 0; a.carrega = false; a.bolha = null; });
-    envelopes = []; avioes = [];
-    if(calmo()) EQUIPE.forEach(sentar);
-  }
-  function aviaoDe(x, y){ if(!calmo()) avioes.push({x0: x, y0: y, t: 0}); }
-  function receberPedido(e){
-    if(e.a === 'genio'){ AG.genio.fila.push({tipo: 'responder', ev: e}); return; }
-    if(calmo()) AG.genio.fila.push({tipo: 'entrega', alvo: e.a, ev: e});
-    else envelopes.push({t: 0, job: {tipo: 'entrega', alvo: e.a, ev: e}});
-  }
-  function receberRotina(e){
-    const a = AG[e.a]; if(!a || a.fila.length > 5) return;
-    a.fila.push({tipo: 'trabalho', ev: e, visita: e.t === 'abriu' || e.t === 'link' ? null : (a.vai || null), dur: 1.6 + Math.random() * 1.6});
-  }
-  function animar(lista){
-    const juntos = [];
-    for(const e of lista){
-      const ult = juntos[juntos.length - 1];
-      if(ult && ult.a === e.a && ult.t === e.t && ult.o === e.o && !WHATS.has(e.o)){ ult.n = (+ult.n || 1) + (+e.n || 1); continue; }
-      juntos.push(Object.assign({}, e));
-    }
-    for(const e of juntos.slice(-10)){ if(!AG[e.a]) continue; if(WHATS.has(e.o)) receberPedido(e); else receberRotina(e); }
-  }
-  function passo(a, dt){
-    if(!a.path.length) return;
-    const alvo = a.path[0], dx = alvo.x - a.x, dy = alvo.y - a.y, dist = Math.hypot(dx, dy), d = a.vel * dt;
-    if(dist > .01) a.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'dir' : 'esq') : (dy > 0 ? 'baixo' : 'cima');
-    if(dist <= d){ a.x = alvo.x; a.y = alvo.y; a.path.shift(); } else { a.x += dx / dist * d; a.y += dy / dist * d; }
-    a.tAnda += dt; if(a.tAnda > .16){ a.tAnda = 0; a.quadro++; }
-    if(!a.path.length){ a.dir = 'baixo'; a.quadro = 0; const cb = a.aoChegar; a.aoChegar = null; if(cb) cb(); }
-  }
-  function atualiza(dt){
-    for(const e of envelopes) e.t += dt;
-    for(const e of envelopes.filter(e => e.t >= 1)) AG.genio.fila.push(e.job);
-    envelopes = envelopes.filter(e => e.t < 1);
-    for(const v of avioes) v.t += dt;
-    avioes = avioes.filter(v => v.t < 1.3);
-    for(const a of EQUIPE){
-      if(a.estado === 'fora'){ a.t -= dt; if(a.t <= 0){ a.estado = 'chegando'; a.x = FORA.x; a.y = FORA.y; a.path = [P(PORTA.x, PORTA.y)].concat(rota(PORTA, a.sentado)); a.aoChegar = () => sentar(a); } continue; }
-      passo(a, dt);
-    }
-    const g = AG.genio;
-    if(g.estado === 'sentado' && noLugar(g) && g.fila.length){
-      g.job = g.fila.shift();
-      if(g.job.tipo === 'responder'){ g.estado = 'trabalhando'; g.t = 1.6; }
-      else { g.estado = 'lendo'; g.t = calmo() ? .2 : .6; g.bolha = AG[g.job.alvo].pal.c; }
-    } else if(g.estado === 'trabalhando'){
-      g.t -= dt; if(g.t <= 0){ g.estado = 'sentado'; aviaoDe(g.x + 6, g.y - 6); g.job = null; }
-    } else if(g.estado === 'lendo'){
-      g.t -= dt;
-      if(g.t <= 0){
-        const alvo = AG[g.job.alvo], job = g.job;
-        g.bolha = null; g.carrega = true; g.estado = 'levando';
-        mover(g, alvo.frente, () => {
-          g.carrega = false; alvo.papeis++; alvo.fila.push({tipo: 'trabalho', ev: job.ev, whats: true, dur: 1.8 + Math.random() * 1.4});
-          g.estado = 'voltando'; mover(g, g.sentado, () => { sentar(g); g.job = null; });
-        });
-      }
-    }
-    for(const a of EQUIPE){
-      if(a.id === 'genio') continue;
-      if(a.estado === 'sentado' && noLugar(a) && a.fila.length){
-        a.job = a.fila.shift(); a.ocioso = 0;
-        if(a.job.visita && LUGAR[a.job.visita]){ a.estado = 'indo'; mover(a, LUGAR[a.job.visita], () => { a.estado = 'consultando'; a.t = 1.2; }); }
-        else { a.estado = 'trabalhando'; a.t = a.job.dur; }
-      } else if(a.estado === 'consultando'){
-        a.t -= dt; if(a.t <= 0){ a.estado = 'voltando'; mover(a, a.sentado, () => { sentar(a); a.estado = 'trabalhando'; a.t = a.job ? a.job.dur : 1; }); }
-      } else if(a.estado === 'trabalhando'){
-        a.t -= dt;
-        if(a.t <= 0){
-          if(a.job && a.job.whats){ a.papeis = Math.max(0, a.papeis - 1); aviaoDe(a.mesa.x - 10, a.mesa.top + 2); }
-          a.job = null; a.estado = 'sentado';
-        }
-      } else if(a.estado === 'sentado' && noLugar(a)){
-        a.ocioso += dt;
-        if(a.ocioso > 25 && Math.random() < dt * .05){ a.ocioso = 0; a.estado = 'cafe'; mover(a, LUGAR.cafe, () => { a.estado = 'no-cafe'; a.t = 2.5; }); }
-      } else if(a.estado === 'no-cafe'){
-        a.t -= dt; if(a.t <= 0){ a.estado = 'voltando-cafe'; mover(a, a.sentado, () => sentar(a)); }
+  function buildTeam() {
+    const list=$('ec-equipe'), hotspots=$('ec-hotspots');
+    for (let sala=0;sala<2;sala++) {
+      const h=document.createElement('h4'); h.className='ec-team-room'; h.textContent=sala?'Sala do Espelho':'Sala do Gênio'; list.append(h);
+      for (const a of EQUIPE.filter(a=>a.sala===sala)) {
+        const b=document.createElement('button'); b.type='button'; b.className='ec-ag'; b.dataset.agent=a.id; b.setAttribute('aria-pressed',a.id===state.selected?'true':'false');
+        const initial=document.createElement('span'); initial.className='ec-initial'; initial.textContent=a.nome[0]; initial.setAttribute('aria-hidden','true');
+        const body=document.createElement('span'), name=document.createElement('strong'), role=document.createElement('small'), count=document.createElement('span');
+        name.textContent=a.nome; role.textContent=a.papel; count.className='ec-count'; count.textContent='—'; body.append(name,role); b.append(initial,body,count); b.addEventListener('click',()=>select(a.id,true)); list.append(b);
+        const hot=document.createElement('button'); hot.type='button'; hot.className='ec-hotspot'; hot.dataset.agent=a.id; hot.setAttribute('aria-label',a.nome+' · '+a.papel); hot.setAttribute('aria-pressed',a.id===state.selected?'true':'false');
+        hot.style.left=(a.box[0]+a.box[2]/2)/W*100+'%'; hot.style.top=(a.box[1]+a.box[3]/2)/H*100+'%';
+        const label=document.createElement('span'); label.textContent=a.nome; hot.append(label); hot.addEventListener('click',()=>select(a.id,false)); hotspots.append(hot);
       }
     }
   }
-
-  // ---------- painel ----------
-  let robos = [], movs = [], hoje = {}, aberto = false, ultimoQuadro = 0, raf = null, erroRede = false, atualizadoEm = null;
-  const linhasEquipe = {};
-  (function montarEquipe(){
-    const box = $('ec-equipe'); if(!box) return;
-    for(const [sala, rot] of [[0, 'Sala do Gênio, no WhatsApp'], [1, 'Sala do Espelho, a base e o app']]){
-      const h = document.createElement('p'); h.className = 'ec-grupo'; h.textContent = rot; box.appendChild(h);
-      for(const a of EQUIPE.filter(x => x.sala === sala)){
-        const d = document.createElement('div'); d.className = 'ec-ag'; d.title = a.faz;
-        d.innerHTML = '<span class="cor"></span><span class="nm"></span><span class="hj"></span><span class="st"></span>';
-        d.querySelector('.cor').style.setProperty('--cor', a.pal.c);
-        const nm = d.querySelector('.nm'); nm.textContent = a.nome; const sm = document.createElement('small'); sm.textContent = a.papel; nm.appendChild(sm);
-        linhasEquipe[a.id] = {st: d.querySelector('.st'), hj: d.querySelector('.hj'), txt: null, ativo: null, n: null};
-        box.appendChild(d);
+  function select(id, focusRoom) {
+    if (!AG[id]) return;
+    state.selected=id;
+    if (focusRoom && mobile.matches) {
+      setView(AG[id].sala?'espelho':'genio');
+      requestAnimationFrame(()=>dialog.querySelector('.ec-selected').scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'center'}));
+    }
+    updateSelection();
+  }
+  function updateSelection() {
+    const a=AG[state.selected];
+    $('ec-selected-name').textContent=a.nome; $('ec-selected-role').textContent=a.papel; $('ec-selected-mark').textContent=a.nome[0];
+    $('ec-selected-text').textContent=a.last?text(a.last):a.desc;
+    const t=$('ec-selected-time');
+    if (a.last) { t.dateTime=a.last.em; t.textContent='Último registro · '+stamp(a.last.em); }
+    else if (a.id==='ro' && state.lastSignal) { t.dateTime=state.lastSignal; t.textContent='Último sinal do robô · '+stamp(state.lastSignal); }
+    else { t.removeAttribute('datetime'); t.textContent=state.loaded?'Sem atividade registrada no diário recebido.':'Aguardando o diário de atividade.'; }
+    for (const b of dialog.querySelectorAll('[data-agent]')) b.setAttribute('aria-pressed',b.dataset.agent===state.selected?'true':'false');
+  }
+  function update() {
+    for (const b of dialog.querySelectorAll('.ec-ag')) {
+      const a=AG[b.dataset.agent];
+      b.querySelector('.ec-count').textContent=state.loaded?String(a.count):'—';
+      b.querySelector('.ec-count').setAttribute('aria-label',a.count+' registros hoje');
+      b.classList.toggle('is-active',!!state.active && (state.active.agent.id===a.id || state.active.event.a===a.id));
+      b.title=a.last?'Último registro: '+text(a.last)+' · '+stamp(a.last.em):a.desc;
+    }
+    updateSelection();
+    const feed=$('ec-mov'); feed.replaceChildren();
+    for (const e of state.events.slice(0,12)) {
+      const li=document.createElement('li'); li.dataset.eventKey=keyOf(e);
+      const time=document.createElement('time'); time.dateTime=e.em; time.textContent=day(e.em)===day(Date.now())?clock(e.em):stamp(e.em); time.title=stamp(e.em);
+      const line=document.createElement('div'); line.className='ec-event-line';
+      const name=document.createElement('strong'); name.textContent=AG[e.a].nome+' · ';
+      const origin=document.createElement('span'); origin.className='ec-origin'; origin.textContent=e.o==='w'?'Pedido do WhatsApp':'Rotina do Espelho';
+      line.append(name,document.createTextNode(text(e)),origin); li.append(time,line); feed.append(li);
+    }
+    $('ec-vazio').hidden=state.events.length>0;
+    if (state.loaded && !state.events.length) $('ec-vazio').textContent='Nenhum movimento registrado por enquanto. Os novos registros aparecerão aqui.';
+    const count=Object.values(AG).reduce((n,a)=>n+a.count,0);
+    $('ec-journal-summary').textContent=state.loaded?count.toLocaleString('pt-BR')+' registros recebidos hoje · últimos 12':'Diário da equipe';
+    const tab=document.querySelector('#tabs .ec-tab');
+    if (tab) tab.querySelector('small').textContent=state.loaded?count.toLocaleString('pt-BR')+' registros hoje':'Gênio e Espelho';
+  }
+  function normalize(raw) {
+    if (!raw || !AG[raw.a] || typeof raw.em!=='string') return null;
+    const ms=Date.parse(raw.em);
+    if (!Number.isFinite(ms)) return null;
+    return {a:raw.a,t:safe(raw.t,50),em:new Date(ms).toISOString(),p:safe(raw.p,160),
+      n:Number.isFinite(Number(raw.n)) && Number(raw.n)>=0?Math.min(10000000,Math.floor(Number(raw.n))):null,o:raw.o==='w'?'w':'',ok:raw.ok!==false};
+  }
+  function queueEvents(events, first) {
+    if (reduced.matches || !state.open || !visible()) return;
+    let latest=events.filter(e=>Date.now()-Date.parse(e.em)<600000 && Date.parse(e.em)<=Date.now()+60000).sort((a,b)=>Date.parse(a.em)-Date.parse(b.em));
+    if (first) latest=latest.slice(-3);
+    else {
+      const groups=[];
+      for (const e of latest) {
+        const last=groups[groups.length-1];
+        if (e.o!=='w' && last && last.a===e.a && last.t===e.t && last.o===e.o) groups[groups.length-1]=e;
+        else groups.push(e);
       }
+      latest=groups.slice(-10);
     }
-  })();
-  function statusDe(a){
-    if(a.estado === 'fora' || a.estado === 'chegando') return ['Chegando.', false];
-    if(a.id === 'genio'){
-      const alvo = a.job && a.job.alvo ? AG[a.job.alvo] : null;
-      if(a.estado === 'lendo' && alvo) return ['Lendo um pedido para ' + alvo.art + ' ' + alvo.nome + '.', true];
-      if(a.estado === 'levando' && alvo) return ['Levando um pedido para ' + alvo.art + ' ' + alvo.nome + '.', true];
-      if(a.estado === 'voltando') return ['Voltando para a recepção.', false];
-      if(a.estado === 'trabalhando') return ['Respondendo no WhatsApp.', true];
-      const n = a.fila.length + envelopes.length;
-      return [n ? (n === 1 ? '1 pedido chegando.' : n + ' pedidos chegando.') : 'Na recepção.', false];
-    }
-    if(a.estado === 'trabalhando' || a.estado === 'consultando' || a.estado === 'indo') return [fazendo(a), true];
-    if(a.estado === 'cafe' || a.estado === 'no-cafe' || a.estado === 'voltando-cafe') return ['Pegando um café.', false];
-    if(a.id === 'ro' && robos.length){
-      const ult = robos.reduce((m, r) => Math.max(m, Date.parse(r.visto_em) || 0), 0);
-      if(ult) return ['Livre. Último sinal dos robôs às ' + hhmm(new Date(ult)) + '.', false];
-    }
-    return [a.papeis ? 'Tem pedido na mesa.' : 'Livre.', false];
+    state.queue.push(...latest); state.queue=state.queue.slice(-10); animate();
   }
-  function atualizaEquipe(){
-    for(const a of EQUIPE){
-      const l = linhasEquipe[a.id]; if(!l) continue;
-      const [txt, ativo] = statusDe(a), n = hoje[a.id] || 0;
-      if(txt !== l.txt){ l.st.textContent = txt; l.txt = txt; }
-      if(ativo !== l.ativo){ l.st.classList.toggle('ativo', ativo); l.ativo = ativo; }
-      if(n !== l.n){ l.hj.textContent = n ? n + ' hoje' : ''; l.n = n; }
-    }
-  }
-  function desenhaMovs(){
-    const ol = $('ec-mov'); if(!ol) return;
-    $('ec-vazio').hidden = movs.length > 0;
-    ol.replaceChildren(...movs.slice(-12).reverse().map(e => {
-      const li = document.createElement('li'), t = document.createElement('time'), p = document.createElement('p'), b = document.createElement('b');
-      const d = new Date(e.em); t.textContent = hhmm(d); t.dateTime = d.toISOString();
-      b.textContent = (AG[e.a] ? AG[e.a].nome : e.a) + ' '; p.append(b, texto(e));
-      li.append(t, p); return li;
-    }));
-  }
-  function atualizaSub(){
-    const s = $('ec-sub'); if(!s) return;
-    s.textContent = erroRede ? 'Sem conexão com o diário agora. Tento de novo em instantes.'
-      : atualizadoEm ? 'Ao vivo. Atualizado às ' + hhmm(atualizadoEm) + '.' : 'Carregando…';
+  async function fetchActivity() {
+    if (!state.open || !visible() || !checkAccess() || state.inFlight) return;
+    const code=state.code, epoch=state.epoch, ticket={}; state.inFlight=ticket;
+    if (!state.loaded) network('loading','Consultando o diário…');
+    try {
+      const args={p_codigo:code}; if (state.cursor) args.p_desde=state.cursor;
+      const result=await A.rpc('escritorio_atividade',args);
+      if (!state.open || epoch!==state.epoch || code!==currentCode()) return;
+      if (!checkAccess()) return;
+      if (result && (result.erro==='so_admin' || result.error==='so_admin')) { state.revoked=code; checkAccess(); return; }
+      if (!result || result.ok!==true || !Array.isArray(result.eventos)) throw new Error('unavailable');
+      const valid=result.eventos.map(normalize).filter(Boolean);
+      const invalid=result.eventos.length-valid.length;
+      if (invalid && !valid.length) throw new Error('invalid events');
+      const fresh=[], first=!state.loaded;
+      rollDay();
+      for (const e of valid) {
+        const key=keyOf(e); if (state.seen.has(key)) continue;
+        state.seen.add(key); fresh.push(e); state.events.push(e);
+        const a=AG[e.a]; if (!a.last || Date.parse(e.em)>Date.parse(a.last.em)) a.last=e;
+        if (day(e.em)===day(Date.now())) a.count++;
+      }
+      state.events.sort((a,b)=>Date.parse(b.em)-Date.parse(a.em)); state.events=state.events.slice(0,60);
+      // Cursor overlap is two seconds. Older keys can be evicted without recounting that overlap.
+      if (state.seen.size>3000) state.seen=new Set(state.events.map(keyOf));
+      if (valid.length) { const max=Math.max(...valid.map(e=>Date.parse(e.em)),state.cursor?Date.parse(state.cursor)+2000:0); state.cursor=new Date(max-2000).toISOString(); }
+      const signals=(Array.isArray(result.robos)?result.robos:[]).map(r=>Date.parse(r?.visto_em)).filter(Number.isFinite);
+      if (signals.length) state.lastSignal=new Date(Math.max(...signals)).toISOString();
+      state.loaded=true; update(); draw();
+      network(invalid?'error':'ok',invalid?'Alguns registros não puderam ser lidos.':'Diário atualizado às '+clock(Date.now()));
+      queueEvents(fresh,first);
+    } catch (_) {
+      if (state.open && epoch===state.epoch && code===currentCode()) {
+        network('error',state.loaded?'Sem conexão com o diário. Exibindo os últimos registros.':'Não foi possível consultar o diário.');
+        if (!state.events.length) $('ec-vazio').textContent='O diário está indisponível. Tente novamente para consultar a atividade da equipe.';
+      }
+    } finally { if (state.inFlight===ticket) state.inFlight=null; }
   }
 
-  // ---------- dados ----------
-  const vistos = new Set(); let cursor = null, pedindo = false, timer = null, totalHoje = 0, diaDe = null;
-  const chave = e => [e.a, e.t, e.em, e.p || '', e.n || ''].join('|');
-  const recentes = () => movs.filter(e => Date.now() - Date.parse(e.em) < 10 * 60e3).slice(-3);
-  function receber(r, inicial){
-    if(!r || r.ok === false) return;
-    const dia = new Date().toDateString();
-    if(diaDe !== dia){ diaDe = dia; hoje = {}; totalHoje = 0; }
-    if(Array.isArray(r.robos)) robos = r.robos;
-    const novos = [];
-    for(const e of r.eventos || []){ const k = chave(e); if(vistos.has(k)) continue; vistos.add(k); novos.push(e); }
-    let max = cursor ? Date.parse(cursor) : 0;
-    for(const e of novos){
-      hoje[e.a] = (hoje[e.a] || 0) + 1; totalHoje++;
-      const t = Date.parse(e.em); if(t > max) max = t;
+  // The panorama is lazy-loaded. Original seated people are restored when a movement ends.
+  function loadImage(name) { return new Promise((resolve,reject)=>{const i=new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=asset(name);}); }
+  async function loadScene() {
+    if (state.imagePromise) return state.imagePromise;
+    state.imagePromise=(async()=>{
+      try {
+        const base=await loadImage('escritorio-cenario.png'); state.images={base}; $('ec-scene-loading').hidden=true; draw();
+        try {
+          const [empty,people]=await Promise.all([loadImage('escritorio-vazio.png'),loadImage('escritorio-agentes.png')]);
+          if (base.naturalWidth!==empty.naturalWidth || base.naturalHeight!==empty.naturalHeight) throw new Error('alignment');
+          state.images.empty=empty; state.images.people=people; state.motionReady=true; motionNote(); animate();
+        } catch (_) { state.imageError=true; state.queue=[]; motionNote(); }
+      } catch (_) { state.imageError=true; $('ec-scene-loading').textContent='O cenário não carregou. A atividade continua disponível na lista.'; }
+    })();
+    return state.imagePromise;
+  }
+  function motionNote() {
+    $('ec-motion-note').textContent=reduced.matches?'Movimento reduzido ativo. Acompanhe os registros no diário abaixo.':state.imageError?'Movimento indisponível. Os registros continuam disponíveis na lista.':'Movimentos representam registros do diário, sem reproduzir a duração real das tarefas.';
+  }
+  function measure() {
+    const width=Math.max(1,Math.round(scene.getBoundingClientRect().width));
+    const ratio=Math.min(devicePixelRatio || 1,2);
+    const pixels=Math.min(3840,Math.round(width*ratio));
+    if (canvas.width!==pixels) { canvas.width=pixels; canvas.height=Math.round(pixels*H/W); }
+    draw();
+  }
+  function setView(view) {
+    state.view=view; scene.dataset.view=view;
+    for (const b of dialog.querySelectorAll('[data-room]')) b.setAttribute('aria-pressed',b.dataset.room===view?'true':'false');
+    requestAnimationFrame(()=>{measure(); viewport.scrollTo({left:view==='espelho'?viewport.scrollWidth:0,behavior:reduced.matches?'auto':'smooth'});});
+  }
+  const DOOR=[813,719], HUB=[1040,686];
+  function deliveryRoute(target) {
+    const start=AG.genio;
+    if (target.id==='genio') return [start.home,[463,580],start.home];
+    const route=[start.home,...start.exit];
+    if (target.sala===1) route.push(DOOR,[932,701],HUB);
+    else route.push([783,665]);
+    route.push(...target.exit.slice().reverse(),target.home);
+    return [...route,...route.slice(0,-1).reverse()];
+  }
+  function routineRoute(a) {
+    // Explicit aisle routes follow the approved floor perspective, never the former tile map.
+    const stop=a.exit[Math.min(1,a.exit.length-1)] || a.home;
+    return [a.home,...a.exit.slice(0,2),stop,...a.exit.slice(0,2).reverse(),a.home];
+  }
+  function beginEvent(event, now) {
+    const target=AG[event.a], agent=event.o==='w'?AG.genio:target;
+    const route=event.o==='w'?deliveryRoute(target):routineRoute(target);
+    state.active={event,agent,route,started:now,duration:event.o==='w'?6400:3200}; update();
+  }
+  function pointOnPath(route, progress) {
+    const lengths=[]; let total=0;
+    for (let i=1;i<route.length;i++) { const d=Math.hypot(route[i][0]-route[i-1][0],route[i][1]-route[i-1][1]); lengths.push(d); total+=d; }
+    let rest=total*Math.max(0,Math.min(1,progress));
+    for (let i=0;i<lengths.length;i++) { if (rest<=lengths[i] || i===lengths.length-1) {const t=lengths[i]?rest/lengths[i]:0;return [route[i][0]+(route[i+1][0]-route[i][0])*t,route[i][1]+(route[i+1][1]-route[i][1])*t];} rest-=lengths[i]; }
+    return route[0];
+  }
+  function maskPerson(a) {
+    const [x,y,w,h]=a.box;
+    ctx.save(); ctx.beginPath();
+    // Soft corners keep the clean plate local to the seated silhouette and its chair.
+    ctx.roundRect(x-3,y-3,w+6,h+7,Math.min(18,w/5)); ctx.clip();
+    ctx.drawImage(state.images.empty,0,0,W,H); ctx.restore();
+  }
+  function stockData() {
+    if (!authorized() || state.code!==currentCode()) return {available:false,d:0,r:0,v:0,o:0};
+    if (state.stock && Date.now()-state.stockAt<60000) return state.stock;
+    let data;
+    try { data=typeof A.dados==='function'?A.dados():null; } catch (_) {}
+    const totals={available:Array.isArray(data?.projetos),d:0,r:0,v:0,o:0};
+    for (const p of Array.isArray(data?.projetos)?data.projetos:[]) for (const u of Array.isArray(p?.unidades)?p.unidades:[]) {
+      if (!Array.isArray(u)) continue;
+      if (u[6]==='disponivel') totals.d++;
+      else if (u[6]==='reservada') totals.r++;
+      else if (u[6]==='vendida') totals.v++;
+      else totals.o++;
     }
-    if(max) cursor = new Date(max - 2000).toISOString();
-    movs = movs.concat(novos).slice(-60);
-    atualizadoEm = new Date(); erroRede = false;
-    if(aberto && !inicial) animar(novos);
-    desenhaMovs(); atualizaEquipe(); atualizaSub(); atualizarTab();
+    state.stock=totals; state.stockAt=Date.now();
+    return totals;
   }
-  function buscar(inicial){
-    if(pedindo || !A.codigo()) return Promise.resolve();
-    pedindo = true;
-    const args = {p_codigo: A.codigo()}; if(cursor) args.p_desde = cursor;
-    return A.rpc('escritorio_atividade', args)
-      .then(r => { if(r && r.ok === false && r.erro === 'so_admin'){ tirarTab(); if(aberto) fecharUI(); return; } receber(r, inicial); })
-      .catch(() => { erroRede = true; atualizaSub(); })
-      .finally(() => { pedindo = false; });
+  function stockBoard() {
+    const s=stockData(), total=s.d+s.r+s.v+s.o;
+    const caption=$('ec-stock');
+    const label=!s.available?'Quadro de estoque: base ainda não carregada.':!total?'Quadro de estoque: nenhuma unidade na base carregada.':'Base carregada · '+s.d.toLocaleString('pt-BR')+' disponíveis · '+s.r.toLocaleString('pt-BR')+' reservadas · '+s.v.toLocaleString('pt-BR')+' vendidas'+(s.o?' · '+s.o.toLocaleString('pt-BR')+' em outros status':'')+'. Quadro proporcional.';
+    if (caption && caption.textContent!==label) caption.textContent=label;
+    ctx.save();
+    // Cover every illustrated status cell, preserving the TV frame and right skyline screen.
+    ctx.beginPath(); ctx.moveTo(1125,124);ctx.lineTo(1368,137);ctx.lineTo(1364,255);ctx.lineTo(1120,232);ctx.closePath();ctx.clip();
+    ctx.fillStyle='#13283c';ctx.fillRect(1118,120,255,139);
+    ctx.transform(1,.060,-.045,1,1128,128);
+    ctx.fillStyle='#e8c387';ctx.font='600 12px system-ui';ctx.fillText('ESPELHO DE VENDAS',10,17);
+    if (!s.available || !total) {
+      ctx.fillStyle='#d0dbe4';ctx.font='13px system-ui';ctx.fillText(!s.available?'Base sem dados':'Sem unidades',10,51);
+      ctx.fillStyle='#99adbd';ctx.font='11px system-ui';ctx.fillText('Aguardando a base carregada',10,71);
+    } else {
+      const nd=Math.round(78*s.d/total),nr=Math.round(78*s.r/total),nv=Math.round(78*s.v/total);
+      for (let i=0;i<78;i++) {ctx.fillStyle=i<nd?'#86c6a5':i<nd+nr?'#dfb56e':i<nd+nr+nv?'#c98280':'#697e8e';ctx.fillRect(10+(i%13)*16.5,27+Math.floor(i/13)*9,14,7);}
+      ctx.fillStyle='#d1dde6';ctx.font='11px system-ui';ctx.fillText('Proporção da base carregada',10,96);
+    }
+    ctx.restore();
   }
-
-  // ---------- placas com os nomes ----------
-  const cena = $('ec-cena'), caixa = $('ec-palco');
-  const placas = EQUIPE.map(a => {
-    const el = document.createElement('span'); el.className = 'ec-placa'; el.textContent = a.nome; el.setAttribute('aria-hidden', 'true');
-    el.style.left = (a.placa.x / W * 100) + '%'; el.style.top = (a.placa.y / H * 100) + '%'; caixa.appendChild(el); return el;
+  const CROPS=[
+    [99,0,199,498],[438,0,185,498],[746,0,185,498],[1054,0,199,498],[1390,0,201,498],
+    [91,499,203,442],[441,499,200,442],[741,499,202,442],[1070,499,206,442],[1390,499,203,442]
+  ];
+  function drawPerson(a, position, now) {
+    const [sx,sy,sw,sh]=CROPS[a.index], [x,y]=position;
+    const height=225+(y-400)*.22, width=height*sw/sh;
+    const bob=Math.sin(now/94)*1.0;
+    ctx.save(); ctx.translate(x,y); ctx.fillStyle='rgba(6,12,20,.24)'; ctx.beginPath(); ctx.ellipse(0,-2,width*.37,5,0,0,Math.PI*2); ctx.fill();
+    ctx.rotate(Math.sin(now/188)*.009); ctx.drawImage(state.images.people,sx,sy,sw,sh,-width/2,-height+bob,width,height); ctx.restore();
+  }
+  function envelope(progress) {
+    const x=96+(437-96)*progress, y=650+(520-650)*progress-Math.sin(progress*Math.PI)*70;
+    ctx.save(); ctx.translate(x,y);ctx.rotate(-.2);ctx.fillStyle='#fff1d4';ctx.strokeStyle='#bd914c';ctx.lineWidth=1.3;ctx.fillRect(-11,-7,22,14);ctx.strokeRect(-11,-7,22,14);ctx.beginPath();ctx.moveTo(-11,-7);ctx.lineTo(0,2);ctx.lineTo(11,-7);ctx.stroke();ctx.restore();
+  }
+  function draw(now=performance.now()) {
+    if (!ctx || !state.images?.base) return;
+    ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.clearRect(0,0,W,H); ctx.drawImage(state.images.base,0,0,W,H);
+    const job=state.active;
+    if (!job || !state.motionReady || reduced.matches) {stockBoard();return;}
+    const p=Math.min(1,(now-job.started)/job.duration);
+    if (job.event.o==='w' && p<.1) { stockBoard();envelope(p/.1);return; }
+    const progress=job.event.o==='w'?(p-.1)/.9:p;
+    maskPerson(job.agent); stockBoard();drawPerson(job.agent,pointOnPath(job.route,progress),now);
+  }
+  function frame(now) {
+    state.raf=null;
+    if (!state.open || !visible() || !authorized() || reduced.matches || !state.motionReady) {state.active=null;draw();return;}
+    if (!state.active && state.queue.length) beginEvent(state.queue.shift(),now);
+    if (state.active && now-state.active.started>=state.active.duration) { state.active=null; update(); }
+    draw(now);
+    if (state.active || state.queue.length) state.raf=requestAnimationFrame(frame);
+  }
+  function animate() { if (!state.raf && state.open && visible() && state.motionReady && !reduced.matches && (state.queue.length || state.active)) state.raf=requestAnimationFrame(frame); }
+  function stopAnimation() { if (state.raf) cancelAnimationFrame(state.raf);state.raf=null;state.active=null;state.queue=[];draw();update(); }
+  function addTab() {
+    if (!authorized()) { document.querySelector('#tabs .ec-tab')?.remove(); if (state.open) checkAccess(); return; }
+    const nav=$('tabs'); if (!nav || nav.querySelector('.ec-tab')) return;
+    const b=document.createElement('button'); b.type='button'; b.className='tab ec-tab';
+    const title=document.createElement('b');title.textContent='Escritório'; const sub=document.createElement('small');sub.textContent='Gênio e Espelho';b.append(title,sub);b.addEventListener('click',open);nav.append(b);nav.hidden=false;update();
+  }
+  function open() {
+    if (!checkAccess() || state.open) return;
+    state.open=true; state.epoch++; state.focus=document.activeElement;
+    dialog.hidden=false; document.body.classList.add('ec-aberto');
+    if (location.hash!=='#escritorio') {try{history.pushState({ec:1},'','#escritorio');state.pushed=true;}catch(_){}}
+    setView(state.view); loadScene(); motionNote(); $('ec-voltar').focus();
+    $('ec-tv').hidden=!(document.fullscreenEnabled && dialog.requestFullscreen);
+    fetchActivity(); state.poll=setInterval(fetchActivity,8000);state.authTimer=setInterval(checkAccess,1000);
+  }
+  function closeUI() {
+    if (!state.open) return;
+    state.open=false;state.epoch++;state.inFlight=null;dialog.hidden=true;document.body.classList.remove('ec-aberto');
+    clearInterval(state.poll);clearInterval(state.authTimer);state.poll=null;state.authTimer=null;stopAnimation();
+    if (document.fullscreenElement===dialog && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+    if (state.focus?.isConnected) state.focus.focus();
+  }
+  function close() {
+    const pushed=state.pushed;state.pushed=false;closeUI();
+    if (pushed && location.hash==='#escritorio') history.back();
+    else if (location.hash==='#escritorio') {try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
+  }
+  const stockCaption=document.createElement('p');stockCaption.id='ec-stock';stockCaption.className='ec-stock';stockCaption.textContent='Quadro de estoque: aguardando a base carregada.';dialog.querySelector('.ec-scene-footer').append(stockCaption);
+  buildTeam(); setView(state.view);
+  $('ec-voltar').addEventListener('click',close);$('ec-retry').addEventListener('click',fetchActivity);
+  $('ec-tv').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else dialog.requestFullscreen?.().catch(()=>{});});
+  for (const b of dialog.querySelectorAll('[data-room]')) b.addEventListener('click',()=>setView(b.dataset.room));
+  let drag=null;
+  viewport.addEventListener('pointerdown',e=>{if(e.pointerType==='touch' || e.button!==0 || e.target.closest('button'))return;drag={x:e.clientX,left:viewport.scrollLeft};viewport.setPointerCapture(e.pointerId);viewport.classList.add('is-dragging');});
+  viewport.addEventListener('pointermove',e=>{if(drag)viewport.scrollLeft=drag.left-(e.clientX-drag.x);});
+  for(const type of ['pointerup','pointercancel','lostpointercapture']) viewport.addEventListener(type,()=>{drag=null;viewport.classList.remove('is-dragging');});
+  viewport.addEventListener('keydown',e=>{if(e.target!==viewport)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();viewport.scrollBy({left:(e.key==='ArrowRight'?1:-1)*viewport.clientWidth*.65,behavior:reduced.matches?'auto':'smooth'});}});
+  dialog.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !document.fullscreenElement){e.preventDefault();close();}
+    if(e.key==='Tab') {const targets=[...dialog.querySelectorAll('button:not([hidden]),[tabindex="0"]')].filter(n=>n.getClientRects().length);const first=targets[0],last=targets[targets.length-1];if(e.shiftKey && document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first?.focus();}}
   });
-  for(const [x, rot] of [[132, 'Sala do Gênio'], [358, 'Sala do Espelho']]){
-    const el = document.createElement('span'); el.className = 'ec-sala'; el.textContent = rot; el.setAttribute('aria-hidden', 'true');
-    el.style.left = (x / W * 100) + '%'; el.style.top = (47 / H * 100) + '%'; caixa.appendChild(el);
-  }
-  function medir(){
-    const s = cv.clientWidth / W; if(!s) return;
-    caixa.classList.toggle('miuda', s < 1.7);
-    const fs = Math.max(12, Math.round(4.2 * s)) + 'px';
-    for(const el of placas) el.style.fontSize = fs;
-  }
-  if(window.ResizeObserver) new ResizeObserver(medir).observe(cv); else window.addEventListener('resize', medir);
-
-  // ---------- abrir / fechar ----------
-  let ecPush = false, chegou = false;
-  function laco(agora){
-    if(!aberto){ raf = null; return; }
-    const dt = Math.min(.05, (agora - ultimoQuadro) / 1000); ultimoQuadro = agora;
-    atualiza(dt); desenha(agora); atualizaEquipe();
-    raf = requestAnimationFrame(laco);
-  }
-  function abrir(){
-    const m = $('escritorio'); if(!m || !m.hidden) return;
-    m.hidden = false; document.body.classList.add('ec-aberto'); aberto = true;
-    if(location.hash !== '#escritorio'){ try{ history.pushState({ec: 1}, '', '#escritorio'); ecPush = true; }catch(e){} }
-    lerCores(); medir();
-    if(!chegou){ chegou = true; chegarTodos(); animar(recentes()); }
-    ultimoQuadro = performance.now();
-    if(!raf) raf = requestAnimationFrame(laco);
-    const vazio = !movs.length;
-    buscar(vazio).then(() => { if(vazio && aberto) animar(recentes()); });
-    clearInterval(timer); timer = setInterval(() => { if(document.visibilityState === 'visible') buscar(false); }, 8000);
-    $('ec-tv').hidden = !(document.fullscreenEnabled && cena.requestFullscreen);
-  }
-  function fecharUI(){
-    const m = $('escritorio'); if(m) m.hidden = true;
-    document.body.classList.remove('ec-aberto'); aberto = false; clearInterval(timer); timer = null;
-    if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
-  }
-  function fecharPeloUsuario(){
-    if(ecPush){ history.back(); return; }
-    fecharUI(); if(location.hash === '#escritorio'){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
-  }
-  window.addEventListener('popstate', () => { if(ecPush && aberto){ ecPush = false; fecharUI(); } });
-
-  // ---------- aba "Escritório" na barra de projetos (só administrador) ----------
-  const ehAdmin = () => typeof A.nivel === 'function' && A.nivel() === 'admin';
-  function atualizarTab(){
-    const b = document.querySelector('#tabs .ec-tab'); if(!b) return;
-    b.querySelector('i').textContent = totalHoje ? totalHoje.toLocaleString('pt-BR') : '';
-    b.querySelector('span').textContent = totalHoje ? 'movimentos hoje' : 'os agentes ao vivo';
-  }
-  function addTab(){
-    const nav = $('tabs'); if(!nav || !ehAdmin()) return;
-    if(nav.querySelector('.ec-tab')){ atualizarTab(); return; }
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab ec-tab'; b.title = 'Os agentes do Gênio e do Espelho trabalhando ao vivo';
-    b.innerHTML = '<b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13"/><path d="M9 21v-5h6v5M9 11h.01M15 11h.01"/></svg>Escritório</b><small><i></i> <span></span></small>';
-    b.addEventListener('click', abrir);
-    nav.appendChild(b); nav.hidden = false; atualizarTab();
-  }
-  function tirarTab(){ const b = document.querySelector('#tabs .ec-tab'); if(b) b.remove(); }
-
-  // ---------- início ----------
-  $('ec-voltar').addEventListener('click', fecharPeloUsuario);
-  $('ec-tv').addEventListener('click', () => { if(document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if(cena.requestFullscreen) cena.requestFullscreen().catch(() => {}); });
-  document.addEventListener('keydown', ev => { if(ev.key === 'Escape' && aberto && !document.fullscreenElement) fecharPeloUsuario(); });
-  const antes = window.__onProjeto;
-  window.__onProjeto = id => { try{ if(antes) antes(id); }catch(e){} addTab(); };
-  let tentativas = 0;
-  (function quandoTiverNivel(){
-    if(ehAdmin()){
-      addTab();
-      buscar(true).then(() => { if(location.hash === '#escritorio') abrir(); });
-      return;
-    }
-    if(++tentativas < 20) setTimeout(quandoTiverNivel, 1500);
-  })();
-  window.addEventListener('hashchange', () => { if(location.hash === '#escritorio' && !aberto && ehAdmin()) abrir(); });
-  window.ESCRITORIO = {abrir};
+  document.addEventListener('visibilitychange',()=>{if(!state.open)return;if(!visible())stopAnimation();else if(checkAccess()){measure();fetchActivity();}});
+  window.addEventListener('resize',()=>{if(state.open)measure();});
+  if (typeof ResizeObserver==='function') new ResizeObserver(()=>{if(state.open)measure();}).observe(scene);
+  reduced.addEventListener('change',()=>{stopAnimation();motionNote();});
+  mobile.addEventListener('change',()=>setView(mobile.matches?'genio':'geral'));
+  window.addEventListener('popstate',()=>{if(state.open && location.hash!=='#escritorio'){state.pushed=false;closeUI();}});
+  window.addEventListener('hashchange',()=>{if(location.hash==='#escritorio' && !state.open)open();else if(location.hash!=='#escritorio' && state.open)closeUI();});
+  const previous=window.__onProjeto;
+  window.__onProjeto=function(...args){try{if(typeof previous==='function')previous.apply(this,args);}catch(_){}state.stock=null;state.stockAt=0;addTab();if(state.open){checkAccess();draw();}};
+  let attempts=0;
+  (function whenReady(){addTab();if(authorized()){if(location.hash==='#escritorio')open();return;}if(++attempts<20)setTimeout(whenReady,1500);})();
+  window.ESCRITORIO={abrir:open,fechar:close};
 })();
 </script>
 </body>
