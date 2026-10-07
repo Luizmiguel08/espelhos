@@ -4897,13 +4897,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   const K_CACHE = 'espelhos-docs';
   const urlDoc = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  // arquivo que a construtora mandou direto fica no site do app (x.u); os outros, no Drive da construtora
+  const linkDoc = x => (x && /^https:\/\//.test(String(x.u || '')) ? String(x.u) : urlDoc(x.id));
   const urlPasta = id => 'https://drive.google.com/drive/folders/' + encodeURIComponent(id);
   const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const TIPOS = [['book', 'Book'], ['memorial', 'Memorial'], ['convencao', 'Convenção'], ['contrato', 'Contrato'], ['matricula', 'Matrícula'],
-    ['certidoes', 'Certidões'], ['scp', 'SCP'], ['credito', 'Crédito e cadastro']];
+    ['certidoes', 'Certidões'], ['societario', 'SPE (contrato social e CNPJ)'], ['scp', 'SCP'], ['credito', 'Crédito e cadastro']];
   const SINONIMOS = {book: 'book apresentacao folder', memorial: 'memorial descritivo acabamento', convencao: 'convencao condominio minuta regimento',
     contrato: 'contrato minuta quadro resumo qr compra venda compromisso enquadrado', matricula: 'matricula registro ri imovel cartorio averbacao',
-    certidoes: 'certidao certidoes negativa trabalhista fgts protesto processos spe', scp: 'scp sociedade cessao investimento investidor',
+    certidoes: 'certidao certidoes negativa trabalhista fgts protesto processos spe', societario: 'contrato social cnpj spe empresa sociedade junta comercial inteiro teor', scp: 'scp sociedade cessao investimento investidor',
     credito: 'credito cadastro ficha', institucional: 'institucional apresentacao vita',
     lojas: 'lojas loja', prefeitura: 'prefeitura alvara', condominio: 'condominio valor estimativa', treinamento: 'treinamento'};
   const PARADA = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'o', 'a', 'os', 'as', 'para', 'pra', 'no', 'na', 'em', 'um', 'uma', 'nurban']);
@@ -4970,7 +4972,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('dc-cont').textContent = toks.length || tipo ? (nDoc ? nDoc + (nDoc === 1 ? ' documento' : ' documentos') + (nG > 1 ? ' em ' + nG + ' projetos' : '') : '') : 'Toque em Abrir para ver no Drive ou em Copiar link para mandar ao cliente.';
     if(!blocos.length) lista.innerHTML = '<div class="dc-nada">Nenhum documento com "' + esc(q) + '"' + (tipo ? ' nesse tipo' : '') + '. Tente outra palavra, como convenção, memorial, matrícula ou o nome do projeto.</div>';
     else lista.replaceChildren(...blocos);
-    $('dc-fonte').innerHTML = 'Fonte: ' + (C.fonte && C.fonte.u ? '<a href="' + esc(C.fonte.u) + '" target="_blank" rel="noopener">' + esc(C.fonte.t || C.fonte.u) + '</a>' : esc(C.nome)) + '. Os arquivos ficam no Drive da construtora; se um link não abrir, a construtora pode ter trocado o arquivo. Peça também pelo Gênio: "convenção do Nurban Consolação" chega em PDF no WhatsApp.';
+    $('dc-fonte').innerHTML = 'Fonte: ' + (C.fonte && C.fonte.u ? '<a href="' + esc(C.fonte.u) + '" target="_blank" rel="noopener">' + esc(C.fonte.t || C.fonte.u) + '</a>' : esc((C.fonte && C.fonte.t) || C.nome)) + '. '
+      + esc(C.arquivos || 'Os arquivos ficam no Drive da construtora; se um link não abrir, a construtora pode ter trocado o arquivo.') + ' Peça também pelo Gênio: "convenção do Nurban Consolação" chega em PDF no WhatsApp.';
     if(alvo){ const el = lista.querySelector('[data-p="' + alvo + '"]'); if(el){ el.classList.add('alvo'); const c = $('dc-corpo'); requestAnimationFrame(() => { c.scrollTop = Math.max(0, el.offsetTop - c.offsetTop - 120); }); } }
   }
   function chip(t, on, fn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (on ? ' on' : ''); b.textContent = t; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.addEventListener('click', fn); return b; }
@@ -5006,9 +5009,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const s = document.createElement('small'); s.textContent = [x.a, x.d].filter(Boolean).join(' · '); s.title = x.a || ''; d.appendChild(s);
     li.appendChild(d);
     const ac = document.createElement('div'); ac.className = 'dc-ac';
-    const ab = document.createElement('a'); ab.className = 'pri'; ab.href = urlDoc(x.id); ab.target = '_blank'; ab.rel = 'noopener'; ab.textContent = 'Abrir'; ab.setAttribute('aria-label', 'Abrir ' + x.t + (p && p.n ? ' do ' + p.n : '') + ' no Drive');
+    const ab = document.createElement('a'); ab.className = 'pri'; ab.href = linkDoc(x); ab.target = '_blank'; ab.rel = 'noopener'; ab.textContent = 'Abrir'; ab.setAttribute('aria-label', 'Abrir ' + x.t + (p && p.n ? ' do ' + p.n : '') + (x.u ? '' : ' no Drive'));
     const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = 'Copiar link';
-    cp.addEventListener('click', () => copiar((p && p.n ? p.n + ' · ' : '') + x.t + ': ' + urlDoc(x.id)));
+    cp.addEventListener('click', () => copiar((p && p.n ? p.n + ' · ' : '') + x.t + ': ' + linkDoc(x)));
     ac.append(ab, cp); li.appendChild(ac);
     return li;
   }
