@@ -1108,6 +1108,31 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   .bf-acoes{gap:6px;padding-left:10px;padding-right:10px}
   .bf-acoes .abtn{min-width:0;padding:0 8px;font-size:13px;line-height:1.15;white-space:normal;text-align:center}
 }
+/* buscar em tudo: campo no alto da lista e sugestões (projeto, unidade, região, construtora, cliente, documento) */
+.ba-q{position:relative;display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);border-radius:12px;padding:0 6px 0 12px;flex:none;z-index:6}
+.ba-q:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ba-q > svg{width:17px;height:17px;flex:none;color:var(--muted)}
+.ba-q input{flex:1;min-width:0;height:44px;border:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.ba-q input::-webkit-search-cancel-button{display:none}
+.ba-q-x{width:32px;height:32px;flex:none;border:0;border-radius:50%;background:var(--surface-2);color:var(--ink-2);font-size:18px;line-height:1;cursor:pointer}
+.ba-q-sug{position:absolute;left:-1px;right:-1px;top:calc(100% + 6px);max-height:min(62vh,480px);overflow-y:auto;background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow);padding:6px;display:flex;flex-direction:column;gap:2px}
+.ba-q-cab{font-size:12.5px;font-weight:700;color:var(--muted);padding:8px 10px 2px}
+.ba-q-it{display:flex;align-items:center;gap:4px}
+.ba-q-b{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;border:0;background:transparent;border-radius:10px;padding:7px 10px;font:inherit;color:var(--ink);cursor:pointer}
+.ba-q-b b{font-size:14.5px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ba-q-b small{font-size:12.5px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ba-q-b:hover,.ba-q-b:focus-visible,.ba-q-b.on{background:var(--accent-soft);outline:none}
+.ba-q-b[disabled]{cursor:default;background:transparent}
+.ba-q-ir{flex:none;height:30px;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink-2);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.ba-q-ir:hover{border-color:var(--accent);color:var(--accent)}
+/* enviadas: ligar ao Gênio, marca do Gênio e o cartão encontrado pela busca */
+.se-genio{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface));display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:10px}
+.se-genio:empty{display:none}
+.se-g-t{margin:0;font-size:13.5px;color:var(--ink)}
+.se-g-cod{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.04em;background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.se-g-esp{font-size:12.5px;color:var(--muted)}
+.se-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.bs-card.alvo{box-shadow:0 0 0 2px var(--accent);transition:box-shadow .3s}
 </style>
 </head>
 <body>
@@ -1327,6 +1352,13 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
           <button type="button" class="abtn primary mk-ver" id="ba-ver">Ver resultados</button>
         </form>
         <section class="mk-res bz-res" aria-label="Resultados">
+          <div class="ba-q" id="ba-q-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="ba-q" type="search" placeholder="Projeto, bairro, unidade, cliente ou documento" autocomplete="off" spellcheck="false" enterkeyhint="search"
+                   role="combobox" aria-expanded="false" aria-controls="ba-q-sug" aria-autocomplete="list" aria-label="Buscar em tudo: projeto, bairro, construtora, unidade, cliente ou documento">
+            <button type="button" class="ba-q-x" id="ba-q-x" aria-label="Limpar a busca" hidden>×</button>
+            <div class="ba-q-sug" id="ba-q-sug" role="listbox" aria-label="Encontrado" hidden></div>
+          </div>
           <div class="mk-res-top"><b id="ba-cont" aria-live="polite">—</b><label class="mk-ord"><span>Ordenar</span><select id="ba-ordem">
             <option value="preco">Menor preço</option>
             <option value="m2">Menor R$/m²</option>
@@ -1388,7 +1420,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 
     <!-- 3) Seleções enviadas -->
     <div class="bz-v" id="bz-enviadas" hidden>
-      <p class="txt">As seleções que você mandou deste aparelho. Você recebe um aviso quando o cliente abre o link ou toca em <b>Tenho interesse</b>. Cada link vale 60 dias.</p>
+      <p class="txt">O que você mandou deste aparelho: seleções da busca e fichas da central. Você recebe um aviso quando o cliente abre o link ou toca em <b>Tenho interesse</b>.</p>
+      <div class="se-genio" id="se-genio"></div>
       <div id="se-lista" class="bs-lista"></div>
     </div>
 
@@ -1608,7 +1641,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 </div>
 
 
-<script>window.ESPELHO_FAIXAS={"consolacao": [[19.7, "17 a 20 m²"], [26, "23 a 26 m²"], [30, "28 a 30 m²"], [40, "37 m²"], [999, "Loja 60 m²"]], "moby-life-pacaembu": [[25, "24 m²"], [26.5, "26 m²"], [27.5, "27 m²"], [29.5, "29 m²"], [30.5, "30 m²"], [31.5, "31 m²"], [38, "33 a 38 m²"], [999, "46 a 55 m²"]], "myone-conceicao": [[37.5, "36,9 a 37,4 m²"], [999, "37,7 a 37,9 m²"]], "nex-angelica": [[22.99, "22 m²"], [27.99, "27 a 28 m²"], [29.99, "29 m² (1º pavimento)"], [999, "45 m²"]], "nex-balthazar": [[21.99, "20 a 21 m²"], [24.99, "22 a 24 m²"], [27.99, "26 a 27 m²"], [999, "Garden 31 a 61 m²"]], "nex-bandeira-paulista": [[22.5, "21 a 22 m²"], [26.5, "24 a 26 m²"], [33, "31 m²"], [36, "35 m² (1 dorm.)"], [999, "44 a 54 m²"]], "nex-bela-cintra": [[21.99, "20 m²"], [26.99, "23 a 26 m²"], [30.99, "27 a 30 m²"], [999, "31 m² ou mais"]], "nex-caiubi": [[21.99, "Studio 20 a 22 m²"], [24.52, "Studio 23 a 24 m²"], [25.49, "1 dorm. 24,5 a 25 m²"], [32.99, "Studio 28 a 32 m²"], [999, "36 a 48 m²"]], "nex-capote-valente": [[23.5, "22 a 23 m²"], [24.8, "24 m²"], [25.5, "25 m²"], [30, "27 m²"], [999, "35 m²"]], "nex-estacao-clinicas": [[24.5, "24 m²"], [31.0, "30 a 31 m²"], [32.0, "31 a 32 m²"], [34.0, "32 a 34 m²"], [40.0, "35 a 40 m²"], [999, "41 a 66 m²"]], "nex-estacao-eucaliptos": [[22.5, "21 a 22 m²"], [23.5, "23 m²"], [25.2, "24 a 25 m²"], [27, "26 m²"], [999, "34 m²"]], "nex-japao-liberdade": [[21, "19 a 20 m²"], [23, "22 m²"], [25, "24 m² (studio e 1 dorm.)"], [99, "42 m² (garden)"]], "nex-miguel-calfat": [[22, "21 m²"], [24.3, "23 m²"], [25, "24 m²"], [26, "25 m²"], [27.5, "26 m²"], [999, "28 m²"]], "nex-parque-augusta": [[27.5, "Studio 26 m²"], [38, "Studio Garden 36 a 37 m²"], [41, "2 dorm. 39 a 40 m²"], [999, "2 dorm. Garden 107 m²"]], "nex-sarutaia": [[21.99, "Studio 20 a 21 m²"], [24.05, "Studio 23 a 24 m²"], [24.5, "Studio 24 m²"], [25.05, "1 dorm. 24 a 25 m²"], [30.5, "27 a 30 m²"], [32.5, "1 dorm. 31 m²"], [999, "40 a 56 m²"]], "raj-2": [[17, "17 m²"], [20, "20 m²"], [26, "26 m²"], [99, "37 e 40 m²"]], "raj-mendes": [[23, "21 a 23 m²"], [26, "26 m²"], [33, "30 a 33 m²"], [99, "39 m² (2 dorms)"]], "sumare": [[18.5, "18 m²"], [22, "21 m²"], [99, "24 a 25 m²"]], "sync-ibirapuera": [[26.1, "Studio 24,5 a 26 m²"], [30.5, "1 dorm 29,7 a 30,5 m²"], [35, "Studio garden 31,7 a 34,8 m²"], [50, "1 dorm garden 42 e 49 m²"], [999, "Garden 63 m²"]], "today-alto-da-boa-vista": [[30.5, "29 a 30 m²"], [40, "38 a 39 m² · 2 dorms."], [43, "42 a 43 m² · 1º pav."], [45, "44 a 45 m²"], [999, "Lojas 132 a 179 m²"]], "today-campo-belo": [[30.5, "Studio e 1 dorm. · 29,9 a 30,3 m²"], [31.5, "1 dorm. · 30,7 a 31,3 m²"], [45, "2 dorms · 39,8 a 40,3 m²"], [9999, "Lojas · 66 a 344 m²"]], "today-centro": [[30.1, "29 a 30 m²"], [36.3, "31 a 36 m²"], [37.9, "37 a 38 m²"], [40.6, "39 a 40 m²"], [60, "58 a 59 m²"], [999, "299 m² (loja)"]], "today-chacara-santo-antonio": [[30.99, "1 dorm. 29 a 30 m²"], [999, "2 dorms. 39 a 40 m²"]], "today-gomes-de-carvalho": [[26.0, "25 a 26 m²"], [27.0, "26 a 27 m²"], [28.0, "27 a 28 m²"], [31.0, "30 a 31 m²"], [39.0, "35 a 39 m²"], [46.0, "40 a 46 m²"], [61.0, "59 a 61 m²"]], "today-ibirapuera": [[29.6, "1 dorm 29,59 m²"], [30.2, "1 dorm 30 a 30,2 m²"], [32, "1 dorm 31,90 m²"], [999, "Loja 81,84 m²"]], "today-joaquim-tavora": [[29.99, "26 a 29 m²"], [32.99, "30 a 32 m²"], [36.99, "34 a 36 m²"], [41.99, "38 a 41 m²"], [44.99, "43 a 44 m²"], [999, "Loja 161 m²"]], "today-moema": [[28, "Studio 26,6 a 27,5 m²"], [32, "1 dorm 31 a 31,6 m²"], [41, "2 dorms 38,7 a 40,4 m²"], [9999, "Lojas 82 a 392 m²"]], "today-paraiso": [[29.99, "29 a 30 m²"], [37.1, "36 a 37 m²"], [42.2, "42 m²"], [80, "70 a 79 m²"], [999, "148 m²"]], "today-paulista": [[30.7, "Studio e 1 dorm · 30,02 a 30,66 m²"], [999, "Lojas · 33,68 e 98,77 m²"]], "today-perdizes": [[29.0, "27 a 29 m²"], [30.6, "30 a 30,6 m²"], [39.31, "38 a 39,3 m²"], [41.7, "41 a 41,7 m²"], [49.0, "48,8 m²"], [64.0, "63 m²"], [999, "Lojas de 200 a 400 m²"]], "today-platina": [[29.99, "1 dorm. 28,85 a 29,64 m²"], [30.99, "1 dorm. 30,03 a 30,76 m²"], [39.99, "1 dorm. garden 36,46 a 37,19 m²"], [40.99, "2 dorms. 40,31 e 40,82 m²"], [45.99, "1 dorm. garden 43,03 a 45,14 m²"], [69.99, "2 dorms. garden 69,00 m²"], [999, "Loja 131,03 m²"]], "today-pompeia": [[29.8, "1 dorm e studio 29 a 30 m²"], [39.5, "2 dorms 37 a 39 m²"], [56, "Loja 55 m²"], [76, "2 dorms 75 m²"], [999, "Loja 186 m²"]], "today-saude": [[29.99, "1 dorm 28 a 30 m²"], [36.0, "32 a 36 m²"], [39.99, "2 dorms 39 a 40 m²"], [59.99, "2 dorms 50 a 53 m² (1º andar)"], [99.99, "2 dorms R2V 63 m²"], [999.0, "Loja 233 m²"]], "today-tatuape": [[31.3, "30 a 31 m²"], [36, "32 a 36 m² · lojas"], [43, "40 a 43 m²"], [62, "51 a 61 m² · garden"], [78, "76 a 77 m² · garden"], [999, "142 m² · loja"]], "today-vila-clementino": [[29.99, "1 dorm. 29 a 30 m²"], [31.99, "1 dorm. 30 a 31,5 m²"], [34.99, "1 dorm. 33 a 34 m²"], [60, "1 dorm. 36 a 60 m² (1º pav.)"], [999, "Loja 101,61 m²"]], "today-vila-mariana": [[25.6, "24,5 a 25,5 m²"], [28.0, "26 a 28 m²"], [31.7, "28,5 a 31,5 m²"], [35.0, "32 a 35 m²"], [40.0, "38 a 40 m²"], [60.0, "55 m²"], [999, "Loja"]], "urby-paulista": [[24, "20 a 24 m²"], [27, "26 m²"], [30, "28 a 30 m²"], [34, "32 a 33 m²"], [999, "48 a 56 m²"]], "very-faria-lima": [[22.99, "Studio 22 m²"], [30.99, "1 dorm. 30 m²"], [33.99, "1 dorm. 31 a 33 m²"], [999, "2 dorms. 39 m²"]]};window.ESPELHO_NOMES={"consolacao": {"curto": "Consolação", "longo": "Nurban Consolação"}, "moby-life-pacaembu": {"curto": "Moby Pacaembu", "longo": "Moby Life Pacaembu"}, "myone-conceicao": {"curto": "My One Conceição", "longo": "My One Estação Conceição"}, "nex-angelica": {"curto": "NEX Angélica", "longo": "NEX One Angélica"}, "nex-balthazar": {"curto": "NEX Balthazar", "longo": "NEX One Balthazar"}, "nex-bandeira-paulista": {"curto": "NEX Bandeira Paulista", "longo": "NEX One Bandeira Paulista"}, "nex-bela-cintra": {"curto": "NEX Bela Cintra", "longo": "NEX One Bela Cintra"}, "nex-caiubi": {"curto": "NEX Caiubi", "longo": "NEX One Caiubi"}, "nex-capote-valente": {"curto": "NEX Capote Valente", "longo": "NEX One Capote Valente"}, "nex-estacao-clinicas": {"curto": "NEX Estação Clínicas", "longo": "NEX One Estação Clínicas"}, "nex-estacao-eucaliptos": {"curto": "NEX Estação Eucaliptos", "longo": "NEX One Estação Eucaliptos"}, "nex-japao-liberdade": {"curto": "NEX Japão-Liberdade", "longo": "NEX One Estação Japão-Liberdade"}, "nex-miguel-calfat": {"curto": "NEX Miguel Calfat", "longo": "NEX One Miguel Calfat"}, "nex-parque-augusta": {"curto": "NEX Parque Augusta", "longo": "NEX One Parque Augusta"}, "nex-sarutaia": {"curto": "NEX Sarutaiá", "longo": "NEX One Sarutaiá Jardins"}, "raj-2": {"curto": "RAJ 2", "longo": "RAJ Home II"}, "raj-mendes": {"curto": "RAJ Mendes", "longo": "RAJ Mendes"}, "sumare": {"curto": "Sumaré", "longo": "Nurban Avenida Sumaré"}, "sync-ibirapuera": {"curto": "Sync Ibirapuera", "longo": "Sync Ibirapuera"}, "today-alto-da-boa-vista": {"curto": "Today Alto da Boa Vista", "longo": "Today Alto da Boa Vista"}, "today-campo-belo": {"curto": "Today Campo Belo", "longo": "Today Campo Belo"}, "today-centro": {"curto": "Today Centro", "longo": "Today Centro"}, "today-chacara-santo-antonio": {"curto": "Today Chácara Sto. Antônio", "longo": "Today Chácara Santo Antônio"}, "today-gomes-de-carvalho": {"curto": "Today Gomes de Carvalho", "longo": "Today Gomes de Carvalho"}, "today-ibirapuera": {"curto": "Today Ibirapuera", "longo": "Today Ibirapuera"}, "today-joaquim-tavora": {"curto": "Today Joaquim Távora", "longo": "Today Joaquim Távora"}, "today-moema": {"curto": "Today Moema", "longo": "Today Moema"}, "today-paraiso": {"curto": "Today Paraíso", "longo": "Today Paraíso"}, "today-paulista": {"curto": "Today Paulista", "longo": "Today Paulista"}, "today-perdizes": {"curto": "Today Perdizes", "longo": "Today Perdizes"}, "today-platina": {"curto": "Today Platina", "longo": "Today Platina"}, "today-pompeia": {"curto": "Today Pompéia", "longo": "Today Pompéia"}, "today-saude": {"curto": "Today Saúde", "longo": "Today Saúde"}, "today-tatuape": {"curto": "Today Tatuapé", "longo": "Today Tatuapé"}, "today-vila-clementino": {"curto": "Today Vila Clementino", "longo": "Today Vila Clementino"}, "today-vila-mariana": {"curto": "Today Vila Mariana", "longo": "Today Vila Mariana"}, "urby-paulista": {"curto": "Urby Paulista", "longo": "Urby Paulista"}, "very-faria-lima": {"curto": "Very Faria Lima", "longo": "Very Estação Faria Lima"}};window.ESPELHO_CENTRAL=["raj-mendes", "consolacao", "sumare", "nex-bela-cintra", "raj-2", "moby-life-pacaembu", "myone-conceicao", "nex-angelica", "nex-balthazar", "nex-bandeira-paulista", "nex-caiubi", "nex-capote-valente", "nex-estacao-clinicas", "nex-estacao-eucaliptos", "nex-japao-liberdade", "nex-miguel-calfat", "nex-parque-augusta", "nex-sarutaia", "urby-paulista", "very-faria-lima", "today-platina", "sync-ibirapuera", "today-vila-clementino", "today-chacara-santo-antonio", "today-ibirapuera", "today-alto-da-boa-vista", "today-campo-belo", "today-gomes-de-carvalho", "today-vila-mariana", "today-joaquim-tavora", "today-saude", "today-moema", "today-paraiso", "today-paulista", "today-centro", "today-perdizes", "today-pompeia", "today-tatuape"];</script>
+<script>window.ESPELHO_FAIXAS={"consolacao": [[19.7, "17 a 20 m²"], [26, "23 a 26 m²"], [30, "28 a 30 m²"], [40, "37 m²"], [999, "Loja 60 m²"]], "moby-life-pacaembu": [[25, "24 m²"], [26.5, "26 m²"], [27.5, "27 m²"], [29.5, "29 m²"], [30.5, "30 m²"], [31.5, "31 m²"], [38, "33 a 38 m²"], [999, "46 a 55 m²"]], "myone-conceicao": [[37.5, "36,9 a 37,4 m²"], [999, "37,7 a 37,9 m²"]], "nex-angelica": [[22.99, "22 m²"], [27.99, "27 a 28 m²"], [29.99, "29 m² (1º pavimento)"], [999, "45 m²"]], "nex-balthazar": [[21.99, "20 a 21 m²"], [24.99, "22 a 24 m²"], [27.99, "26 a 27 m²"], [999, "Garden 31 a 61 m²"]], "nex-bandeira-paulista": [[22.5, "21 a 22 m²"], [26.5, "24 a 26 m²"], [33, "31 m²"], [36, "35 m² (1 dorm.)"], [999, "44 a 54 m²"]], "nex-bela-cintra": [[21.99, "20 m²"], [26.99, "23 a 26 m²"], [30.99, "27 a 30 m²"], [999, "31 m² ou mais"]], "nex-caiubi": [[21.99, "Studio 20 a 22 m²"], [24.52, "Studio 23 a 24 m²"], [25.49, "1 dorm. 24,5 a 25 m²"], [32.99, "Studio 28 a 32 m²"], [999, "36 a 48 m²"]], "nex-capote-valente": [[23.5, "22 a 23 m²"], [24.8, "24 m²"], [25.5, "25 m²"], [30, "27 m²"], [999, "35 m²"]], "nex-estacao-clinicas": [[24.5, "24 m²"], [31.0, "30 a 31 m²"], [32.0, "31 a 32 m²"], [34.0, "32 a 34 m²"], [40.0, "35 a 40 m²"], [999, "41 a 66 m²"]], "nex-estacao-eucaliptos": [[22.5, "21 a 22 m²"], [23.5, "23 m²"], [25.2, "24 a 25 m²"], [27, "26 m²"], [999, "34 m²"]], "nex-japao-liberdade": [[21, "19 a 20 m²"], [23, "22 m²"], [25, "24 m² (studio e 1 dorm.)"], [99, "42 m² (garden)"]], "nex-miguel-calfat": [[22, "21 m²"], [24.3, "23 m²"], [25, "24 m²"], [26, "25 m²"], [27.5, "26 m²"], [999, "28 m²"]], "nex-parque-augusta": [[27.5, "Studio 26 m²"], [38, "Studio Garden 36 a 37 m²"], [41, "2 dorm. 39 a 40 m²"], [999, "2 dorm. Garden 107 m²"]], "nex-sarutaia": [[21.99, "Studio 20 a 21 m²"], [24.05, "Studio 23 a 24 m²"], [24.5, "Studio 24 m²"], [25.05, "1 dorm. 24 a 25 m²"], [30.5, "27 a 30 m²"], [32.5, "1 dorm. 31 m²"], [999, "40 a 56 m²"]], "raj-2": [[17, "17 m²"], [20, "20 m²"], [26, "26 m²"], [99, "37 e 40 m²"]], "raj-mendes": [[23, "21 a 23 m²"], [26, "26 m²"], [33, "30 a 33 m²"], [99, "39 m² (2 dorms)"]], "sumare": [[18.5, "18 m²"], [22, "21 m²"], [99, "24 a 25 m²"]], "sync-ibirapuera": [[26.1, "Studio 24,5 a 26 m²"], [30.5, "1 dorm 29,7 a 30,5 m²"], [35, "Studio garden 31,7 a 34,8 m²"], [50, "1 dorm garden 42 e 49 m²"], [999, "Garden 63 m²"]], "today-alto-da-boa-vista": [[30.5, "29 a 30 m²"], [40, "38 a 39 m² · 2 dorms."], [43, "42 a 43 m² · 1º pav."], [45, "44 a 45 m²"], [999, "Lojas 132 a 179 m²"]], "today-campo-belo": [[30.5, "Studio e 1 dorm. · 29,9 a 30,3 m²"], [31.5, "1 dorm. · 30,7 a 31,3 m²"], [45, "2 dorms · 39,8 a 40,3 m²"], [9999, "Lojas · 66 a 344 m²"]], "today-centro": [[30.1, "29 a 30 m²"], [36.3, "31 a 36 m²"], [37.9, "37 a 38 m²"], [40.6, "39 a 40 m²"], [60, "58 a 59 m²"], [999, "299 m² (loja)"]], "today-chacara-santo-antonio": [[30.99, "1 dorm. 29 a 30 m²"], [999, "2 dorms. 39 a 40 m²"]], "today-gomes-de-carvalho": [[26.0, "25 a 26 m²"], [27.0, "26 a 27 m²"], [28.0, "27 a 28 m²"], [31.0, "30 a 31 m²"], [39.0, "35 a 39 m²"], [46.0, "40 a 46 m²"], [61.0, "59 a 61 m²"]], "today-ibirapuera": [[29.6, "1 dorm 29,59 m²"], [30.2, "1 dorm 30 a 30,2 m²"], [32, "1 dorm 31,90 m²"], [999, "Loja 81,84 m²"]], "today-joaquim-tavora": [[29.99, "26 a 29 m²"], [32.99, "30 a 32 m²"], [36.99, "34 a 36 m²"], [41.99, "38 a 41 m²"], [44.99, "43 a 44 m²"], [999, "Loja 161 m²"]], "today-moema": [[28, "Studio 26,6 a 27,5 m²"], [32, "1 dorm 31 a 31,6 m²"], [41, "2 dorms 38,7 a 40,4 m²"], [9999, "Lojas 82 a 392 m²"]], "today-paraiso": [[29.99, "29 a 30 m²"], [37.1, "36 a 37 m²"], [42.2, "42 m²"], [80, "70 a 79 m²"], [999, "148 m²"]], "today-paulista": [[30.7, "Studio e 1 dorm · 30,02 a 30,66 m²"], [999, "Lojas · 33,68 e 98,77 m²"]], "today-perdizes": [[29.0, "27 a 29 m²"], [30.6, "30 a 30,6 m²"], [39.31, "38 a 39,3 m²"], [41.7, "41 a 41,7 m²"], [49.0, "48,8 m²"], [64.0, "63 m²"], [999, "Lojas de 200 a 400 m²"]], "today-platina": [[29.99, "1 dorm. 28,85 a 29,64 m²"], [30.99, "1 dorm. 30,03 a 30,76 m²"], [39.99, "1 dorm. garden 36,46 a 37,19 m²"], [40.99, "2 dorms. 40,31 e 40,82 m²"], [45.99, "1 dorm. garden 43,03 a 45,14 m²"], [69.99, "2 dorms. garden 69,00 m²"], [999, "Loja 131,03 m²"]], "today-pompeia": [[29.8, "1 dorm e studio 29 a 30 m²"], [39.5, "2 dorms 37 a 39 m²"], [56, "Loja 55 m²"], [76, "2 dorms 75 m²"], [999, "Loja 186 m²"]], "today-saude": [[29.99, "1 dorm 28 a 30 m²"], [36.0, "32 a 36 m²"], [39.99, "2 dorms 39 a 40 m²"], [59.99, "2 dorms 50 a 53 m² (1º andar)"], [99.99, "2 dorms R2V 63 m²"], [999.0, "Loja 233 m²"]], "today-tatuape": [[31.3, "30 a 31 m²"], [36, "32 a 36 m² · lojas"], [43, "40 a 43 m²"], [62, "51 a 61 m² · garden"], [78, "76 a 77 m² · garden"], [999, "142 m² · loja"]], "today-vila-clementino": [[29.99, "1 dorm. 29 a 30 m²"], [31.99, "1 dorm. 30 a 31,5 m²"], [34.99, "1 dorm. 33 a 34 m²"], [60, "1 dorm. 36 a 60 m² (1º pav.)"], [999, "Loja 101,61 m²"]], "today-vila-mariana": [[25.6, "24,5 a 25,5 m²"], [28.0, "26 a 28 m²"], [31.7, "28,5 a 31,5 m²"], [35.0, "32 a 35 m²"], [40.0, "38 a 40 m²"], [60.0, "55 m²"], [999, "Loja"]], "urby-paulista": [[24, "20 a 24 m²"], [27, "26 m²"], [30, "28 a 30 m²"], [34, "32 a 33 m²"], [999, "48 a 56 m²"]], "very-faria-lima": [[22.99, "Studio 22 m²"], [30.99, "1 dorm. 30 m²"], [33.99, "1 dorm. 31 a 33 m²"], [999, "2 dorms. 39 m²"]]};window.ESPELHO_NOMES={"consolacao": {"curto": "Consolação", "longo": "Nurban Consolação"}, "moby-life-pacaembu": {"curto": "Moby Pacaembu", "longo": "Moby Life Pacaembu"}, "myone-conceicao": {"curto": "My One Conceição", "longo": "My One Estação Conceição"}, "nex-angelica": {"curto": "NEX Angélica", "longo": "NEX One Angélica"}, "nex-balthazar": {"curto": "NEX Balthazar", "longo": "NEX One Balthazar"}, "nex-bandeira-paulista": {"curto": "NEX Bandeira Paulista", "longo": "NEX One Bandeira Paulista"}, "nex-bela-cintra": {"curto": "NEX Bela Cintra", "longo": "NEX One Bela Cintra"}, "nex-caiubi": {"curto": "NEX Caiubi", "longo": "NEX One Caiubi"}, "nex-capote-valente": {"curto": "NEX Capote Valente", "longo": "NEX One Capote Valente"}, "nex-estacao-clinicas": {"curto": "NEX Estação Clínicas", "longo": "NEX One Estação Clínicas"}, "nex-estacao-eucaliptos": {"curto": "NEX Estação Eucaliptos", "longo": "NEX One Estação Eucaliptos"}, "nex-japao-liberdade": {"curto": "NEX Japão-Liberdade", "longo": "NEX One Estação Japão-Liberdade"}, "nex-miguel-calfat": {"curto": "NEX Miguel Calfat", "longo": "NEX One Miguel Calfat"}, "nex-parque-augusta": {"curto": "NEX Parque Augusta", "longo": "NEX One Parque Augusta"}, "nex-sarutaia": {"curto": "NEX Sarutaiá", "longo": "NEX One Sarutaiá Jardins"}, "raj-2": {"curto": "RAJ 2", "longo": "RAJ Home II"}, "raj-mendes": {"curto": "RAJ Mendes", "longo": "RAJ Mendes"}, "sumare": {"curto": "Sumaré", "longo": "Nurban Avenida Sumaré"}, "sync-ibirapuera": {"curto": "Sync Ibirapuera", "longo": "Sync Ibirapuera"}, "today-alto-da-boa-vista": {"curto": "Today Alto da Boa Vista", "longo": "Today Alto da Boa Vista"}, "today-campo-belo": {"curto": "Today Campo Belo", "longo": "Today Campo Belo"}, "today-centro": {"curto": "Today Centro", "longo": "Today Centro"}, "today-chacara-santo-antonio": {"curto": "Today Chácara Sto. Antônio", "longo": "Today Chácara Santo Antônio"}, "today-gomes-de-carvalho": {"curto": "Today Gomes de Carvalho", "longo": "Today Gomes de Carvalho"}, "today-ibirapuera": {"curto": "Today Ibirapuera", "longo": "Today Ibirapuera"}, "today-joaquim-tavora": {"curto": "Today Joaquim Távora", "longo": "Today Joaquim Távora"}, "today-moema": {"curto": "Today Moema", "longo": "Today Moema"}, "today-paraiso": {"curto": "Today Paraíso", "longo": "Today Paraíso"}, "today-paulista": {"curto": "Today Paulista", "longo": "Today Paulista"}, "today-perdizes": {"curto": "Today Perdizes", "longo": "Today Perdizes"}, "today-platina": {"curto": "Today Platina", "longo": "Today Platina"}, "today-pompeia": {"curto": "Today Pompéia", "longo": "Today Pompéia"}, "today-saude": {"curto": "Today Saúde", "longo": "Today Saúde"}, "today-tatuape": {"curto": "Today Tatuapé", "longo": "Today Tatuapé"}, "today-vila-clementino": {"curto": "Today Vila Clementino", "longo": "Today Vila Clementino"}, "today-vila-mariana": {"curto": "Today Vila Mariana", "longo": "Today Vila Mariana"}, "urby-paulista": {"curto": "Urby Paulista", "longo": "Urby Paulista"}, "very-faria-lima": {"curto": "Very Faria Lima", "longo": "Very Estação Faria Lima"}};window.ESPELHO_CENTRAL=["raj-mendes", "consolacao", "sumare", "nex-bela-cintra", "raj-2", "moby-life-pacaembu", "myone-conceicao", "nex-angelica", "nex-balthazar", "nex-bandeira-paulista", "nex-caiubi", "nex-capote-valente", "nex-estacao-clinicas", "nex-estacao-eucaliptos", "nex-japao-liberdade", "nex-miguel-calfat", "nex-parque-augusta", "nex-sarutaia", "urby-paulista", "very-faria-lima", "today-platina", "sync-ibirapuera", "today-vila-clementino", "today-chacara-santo-antonio", "today-ibirapuera", "today-alto-da-boa-vista", "today-campo-belo", "today-gomes-de-carvalho", "today-vila-mariana", "today-joaquim-tavora", "today-saude", "today-moema", "today-paraiso", "today-paulista", "today-centro", "today-perdizes", "today-pompeia", "today-tatuape"];window.ESPELHO_PAGINAS={"consolacao": "ver-consolacao.html", "moby-life-pacaembu": "ver-moby-life-pacaembu.html", "myone-conceicao": "ver-myone-conceicao.html", "nex-angelica": "ver-nex-angelica.html", "nex-balthazar": "ver-nex-balthazar.html", "nex-bandeira-paulista": "ver-nex-bandeira-paulista.html", "nex-caiubi": "ver-nex-caiubi.html", "nex-capote-valente": "ver-nex-capote-valente.html", "nex-estacao-clinicas": "ver-nex-estacao-clinicas.html", "nex-estacao-eucaliptos": "ver-nex-estacao-eucaliptos.html", "nex-japao-liberdade": "ver-nex-japao-liberdade.html", "nex-miguel-calfat": "ver-nex-miguel-calfat.html", "nex-parque-augusta": "ver-nex-parque-augusta.html", "nex-sarutaia": "ver-nex-sarutaia.html", "raj-2": "ver-raj-2.html", "raj-mendes": "ver-raj-mendes.html", "sumare": "ver-sumare.html", "sync-ibirapuera": "ver-sync-ibirapuera.html", "today-alto-da-boa-vista": "ver-today-alto-da-boa-vista.html", "today-campo-belo": "ver-today-campo-belo.html", "today-centro": "ver-today-centro.html", "today-chacara-santo-antonio": "ver-today-chacara-santo-antonio.html", "today-gomes-de-carvalho": "ver-today-gomes-de-carvalho.html", "today-ibirapuera": "ver-today-ibirapuera.html", "today-joaquim-tavora": "ver-today-joaquim-tavora.html", "today-moema": "ver-today-moema.html", "today-paraiso": "ver-today-paraiso.html", "today-paulista": "ver-today-paulista.html", "today-perdizes": "ver-today-perdizes.html", "today-platina": "ver-today-platina.html", "today-pompeia": "ver-today-pompeia.html", "today-saude": "ver-today-saude.html", "today-tatuape": "ver-today-tatuape.html", "today-vila-clementino": "ver-today-vila-clementino.html", "today-vila-mariana": "ver-today-vila-mariana.html", "urby-paulista": "ver-urby-paulista.html", "very-faria-lima": "ver-very-faria-lima.html"};</script>
 <script>
 (function(){
   let DADOS = {projetos: []};
@@ -2622,7 +2655,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(!buscas.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhum aviso neste aparelho ainda. Monte a busca em "Buscar agora" e toque em "Avisar quando aparecer".'; box.appendChild(v); atualizarContador(); return; }
     for(const b of buscas){
       const achou = encontrados(b.criterios);
-      const card = document.createElement('div'); card.className = 'bs-card';
+      const card = document.createElement('div'); card.className = 'bs-card'; card.dataset.k = 'av:' + b.id;
       card.innerHTML = '<div class="h"><b></b><small class="muted"></small></div><div class="crit"></div><div class="agora"></div><div class="acoes"></div><div class="lst"></div>';
       card.querySelector('b').textContent = b.cliente;
       card.querySelector('small').textContent = b.avisos ? b.avisos + ' aviso' + (b.avisos > 1 ? 's' : '') + (b.ultimo_aviso ? ' · último ' + quando(b.ultimo_aviso) : '') : '';
@@ -2644,6 +2677,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       box.appendChild(card);
     }
     atualizarContador();
+    destacar(box);
   }
   function editarAviso(b){
     baEdit = b || null;
@@ -2679,12 +2713,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('ba-avisar').addEventListener('click', () => salvarAviso());
 
   // ---------- Buscar agora ----------
-  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, vaga: 0, ent: '', ord: 'preco'};
+  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, vaga: 0, ent: '', ord: 'preco', q: ''};
   const PASSO_PROJ = 24;
   let baRes = [], baCrit = {}, baSel = new Set(), baAberto = {}, baMaisProj = PASSO_PROJ, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora', baFicha = null;
   const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null || c.vaga_min || c.entrega_ate));
   function critBusca(){
     const c = {projetos: ba.projs.slice(), modo: ba.modo};
+    // texto do campo de busca: vira a lista de empreendimentos que casam (o aviso salvo e o link usam essa lista)
+    const qr = lerQ(ba.q);
+    if(qr && qr.ids.length){ const sel = c.projetos.filter(id => qr.ids.includes(id)); c.projetos = sel.length ? sel : qr.ids.slice(); }
     if(ba.grupos.length) c.grupos = ba.grupos.slice();
     if(ba.fases.length) c.fases = ba.fases.slice();
     if(ba.tipos.length) c.tipos = ba.tipos.slice();
@@ -2812,6 +2849,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   function formDe(c, cli){   // carrega uma busca (aviso) no formulário
     c = c || {};
     $('ba-cli').value = cli || '';
+    ba.q = ''; $('ba-q').value = ''; $('ba-q-x').hidden = true;
     ba.projs = (c.projetos || []).slice(); ba.grupos = (c.grupos || []).slice(); ba.fases = (c.fases || []).slice(); ba.tipos = (c.tipos || []).slice(); ba.zonas = (c.zonas || []).slice();
     ba.bairro = c.regiao ? {nome: c.regiao.nome, lat: +c.regiao.lat, lng: +c.regiao.lng} : null;
     $('ba-bairro').value = c.regiao ? c.regiao.nome : ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
@@ -2861,6 +2899,156 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('ba-mais-res').addEventListener('click', () => { baMaisProj += PASSO_PROJ; renderRes(); });
   $('ba-limpar').addEventListener('click', limparBusca);
   $('ba-cli').addEventListener('input', renderBarra);
+
+  // ---------- buscar em tudo: nome do projeto, bairro, construtora, unidade, cliente ou documento ----------
+  // O texto filtra a lista (empreendimentos que casam com todas as palavras, aceitando erro de digitação) e abre
+  // as sugestões: empreendimento, unidade pelo número, região, construtora, cliente (enviadas e avisos) e documento.
+  const PARADAS_Q = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'o', 'a', 'os', 'as', 'em', 'no', 'na', 'nos', 'nas', 'para', 'pra', 'pro', 'com', 'um', 'uma', 'unidade', 'apto', 'ap']);
+  const normQ = s => norm(s).replace(/[^a-z0-9]+/g, ' ').trim();
+  const ST_Q = {disponivel: 'disponível', reservada: 'reservada', processo_final: 'pend. pagamento do ato', vendida: 'vendida'};
+  let qIdx = null, qIdxDe = null, qMemo = null, qSel = -1;
+  function indiceQ(){
+    if(qIdx && qIdxDe === dados) return qIdx;
+    qIdxDe = dados;
+    qIdx = (dados ? dados.projetos : []).map(p => { const i = infoDe(p);
+      return {p, k: ' ' + normQ([p.nome, p.curto, i.nome, String(p.id).replace(/-/g, ' '), i.bairro, i.cidade, i.endereco, p.endereco, GRUPO_NOME[grupoDe(p)], i.construtora, p.grupo_nome, p.linha].filter(Boolean).join(' ')) + ' '}; });
+    return qIdx;
+  }
+  // {ids: empreendimentos que casam, nums: números soltos (unidade), fuzzy: achou pelo nome parecido}
+  function lerQ(txt){
+    const q = String(txt || '').trim();
+    if(qMemo && qMemo.q === q && qMemo.de === dados) return qMemo.r;
+    const toks = normQ(q).split(' ').filter(t => t && !PARADAS_Q.has(t));
+    let r = null;
+    if(toks.length){
+      const idx = indiceQ(), tem = (x, t) => x.k.includes(' ' + t) || (t.length >= 3 && x.k.includes(t));
+      const ehNum = t => /^\d{1,5}[a-z]?$/.test(t), nums = toks.filter(ehNum), pal = toks.filter(t => !ehNum(t));
+      let ps = idx.filter(x => toks.every(t => tem(x, t))), comNum = true, fuzzy = false;
+      if(!ps.length && pal.length && nums.length){ ps = idx.filter(x => pal.every(t => tem(x, t))); comNum = false; }
+      if(!ps.length && pal.length){
+        // erro de digitação: uma letra trocada em palavra de 5 a 9 letras, duas a partir de 10 ("pacaenbu", "higenopolis")
+        ps = idx.filter(x => { const ws = x.k.trim().split(' '); return pal.every(t => tem(x, t) || (t.length >= 5 && ws.some(w => w.length >= 4 && distEd(w, t) <= (t.length >= 10 ? 2 : 1)))); });
+        fuzzy = ps.length > 0; comNum = false;
+      }
+      r = {q, toks, ids: ps.map(x => x.p.id), nums: comNum && ps.length ? [] : nums, fuzzy};
+    }
+    qMemo = {q, de: dados, r};
+    return r;
+  }
+  function critLinha(c){   // a linha acima da lista: o texto buscado e os filtros
+    const qr = lerQ(ba.q), q = String(ba.q || '').trim();
+    if(qr && qr.ids.length){
+      const c2 = Object.assign({}, c, {projetos: ba.projs.filter(id => qr.ids.includes(id))});
+      const resto = temFiltro(c2) ? critTexto(c2).replace(/^Todos os projetos( · )?/, '') : '';
+      return 'Com “' + q + '”' + (qr.fuzzy ? ' (nome parecido)' : '') + ': ' + qr.ids.length + (qr.ids.length === 1 ? ' empreendimento' : ' empreendimentos') + (resto ? ' · ' + resto : '');
+    }
+    const base = temFiltro(c) ? critTexto(c) : 'Todos os projetos da carteira, com as unidades disponíveis agora.';
+    return q ? 'Nenhum empreendimento com “' + q + '”: veja as sugestões no campo de busca. ' + base : base;
+  }
+  function aplicarQ(){ ba.q = $('ba-q').value; $('ba-q-x').hidden = !ba.q; baMaisProj = PASSO_PROJ; renderChipsBusca(); agendar(); }
+  function fecharSugQ(){ $('ba-q-sug').hidden = true; $('ba-q').setAttribute('aria-expanded', 'false'); qSel = -1; }
+  const projDe = id => (dados ? dados.projetos : []).find(p => p.id === id) || null;
+  function abrirFichaQ(p){
+    const g = baRes.find(x => x.p.id === p.id) || {p, us: (p.unidades || []).filter(a => casaUni(baCrit, p, a)), d: null};
+    abrirFichaProj(g);
+  }
+  function irEspelhoQ(pid){
+    fecharFichaProj(); document.querySelectorAll('.painel-fundo').forEach(x => x.hidden = true);
+    try{ history.replaceState(null, '', '#' + pid); }catch(e){}
+    if(window.ESPELHO) ESPELHO.goto(pid);
+  }
+  function usarBairroQ(b){
+    $('ba-q').value = ''; ba.q = ''; $('ba-q-x').hidden = true;
+    ba.bairro = b; ba.zonas = []; $('ba-bairro').value = b.nome; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
+    renderChipsBusca(); buscarAgora();
+  }
+  function usarGrupoQ(g){
+    $('ba-q').value = ''; ba.q = ''; $('ba-q-x').hidden = true;
+    ba.grupos = [g]; ba.projs = []; renderChipsBusca(); buscarAgora();
+  }
+  function sugQ(){
+    const box = $('ba-q-sug'), q = $('ba-q').value.trim();
+    if(q.length < 2 || !dados){ fecharSugQ(); return; }
+    const r = lerQ(q), itens = [], cab = t => itens.push({cab: t});
+    // empreendimentos
+    const ps = r ? r.ids.map(projDe).filter(Boolean) : [];
+    if(ps.length){
+      cab(r.fuzzy ? 'Empreendimentos com nome parecido' : 'Empreendimentos');
+      for(const p of ps.slice(0, 5)){
+        const i = infoDe(p), nd = (p.unidades || []).filter(a => a[6] === 'disponivel').length;
+        itens.push({t: p.nome, s: [i.bairro, GRUPO_NOME[grupoDe(p)] || i.construtora, nd + (nd === 1 ? ' disponível' : ' disponíveis')].filter(Boolean).join(' · '),
+                    ir: () => abrirFichaQ(p), extra: {t: 'Espelho', ir: () => irEspelhoQ(p.id)}});
+      }
+      if(ps.length > 5) itens.push({t: 'A lista já mostra os ' + ps.length, s: 'Toque fora para ver todos', ir: () => {}});
+    }
+    // unidade pelo número (em qualquer situação), nos empreendimentos do texto ou em todos
+    if(r && r.nums.length){
+      const onde = ps.length ? ps : (dados ? dados.projetos : []), us = [], sem0 = v => String(v).toLowerCase().replace(/^0+/, '');
+      for(const n of r.nums.slice(0, 2)) for(const p of onde) for(const a of (p.unidades || [])) if(sem0(a[0]) === sem0(n)) us.push({p, a});
+      us.sort((x, y) => (x.a[6] !== 'disponivel') - (y.a[6] !== 'disponivel'));
+      if(us.length){
+        cab(us.length === 1 ? 'Unidade' : 'Unidades');
+        for(const {p, a} of us.slice(0, 6)){
+          const pr = a[6] === 'disponivel' ? precoDe(p, a, ba.modo) : null, ar = areaDe(a);
+          itens.push({t: 'Unidade ' + a[0] + ' · ' + p.nome, s: [ehLoja(a) ? 'Loja' : tipologiaDe(p, a), ar > 0 ? fmtM2(ar) + ' m²' : null, andarTxt(a[4]), ST_Q[a[6]] || a[6], pr ? BRL(pr.v) : null].filter(Boolean).join(' · '),
+                      ir: () => irUnidade(p.id, a[0])});
+        }
+        if(us.length > 6) itens.push({t: 'Mais ' + (us.length - 6) + ' com esse número', s: 'Escreva também o nome do projeto, ex.: “caiubi ' + r.nums[0] + '”', ir: null});
+      }
+    }
+    // região (bairro) e construtora
+    if(!bairroIdx) indiceBairros();
+    const nq = norm(q), bs = [...bairroIdx.values()].filter(b => norm(b.nome) === nq || (nq.length >= 3 && norm(b.nome).startsWith(nq))).slice(0, 2);
+    if(bs.length){ cab('Região'); for(const b of bs) itens.push({t: 'Perto de ' + b.nome, s: 'Unidades a até ' + fmtKm(ba.raio) + ' do bairro, em todos os projetos', ir: () => usarBairroQ(b)}); }
+    const nqq = normQ(q), gs = [...new Set((dados ? dados.projetos : []).map(grupoDe).filter(Boolean))].filter(g => nqq.length >= 3 && normQ(GRUPO_NOME[g] || g).includes(nqq));
+    if(gs.length){ cab('Construtora'); for(const g of gs.slice(0, 2)){ const n = dados.projetos.filter(p => grupoDe(p) === g).length; itens.push({t: 'Só ' + (GRUPO_NOME[g] || g), s: n + (n === 1 ? ' projeto' : ' projetos'), ir: () => usarGrupoQ(g)}); } }
+    // clientes: seleções e fichas enviadas, e avisos salvos
+    garantirEnviadas();
+    const tq = normQ(q).split(' ').filter(Boolean), casaCli = nome => { const k = ' ' + normQ(nome) + ' '; return tq.every(t => k.includes(' ' + t)); };
+    const cs = [];
+    for(const s of seLista) if(casaCli(s.cliente)) cs.push({t: s.cliente, s: (s.origem === 'genio' ? 'Seleção do Gênio ' : 'Seleção enviada ') + quando(s.criado_em) + (s.aberturas ? ' · abriu ' + s.aberturas + '×' : ' · ainda não abriu'), ir: () => irEnviadaQ('sel:' + s.id)});
+    for(const l of seLinks) if(casaCli(l.cliente)) cs.push({t: l.cliente, s: 'Ficha do ' + nomeProjQ(l.projeto) + ' enviada ' + quando(l.criado_em) + (l.aberturas ? ' · abriu ' + l.aberturas + '×' : ' · ainda não abriu'), ir: () => irEnviadaQ('fic:' + l.id)});
+    for(const b of buscas) if(casaCli(b.cliente)) cs.push({t: b.cliente, s: 'Aviso salvo · ' + critTexto(b.criterios), ir: () => { bsAlvo = 'av:' + b.id; abaBusca('avisos'); }});
+    if(cs.length){ cab('Clientes'); cs.slice(0, 5).forEach(x => itens.push(x)); }
+    // documentos das construtoras (book, memorial, convenção, matrícula...)
+    const D = window.DOCS;
+    if(D && D.buscar){
+      const ds = D.buscar(q, 4), um = ps.length === 1 && D.docsDoProjeto ? D.docsDoProjeto(ps[0].id) : null, nDocs = um ? (um.p.docs || []).length : 0;
+      if(ds.length || nDocs){
+        cab('Documentos');
+        for(const d of ds) itens.push({t: d.x.t, s: d.p.n + ' · ' + d.c.nome, ir: () => D.abrirBusca(q, d.p.id, d.c.id)});
+        if(nDocs && !ds.some(d => d.p.id === ps[0].id)) itens.push({t: 'Documentos do ' + ps[0].nome + ' (' + nDocs + ')', s: 'Book, memorial, convenção e o que a construtora divulgou', ir: () => D.abrir(ps[0].id)});
+      }
+    }
+    if(!itens.length) itens.push({t: 'Nada com “' + q + '”', s: 'Procurei nos projetos, bairros, unidades, clientes e documentos.', ir: null});
+    box.replaceChildren(); qSel = -1;
+    for(const it of itens){
+      if(it.cab){ box.appendChild(el('div', 'ba-q-cab', it.cab)); continue; }
+      const row = el('div', 'ba-q-it'), b = el('button', 'ba-q-b'); b.type = 'button'; b.setAttribute('role', 'option');
+      b.append(el('b', null, it.t), el('small', null, it.s || ''));
+      if(it.ir){ b.addEventListener('mousedown', e => e.preventDefault()); b.addEventListener('click', () => { fecharSugQ(); $('ba-q').blur(); it.ir(); }); }
+      else b.disabled = true;
+      row.appendChild(b);
+      if(it.extra){ const x = el('button', 'ba-q-ir', it.extra.t + ' ›'); x.type = 'button'; x.addEventListener('mousedown', e => e.preventDefault()); x.addEventListener('click', () => { fecharSugQ(); it.extra.ir(); }); row.appendChild(x); }
+      box.appendChild(row);
+    }
+    box.hidden = false; $('ba-q').setAttribute('aria-expanded', 'true');
+  }
+  let qT = null;
+  $('ba-q').addEventListener('input', () => { aplicarQ(); clearTimeout(qT); qT = setTimeout(sugQ, 90); });
+  $('ba-q').addEventListener('focus', () => { if($('ba-q').value.trim().length >= 2) sugQ(); });
+  $('ba-q').addEventListener('blur', () => setTimeout(fecharSugQ, 160));
+  $('ba-q').addEventListener('keydown', e => {
+    const its = [...$('ba-q-sug').querySelectorAll('.ba-q-b:not([disabled])')];
+    if(e.key === 'Escape'){ if(!$('ba-q-sug').hidden) fecharSugQ(); else { $('ba-q').value = ''; aplicarQ(); } e.stopPropagation(); return; }
+    if((e.key === 'ArrowDown' || e.key === 'ArrowUp') && its.length && !$('ba-q-sug').hidden){
+      e.preventDefault(); qSel = (qSel + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length;
+      its.forEach((b, k) => { b.classList.toggle('on', k === qSel); b.setAttribute('aria-selected', k === qSel ? 'true' : 'false'); }); its[qSel].scrollIntoView({block: 'nearest'});
+      return;
+    }
+    if(e.key === 'Enter'){ e.preventDefault(); if(qSel >= 0 && its[qSel]) its[qSel].click(); else { fecharSugQ(); $('ba-q').blur(); } }
+  });
+  $('ba-q-x').addEventListener('click', () => { $('ba-q').value = ''; aplicarQ(); fecharSugQ(); $('ba-q').focus(); });
 
   const chave = (p, a) => p.id + '|' + a[0];
   const pidDe = k => k.slice(0, k.indexOf('|'));
@@ -2927,7 +3115,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
                                             : 'Nenhuma unidade disponível com esses filtros';
     const op = $('ba-ordem').querySelector('option[value="perto"]'); op.hidden = op.disabled = !c.regiao;
     if(!c.regiao && ba.ord === 'perto'){ ba.ord = 'preco'; $('ba-ordem').value = 'preco'; }
-    $('ba-crit').textContent = temFiltro(c) ? critTexto(c) : 'Todos os projetos da carteira, com as unidades disponíveis agora.';
+    $('ba-crit').textContent = critLinha(c);
     const sug = $('ba-sug-box'); sug.replaceChildren();
     if(!nU){ sug.appendChild(sugestoesEl(c, 0)); $('ba-mais-res').hidden = true; return; }
     baRes.slice(0, baMaisProj).forEach(g => box.appendChild(cardProj(g)));
@@ -3140,7 +3328,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(book) lk(book, 'Book do empreendimento (PDF)', 'primary');
     for(const z of ((P && P.tours) || [])) if(z && urlSegura(z.u)) lk(z.u, z.cli || z.t || 'Tour virtual');
     if(urlSegura(i.pagina)) lk(i.pagina, 'Página oficial ↗');
-    if(P) lk('nex/?p=' + encodeURIComponent(p.id), 'Ficha completa');
+    lk('nex/?p=' + encodeURIComponent(p.id), 'Ficha completa');   // sem ficha montada, a central abre a ficha automática
     if(P && docs.length) lk('nex/?p=' + encodeURIComponent(p.id) + '#mat', 'Todo o material (' + docs.length + ')');
     if(links.children.length) sec.appendChild(links);
     const peso = d => (d.ext === 'pdf' || d.pasta || d.u) ? 0 : 1;   // PDFs e pastas primeiro; vídeos e imagens por último
@@ -3312,7 +3500,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       try{
         const ep = await epRapido();
         const r = await rpc('selecao_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_cliente: cli, p_corretor: cor, p_whats: tel,
-          p_busca: {texto: textoBusca(c), modo: c.modo || 'pv', criterios: c}, p_itens: its.map(({p, a}) => ({p: p.id, n: String(a[0])}))});
+          p_busca: {texto: textoBusca(c), modo: c.modo || 'pv', criterios: c, origem: 'app'}, p_itens: its.map(({p, a}) => ({p: p.id, n: String(a[0])}))});
         beLink = {id: r.id, url: urlSel(r.id), sig, usado: false, avisos: !!r.avisos, cli, cor, tel};
         montarMsg(); estadoLink();
         if($('be-cli').value.trim() !== cli || $('be-cor').value.trim() !== cor || $('be-mtel').value.trim() !== tel) sincLink();
@@ -3406,45 +3594,139 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     }
   }
 
-  // ---------- seleções enviadas ----------
-  let seLista = [], seExcluir = null;
-  async function carregarEnviadas(){
-    const box = $('se-lista');
-    if(!seLista.length){ box.replaceChildren(); const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Carregando…'; box.appendChild(v); }
-    try{
-      const ep = await epRapido();
-      seLista = (await rpc('minhas_selecoes', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep})) || [];
-    }catch(e){ if(!seLista.length && box.firstChild) box.firstChild.textContent = 'Não consegui carregar agora. Confira a internet.'; return; }
-    renderEnviadas();
+  // ---------- enviadas: seleções da busca, fichas da central e, com o app ligado, o que o Gênio mandou ----------
+  const GENIO_WA = '5511978134764', K_GENIO = 'espelhos-genio';
+  let seLista = [], seLinks = [], seExcluir = null, seCarregado = 0, sePedido = null, seAlvo = null, bsAlvo = null, vinc = null;
+  // o servidor já tem a ligação com o Gênio? null = ainda não conferiu; sem a função (404), o quadro fica escondido
+  let genioPronto = null;
+  async function conferirGenio(){
+    if(genioPronto !== null || !codigo) return;
+    try{ await rpc('vinculo_status', {p_codigo: codigo, p_dono: dono(), p_vinculo: '-'}); genioPronto = true; }
+    catch(e){ if(e && e.status) genioPronto = e.status !== 404; }
   }
+  const nomeProjQ = id => { const p = projDe(id); return p ? p.nome : id; };
+  const urlFicha = l => new URL('nex/' + ((window.ESPELHO_PAGINAS || {})[l.projeto] || 'ver.html') + '?l=' + encodeURIComponent(l.id), location.href).href;
+  async function buscarEnviadas(){
+    const ep = await epRapido();
+    const [s, l] = await Promise.all([rpc('minhas_selecoes', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}),
+      rpc('meus_links', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep}).catch(() => null)]);
+    seLista = Array.isArray(s) ? s : []; if(Array.isArray(l)) seLinks = l;
+    seCarregado = Date.now();
+  }
+  // a busca em tudo procura os clientes sem esperar: carrega uma vez e refaz as sugestões quando chegar
+  function garantirEnviadas(){
+    if(seCarregado || sePedido || !codigo) return;
+    sePedido = buscarEnviadas().then(() => { if(!$('ba-q-sug').hidden) sugQ(); }).catch(() => {}).finally(() => { sePedido = null; if(!seCarregado) seCarregado = 1; });
+  }
+  function irEnviadaQ(k){ seAlvo = k; abaBusca('enviadas'); }
+  function destacar(box){
+    const k = box.id === 'se-lista' ? seAlvo : bsAlvo; if(!k) return;
+    const c = box.querySelector('[data-k="' + CSS.escape(k) + '"]'); if(!c) return;
+    if(box.id === 'se-lista') seAlvo = null; else bsAlvo = null;
+    c.classList.add('alvo'); requestAnimationFrame(() => c.scrollIntoView({block: 'center', behavior: 'smooth'}));
+    setTimeout(() => c.classList.remove('alvo'), 2600);
+  }
+  async function carregarEnviadas(){
+    const box = $('se-lista'); renderGenio();
+    if(!seLista.length && !seLinks.length){ box.replaceChildren(); const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Carregando…'; box.appendChild(v); }
+    try{ await Promise.all([buscarEnviadas(), conferirGenio()]); }
+    catch(e){ renderGenio(); if(!seLista.length && !seLinks.length && box.firstChild) box.firstChild.textContent = 'Não consegui carregar agora. Confira a internet.'; return; }
+    if(seLista.some(s => s.origem === 'genio')) LS.set(K_GENIO, '1');
+    renderGenio(); renderEnviadas();
+  }
+  const EV_FICHA = {planta: 'planta', vista: 'vista', valores: 'valores', galeria: 'fotos', local: 'localização', andar: 'posição no andar', whatsapp: 'tocou no WhatsApp'};
   function renderEnviadas(){
     const box = $('se-lista'); box.replaceChildren();
-    if(!seLista.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nenhuma seleção enviada deste aparelho ainda. Em "Buscar agora", marque as unidades e toque em "Enviar ao cliente".'; box.appendChild(v); return; }
-    for(const s of seLista){
-      const card = document.createElement('div'); card.className = 'bs-card se-card' + (s.expirado ? ' exp' : '');
+    const todos = seLista.map(s => ({k: 'sel:' + s.id, tipo: 'sel', em: s.criado_em, s})).concat(seLinks.map(l => ({k: 'fic:' + l.id, tipo: 'fic', em: l.criado_em, s: l})))
+      .sort((x, y) => String(y.em || '').localeCompare(String(x.em || '')));
+    if(!todos.length){ const v = document.createElement('div'); v.className = 'vazio'; v.textContent = 'Nada enviado deste aparelho ainda. Em "Buscar agora", marque as unidades e toque em "Enviar ao cliente". Na Ficha completa, use "Enviar ao cliente".'; box.appendChild(v); return; }
+    for(const it of todos){
+      const s = it.s, ficha = it.tipo === 'fic';
+      const card = document.createElement('div'); card.className = 'bs-card se-card' + (s.expirado ? ' exp' : ''); card.dataset.k = it.k;
       card.innerHTML = '<div class="h"><b></b><small class="muted"></small></div><div class="crit"></div><div class="agora"></div><div class="acoes"></div>';
+      const h = card.querySelector('.h');
       card.querySelector('b').textContent = s.cliente;
+      if(s.origem === 'genio'){ const g = el('span', 'se-tag', 'Gênio'); g.title = 'Mandado pelo Gênio no WhatsApp'; h.querySelector('b').appendChild(g); }
       card.querySelector('small').textContent = 'enviada ' + quando(s.criado_em);
-      card.querySelector('.crit').textContent = s.unidades + (s.unidades === 1 ? ' unidade' : ' unidades') + ' em ' + s.projetos + (s.projetos === 1 ? ' empreendimento' : ' empreendimentos') + (s.texto ? ' · ' + s.texto : '');
+      const us = s.unidades || [];
+      card.querySelector('.crit').textContent = ficha ? 'Ficha do ' + nomeProjQ(s.projeto) + ' · ' + (us.length === 1 ? 'unidade ' + us[0] : 'unidades ' + us.join(', '))
+        : s.unidades + (s.unidades === 1 ? ' unidade' : ' unidades') + ' em ' + s.projetos + (s.projetos === 1 ? ' empreendimento' : ' empreendimentos') + (s.texto ? ' · ' + s.texto : '');
       const ag = card.querySelector('.agora');
-      if(s.expirado) ag.textContent = 'Link expirado (cada link vale 60 dias).';
-      else if(s.aberturas){ ag.classList.add('tem'); ag.textContent = 'Abriu ' + (s.aberturas === 1 ? '1 vez' : s.aberturas + ' vezes') + (s.ultimo_acesso ? ' · última ' + quando(s.ultimo_acesso) : '') + (s.interesses ? ' · tocou em "Tenho interesse" ' + (s.interesses === 1 ? '1 vez' : s.interesses + ' vezes') : ''); }
+      const vistos = ficha ? Object.keys(s.vistos || {}).filter(k => EV_FICHA[k]).map(k => EV_FICHA[k]) : [];
+      if(s.expirado) ag.textContent = 'Link expirado (cada link vale ' + (ficha ? 90 : 60) + ' dias).';
+      else if(s.aberturas){ ag.classList.add('tem'); ag.textContent = 'Abriu ' + (s.aberturas === 1 ? '1 vez' : s.aberturas + ' vezes') + (s.ultimo_acesso ? ' · última ' + quando(s.ultimo_acesso) : '') + (s.interesses ? ' · tocou em "Tenho interesse" ' + (s.interesses === 1 ? '1 vez' : s.interesses + ' vezes') : '') + (vistos.length ? ' · viu ' + vistos.join(', ') : ''); }
       else ag.textContent = 'O cliente ainda não abriu.';
-      const ac = card.querySelector('.acoes'), url = urlSel(s.id);
+      const ac = card.querySelector('.acoes'), url = ficha ? urlFicha(s) : urlSel(s.id);
       const bt = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'abtn'; x.textContent = t; x.addEventListener('click', fn); ac.appendChild(x); return x; };
       if(!s.expirado){
         const a = document.createElement('a'); a.className = 'abtn'; a.textContent = 'Ver'; a.href = url + '&previa=1'; a.target = '_blank'; a.rel = 'noopener'; ac.appendChild(a);
         bt('Copiar link', async () => { try{ await navigator.clipboard.writeText(url); toast('Link copiado.'); }catch(e){ toast(url, 8000); } });
-        bt('Reenviar', () => { const cli = String(s.cliente || '').split(/\s+/)[0]; window.open('https://wa.me/?text=' + encodeURIComponent('Oi' + (cli ? ', ' + cli : '') + '! Segue de novo a seleção de imóveis que separei para você:\n' + url), '_blank', 'noopener'); });
+        bt('Reenviar', () => { const cli = String(s.cliente || '').split(/\s+/)[0]; window.open('https://wa.me/?text=' + encodeURIComponent('Oi' + (cli ? ', ' + cli : '') + '! Segue de novo ' + (ficha ? 'a apresentação do ' + nomeProjQ(s.projeto) : 'a seleção de imóveis') + ' que separei para você:\n' + url), '_blank', 'noopener'); });
       }
-      const del = bt(seExcluir === s.id ? 'Confirmar exclusão' : 'Apagar', async () => {
-        if(seExcluir !== s.id){ seExcluir = s.id; renderEnviadas(); return; }
-        try{ await rpc('selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: s.id}); seLista = seLista.filter(x => x.id !== s.id); toast('Seleção de ' + s.cliente + ' apagada. O link deixa de funcionar.'); }catch(e){ toast('Não consegui apagar agora.'); }
+      const del = bt(seExcluir === it.k ? 'Confirmar exclusão' : 'Apagar', async () => {
+        if(seExcluir !== it.k){ seExcluir = it.k; renderEnviadas(); return; }
+        try{
+          await rpc(ficha ? 'link_apagar' : 'selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: s.id});
+          if(ficha) seLinks = seLinks.filter(x => x.id !== s.id); else seLista = seLista.filter(x => x.id !== s.id);
+          toast((ficha ? 'Ficha' : 'Seleção') + ' de ' + s.cliente + ' apagada. O link deixa de funcionar.');
+        }catch(e){ toast('Não consegui apagar agora.'); }
         seExcluir = null; renderEnviadas();
       });
-      if(seExcluir === s.id) del.style.color = 'var(--vend-text)';
+      if(seExcluir === it.k) del.style.color = 'var(--vend-text)';
       box.appendChild(card);
     }
+    destacar(box);
+  }
+  // ligar este aparelho ao Gênio: o app gera um código, o corretor manda "ligar app CÓDIGO" no WhatsApp do Gênio
+  // e os links que o Gênio mandar passam a aparecer aqui, com o aviso de quando o cliente abrir
+  function renderGenio(){
+    const box = $('se-genio'); if(!box) return; box.replaceChildren();
+    const ligado = LS.get(K_GENIO) === '1';
+    if(genioPronto !== true && !vinc) return;   // vazio = escondido (.se-genio:empty)
+    if(vinc && vinc.codigo && !vinc.fim){
+      const p = el('p', 'se-g-t'); p.append('Mande para o Gênio no WhatsApp: '); p.appendChild(el('b', 'se-g-cod', 'ligar app ' + vinc.codigo));
+      p.append(' (vale 15 minutos).');
+      const row = el('div', 'row');
+      const a = el('a', 'abtn primary', 'Abrir o WhatsApp do Gênio'); a.href = 'https://wa.me/' + GENIO_WA + '?text=' + encodeURIComponent('ligar app ' + vinc.codigo); a.target = '_blank'; a.rel = 'noopener';
+      const c = el('button', 'abtn', 'Copiar'); c.type = 'button'; c.addEventListener('click', async () => { try{ await navigator.clipboard.writeText('ligar app ' + vinc.codigo); toast('Copiado. Cole na conversa com o Gênio.'); }catch(e){ toast('ligar app ' + vinc.codigo, 8000); } });
+      row.append(a, c);
+      box.append(p, row, el('small', 'se-g-esp', vinc.msg || 'Esperando o Gênio confirmar…'));
+      return;
+    }
+    if(ligado){
+      const p = el('p', 'se-g-t ok'); p.append('Ligado ao Gênio: o que ele manda para você no WhatsApp aparece aqui, com a marca '); p.appendChild(el('span', 'se-tag', 'Gênio')); p.append('.');
+      const b = el('button', 'lnk', 'Ligar de novo'); b.type = 'button'; b.addEventListener('click', ligarGenio); p.append(' '); p.appendChild(b);
+      box.appendChild(p); return;
+    }
+    const p = el('p', 'se-g-t', 'Os links que o Gênio manda no WhatsApp podem aparecer aqui também, com o aviso de quando o cliente abre.');
+    const b = el('button', 'abtn', 'Ligar ao Gênio'); b.type = 'button'; b.addEventListener('click', ligarGenio);
+    box.append(p, b);
+  }
+  async function ligarGenio(){
+    try{
+      const ep = await epRapido();
+      const r = await rpc('vinculo_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep});
+      vinc = {codigo: r.codigo, ate: Date.now() + 15 * 60e3, n: 0};
+      renderGenio(); esperarGenio();
+    }catch(e){
+      if(e && e.status === 404){ genioPronto = false; renderGenio(); toast('A ligação com o Gênio ainda não está ativa.'); return; }
+      toast(/limite_vinculos/.test((e && e.body) || '') ? 'Muitos códigos na última hora. Tente daqui a pouco.' : 'Não consegui gerar o código agora. Confira a internet.');
+    }
+  }
+  async function esperarGenio(){
+    const v = vinc; if(!v || v.fim) return;
+    if(Date.now() > v.ate){ v.fim = true; vinc = null; toast('O código venceu. Gere outro em "Ligar ao Gênio".'); renderGenio(); return; }
+    await new Promise(r => setTimeout(r, v.n++ < 20 ? 3000 : 8000));
+    if(vinc !== v) return;
+    try{
+      const r = await rpc('vinculo_status', {p_codigo: codigo, p_dono: dono(), p_vinculo: v.codigo});
+      if(r && r.usado){
+        v.fim = true; vinc = null; LS.set(K_GENIO, '1');
+        toast('Pronto: o Gênio está ligado a este aparelho' + (r.movidos ? ' e ' + r.movidos + (r.movidos === 1 ? ' link dele veio' : ' links dele vieram') + ' para cá.' : '.'), 5500);
+        renderGenio(); carregarEnviadas(); return;
+      }
+    }catch(e){}
+    esperarGenio();
   }
 
   // =====================================================================
@@ -3923,7 +4205,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       const info = document.querySelector('#sheet .info'); (info || $('sheet')).appendChild(acoes);
     }
     ppBtn.hidden = !(u && u.st === 'disponivel');
-    const pid = window.ESPELHO && ESPELHO.current(), tem = !!(u && pid && CENTRAL.has(pid));
+    // todo projeto do espelho tem ficha: a montada (material da construtora) ou a automática (fotos, unidades e valores do app)
+    const pid = window.ESPELHO && ESPELHO.current(), tem = !!(u && pid && (CENTRAL.has(pid) || (dados && dados.projetos.some(p => p.id === pid))));
     fcBtn.hidden = !tem;
     if(tem) fcBtn.href = 'nex/?p=' + encodeURIComponent(pid) + '#u' + encodeURIComponent(u.key);
   };
@@ -5032,6 +5315,23 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     render();
     carregar().then(() => { render(); alvo = null; });
   }
+  // busca em tudo (aba Buscar): documentos com todas as palavras no nome do documento ou do projeto
+  function buscar(texto, max){
+    if(!IDX){ carregar(); return []; }
+    const toks = norm(texto).replace(/[^a-z0-9 ]+/g, ' ').split(' ').filter(t => t.length > 1 && !PARADA.has(t));
+    if(!toks.length) return [];
+    const out = [];
+    for(const c of IDX.construtoras) for(const p of (c.projetos || [])) for(const x of (p.docs || [])){
+      if(toks.every(t => x._k.includes(t) || p._k.includes(t)) && toks.some(t => x._k.includes(t))) out.push({c, p, x});
+      if(out.length >= (max || 5)) return out;
+    }
+    return out;
+  }
+  function abrirBusca(texto, pid, consId){
+    q = String(texto || ''); $('dc-q').value = q;
+    const r = pid ? docsDoProjeto(pid) : null; if(r) cons = r.c.id; else if(consId && IDX && IDX.construtoras.some(c => c.id === consId)) cons = consId;
+    abrir(pid || null);
+  }
   function fecharUI(){ $('docs').hidden = true; document.body.classList.remove('dc-aberto'); }
   function fecharPeloUsuario(){
     if(dcPush){ history.back(); return; }
@@ -5084,7 +5384,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   addTab();
   setTimeout(() => carregar().then(() => { if(/^#docs/.test(location.hash)) abrir((/^#docs-(.+)$/.exec(location.hash) || [])[1] || null); }), 1500);
   window.addEventListener('hashchange', () => { const m = /^#docs(?:-(.+))?$/.exec(location.hash); if(m && $('docs').hidden) abrir(m[1] || null); });
-  window.DOCS = {abrir, docsDoProjeto};
+  window.DOCS = {abrir, abrirBusca, buscar, docsDoProjeto};
 })();
 </script>
 <script>/* Escritório Fortal: sala de vendas em pixel art, no estilo Habbo (06/10/2026).
