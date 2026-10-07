@@ -798,6 +798,18 @@ body.ec-aberto{overflow:hidden}
 @media(max-width:820px){.ec-stage-layout{grid-template-columns:1fr}.ec-top{gap:12px;flex-wrap:wrap;padding:13px 16px}.ec-tit h2{font-size:21px}.ec-tit p{font-size:11px}.ec-tv{margin-left:auto}.ec-network{order:5;max-width:none;width:100%;min-height:20px}.ec-network #ec-sub{font-size:11px}.ec-network .ec-retry{min-height:30px;padding:0 7px}.ec-main{padding:17px 16px 28px}.ec-scene-header{display:block}.ec-scene-header h3{font-size:12px;margin-bottom:12px}.ec-rooms{width:100%;display:flex}.ec-room{flex:1;padding:8px 7px;font-size:11px!important}.ec-cena[data-view=genio],.ec-cena[data-view=espelho]{width:200%;min-height:0}.ec-cena[data-view=geral]{min-height:0}.ec-scene-shell{border-radius:8px}.ec-hotspot{min-height:32px;min-width:28px}.ec-scene-footer{font-size:11px}.ec-drag-hint{display:block}.ec-selected-mark{font-size:21px;padding-right:12px}.ec-selected{gap:12px}.ec-selected h3 small{display:block;margin:3px 0 0}.ec-selected p{font-size:12px}.ec-selected time{font-size:11px}.ec-team-room{grid-column:1/-1}#ec-equipe{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ec-ag{grid-template-columns:28px minmax(0,1fr) 20px;padding-left:11px;padding-right:11px}.ec-ag small{font-size:11px}.ec-team-foot{font-size:11px}.ec-mov{grid-template-columns:1fr}.ec-journal-head{display:block}.ec-journal-head p{margin-top:6px}.ec-journal{margin-top:22px}}
 @media(max-width:390px){.ec-top{padding:12px}.ec-main{padding:15px 12px 24px}.ec-back{padding:8px 10px;font-size:12px!important}.ec-tit h2{font-size:19px}.ec-tv{padding:8px 10px;font-size:11px!important}.ec-tit p{display:none}.ec-ag{grid-template-columns:25px minmax(0,1fr) 17px;gap:7px}.ec-initial{width:25px;height:25px}.ec-scene-footer{display:block}.ec-drag-hint{margin-top:4px}.ec-selected-mark{display:none}}
 @media(prefers-reduced-motion:reduce){.ec *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+/* pixel art no estilo Habbo (06/10/2026): botão de som e marcador de seleção desenhado na cena */
+.ec-som[aria-pressed=false]{color:var(--ec-muted);border-style:dashed}
+.ec-hotspot[aria-pressed=true]::after{display:none}
+@media(max-width:820px){.ec-som{margin-left:auto}}
+.ec-som .ec-som-curto{display:none}
+.ec .ec-drag-hint{display:none}
+@media(max-width:820px){
+  .ec .ec-cena[data-view=genio],.ec .ec-cena[data-view=espelho]{width:100%;aspect-ratio:4/3;min-height:0}
+  .ec-som .ec-som-longo{display:none}
+  .ec-som .ec-som-curto{display:inline}
+  .ec-som{padding:9px 12px}
+}
 
 
 /* ===== lupa: buscar para o cliente (buscar agora, avisos, enviadas) ===== */
@@ -1572,20 +1584,21 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   </div>
 </div>
 
-<!-- Escritório Fortal. A cena representa somente registros do diário de atividade. -->
+<!-- Escritório Fortal em pixel art (estilo Habbo). O diário real aparece em balão dourado e na lista; conversas, gritos e buzina são clima. -->
 <div class="ec" id="escritorio" hidden role="dialog" aria-modal="true" aria-labelledby="ec-title" tabindex="-1">
   <header class="ec-top">
     <button class="ec-back" type="button" id="ec-voltar" aria-label="Voltar aos espelhos">← Espelhos</button>
     <div class="ec-tit"><h2 id="ec-title">Escritório Fortal</h2><p>Gênio &amp; Espelho · uma equipe, duas salas</p></div>
     <div class="ec-network" id="ec-network" data-state="loading"><span class="ec-network-dot" aria-hidden="true"></span><span id="ec-sub" role="status" aria-live="polite">Aguardando consulta.</span><button class="ec-retry" type="button" id="ec-retry" hidden>Tentar de novo</button></div>
+    <button class="ec-outline ec-som" type="button" id="ec-som" aria-pressed="true" aria-label="Som da buzina e da torcida: ligado"><span class="ec-som-longo">Som ligado</span><span class="ec-som-curto">Som</span></button>
     <button class="ec-outline ec-tv" type="button" id="ec-tv" hidden>Tela cheia</button>
   </header>
   <div class="ec-main">
     <div class="ec-scene-header"><h3>Selecione alguém para acompanhar sua atividade</h3><div class="ec-rooms" role="group" aria-label="Visão do escritório"><button type="button" class="ec-room" data-room="geral" aria-pressed="true">Visão geral</button><button type="button" class="ec-room" data-room="genio" aria-pressed="false">Sala Gênio</button><button type="button" class="ec-room" data-room="espelho" aria-pressed="false">Sala Espelho</button></div></div>
     <div class="ec-stage-layout">
       <section class="ec-scene-block" aria-label="As duas salas">
-        <div class="ec-scene-shell" id="ec-scene-shell"><div class="ec-rolagem" id="ec-rolagem" tabindex="0" aria-label="Panorama do escritório. Use as setas para navegar pelas salas."><div class="ec-cena" id="ec-cena" data-view="geral"><canvas id="ec-canvas" width="1680" height="945" role="img" aria-label="Escritório Fortal com ambientes em azul marinho, vidro e iluminação dourada. Gênio, Mila, Flávia e Sérgio na sala do Gênio; Otto, Téo, Rô, Murilo, Dora e Lia na sala do Espelho."></canvas><div class="ec-hotspots" id="ec-hotspots"></div><div class="ec-scene-loading" id="ec-scene-loading">Carregando o escritório…</div></div></div></div>
-        <div class="ec-scene-footer"><p class="ec-motion-note" id="ec-motion-note">Movimentos representam registros do diário, sem reproduzir a duração real das tarefas.</p><span class="ec-drag-hint">Arraste para explorar →</span></div>
+        <div class="ec-scene-shell" id="ec-scene-shell"><div class="ec-rolagem" id="ec-rolagem" tabindex="0" aria-label="Panorama do escritório. Use as setas para navegar pelas salas."><div class="ec-cena" id="ec-cena" data-view="geral"><canvas id="ec-canvas" width="1280" height="720" role="img" aria-label="Escritório Fortal em pixel art, com duas salas separadas por vidro. Gênio, Mila, Flávia e Sérgio na sala do Gênio; Otto, Téo, Rô, Murilo, Dora e Lia na sala do Espelho, andando, conversando e tocando a buzina."></canvas><div class="ec-hotspots" id="ec-hotspots"></div><div class="ec-scene-loading" id="ec-scene-loading">Montando o escritório…</div></div></div></div>
+        <div class="ec-scene-footer"><p class="ec-motion-note" id="ec-motion-note">Conversas, gritos e buzina são clima de escritório. O que aconteceu de verdade aparece no balão dourado e na lista.</p><span class="ec-drag-hint">Arraste para explorar →</span></div>
         <section class="ec-selected" aria-label="Agente selecionado"><span class="ec-selected-mark" id="ec-selected-mark" aria-hidden="true">G</span><div class="ec-selected-main"><h3><span id="ec-selected-name">Gênio</span><small id="ec-selected-role">Recepção</small></h3><p id="ec-selected-text">Recebe os pedidos do WhatsApp e encaminha à equipe.</p><time id="ec-selected-time">Aguardando o diário de atividade.</time></div></section>
       </section>
       <aside class="ec-agents" aria-labelledby="ec-agents-title"><div class="ec-aside-head"><h3 id="ec-agents-title">Agora</h3><span>10 agentes</span></div><div id="ec-equipe"></div><p class="ec-team-foot">Os números contam registros recebidos hoje, não tarefas ainda em execução.</p></aside>
@@ -5071,25 +5084,25 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   window.DOCS = {abrir, docsDoProjeto};
 })();
 </script>
-<script>/* Escritório Fortal: apresentação do diário existente, sem produzir atividade. */
+<script>/* Escritório Fortal: sala de vendas em pixel art, no estilo Habbo (06/10/2026).
+   O diário real (escritorio_atividade) aparece em balão dourado e na lista; conversas, gritos e buzina são clima de escritório. */
 (function () {
   'use strict';
   const A = window.APP;
   const $ = id => document.getElementById(id);
   const dialog = $('escritorio');
   if (!A || !dialog) return;
-  const W = 1672, H = 941;
   const EQUIPE = [
-    {id:'genio', nome:'Gênio', papel:'Recepção', sala:0, desc:'Recebe os pedidos do WhatsApp e encaminha à equipe.', box:[224,300,132,124], home:[442,551], exit:[[450,605],[559,661]]},
-    {id:'mila', nome:'Mila', papel:'Material', sala:0, desc:'Espelho, fotos, plantas, book e link para o cliente.', box:[398,214,83,93], home:[566,406], exit:[[450,427],[450,605],[559,661]]},
-    {id:'flavia', nome:'Flávia', papel:'Fluxo', sala:0, desc:'Fluxo de pagamento, card da proposta e rentabilidade.', box:[648,227,71,94], home:[767,441], exit:[[777,593],[783,665]]},
-    {id:'sergio', nome:'Sérgio', papel:'Secretário', sala:0, desc:'Compromissos, avisos no WhatsApp e Google Agenda.', box:[570,336,115,110], home:[753,581], exit:[[783,665]]},
-    {id:'otto', nome:'Otto', papel:'Organização', sala:1, desc:'Confere os projetos, avisa buscas salvas e conta o que mudou.', box:[1024,239,88,95], home:[1142,445], exit:[[1143,514],[1120,669],[1040,686]]},
-    {id:'teo', nome:'Téo', papel:'Tabelas', sala:1, desc:'Carrega tabelas novas de preço, confere as somas e atualiza a revenda One todo dia.', box:[1205,248,106,94], home:[1357,463], exit:[[1351,534],[1350,672],[1040,686]]},
-    {id:'ro', nome:'Rô', papel:'Robô de status', sala:1, desc:'Acompanha disponível, reservada e vendida nos sistemas das construtoras.', box:[1425,269,103,92], home:[1587,490], exit:[[1593,602],[1562,698],[1350,692],[1040,686]]},
-    {id:'murilo', nome:'Murilo', papel:'Mercado', sala:1, desc:'Recebe a Órulo e atualiza as outras incorporadoras.', box:[953,357,118,121], home:[1117,593], exit:[[1120,669],[1040,686]]},
-    {id:'dora', nome:'Dora', papel:'Documentos', sala:1, desc:'Fichas, plantas, books e central de documentação.', box:[1192,383,102,119], home:[1351,633], exit:[[1350,681],[1040,686]]},
-    {id:'lia', nome:'Lia', papel:'Lupa', sala:1, desc:'Busca para o cliente e links de seleção.', box:[1430,400,129,136], home:[1580,670], exit:[[1546,707],[1350,692],[1040,686]]}
+    {id:'genio', nome:'Gênio', papel:'Recepção', sala:0, desc:'Recebe os pedidos do WhatsApp e encaminha à equipe.'},
+    {id:'mila', nome:'Mila', papel:'Material', sala:0, desc:'Espelho, fotos, plantas, book e link para o cliente.'},
+    {id:'flavia', nome:'Flávia', papel:'Fluxo', sala:0, desc:'Fluxo de pagamento, card da proposta e rentabilidade.'},
+    {id:'sergio', nome:'Sérgio', papel:'Secretário', sala:0, desc:'Compromissos, avisos no WhatsApp e Google Agenda.'},
+    {id:'otto', nome:'Otto', papel:'Organização', sala:1, desc:'Confere os projetos, avisa buscas salvas e conta o que mudou.'},
+    {id:'teo', nome:'Téo', papel:'Tabelas', sala:1, desc:'Carrega tabelas novas de preço, confere as somas e atualiza a revenda One todo dia.'},
+    {id:'ro', nome:'Rô', papel:'Robô de status', sala:1, desc:'Acompanha disponível, reservada e vendida nos sistemas das construtoras.'},
+    {id:'murilo', nome:'Murilo', papel:'Mercado', sala:1, desc:'Recebe a Órulo e atualiza as outras incorporadoras.'},
+    {id:'dora', nome:'Dora', papel:'Documentos', sala:1, desc:'Fichas, plantas, books e central de documentação.'},
+    {id:'lia', nome:'Lia', papel:'Lupa', sala:1, desc:'Busca para o cliente e links de seleção.'}
   ];
   const AG = Object.fromEntries(EQUIPE.map((a,i) => [a.id,{...a,index:i,count:0,last:null}]));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -5099,9 +5112,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const state = {open:false, epoch:0, code:null, revoked:null, inFlight:null, poll:null, authTimer:null,
     events:[], seen:new Set(), cursor:null, loaded:false, selected:'genio', lastSignal:null, countDay:new Date().toLocaleDateString('en-CA'),
     queue:[], active:null, raf:null, view:mobile.matches?'genio':'geral', focus:null, pushed:false,
-    images:null, imagePromise:null, imageError:false, motionReady:false, stock:null, stockAt:0};
-  const scriptURL = document.currentScript && document.currentScript.src || location.href;
-  const asset = name => new URL(name, scriptURL).href;
+    stock:null, stockAt:0, r:1, k:1, cam:null, camChave:'', camDe:null, camAlvo:null, camT0:0, last:0, drawn:0, baloes:[], confete:[], agenda:[], aviao:null, festa:null,
+    nextTalk:0, nextShout:0, nextHorn:0, nextReal:0, indoBuzinar:null, buzinaAte:0, audio:null, som:true};
   const visible = () => document.visibilityState === 'visible';
   const currentCode = () => typeof A.codigo === 'function' ? String(A.codigo() || '') : '';
   const authorized = () => !!currentCode() && typeof A.nivel === 'function' && A.nivel() === 'admin' && state.revoked !== currentCode();
@@ -5165,7 +5177,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
         const body=document.createElement('span'), name=document.createElement('strong'), role=document.createElement('small'), count=document.createElement('span');
         name.textContent=a.nome; role.textContent=a.papel; count.className='ec-count'; count.textContent='—'; body.append(name,role); b.append(initial,body,count); b.addEventListener('click',()=>select(a.id,true)); list.append(b);
         const hot=document.createElement('button'); hot.type='button'; hot.className='ec-hotspot'; hot.dataset.agent=a.id; hot.setAttribute('aria-label',a.nome+' · '+a.papel); hot.setAttribute('aria-pressed',a.id===state.selected?'true':'false');
-        hot.style.left=(a.box[0]+a.box[2]/2)/W*100+'%'; hot.style.top=(a.box[1]+a.box[3]/2)/H*100+'%';
+        hotspotsEls.push(hot);
         const label=document.createElement('span'); label.textContent=a.nome; hot.append(label); hot.addEventListener('click',()=>select(a.id,false)); hotspots.append(hot);
       }
     }
@@ -5275,70 +5287,103 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     } finally { if (state.inFlight===ticket) state.inFlight=null; }
   }
 
-  // The panorama is lazy-loaded. Original seated people are restored when a movement ends.
-  function loadImage(name) { return new Promise((resolve,reject)=>{const i=new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=asset(name);}); }
-  async function loadScene() {
-    if (state.imagePromise) return state.imagePromise;
-    state.imagePromise=(async()=>{
-      try {
-        const base=await loadImage('escritorio-cenario.png'); state.images={base}; $('ec-scene-loading').hidden=true; draw();
-        try {
-          const [empty,people]=await Promise.all([loadImage('escritorio-vazio.png'),loadImage('escritorio-agentes.png')]);
-          if (base.naturalWidth!==empty.naturalWidth || base.naturalHeight!==empty.naturalHeight) throw new Error('alignment');
-          state.images.empty=empty; state.images.people=people; state.motionReady=true; motionNote(); animate();
-        } catch (_) { state.imageError=true; state.queue=[]; motionNote(); }
-      } catch (_) { state.imageError=true; $('ec-scene-loading').textContent='O cenário não carregou. A atividade continua disponível na lista.'; }
-    })();
-    return state.imagePromise;
+  // ---------- cena em pixel art, no estilo Habbo ----------
+  // Diário real: balão dourado (tipo 'real') e lista. Conversas, gritos e buzina: clima de escritório.
+  const BW=640, BH=360, TW=28, TH=14, OX=215, OY=82, GW=26, GH=11, PAREDE=64, VIDRO=44, DIV=12, PORTA=[5,6], VEL=2.2;
+  const OURO='#c8a24a', OURO_CLARO='#e3bc77', CONTORNO='#13202f', CREME='#f4f1e9';
+  const iso=(gx,gy,z=0)=>[OX+(gx-gy)*TW/2, OY+(gx+gy)*TH/2-z];
+  const novaTela=()=>{const c=document.createElement('canvas');c.width=BW;c.height=BH;return c;};
+  const buf=novaTela(), bx=buf.getContext('2d'), fundo=novaTela(), fx=fundo.getContext('2d');
+  const scriptURL=document.currentScript && document.currentScript.src || location.href;
+  const asset=name=>new URL(name,scriptURL).href;
+  let logo=null, semente=7;
+  const sorte=()=>((semente=(semente*16807)%2147483647)/2147483647);
+  const sorteia=lista=>lista.length?lista[Math.floor(Math.random()*lista.length)]:null;
+
+  const GERAL=['Cliente quer visitar amanhã','Manda o espelho pra ele','Tem studio até 400 mil?','Liga pro cliente agora','Proposta saiu!',
+    'Quem tem a planta do 2 dorms?','Ele quer com vaga','Cadê a tabela nova?','Hoje sai venda','Entrada parcelada ajuda','Fechou a reserva?',
+    'Chegou lead novo','Partiu visita','Ele aceitou o fluxo','Bora bater a meta','Cliente no WhatsApp','Andar alto ainda tem?','Vou mandar o book'];
+  const FALAS={genio:['Pedido novo no WhatsApp','Já encaminhei','Bom dia, time!','Cliente esperando resposta'],
+    mila:['Book enviado','Separei as fotos','Link pronto pro cliente','Planta na mão'],
+    flavia:['Fluxo montado','Card da proposta pronto','A rentabilidade fechou','Ato mais baixo cabe'],
+    sergio:['Visita marcada','Agenda lotada hoje','Lembrete enviado','Confirma o horário?'],
+    otto:['Conferi os projetos','Busca salva avisada','Mudou status agora','Lista organizada'],
+    teo:['Tabela nova carregada','Somas batendo','Revenda atualizada','Preço novo chegou'],
+    ro:['Status atualizado','Reservaram uma agora','Robô rodando','Voltou pra disponível'],
+    murilo:['Órulo atualizou','O mercado mexeu hoje','Lançamento novo na praça','Concorrente subiu preço'],
+    dora:['Documento na central','Planta nova chegou','Memorial atualizado','Ficha pronta'],
+    lia:['Seleção montada','Link aberto agora','Busca do cliente pronta','Separei três opções']};
+  const RESPOSTAS=['Fechado!','Já mando','Bora!','Deixa comigo','Agora mesmo','Boa!','Tô vendo aqui','Show!','Manda ver'];
+  const GRITOS=['FECHOOOU!','VENDEEEU!','BORA, TIME!','UHUUUL!','É FORTAL!','MAIS UMA!','TÁ ON!','ASSINOU!'];
+  const PAUSA=['Café?','Mais um café','Água, alguém?','Pausa rápida'];
+  const NA_TV=['Olha o quadro!','Disponível caindo','Bora vender mais'];
+
+  const LOOK={
+    genio:{pele:'#c68c5c',cabelo:'#2b1d14',estilo:'curto',roupa:'#1f3b6b',calca:'#1b2433',extra:'gravata'},
+    mila:{pele:'#e3b48c',cabelo:'#6b3f22',estilo:'longo',roupa:'#2a9d8f',calca:'#2b3245'},
+    flavia:{pele:'#d9a173',cabelo:'#1e1410',estilo:'longo',roupa:'#3f8f5a',calca:'#26303f'},
+    sergio:{pele:'#c98f62',cabelo:'#1f1712',estilo:'curto',roupa:'#7a2635',calca:'#1e2430',extra:'barba'},
+    otto:{pele:'#e6bc96',cabelo:'#3a2a1d',estilo:'curto',roupa:'#3d6fb6',calca:'#252c38',extra:'oculos'},
+    teo:{pele:'#d7a77d',cabelo:'#7a5a3a',estilo:'curto',roupa:'#b08a52',calca:'#2a2f3a'},
+    ro:{pele:'#e8c3a0',cabelo:'#b9b9bd',estilo:'chanel',roupa:'#8a8f98',calca:'#2c3340',extra:'fone'},
+    murilo:{pele:'#b77b52',cabelo:'#17110d',estilo:'curto',roupa:'#6b3a7a',calca:'#232a36'},
+    dora:{pele:'#e9c09a',cabelo:'#8a5a33',estilo:'longo',roupa:'#d98a8a',calca:'#2b3142'},
+    lia:{pele:'#8d5a3b',cabelo:'#120d0a',estilo:'cacheado',roupa:'#2f6fd1',calca:'#262d3a'}};
+  // mesa de cada um (x, y, largura em ladrilhos); o lugar fica atrás da mesa, virado para a frente
+  const MESA={genio:{x:3,y:7,w:3,rec:1},mila:{x:2,y:3,w:2},flavia:{x:6,y:3,w:2},sergio:{x:8,y:7,w:2},
+    otto:{x:14,y:3,w:2},teo:{x:18,y:3,w:2},ro:{x:22,y:3,w:2},murilo:{x:14,y:7,w:2},dora:{x:18,y:7,w:2},lia:{x:22,y:7,w:2}};
+  const ASSENTO=Object.fromEntries(Object.entries(MESA).map(([id,m])=>[id,[m.x+(m.rec?1:0),m.y-1]]));
+  const PONTOS={cafe:[[9,1],[10,1]],agua:[[13,1],[14,1]],tv:[[16,1],[17,1]],buzina:[[24,0],[24,1]],sofa:[[16,9],[17,9],[18,9]],
+    janela:[[1,4],[1,6]],recepcao:[[4,8],[5,8]]};
+
+  function poli(c,pts,cor){c.fillStyle=cor;c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);c.closePath();c.fill();}
+  function linha(c,p,q,cor,w=1){c.strokeStyle=cor;c.lineWidth=w;c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1]);c.stroke();}
+  function caixa(c,gx,gy,w,d,h,topo,esq,dir,z0=0){
+    poli(c,[iso(gx,gy+d,z0+h),iso(gx+w,gy+d,z0+h),iso(gx+w,gy+d,z0),iso(gx,gy+d,z0)],esq);
+    poli(c,[iso(gx+w,gy,z0+h),iso(gx+w,gy+d,z0+h),iso(gx+w,gy+d,z0),iso(gx+w,gy,z0)],dir);
+    poli(c,[iso(gx,gy,z0+h),iso(gx+w,gy,z0+h),iso(gx+w,gy+d,z0+h),iso(gx,gy+d,z0+h)],topo);
   }
-  function motionNote() {
-    $('ec-motion-note').textContent=reduced.matches?'Movimento reduzido ativo. Acompanhe os registros no diário abaixo.':state.imageError?'Movimento indisponível. Os registros continuam disponíveis na lista.':'Movimentos representam registros do diário, sem reproduzir a duração real das tarefas.';
+  const paredeD=(c,g1,g2,z1,z2,cor)=>poli(c,[iso(g1,0,z2),iso(g2,0,z2),iso(g2,0,z1),iso(g1,0,z1)],cor);
+  const paredeE=(c,g1,g2,z1,z2,cor)=>poli(c,[iso(0,g2,z2),iso(0,g1,z2),iso(0,g1,z1),iso(0,g2,z1)],cor);
+  function janela(c,lado,g1,g2,z1,z2){
+    const plano=lado==='d'?paredeD:paredeE;
+    plano(c,g1-.1,g2+.1,z1-2,z2+2,'#33475e'); plano(c,g1,g2,z1,z2,'#0d1828');
+    for(let g=g1;g<g2-.01;g+=.22){
+      const larg=Math.min(.22,g2-g), alto=z1+4+sorte()*(z2-z1-12);
+      plano(c,g,g+larg,z1,alto,sorte()<.5?'#172840':'#1d3150');
+      for(let z=z1+3;z<alto-2;z+=4) if(sorte()<.35){const p=lado==='d'?iso(g+larg*.5,0,z):iso(0,g+larg*.5,z);c.fillStyle=sorte()<.8?'#f2cc8c':'#bfe3ff';c.fillRect(Math.round(p[0]),Math.round(p[1]),1,1);}
+    }
+    const m=(g1+g2)/2; linha(c,lado==='d'?iso(m,0,z1):iso(0,m,z1),lado==='d'?iso(m,0,z2):iso(0,m,z2),'#33475e');
   }
-  function measure() {
-    const width=Math.max(1,Math.round(scene.getBoundingClientRect().width));
-    const ratio=Math.min(devicePixelRatio || 1,2);
-    const pixels=Math.min(3840,Math.round(width*ratio));
-    if (canvas.width!==pixels) { canvas.width=pixels; canvas.height=Math.round(pixels*H/W); }
-    draw();
+  function faixaLogo(c,lado,g1,g2,z1,z2){
+    const plano=lado==='d'?paredeD:paredeE;
+    plano(c,g1-.1,g2+.1,z1-2,z2+2,OURO); plano(c,g1,g2,z1,z2,'#0f1c2e');
+    if(!logo) return;
+    const [x0,y0]=lado==='d'?iso(g1,0,z2):iso(0,g2,z2), larg=(g2-g1)*TW/2, alt=z2-z1;
+    const s=Math.min((larg-4)/93,(alt-4)/96), w=93*s, h=96*s;
+    c.save(); c.setTransform(1,lado==='d'?.5:-.5,0,1,x0,y0); c.imageSmoothingEnabled=true; c.drawImage(logo,(larg-w)/2,(alt-h)/2,w,h); c.restore();
   }
-  function setView(view) {
-    state.view=view; scene.dataset.view=view;
-    for (const b of dialog.querySelectorAll('[data-room]')) b.setAttribute('aria-pressed',b.dataset.room===view?'true':'false');
-    requestAnimationFrame(()=>{measure(); viewport.scrollTo({left:view==='espelho'?viewport.scrollWidth:0,behavior:reduced.matches?'auto':'smooth'});});
-  }
-  const DOOR=[813,719], HUB=[1040,686];
-  function deliveryRoute(target) {
-    const start=AG.genio;
-    if (target.id==='genio') return [start.home,[463,580],start.home];
-    const route=[start.home,...start.exit];
-    if (target.sala===1) route.push(DOOR,[932,701],HUB);
-    else route.push([783,665]);
-    route.push(...target.exit.slice().reverse(),target.home);
-    return [...route,...route.slice(0,-1).reverse()];
-  }
-  function routineRoute(a) {
-    // Explicit aisle routes follow the approved floor perspective, never the former tile map.
-    const stop=a.exit[Math.min(1,a.exit.length-1)] || a.home;
-    return [a.home,...a.exit.slice(0,2),stop,...a.exit.slice(0,2).reverse(),a.home];
-  }
-  function beginEvent(event, now) {
-    const target=AG[event.a], agent=event.o==='w'?AG.genio:target;
-    const route=event.o==='w'?deliveryRoute(target):routineRoute(target);
-    state.active={event,agent,route,started:now,duration:event.o==='w'?6400:3200}; update();
-  }
-  function pointOnPath(route, progress) {
-    const lengths=[]; let total=0;
-    for (let i=1;i<route.length;i++) { const d=Math.hypot(route[i][0]-route[i-1][0],route[i][1]-route[i-1][1]); lengths.push(d); total+=d; }
-    let rest=total*Math.max(0,Math.min(1,progress));
-    for (let i=0;i<lengths.length;i++) { if (rest<=lengths[i] || i===lengths.length-1) {const t=lengths[i]?rest/lengths[i]:0;return [route[i][0]+(route[i+1][0]-route[i][0])*t,route[i][1]+(route[i+1][1]-route[i][1])*t];} rest-=lengths[i]; }
-    return route[0];
-  }
-  function maskPerson(a) {
-    const [x,y,w,h]=a.box;
-    ctx.save(); ctx.beginPath();
-    // Soft corners keep the clean plate local to the seated silhouette and its chair.
-    ctx.roundRect(x-3,y-3,w+6,h+7,Math.min(18,w/5)); ctx.clip();
-    ctx.drawImage(state.images.empty,0,0,W,H); ctx.restore();
+  function montarFundo(){
+    const c=fx; semente=7;
+    c.setTransform(1,0,0,1,0,0); c.fillStyle='#0b1522'; c.fillRect(0,0,BW,BH);
+    poli(c,[iso(0,0,PAREDE),iso(GW,0,PAREDE),iso(GW,0,0),iso(0,0,0)],'#1a2b42');
+    poli(c,[iso(0,0,PAREDE),iso(0,GH,PAREDE),iso(0,GH,0),iso(0,0,0)],'#21365a');
+    poli(c,[iso(0,0,PAREDE+3),iso(GW,0,PAREDE+3),iso(GW,0,PAREDE),iso(0,0,PAREDE)],'#2c4466');
+    poli(c,[iso(0,0,PAREDE+3),iso(0,GH,PAREDE+3),iso(0,GH,PAREDE),iso(0,0,PAREDE)],'#35507a');
+    janela(c,'d',.5,3.4,16,50); janela(c,'d',12.3,13.8,16,50); janela(c,'d',24.4,25.7,16,50);
+    janela(c,'e',1,4.2,16,50); janela(c,'e',5,8.2,16,50);
+    paredeD(c,4.1,8.9,37,47,'#0f1c2e'); paredeD(c,4.1,8.9,46,47,OURO); paredeD(c,4.1,8.9,37,38,OURO);
+    paredeD(c,14.6,18.9,45,54,'#0f1c2e'); paredeD(c,14.6,18.9,53,54,OURO); paredeD(c,14.6,18.9,45,46,OURO);
+    paredeD(c,9.3,11.5,24,36,'#2a1d14'); paredeD(c,9.3,11.5,35,36,OURO);
+    faixaLogo(c,'d',5.2,7.8,9,33); faixaLogo(c,'d',19.6,23.9,12,56); faixaLogo(c,'e',8.8,10.6,14,48);
+    linha(c,iso(0,0,1),iso(GW,0,1),OURO); linha(c,iso(0,0,1),iso(0,GH,1),OURO);
+    // piso: base de cada sala e ladrilhos alternados por cima, sem fresta
+    poli(c,[iso(0,0),iso(DIV,0),iso(DIV,GH),iso(0,GH)],'#ccb48e');
+    poli(c,[iso(DIV,0),iso(GW,0),iso(GW,GH),iso(DIV,GH)],'#bac3cd');
+    for(let gx=0;gx<GW;gx++) for(let gy=0;gy<GH;gy++) if((gx+gy)%2===0) poli(c,[iso(gx,gy),iso(gx+1,gy),iso(gx+1,gy+1),iso(gx,gy+1)],gx<DIV?'#d8c4a1':'#c8d0d9');
+    poli(c,[iso(2,8),iso(7,8),iso(7,11),iso(2,11)],OURO); poli(c,[iso(2.12,8.12),iso(6.88,8.12),iso(6.88,10.88),iso(2.12,10.88)],'#1d3354');
+    poli(c,[iso(0,GH),iso(GW,GH),iso(GW,GH,-6),iso(0,GH,-6)],'#0f1a29');
+    poli(c,[iso(GW,0),iso(GW,GH),iso(GW,GH,-6),iso(GW,0,-6)],'#14233a');
   }
   function stockData() {
     if (!authorized() || state.code!==currentCode()) return {available:false,d:0,r:0,v:0,o:0};
@@ -5356,62 +5401,397 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     state.stock=totals; state.stockAt=Date.now();
     return totals;
   }
-  function stockBoard() {
+  function tv(c,now){
+    const g1=14.6,g2=18.9,z1=18,z2=42, f=state.festa, pisca=f&&now-f.t0<2200&&Math.floor((now-f.t0)/180)%2===0;
+    paredeD(c,g1-.12,g2+.12,z1-2,z2+2,pisca?OURO_CLARO:'#33475e'); paredeD(c,g1,g2,z1,z2,'#08111c');
     const s=stockData(), total=s.d+s.r+s.v+s.o;
+    [['d','#86c6a5'],['r','#dfb56e'],['v','#c98280']].forEach(([k,cor],i)=>{
+      const frac=total?s[k]/total:0, zb=z2-11-i*7;
+      paredeD(c,g1+.25,g2-.25,zb-4,zb,'#132235'); paredeD(c,g1+.25,g1+.25+(g2-g1-.5)*Math.max(.02,frac),zb-4,zb,cor);
+    });
     const caption=$('ec-stock');
-    const label=!s.available?'Quadro de estoque: base ainda não carregada.':!total?'Quadro de estoque: nenhuma unidade na base carregada.':'Base carregada · '+s.d.toLocaleString('pt-BR')+' disponíveis · '+s.r.toLocaleString('pt-BR')+' reservadas · '+s.v.toLocaleString('pt-BR')+' vendidas'+(s.o?' · '+s.o.toLocaleString('pt-BR')+' em outros status':'')+'. Quadro proporcional.';
+    const label=!s.available?'Quadro de estoque: base ainda não carregada.':!total?'Quadro de estoque: nenhuma unidade na base carregada.':'Quadro da TV: '+s.d.toLocaleString('pt-BR')+' disponíveis, '+s.r.toLocaleString('pt-BR')+' reservadas e '+s.v.toLocaleString('pt-BR')+' vendidas na base carregada'+(s.o?', '+s.o.toLocaleString('pt-BR')+' em outros status':'')+'.';
     if (caption && caption.textContent!==label) caption.textContent=label;
-    ctx.save();
-    // Cover every illustrated status cell, preserving the TV frame and right skyline screen.
-    ctx.beginPath(); ctx.moveTo(1125,124);ctx.lineTo(1368,137);ctx.lineTo(1364,255);ctx.lineTo(1120,232);ctx.closePath();ctx.clip();
-    ctx.fillStyle='#13283c';ctx.fillRect(1118,120,255,139);
-    ctx.transform(1,.060,-.045,1,1128,128);
-    ctx.fillStyle='#e8c387';ctx.font='600 12px system-ui';ctx.fillText('ESPELHO DE VENDAS',10,17);
-    if (!s.available || !total) {
-      ctx.fillStyle='#d0dbe4';ctx.font='13px system-ui';ctx.fillText(!s.available?'Base sem dados':'Sem unidades',10,51);
-      ctx.fillStyle='#99adbd';ctx.font='11px system-ui';ctx.fillText('Aguardando a base carregada',10,71);
-    } else {
-      const nd=Math.round(78*s.d/total),nr=Math.round(78*s.r/total),nv=Math.round(78*s.v/total);
-      for (let i=0;i<78;i++) {ctx.fillStyle=i<nd?'#86c6a5':i<nd+nr?'#dfb56e':i<nd+nr+nv?'#c98280':'#697e8e';ctx.fillRect(10+(i%13)*16.5,27+Math.floor(i/13)*9,14,7);}
-      ctx.fillStyle='#d1dde6';ctx.font='11px system-ui';ctx.fillText('Proporção da base carregada',10,96);
+  }
+  function bandeirinhas(c,now){
+    const z=PAREDE-2, mexe=reduced.matches?0:1;
+    for(let g=.3,i=0;g<GW-.3;g+=.55,i++){const s=Math.sin(now/420+i)*.07*mexe; poli(c,[iso(g,0,z),iso(g+.42,0,z),iso(g+.21+s,0,z-7)],i%2?OURO:CREME);}
+    for(let g=.3,i=0;g<GH-.3;g+=.55,i++){const s=Math.sin(now/420+i)*.07*mexe; poli(c,[iso(0,g+.42,z),iso(0,g,z),iso(0,g+.21+s,z-7)],i%2?CREME:OURO);}
+    linha(c,iso(0,0,z),iso(GW,0,z),'#0b1522'); linha(c,iso(0,0,z),iso(0,GH,z),'#0b1522');
+  }
+
+  // móveis que podem ficar na frente ou atrás das pessoas: desenhados por profundidade
+  const OBJETOS=[], BLOQ=new Set(), cel=(x,y)=>x+','+y;
+  const bloquear=(x,y,w=1,d=1)=>{for(let i=0;i<w;i++)for(let j=0;j<d;j++)BLOQ.add(cel(x+i,y+j));};
+  const movel=(prof,fn)=>OBJETOS.push({prof,fn});
+  function planta(x,y){
+    bloquear(x,y);
+    movel(x+y+1,c=>{caixa(c,x+.3,y+.3,.4,.4,6,'#6b4f35','#4a3624','#5a422c'); const [p,q]=iso(x+.5,y+.5,6);
+      c.fillStyle='#2f7a4a'; c.fillRect(p-5,q-12,10,10); c.fillStyle='#3f9a5e'; c.fillRect(p-7,q-9,4,6); c.fillRect(p+3,q-10,4,7);
+      c.fillStyle='#57b874'; c.fillRect(p-3,q-15,6,5); c.fillRect(p-1,q-17,2,3);});
+  }
+  function buzinaPoste(c,now){
+    const [x0,y0]=iso(25.5,.5), f=state.festa, t=f?now-f.t0:9999, tr=t<1800?(Math.floor(t/50)%2?1:-1):0, x=Math.round(x0), y=Math.round(y0);
+    c.fillStyle='#4b5563'; c.fillRect(x-1,y-16,2,16); c.fillStyle=CONTORNO; c.fillRect(x-4,y-26,8,11);
+    c.fillStyle='#1d3354'; c.fillRect(x-3+tr,y-25,6,9); c.fillStyle=OURO; c.fillRect(x+3+tr,y-28,3,5); c.fillRect(x+5+tr,y-32,4,9);
+    c.fillStyle=OURO_CLARO; c.fillRect(x+8+tr,y-31,1,7);
+  }
+  function montarObjetos(){
+    for(const [id,m] of Object.entries(MESA)){
+      const [sx,sy]=ASSENTO[id];
+      bloquear(m.x,m.y,m.w,1); bloquear(sx,sy);
+      movel(sx+sy+.6,c=>{caixa(c,sx+.22,sy+.1,.56,.12,21,'#2f4b78','#1d3354','#26406b'); caixa(c,sx+.2,sy+.22,.6,.56,8,'#2f4b78','#1d3354','#26406b');});
+      movel(m.x+m.w+m.y-.1,c=>{
+        let top=11;
+        if(m.rec){ top=14; caixa(c,m.x,m.y,m.w,1,13,'#2a4a78','#1d3354','#24406a');
+          linha(c,iso(m.x,m.y+1,8),iso(m.x+m.w,m.y+1,8),OURO); linha(c,iso(m.x+m.w,m.y,8),iso(m.x+m.w,m.y+1,8),OURO);
+          caixa(c,m.x-.05,m.y-.05,m.w+.1,1.1,1,'#e0cba6','#b89a6c','#c9ad80',13);
+        } else caixa(c,m.x,m.y+.1,m.w,.8,11,'#c08a55','#8b5d35','#a87445');
+        const mx=m.x+m.w-.55;
+        caixa(c,mx,m.y+.2,.42,.1,8,'#1f2937','#111827','#1f2937',top); linha(c,iso(mx,m.y+.2,top+8),iso(mx+.42,m.y+.2,top+8),'#7fd3ff');
+        caixa(c,m.x+.22,m.y+.3,.52,.3,1,'#e5e7eb','#9ca3af','#cbd5e1',top);
+      });
     }
-    ctx.restore();
+    bloquear(9,0,2,1); movel(10.9,c=>{caixa(c,9,.1,2,.8,12,'#c08a55','#8b5d35','#a87445'); caixa(c,9.2,.2,.6,.5,14,'#4b5563','#374151','#6b7280',12);
+      const [p,q]=iso(10.3,.6,12); c.fillStyle=CREME; c.fillRect(Math.round(p),Math.round(q)-3,3,3); c.fillRect(Math.round(p)+5,Math.round(q)-1,3,3);});
+    bloquear(13,0); movel(14,c=>{caixa(c,13.25,.25,.5,.5,12,'#e5e7eb','#9ca3af','#cbd5e1'); caixa(c,13.32,.32,.36,.36,9,'#9fd8ff','#5fb6e8','#7fc8f8',12);});
+    bloquear(25,0); movel(26,(c,now)=>buzinaPoste(c,now));
+    bloquear(16,10,3,1); movel(28.9,c=>{caixa(c,16,10.12,3,.7,7,'#26406b','#16294a','#1d3354'); caixa(c,16,10.62,3,.3,15,'#2f4b78','#16294a','#1d3354');
+      caixa(c,16.3,10.3,.5,.3,3,OURO_CLARO,OURO,OURO,7); caixa(c,18.2,10.3,.5,.3,3,OURO_CLARO,OURO,OURO,7);});
+    [[0,0],[11,0],[0,10],[11,10],[12,10],[25,10],[25,5]].forEach(([x,y])=>planta(x,y));
+    for(let gy=0;gy<GH;gy++){
+      if(PORTA.includes(gy)) continue;
+      movel(DIV+gy+.5,c=>{poli(c,[iso(DIV,gy,VIDRO),iso(DIV,gy+1,VIDRO),iso(DIV,gy+1,0),iso(DIV,gy,0)],'rgba(150,200,235,0.2)');
+        linha(c,iso(DIV,gy,VIDRO),iso(DIV,gy+1,VIDRO),OURO); linha(c,iso(DIV,gy,0),iso(DIV,gy,VIDRO),'#9fb3c6');});
+    }
+    movel(DIV+PORTA[0]+.5,c=>linha(c,iso(DIV,PORTA[0],0),iso(DIV,PORTA[0],VIDRO+4),'#c9d4df',2));
+    movel(DIV+PORTA[1]+1.5,c=>{linha(c,iso(DIV,PORTA[1]+1,0),iso(DIV,PORTA[1]+1,VIDRO+4),'#c9d4df',2); linha(c,iso(DIV,PORTA[0],VIDRO+4),iso(DIV,PORTA[1]+1,VIDRO+4),OURO,2);});
   }
-  const CROPS=[
-    [99,0,199,498],[438,0,185,498],[746,0,185,498],[1054,0,199,498],[1390,0,201,498],
-    [91,499,203,442],[441,499,200,442],[741,499,202,442],[1070,499,206,442],[1390,499,203,442]
-  ];
-  function drawPerson(a, position, now) {
-    const [sx,sy,sw,sh]=CROPS[a.index], [x,y]=position;
-    const height=225+(y-400)*.22, width=height*sw/sh;
-    const bob=Math.sin(now/94)*1.0;
-    ctx.save(); ctx.translate(x,y); ctx.fillStyle='rgba(6,12,20,.24)'; ctx.beginPath(); ctx.ellipse(0,-2,width*.37,5,0,0,Math.PI*2); ctx.fill();
-    ctx.rotate(Math.sin(now/188)*.009); ctx.drawImage(state.images.people,sx,sy,sw,sh,-width/2,-height+bob,width,height); ctx.restore();
+
+  // pessoas
+  const ATOR={};
+  function iniciarAtores(){
+    EQUIPE.forEach((a,i)=>{const [sx,sy]=ASSENTO[a.id];ATOR[a.id]={id:a.id,ix:i,x:sx+.5,y:sy+.5,cx:sx,cy:sy,modo:'sentado',rota:[],destino:null,
+      ate:0,prox:0,costas:false,espelho:i%2===1,passo:0,pulo:0,fala:0};});
   }
-  function envelope(progress) {
-    const x=96+(437-96)*progress, y=650+(520-650)*progress-Math.sin(progress*Math.PI)*70;
-    ctx.save(); ctx.translate(x,y);ctx.rotate(-.2);ctx.fillStyle='#fff1d4';ctx.strokeStyle='#bd914c';ctx.lineWidth=1.3;ctx.fillRect(-11,-7,22,14);ctx.strokeRect(-11,-7,22,14);ctx.beginPath();ctx.moveTo(-11,-7);ctx.lineTo(0,2);ctx.lineTo(11,-7);ctx.stroke();ctx.restore();
+  function boneco(c,at,now){
+    const L=LOOK[at.id], sentado=at.modo==='sentado'&&!at.rota.length, pulando=at.pulo>now;
+    let [x,y]=iso(at.x,at.y); x=Math.round(x); y=Math.round(y);
+    if(state.selected===at.id){c.strokeStyle=OURO;c.lineWidth=1;c.beginPath();c.moveTo(x,y-4);c.lineTo(x+9,y);c.lineTo(x,y+4);c.lineTo(x-9,y);c.closePath();c.stroke();}
+    const pulo=pulando&&!reduced.matches?Math.round(Math.abs(Math.sin((at.pulo-now)/140))*5):0;
+    if(!sentado){c.fillStyle='rgba(5,10,18,.28)';c.fillRect(x-6,y-1,12,2);c.fillRect(x-4,y-2,8,4);}
+    if(sentado) y+=1;
+    y-=pulo;
+    const esp=at.espelho?-1:1, costas=at.costas&&!sentado;
+    const R=(dx,dy,w,h,cor)=>{c.fillStyle=cor;c.fillRect(esp>0?x+dx:x-dx-w,y+dy,w,h);};
+    const andando=at.rota.length>0, fase=andando?Math.floor(at.passo)%4:0, perna=[0,1,0,-1][fase];
+    if(!sentado){
+      R(-4,-9+(perna>0?-1:0),3,8,L.calca); R(1,-9+(perna<0?-1:0),3,8,L.calca);
+      R(-5,-2+(perna>0?-1:0),4,2,'#141414'); R(1,-2+(perna<0?-1:0),4,2,'#141414');
+    }
+    R(-7,-21,14,12,CONTORNO); R(-6,-21,12,11,L.roupa); R(-6,-10,12,1,L.calca);
+    if(pulando){R(-9,-30,3,10,L.roupa);R(6,-30,3,10,L.roupa);R(-9,-32,3,2,L.pele);R(6,-32,3,2,L.pele);}
+    else if(sentado){const t=Math.floor(now/180+at.ix)%2;R(-8,-20,3,6,L.roupa);R(5,-20,3,6,L.roupa);R(-6+t,-14,3,2,L.pele);R(3-t,-14,3,2,L.pele);}
+    else {const b=andando?perna:0;R(-9,-20+b,3,9,L.roupa);R(6,-20-b,3,9,L.roupa);R(-9,-11+b,3,2,L.pele);R(6,-11-b,3,2,L.pele);}
+    R(-1,-23,2,2,L.pele); R(-6,-34,12,12,CONTORNO); R(-5,-33,10,10,L.pele);
+    if(!costas){
+      const pisca=Math.floor(now/97+at.ix*31)%40===0, fala=at.fala>now&&Math.floor(now/120)%2===0;
+      R(-3,-29,1,pisca?1:2,'#1b1b1b'); R(2,-29,1,pisca?1:2,'#1b1b1b'); R(-1,-25,2,fala?2:1,fala?'#7a2e24':'#9a5a48');
+    }
+    const h=L.cabelo;
+    if(L.estilo==='curto'){R(-6,-35,12,4,h); if(costas)R(-6,-31,12,6,h); else {R(-6,-31,1,3,h);R(5,-31,1,3,h);}}
+    else if(L.estilo==='longo'){R(-7,-35,14,5,h);R(-7,-30,2,11,h);R(5,-30,2,11,h);if(costas)R(-5,-30,10,12,h);}
+    else if(L.estilo==='chanel'){R(-7,-35,14,5,h);R(-7,-30,2,6,h);R(5,-30,2,6,h);if(costas)R(-5,-30,10,6,h);}
+    else if(L.estilo==='cacheado'){R(-8,-38,16,7,h);R(-8,-31,3,7,h);R(5,-31,3,7,h);for(let i=-7;i<8;i+=3)R(i,-39,2,1,h);if(costas)R(-5,-31,10,7,h);}
+    if(!costas){
+      if(L.extra==='gravata'){R(-2,-21,4,1,CREME);R(-1,-20,2,7,OURO);}
+      if(L.extra==='barba'){R(-4,-26,8,3,h);R(-1,-25,2,1,'#9a5a48');}
+      if(L.extra==='oculos'){R(-4,-30,3,3,'#1b1b1b');R(1,-30,3,3,'#1b1b1b');R(-3,-29,1,1,'#bfe3ff');R(2,-29,1,1,'#bfe3ff');R(-1,-29,2,1,'#1b1b1b');}
+    }
+    if(L.extra==='fone'){R(-7,-36,14,1,'#1b1b1b');R(-8,-31,2,4,'#1b1b1b');if(!costas)R(-7,-27,4,1,'#1b1b1b');}
+  }
+
+  // caminhos: ladrilhos livres, com a passagem entre as salas só pela porta
+  const livre=(x,y,alvo)=>x>=0&&y>=0&&x<GW&&y<GH&&(!BLOQ.has(cel(x,y))||!!(alvo&&x===alvo[0]&&y===alvo[1]));
+  const passa=(x1,y1,x2,y2)=>!(((x1===DIV-1&&x2===DIV)||(x1===DIV&&x2===DIV-1))&&!(PORTA.includes(y1)&&PORTA.includes(y2)));
+  function rota(de,para){
+    const k=p=>p[0]+','+p[1], ini=k(de), fim=k(para);
+    if(ini===fim) return [];
+    const vem=new Map([[ini,null]]), fila=[de], viz=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+    while(fila.length){
+      const p=fila.shift();
+      for(const [dx,dy] of viz){
+        const q=[p[0]+dx,p[1]+dy], kq=k(q);
+        if(vem.has(kq)||!livre(q[0],q[1],para)||!passa(p[0],p[1],q[0],q[1])) continue;
+        if(dx&&dy&&(!livre(p[0]+dx,p[1],para)||!livre(p[0],p[1]+dy,para)||!passa(p[0],p[1],p[0]+dx,p[1])||!passa(p[0],p[1],p[0],p[1]+dy))) continue;
+        vem.set(kq,p);
+        if(kq===fim){const out=[];let c=q;while(c&&k(c)!==ini){out.unshift(c);c=vem.get(k(c));}return out;}
+        fila.push(q);
+      }
+    }
+    return null;
+  }
+  function ir(at,alvo,destino){
+    if(!alvo) return false;
+    const r=rota([at.cx,at.cy],alvo);
+    if(!r||!r.length) return false;
+    at.rota=r; at.destino=destino; at.modo='andando'; return true;
+  }
+  function falar(id,texto,now,tipo='fala',dur){
+    state.baloes=state.baloes.filter(b=>b.id!==id||b.tipo==='real');
+    state.baloes.push({id,texto,tipo,nasce:now,ate:now+(dur||(tipo==='real'?5200:tipo==='grito'?2200:3000))});
+    if(ATOR[id]) ATOR[id].fala=now+(tipo==='grito'?1200:1600);
+    if(state.baloes.length>8) state.baloes.splice(0,state.baloes.length-8);
+  }
+  const agenda=(t,fn)=>state.agenda.push({t,fn});
+  function decidir(at,now){
+    if(Object.values(ATOR).filter(o=>o.modo!=='sentado').length>=5){at.prox=now+2000+Math.random()*3000;return;}
+    let destino=null, alvo=null;
+    if(Math.random()<.38){
+      const mesmaSala=Math.random()<.75;
+      const o=sorteia(EQUIPE.filter(e=>e.id!==at.id&&ATOR[e.id].modo==='sentado'&&(!mesmaSala||e.sala===AG[at.id].sala)));
+      if(o){const [sx,sy]=ASSENTO[o.id]; alvo=[[sx-1,sy],[sx+1,sy],[sx,sy-1],[sx-1,sy-1]].find(p=>livre(p[0],p[1])); destino={tipo:'visita',quem:o.id};}
+    }
+    if(!alvo){const tipo=sorteia(['cafe','cafe','agua','tv','sofa','janela',AG[at.id].sala?'tv':'recepcao']); alvo=sorteia(PONTOS[tipo]); destino={tipo};}
+    if(!ir(at,alvo,destino)) at.prox=now+2500+Math.random()*2500;
+  }
+  function chegou(at,now){
+    const d=at.destino||{};
+    if(d.tipo==='casa'){at.modo='sentado';at.costas=false;at.espelho=Math.random()<.5;at.destino=null;at.prox=now+5000+Math.random()*11000;return;}
+    at.modo='parado'; at.ate=now+2400+Math.random()*2600;
+    at.costas=['tv','janela','cafe','agua','buzina'].includes(d.tipo);
+    if(d.tipo==='visita'&&d.quem){
+      const o=ATOR[d.quem]; at.espelho=o.x<at.x;
+      falar(at.id,sorteia(Math.random()<.5?GERAL:FALAS[at.id]),now);
+      agenda(now+1400,t=>falar(d.quem,sorteia(RESPOSTAS),t));
+    } else if(d.tipo==='buzina') festa(now,at);
+    else if(Math.random()<.6) falar(at.id,sorteia(d.tipo==='tv'?NA_TV:d.tipo==='cafe'||d.tipo==='agua'?PAUSA:GERAL),now);
+  }
+  function voltar(at,now){
+    const casa=ASSENTO[at.id];
+    if(!ir(at,casa,{tipo:'casa'})){at.x=casa[0]+.5;at.y=casa[1]+.5;at.cx=casa[0];at.cy=casa[1];at.rota=[];at.modo='sentado';at.costas=false;at.prox=now+6000;}
+  }
+  function mover(at,dt,now){
+    if(!at.rota.length) return;
+    const [cx,cy]=at.rota[0], tx=cx+.5, ty=cy+.5, dx=tx-at.x, dy=ty-at.y, dist=Math.hypot(dx,dy), passo=VEL*dt/1000;
+    const sx=dx-dy, sy=dx+dy;
+    if(Math.abs(sx)>.01||Math.abs(sy)>.01){at.costas=sy<-.01; at.espelho=sx<-.01;}
+    if(dist<=passo){at.x=tx;at.y=ty;at.cx=cx;at.cy=cy;at.rota.shift();if(!at.rota.length)chegou(at,now);}
+    else {at.x+=dx/dist*passo;at.y+=dy/dist*passo;}
+    at.passo+=passo*4;
+  }
+  function festa(now,at){
+    state.indoBuzinar=null;
+    const [hx,hy]=iso(25.5,.5,30);
+    state.festa={t0:now,x:hx,y:hy};
+    if(at) at.pulo=now+1200;
+    Object.values(ATOR).filter(o=>!at||o.id!==at.id).sort(()=>Math.random()-.5).slice(0,4)
+      .forEach((o,i)=>agenda(now+350+i*280,t=>{falar(o.id,sorteia(GRITOS),t,'grito');o.pulo=t+1300;}));
+    for(let i=0;i<70;i++) state.confete.push({x:hx+(Math.random()-.5)*10,y:hy,vx:(Math.random()-.5)*150,vy:-60-Math.random()*130,
+      cor:[OURO,CREME,'#2f6fd1','#87d5ad',OURO_CLARO][i%5],ate:now+1600+Math.random()*900});
+    somBuzina(); agenda(now+500,()=>somTorcida());
+  }
+  function chamarBuzina(now){
+    state.nextHorn=now+30000+Math.random()*15000;
+    const at=sorteia(EQUIPE.filter(a=>a.sala===1&&ATOR[a.id].modo==='sentado').map(a=>ATOR[a.id]));
+    if(at&&ir(at,sorteia(PONTOS.buzina),{tipo:'buzina'})){state.indoBuzinar=at.id;state.buzinaAte=now+9000;}
+    else festa(now,null);
+  }
+  function ambiente(now,dt){
+    if(!state.nextTalk){state.nextTalk=now+1200;state.nextShout=now+7000;state.nextHorn=now+15000;}
+    for(const at of Object.values(ATOR)){
+      if(at.modo==='sentado'&&!at.rota.length&&now>at.prox) decidir(at,now);
+      else if(at.modo==='parado'&&now>at.ate) voltar(at,now);
+      mover(at,dt,now);
+    }
+    if(now>state.nextTalk){const at=sorteia(Object.values(ATOR).filter(o=>o.fala<now)); if(at) falar(at.id,sorteia(Math.random()<.55?FALAS[at.id]:GERAL),now); state.nextTalk=now+1800+Math.random()*2200;}
+    if(now>state.nextShout){const at=sorteia(Object.values(ATOR)); if(at){falar(at.id,sorteia(GRITOS),now,'grito');at.pulo=now+900;} state.nextShout=now+8000+Math.random()*7000;}
+    if(state.indoBuzinar&&now>state.buzinaAte) festa(now,null);
+    else if(!state.indoBuzinar&&now>state.nextHorn) chamarBuzina(now);
+    const vencidos=state.agenda.filter(a=>a.t<=now); state.agenda=state.agenda.filter(a=>a.t>now); for(const a of vencidos) a.fn(now);
+    const s=dt/1000; for(const p of state.confete){p.vy+=220*s;p.x+=p.vx*s;p.y+=p.vy*s;}
+  }
+  const curto=s=>s.length>46?s.slice(0,44).trimEnd()+'…':s;
+  function eventosReais(now){
+    if(!state.queue.length||now<state.nextReal) return;
+    const e=state.queue.shift(), alvo=ATOR[e.a];
+    if(!alvo) return;
+    state.active={event:e,agent:AG[e.a],ate:now+5200};
+    if(e.o==='w'&&e.a!=='genio'){
+      falar('genio','Pedido do WhatsApp para '+AG[e.a].nome,now,'real',2800);
+      state.aviao={de:iso(ATOR.genio.x,ATOR.genio.y,34),para:iso(alvo.x,alvo.y,34),t0:now,dur:1100};
+      agenda(now+1100,t=>{falar(e.a,curto(text(e)),t,'real',5200);alvo.pulo=t+600;});
+      state.nextReal=now+3800;
+    } else {falar(e.a,curto(text(e)),now,'real',5200);alvo.pulo=now+600;state.nextReal=now+2600;}
+    update();
+  }
+
+  // som da buzina e da torcida, gerados na hora (sem arquivo de áudio); botão Som liga e desliga
+  function lerSom(){try{return localStorage.getItem('espelhos-ec-som')!=='0';}catch(_){return true;}}
+  function gravarSom(v){try{localStorage.setItem('espelhos-ec-som',v?'1':'0');}catch(_){}}
+  function audio(){
+    if(!state.som) return null;
+    try{const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; if(!state.audio) state.audio=new AC();
+      if(state.audio.state==='suspended') state.audio.resume().catch(()=>{}); return state.audio;}catch(_){return null;}
+  }
+  function somBuzina(){
+    const ac=audio(); if(!ac) return;
+    try{
+      const t0=ac.currentTime+.03, saida=ac.createGain(), filtro=ac.createBiquadFilter();
+      saida.gain.value=.3; filtro.type='lowpass'; filtro.frequency.value=2600; filtro.connect(saida); saida.connect(ac.destination);
+      const toque=(ini,dur)=>{const g=ac.createGain(); g.gain.setValueAtTime(.0001,ini); g.gain.exponentialRampToValueAtTime(1,ini+.03);
+        g.gain.setValueAtTime(1,ini+dur-.06); g.gain.exponentialRampToValueAtTime(.0001,ini+dur); g.connect(filtro);
+        for(const f of [220,440,466]){const o=ac.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(f*.96,ini); o.frequency.linearRampToValueAtTime(f,ini+.06); o.connect(g); o.start(ini); o.stop(ini+dur+.02);}};
+      toque(t0,.28); toque(t0+.38,.28); toque(t0+.76,.95);
+    }catch(_){}
+  }
+  function somTorcida(){
+    const ac=audio(); if(!ac) return;
+    try{
+      const dur=1.8, n=Math.floor(ac.sampleRate*dur), b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
+      for(let i=0;i<n;i++){const t=i/ac.sampleRate, env=Math.min(1,t/.25)*Math.max(0,1-Math.max(0,t-.9)/.9); d[i]=(Math.random()*2-1)*env*(.6+.4*Math.sin(t*2*Math.PI*7+Math.sin(t*13)));}
+      const src=ac.createBufferSource(), bp=ac.createBiquadFilter(), g=ac.createGain();
+      src.buffer=b; bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=.6; g.gain.value=.14;
+      src.connect(bp); bp.connect(g); g.connect(ac.destination); src.start();
+    }catch(_){}
+  }
+
+  // desenho: buffer em pixel (640 x 360) ampliado sem suavizar; textos e balões por cima, nítidos
+  function caixaArred(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function largura(s,fs){const m=ctx.measureText(s);return m&&m.width?m.width:s.length*fs*.56;}
+  function textoParede(g1,g2,z,texto,cor,tam){
+    const k=state.k, [x0,y0]=iso(g1,0,z), larg=(g2-g1)*TW/2;
+    ctx.save(); ctx.setTransform(k,k*.5,0,k,tx(x0),ty(y0)); ctx.font='700 '+tam+'px "Barlow Condensed", system-ui, sans-serif';
+    ctx.fillStyle=cor; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(texto,larg/2,0); ctx.restore();
+  }
+  function baloes(now){
+    const r=state.r||1, usados=[];
+    state.baloes=state.baloes.filter(b=>now<b.ate);
+    for(const bl of state.baloes.slice().sort((p,q)=>q.nasce-p.nasce)){
+      const at=ATOR[bl.id]; if(!at) continue;
+      const [x,y]=iso(at.x,at.y), topo=ty(y-(at.modo==='sentado'&&!at.rota.length?36:42)), sx=tx(x);
+      if(sx<-10*r||sx>canvas.width+10*r||topo<-20*r||topo>canvas.height+60*r) continue;
+      const grito=bl.tipo==='grito', real=bl.tipo==='real', fs=Math.round((grito?15:12)*r), pad=7*r;
+      const fonte=p=>p+' '+fs+'px '+(grito?'"Barlow Condensed", ':'"IBM Plex Sans", ')+'system-ui, sans-serif';
+      const nome=grito?'':AG[bl.id].nome+': ';
+      ctx.font=fonte(700); const wn=nome?largura(nome,fs):0; ctx.font=fonte(grito?700:500); const wt=largura(bl.texto,fs);
+      const w=Math.min(canvas.width-8*r,wn+wt+pad*2), h=fs+pad*1.3, vida=(now-bl.nasce)/Math.max(1,bl.ate-bl.nasce);
+      let x0=Math.max(4*r,Math.min(canvas.width-w-4*r,sx-w/2)), y0=Math.max(2*r,topo-h-6*r-vida*10*r);
+      if(grito&&now-bl.nasce<600) x0+=(Math.floor(now/60)%2?1:-1)*r;
+      for(const u of usados) if(x0<u.x+u.w&&x0+w>u.x&&y0<u.y+u.h&&y0+h>u.y) y0=u.y-h-4*r;
+      usados.push({x:x0,y:y0,w,h});
+      ctx.globalAlpha=Math.max(0,Math.min(1,(bl.ate-now)/400));
+      ctx.fillStyle=real?'#101d2b':grito?OURO:'#fbfaf6'; ctx.strokeStyle=real?OURO_CLARO:CONTORNO; ctx.lineWidth=Math.max(1,(real||grito?2:1.5)*r);
+      caixaArred(x0,y0,w,h,4*r); ctx.fill(); ctx.stroke();
+      const cx=Math.max(x0+8*r,Math.min(x0+w-8*r,sx));
+      ctx.beginPath(); ctx.moveTo(cx-4*r,y0+h-1); ctx.lineTo(cx,y0+h+5*r); ctx.lineTo(cx+4*r,y0+h-1); ctx.closePath(); ctx.fill();
+      ctx.textBaseline='middle'; ctx.textAlign='left';
+      if(nome){ctx.font=fonte(700); ctx.fillStyle=real?OURO_CLARO:CONTORNO; ctx.fillText(nome,x0+pad,y0+h/2+.5);}
+      ctx.font=fonte(grito?700:500); ctx.fillStyle=real?CREME:CONTORNO; ctx.fillText(bl.texto,x0+pad+wn,y0+h/2+.5);
+      ctx.globalAlpha=1;
+    }
+  }
+  function nomeSelecionado(){
+    const at=ATOR[state.selected]; if(!at) return;
+    const r=state.r||1, [bxv,byv]=iso(at.x,at.y), x=tx(bxv), y=ty(byv), fs=Math.round(11*r), s=AG[at.id].nome;
+    ctx.font='600 '+fs+'px "IBM Plex Sans", system-ui, sans-serif';
+    const w=largura(s,fs)+10*r, px=x-w/2, py=y+5*r;
+    ctx.fillStyle='rgba(16,29,43,.9)'; caixaArred(px,py,w,fs+6*r,4*r); ctx.fill();
+    ctx.fillStyle=OURO_CLARO; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(s,x,py+(fs+6*r)/2);
+  }
+  function efeitoBuzina(now){
+    const f=state.festa; if(!f) return;
+    const t=now-f.t0; if(t>2600){state.festa=null;return;}
+    const k=state.k, r=state.r||1, x=tx(f.x), y=ty(f.y), some=t<1900?1:Math.max(0,(2600-t)/700);
+    ctx.strokeStyle=OURO_CLARO; ctx.lineWidth=2*r;
+    for(let i=0;i<3;i++){const p=((t/700)+i/3)%1; ctx.globalAlpha=(1-p)*some; ctx.beginPath(); ctx.arc(x+6*k,y,(6+p*30)*k,-1.25,.35); ctx.stroke();}
+    ctx.globalAlpha=1;
+    if(t<1900){const fs=Math.round(24*r), sx=x-34*r+(Math.floor(t/50)%2?2:-2)*r, sy=y-10*r;
+      ctx.font='700 '+fs+'px "Barlow Condensed", system-ui, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.lineWidth=4*r; ctx.strokeStyle=CONTORNO; ctx.strokeText('BÓÓÓÓ!',sx,sy); ctx.fillStyle=OURO; ctx.fillText('BÓÓÓÓ!',sx,sy);}
+    // faixa Fortal que desce no alto da cena
+    const desce=Math.min(1,t/300)*(t>2200?Math.max(0,(2600-t)/400):1), fw=Math.min(canvas.width*.42,320*r), fh=36*r, fy=-fh+desce*(fh+12*r), fxx=(canvas.width-fw)/2;
+    ctx.fillStyle='#0f1c2e'; ctx.strokeStyle=OURO; ctx.lineWidth=3*r; ctx.fillRect(fxx,fy,fw,fh); ctx.strokeRect(fxx,fy,fw,fh);
+    ctx.font='700 '+Math.round(22*r)+'px "Barlow Condensed", system-ui, sans-serif'; ctx.fillStyle=OURO_CLARO; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('É FORTAL!',canvas.width/2,fy+fh/2+1);
+  }
+  const CAM={geral:[0,0,BW,BH],genio:[46,6,398,262],espelho:[214,90,598,354]};
+  function alvoCam(){
+    const [x1,y1,x2,y2]=CAM[state.view]||CAM.geral, A=canvas.width/Math.max(1,canvas.height);
+    let w=x2-x1, h=y2-y1; if(w/h<A) w=h*A; else h=w/A;
+    let x=(x1+x2)/2-w/2, y=(y1+y2)/2-h/2;
+    x=w>=BW?(BW-w)/2:Math.max(0,Math.min(BW-w,x)); y=h>=BH?(BH-h)/2:Math.max(0,Math.min(BH-h,y));
+    return {x,y,w,h};
+  }
+  function camera(now){
+    const alvo=alvoCam(), chave=[alvo.x,alvo.y,alvo.w,alvo.h].map(v=>v.toFixed(1)).join();
+    if(!state.cam||!state.raf||reduced.matches){ if(chave!==state.camChave||!state.cam){state.cam=alvo;state.camChave=chave;state.camDe=null;} }
+    else if(chave!==state.camChave){state.camChave=chave;state.camDe={...state.cam};state.camAlvo=alvo;state.camT0=now;}
+    if(state.camDe){const p=Math.min(1,(now-state.camT0)/350), e=1-Math.pow(1-p,3), d=state.camDe, a=state.camAlvo;
+      state.cam={x:d.x+(a.x-d.x)*e,y:d.y+(a.y-d.y)*e,w:d.w+(a.w-d.w)*e,h:d.h+(a.h-d.h)*e}; if(p>=1) state.camDe=null;}
+    const c=state.cam; state.k=canvas.width/c.w; return c;
+  }
+  const tx=bxv=>(bxv-state.cam.x)*state.k, ty=byv=>(byv-state.cam.y)*state.k;
+  const hotspotsEls=[];
+  function posicionarHotspots(){
+    for(const h of hotspotsEls){const at=ATOR[h.dataset.agent]; if(!at) continue; const [x,y]=iso(at.x,at.y,18);
+      const c=state.cam||{x:0,y:0,w:BW,h:BH}, l=((x-c.x)/c.w*100).toFixed(2)+'%', t=((y-c.y)/c.h*100).toFixed(2)+'%'; if(h.style.left!==l) h.style.left=l; if(h.style.top!==t) h.style.top=t;}
   }
   function draw(now=performance.now()) {
-    if (!ctx || !state.images?.base) return;
-    ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; ctx.clearRect(0,0,W,H); ctx.drawImage(state.images.base,0,0,W,H);
-    const job=state.active;
-    if (!job || !state.motionReady || reduced.matches) {stockBoard();return;}
-    const p=Math.min(1,(now-job.started)/job.duration);
-    if (job.event.o==='w' && p<.1) { stockBoard();envelope(p/.1);return; }
-    const progress=job.event.o==='w'?(p-.1)/.9:p;
-    maskPerson(job.agent); stockBoard();drawPerson(job.agent,pointOnPath(job.route,progress),now);
+    if (!ctx) return;
+    const b=bx;
+    b.setTransform(1,0,0,1,0,0); b.imageSmoothingEnabled=false; b.drawImage(fundo,0,0);
+    tv(b,now); bandeirinhas(b,now);
+    const itens=OBJETOS.slice();
+    for(const at of Object.values(ATOR)) itens.push({prof:at.x+at.y+(at.modo==='sentado'&&!at.rota.length?0:.02),fn:c=>boneco(c,at,now)});
+    itens.sort((p,q)=>p.prof-q.prof);
+    for(const it of itens) it.fn(b,now);
+    state.confete=state.confete.filter(p=>now<p.ate);
+    for(const p of state.confete){b.fillStyle=p.cor;b.fillRect(Math.round(p.x),Math.round(p.y),2,(Math.floor(now/90+p.x)%2)?2:1);}
+    const a=state.aviao;
+    if(a){const p=(now-a.t0)/a.dur; if(p>=1) state.aviao=null; else {const x=Math.round(a.de[0]+(a.para[0]-a.de[0])*p), y=Math.round(a.de[1]+(a.para[1]-a.de[1])*p-Math.sin(p*Math.PI)*30);
+      b.fillStyle=CREME; b.fillRect(x-3,y-1,6,2); b.fillRect(x-1,y-3,2,2); b.fillStyle='#9fb3c6'; b.fillRect(x-3,y+1,4,1);}}
+    ctx.setTransform(1,0,0,1,0,0); ctx.imageSmoothingEnabled=false; ctx.clearRect(0,0,canvas.width,canvas.height);
+    const cam=camera(now); ctx.drawImage(buf,cam.x,cam.y,cam.w,cam.h,0,0,canvas.width,canvas.height);
+    textoParede(4.1,8.9,39.5,'SALA DO GÊNIO',OURO_CLARO,7); textoParede(14.6,18.9,47.5,'SALA DO ESPELHO',OURO_CLARO,7);
+    textoParede(14.6,18.9,36,'ESPELHO DE VENDAS','#cfd8e3',5); textoParede(9.3,11.5,28,'CAFÉ',CREME,6);
+    nomeSelecionado(); baloes(now); efeitoBuzina(now); posicionarHotspots();
+  }
+  function motionNote() {
+    $('ec-motion-note').textContent=reduced.matches?'Movimento reduzido ativo. Acompanhe os registros no diário abaixo.':'Conversas, gritos e buzina são clima de escritório. O que aconteceu de verdade aparece no balão dourado e na lista.';
+  }
+  function carregarLogo(){
+    if(logo!==null) return; logo=false;
+    const i=new Image(); i.onload=()=>{logo=i;montarFundo();draw();}; i.onerror=()=>{}; i.src=asset('fortal-logo.png');
+  }
+  function measure() {
+    const rect=scene.getBoundingClientRect(), width=Math.max(1,Math.round(rect.width)), height=Math.max(1,Math.round(rect.height||width*BH/BW));
+    const ratio=Math.min(devicePixelRatio || 1,3);
+    const pixels=Math.min(3200,Math.round(width*ratio)), alto=Math.round(pixels*height/width);
+    if (canvas.width!==pixels || canvas.height!==alto) { canvas.width=pixels; canvas.height=alto; }
+    state.r=canvas.width/width;
+    draw();
+  }
+  function setView(view) {
+    state.view=view; scene.dataset.view=view;
+    for (const b of dialog.querySelectorAll('[data-room]')) b.setAttribute('aria-pressed',b.dataset.room===view?'true':'false');
+    requestAnimationFrame(()=>{measure(); viewport.scrollTo({left:view==='espelho'?viewport.scrollWidth:0,behavior:reduced.matches?'auto':'smooth'});});
   }
   function frame(now) {
     state.raf=null;
-    if (!state.open || !visible() || !authorized() || reduced.matches || !state.motionReady) {state.active=null;draw();return;}
-    if (!state.active && state.queue.length) beginEvent(state.queue.shift(),now);
-    if (state.active && now-state.active.started>=state.active.duration) { state.active=null; update(); }
-    draw(now);
-    if (state.active || state.queue.length) state.raf=requestAnimationFrame(frame);
+    if (!state.open || !visible() || !authorized() || reduced.matches) {draw(now);return;}
+    const dt=Math.min(100,state.last?now-state.last:16); state.last=now;
+    ambiente(now,dt); eventosReais(now);
+    if (state.active && now>state.active.ate) { state.active=null; update(); }
+    if (now-state.drawn>=32 || now<state.drawn) { state.drawn=now; draw(now); }
+    state.raf=requestAnimationFrame(frame);
   }
-  function animate() { if (!state.raf && state.open && visible() && state.motionReady && !reduced.matches && (state.queue.length || state.active)) state.raf=requestAnimationFrame(frame); }
-  function stopAnimation() { if (state.raf) cancelAnimationFrame(state.raf);state.raf=null;state.active=null;state.queue=[];draw();update(); }
+  function animate() { if (!state.raf && state.open && visible() && !reduced.matches) { state.last=0; state.raf=requestAnimationFrame(frame); } }
+  function stopAnimation() {
+    if (state.raf) cancelAnimationFrame(state.raf);
+    Object.assign(state,{raf:null,active:null,queue:[],baloes:[],confete:[],aviao:null,festa:null,agenda:[],indoBuzinar:null,nextTalk:0,nextReal:0,last:0});
+    iniciarAtores(); draw(); update();
+  }
   function addTab() {
     if (!authorized()) { document.querySelector('#tabs .ec-tab')?.remove(); if (state.open) checkAccess(); return; }
     const nav=$('tabs'); if (!nav || nav.querySelector('.ec-tab')) return;
@@ -5423,7 +5803,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     state.open=true; state.epoch++; state.focus=document.activeElement;
     dialog.hidden=false; document.body.classList.add('ec-aberto');
     if (location.hash!=='#escritorio') {try{history.pushState({ec:1},'','#escritorio');state.pushed=true;}catch(_){}}
-    setView(state.view); loadScene(); motionNote(); $('ec-voltar').focus();
+    setView(state.view); carregarLogo(); motionNote(); $('ec-voltar').focus(); audio(); animate();
     $('ec-tv').hidden=!(document.fullscreenEnabled && dialog.requestFullscreen);
     fetchActivity(); state.poll=setInterval(fetchActivity,8000);state.authTimer=setInterval(checkAccess,1000);
   }
@@ -5440,7 +5820,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     else if (location.hash==='#escritorio') {try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
   }
   const stockCaption=document.createElement('p');stockCaption.id='ec-stock';stockCaption.className='ec-stock';stockCaption.textContent='Quadro de estoque: aguardando a base carregada.';dialog.querySelector('.ec-scene-footer').append(stockCaption);
-  buildTeam(); setView(state.view);
+  state.som=lerSom(); iniciarAtores(); montarObjetos(); montarFundo(); $('ec-scene-loading').hidden=true;
+  const btSom=$('ec-som');
+  const mostrarSom=()=>{if(!btSom)return;btSom.setAttribute('aria-pressed',state.som?'true':'false');btSom.setAttribute('aria-label','Som da buzina e da torcida: '+(state.som?'ligado':'desligado'));
+    const longo=btSom.querySelector('.ec-som-longo'), curto=btSom.querySelector('.ec-som-curto');
+    if(longo&&curto){longo.textContent=state.som?'Som ligado':'Som desligado';curto.textContent=state.som?'Som':'Mudo';} else btSom.textContent=state.som?'Som ligado':'Som desligado';};
+  if (btSom) btSom.addEventListener('click',()=>{state.som=!state.som;gravarSom(state.som);mostrarSom();if(state.som)audio();else if(state.audio&&state.audio.suspend)state.audio.suspend().catch(()=>{});});
+  dialog.addEventListener('pointerdown',()=>{if(state.som&&state.open)audio();});
+  mostrarSom(); buildTeam(); setView(state.view);
   $('ec-voltar').addEventListener('click',close);$('ec-retry').addEventListener('click',fetchActivity);
   $('ec-tv').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else dialog.requestFullscreen?.().catch(()=>{});});
   for (const b of dialog.querySelectorAll('[data-room]')) b.addEventListener('click',()=>setView(b.dataset.room));
