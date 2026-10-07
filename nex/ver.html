@@ -44,6 +44,7 @@ a{color:var(--accent)}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,15,18,.05) 30%,rgba(14,15,18,.55) 62%,rgba(14,15,18,.97) 100%)}
 .hero-txt{position:relative;z-index:1;padding:24px 20px 34px;max-width:760px;width:100%}
+.hero.sem-foto{min-height:52vh;min-height:52svh;background:linear-gradient(160deg,#243049,#0e0f12)}
 .ola{margin:0 0 6px;color:var(--accent);font-weight:600;letter-spacing:.02em}
 .hero h1{font-size:46px;line-height:.98;text-transform:uppercase;letter-spacing:.04em}
 .hero .end{margin:10px 0 0;color:var(--ink-2)}
@@ -196,7 +197,7 @@ footer p{margin:0 0 10px}
 
 <main id="pg" hidden>
   <header class="hero">
-    <img id="hero" alt="" fetchpriority="high">
+    <img id="hero" alt="" fetchpriority="high" referrerpolicy="no-referrer">
     <div class="hero-txt">
       <p class="ola" id="ola"></p>
       <h1 id="nome"></h1>
@@ -249,7 +250,7 @@ footer p{margin:0 0 10px}
 </main>
 
 <script>
-// versão 202610011442
+// versão 202610071723
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -308,7 +309,7 @@ window.NEX = (function(){
     const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
     const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
     const p = r && (P.plantas || []).find(q => q.id === r);
-    return p ? {p, exata: false} : null;
+    return p ? {p, exata: false, nota: rf && rf.nota ? String(rf.nota) : ''} : null;   // nota: por que esta planta (ex.: o material não traz a do andar)
   }
   function vista(P, x){
     const f = face(P, x); if(!f) return null;
@@ -316,9 +317,12 @@ window.NEX = (function(){
     const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
     return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
   }
-  const img = (P, id) => (P.pasta || '') + id + '.jpg';
+  // imagem da ficha: arquivo da pasta do projeto (id) ou foto com endereço completo (ficha automática)
+  const ehUrl = s => /^https?:\/\//i.test(String(s || ''));
+  const img = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
-  const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  const thumb = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + 't' + id + '.jpg';
+  const nomeImg = (id, k) => ehUrl(id) ? 'foto-' + ((k || 0) + 1) + '.jpg' : id + '.jpg';
   // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
   // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
   const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
@@ -486,7 +490,7 @@ window.NEX = (function(){
     if(!vis){
       vis = document.createElement('div'); vis.className = 'vis'; vis.hidden = true;
       vis.innerHTML = '<div class="vis-top"><span class="vis-t"></span><span class="vis-acoes"></span><button type="button" class="vis-x" aria-label="Fechar">×</button></div>' +
-        '<div class="vis-area"><img alt=""></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
+        '<div class="vis-area"><img alt="" referrerpolicy="no-referrer"></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
       document.body.appendChild(vis);
       const area = vis.querySelector('.vis-area');
       vis.querySelector('.vis-x').onclick = () => fechar();
@@ -512,12 +516,22 @@ window.NEX = (function(){
   }
 
   // ---------- compartilhar arquivos (WhatsApp etc.) com alternativa de baixar ----------
+  // foto de outro site que não deixa baixar (ficha automática): vai o link no lugar do arquivo
   async function arquivos(lista){
-    return Promise.all(lista.map(async it => { const r = await fetch(it.src); const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }));
+    const fs = await Promise.all(lista.map(async it => {
+      try{ const r = await fetch(it.src); if(!r.ok) return null; const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }
+      catch(e){ return null; }
+    }));
+    return fs.filter(Boolean);
   }
   async function compartilhar(lista, texto){
     try{
       const fs = await arquivos(lista);
+      if(!fs.length){
+        const t = (texto ? texto + '\n' : '') + lista.map(it => it.src).join('\n');
+        if(navigator.share){ await navigator.share({text: t}); return 'links'; }
+        await navigator.clipboard.writeText(t); return 'copiado';
+      }
       if(navigator.canShare && navigator.canShare({files: fs})){ await navigator.share({files: fs, text: texto || undefined}); return 'ok'; }
       for(const f of fs){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
       return 'baixado';
@@ -538,7 +552,74 @@ window.NEX = (function(){
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+  // ---------- ficha automática: projeto sem ficha montada, feita com o que o app já tem ----------
+  // fotos (capa e fotos do projeto), unidades e valores do espelho, endereço, mapa e as distâncias do destaque.
+  // E: projeto do espelho ({id, nome, info, unidades, grade, faixas, endereco}); extra: {capa, fotos, tipologias, pagina}
+  const MESES_EXT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const FAIXAS_AUTO = [[30, 'até 30 m²'], [45, '30 a 45 m²'], [70, '45 a 70 m²'], [100, '70 a 100 m²'], [9999, 'acima de 100 m²']];
+  // "A 500 m do Shopping Frei Caneca e a 450 m do Mackenzie" -> [{nome: 'Shopping Frei Caneca', m: 500}, {nome: 'Mackenzie', m: 450}]
+  function pertoDe(txt){
+    const out = [];
+    for(const fr of String(txt || '').split(/;\s*|,\s+|\s+e\s+(?=(?:a|à)\s+\d)/i)){
+      const m = /(?:^|\s)(?:a|à)\s+(\d+(?:[.,]\d+)?)\s*(km|metros?|minutos?|min|m)(?![\p{L}\d])\.?\s*(a pé|de carro|de bicicleta|de bike)?\s+(?:d[aeo]s?|até)\s+(.+)$/iu.exec(' ' + fr.trim());
+      if(!m) continue;
+      let nome = m[4].split(/\s+e\s+(?:ao lado|perto|a poucos|entre)\b|\s+com\s+|\s*\(/i)[0].trim().replace(/[.;:]+$/, '');
+      if(nome.length < 3 || nome.length > 70) continue;
+      const v = parseFloat(m[1].replace(',', '.')), u = m[2].toLowerCase(), modo = (m[3] || '').toLowerCase();
+      const it = {nome: cap(nome)};
+      if(u === 'km') it.m = Math.round(v * 1000);
+      else if(u === 'm' || /^metro/.test(u)) it.m = Math.round(v);
+      else if(/pé/.test(modo)) it.pe = v; else if(/carro/.test(modo)) it.carro = v; else if(/bic|bike/.test(modo)) it.bike = v; else it.min = v;
+      out.push(it);
+    }
+    return out.slice(0, 6);
+  }
+  function fichaAuto(E, extra){
+    E = E || {}; extra = extra || {};
+    const i = E.info || {}, nome = String(E.nome || i.nome || E.id || '');
+    const revenda = /^rev-/.test(E.id || '') || /\(revenda\)/i.test(nome);
+    const fotos = [];
+    const add = (u, t) => { if(ehUrl(u) && !fotos.some(f => f.id === String(u))) fotos.push({id: String(u), t: String(t || '').slice(0, 80)}); };
+    add(extra.capa || i.capa, 'Fachada');
+    for(const f of (Array.isArray(extra.fotos) ? extra.fotos : Array.isArray(i.fotos) ? i.fotos : [])) if(f) add(f.u, f.t);
+    const mat = (Array.isArray(i.material) ? i.material : []).filter(x => x && ehUrl(x.u));
+    mat.filter(x => x.tipo === 'foto').forEach(x => add(x.u, x.t));
+    const plantas = mat.filter(x => x.tipo === 'planta').map((x, k) => ({id: String(x.u), t: String(x.t || 'Planta ' + (k + 1)).slice(0, 80)}));
+    // metragens e unidades do espelho
+    const areas = (Array.isArray(E.unidades) ? E.unidades : []).map(areaU).filter(a => a > 0);
+    const fmtA = v => (Math.round(v * 10) / 10).toLocaleString('pt-BR');
+    const aMin = areas.length ? Math.min.apply(null, areas) : null, aMax = areas.length ? Math.max.apply(null, areas) : null;
+    const me = /^(\d{4})-(\d{2})/.exec(i.entrega || '');
+    const entrega = i.fase === 'pronto' ? 'Pronto para morar' : me ? 'Entrega prevista em ' + MESES_EXT[+me[2] - 1] + ' de ' + me[1] : i.fase === 'breve' ? 'Lançamento em breve' : '';
+    const tip = String(extra.tipologias || i.tipologias || '').trim();
+    const cidade = i.cidade && !/^s[aã]o paulo$/i.test(i.cidade) ? i.cidade : '';
+    const end = String(i.endereco || E.endereco || [i.bairro, i.cidade].filter(Boolean).join(', ')).replace(/\s*·\s*/g, ', ').trim();
+    const fatos = [];
+    if(tip) fatos.push(['Tipologias', tip]);
+    if(aMin) fatos.push(['Metragens', aMin === aMax || fmtA(aMin) === fmtA(aMax) ? fmtA(aMin) + ' m²' : 'de ' + fmtA(aMin) + ' a ' + fmtA(aMax) + ' m²']);
+    if(entrega) fatos.push([i.fase === 'pronto' ? 'Fase' : 'Entrega', entrega.replace(/^Entrega prevista em /, '')]);
+    if(i.construtora) fatos.push(['Construtora', String(i.construtora)]);
+    if(i.bairro) fatos.push(['Bairro', i.bairro + (cidade ? ', ' + cidade : '')]);
+    const vg = i.vagas && typeof i.vagas === 'object' && i.vagas.t ? String(i.vagas.t).replace(/[.]$/, '') : '';
+    if(vg) fatos.push(['Vaga de garagem', vg]);
+    const perto = pertoDe(i.destaque);
+    const temGeo = i.lat != null && i.lng != null && isFinite(+i.lat) && isFinite(+i.lng);
+    const pagina = ehUrl(extra.pagina || i.pagina) ? String(extra.pagina || i.pagina) : null;
+    return {
+      id: E.id, nome, auto: true, revenda, pasta: '', pagina: 'ver.html', dim: {},
+      hero: fotos.length ? fotos[0].id : null, renders: fotos, plantas, faces: [],
+      colunas: revenda ? 0 : (+((E.grade || {}).colunas) || +E.colunas || 0),
+      faixas: Array.isArray(E.faixas) && E.faixas.length ? E.faixas : FAIXAS_AUTO,
+      endereco: end, entrega, chamada: String(i.destaque || ''),
+      intro: (tip ? tip + (i.bairro ? ', no bairro ' + i.bairro : '') + '. ' : i.bairro ? 'No bairro ' + i.bairro + '. ' : '') + (entrega ? entrega + '.' : ''),
+      fatos, perto, perto_fonte: perto.length ? 'Distâncias divulgadas pela construtora.' : '',
+      mapa: temGeo ? 'https://www.google.com/maps/search/?api=1&query=' + (+i.lat) + ',' + (+i.lng) : end ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(end) : null,
+      legal: 'Imagens e informações de divulgação da construtora, sujeitas a alteração. Valores e disponibilidade na data do envio.',
+      cat_info: {}, lazer: [], entregue: [], diferenciais: [], pagina_oficial: pagina
+    };
+  }
+
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe};
 })();
 
 (function(){
@@ -569,14 +650,21 @@ window.NEX = (function(){
     if(!/^[A-Za-z0-9_-]{8,20}$/.test(id)) return erro('link_invalido');
     try{ L = await rpc('link_ver', {p_id: id, p_evento: previa ? 'previa' : 'abriu'}); }catch(e){ return erro('rede'); }
     if(!L || !L.ok) return erro(L && L.erro, L);
-    try{ P = await fetch('p/' + encodeURIComponent(L.projeto) + '.json').then(r => { if(!r.ok) throw new Error(); return r.json(); }); }catch(e){ return erro('rede'); }
+    // projeto sem ficha montada: a página sai com a ficha automática (fotos, endereço e mapa que vêm junto do link)
+    try{
+      const r = await fetch('p/' + encodeURIComponent(L.projeto) + '.json');
+      if(r.ok) P = await r.json();
+      else if(r.status === 404 && L.proj) P = NEX.fichaAuto({id: L.projeto, nome: L.proj.nome, info: L.proj.info || {}, colunas: L.proj.colunas, faixas: L.proj.faixas, endereco: L.proj.endereco}, {});
+      else throw new Error('http_' + r.status);
+    }catch(e){ return erro('rede'); }
     render();
   }
 
   function render(){
     const nomeCli = primeiro(L.cliente);
     document.title = P.nome + ' · apresentação para ' + nomeCli;
-    $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva da fachada do ' + P.nome;
+    $('hero').addEventListener('error', () => { $('hero').hidden = true; document.querySelector('header.hero').classList.add('sem-foto'); }, {once: true});
+    if(P.hero){ $('hero').src = img(P, P.hero); $('hero').alt = 'Perspectiva da fachada do ' + P.nome; } else { $('hero').hidden = true; document.querySelector('header.hero').classList.add('sem-foto'); }
     $('ola').textContent = 'Olá, ' + nomeCli;
     $('nome').textContent = P.nome;
     $('end').textContent = P.endereco;
@@ -602,7 +690,7 @@ window.NEX = (function(){
     const car = $('renders');
     const itensR = (P.renders || []).map(r => ({src: img(P, r.id), t: r.t}));
     (P.renders || []).forEach((r, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy"><span></span>';
+      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy" referrerpolicy="no-referrer"><span></span>';
       b.querySelector('img').src = thumb(P, r.id); b.querySelector('img').alt = r.t; b.querySelector('span').textContent = r.t;
       b.onclick = () => { evento('galeria'); visualizador(itensR, i); };
       car.appendChild(b);

@@ -131,6 +131,7 @@ img{display:block;max-width:100%}
 .card{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 12px 8px 8px;width:100%}
 .card:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
 .card img{width:70px;height:76px;object-fit:contain;background:#fff;border-radius:8px}
+.card.sem-img{grid-template-columns:minmax(0,1fr);padding:10px 14px}
 .card .l1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .card .num{font-family:"Barlow Condensed",sans-serif;font-size:23px;font-weight:700;line-height:1;margin-right:2px}
 .card .l2{font-size:13px;color:var(--ink-2);margin-top:3px}
@@ -355,6 +356,21 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 .projs::-webkit-scrollbar{display:none}
 .proj{flex:none;border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:600;font-size:14px;white-space:nowrap;color:var(--ink-2)}
 .proj.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* trocar de projeto: busca por nome, bairro ou construtora (todos os projetos do espelho) */
+.pj{position:relative;margin:0 0 10px;z-index:25}
+.pj-campo{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);border-radius:11px;padding:0 12px}
+.pj-campo:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pj-campo svg{width:17px;height:17px;flex:none;color:var(--muted)}
+.pj-campo input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);padding:10px 0;outline:none}
+.pj-lista{position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:min(60vh,440px);overflow-y:auto;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:var(--shadow);padding:4px}
+.pj-it{display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.pj-it b{display:block;font-weight:600;font-size:14.5px}
+.pj-it small{display:block;font-size:12.5px;color:var(--muted)}
+.pj-it:hover,.pj-it:focus-visible,.pj-it.on{background:var(--accent-soft);outline:none}
+.pj-vazio{padding:12px;font-size:14px;color:var(--ink-2)}
+.topo-foto[hidden]{display:none}
+.mat-auto{margin:0 0 14px;font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px dashed var(--line-2);border-radius:11px;padding:9px 12px}
+.auto-t{color:var(--muted);font-weight:400}
 /* planta real do andar com marcação */
 .andar-img{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .andar-img.larga{scrollbar-width:thin}
@@ -396,9 +412,16 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <main class="wrap" id="app" hidden>
-  <nav class="projs" id="projs" aria-label="Projetos" hidden></nav>
+  <div class="pj" id="projs" hidden>
+    <div class="pj-campo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="pj-q" type="search" placeholder="Trocar de projeto: nome, bairro ou construtora" autocomplete="off" spellcheck="false" enterkeyhint="go"
+             role="combobox" aria-expanded="false" aria-controls="pj-lista" aria-autocomplete="list" aria-label="Trocar de projeto">
+    </div>
+    <div class="pj-lista" id="pj-lista" role="listbox" aria-label="Projetos" hidden></div>
+  </div>
   <section class="topo">
-    <img id="hero" class="topo-foto" alt="">
+    <img id="hero" class="topo-foto" alt="" referrerpolicy="no-referrer">
     <div class="topo-txt">
       <h1 id="p-nome">—</h1>
       <p class="end" id="p-end"></p>
@@ -444,6 +467,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
   </section>
 
   <section class="aba" id="aba-mat" hidden>
+    <p class="mat-auto" id="mat-auto" hidden>Ficha automática: fotos, unidades, valores e mapa vêm do app. Plantas, book e tabela da construtora entram quando o material chegar.</p>
     <div class="mat-sec" id="docs-sec" hidden><h3>Material oficial da construtora</h3>
       <p class="mat-nota">Arquivos originais da construtora (Linktree e Google Drive): abrem no Drive e o link pode ser enviado ao cliente.</p>
       <div class="docs" id="docs"></div>
@@ -503,7 +527,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202610051335
+// versão 202610071723
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -562,7 +586,7 @@ window.NEX = (function(){
     const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
     const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
     const p = r && (P.plantas || []).find(q => q.id === r);
-    return p ? {p, exata: false} : null;
+    return p ? {p, exata: false, nota: rf && rf.nota ? String(rf.nota) : ''} : null;   // nota: por que esta planta (ex.: o material não traz a do andar)
   }
   function vista(P, x){
     const f = face(P, x); if(!f) return null;
@@ -570,9 +594,12 @@ window.NEX = (function(){
     const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
     return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
   }
-  const img = (P, id) => (P.pasta || '') + id + '.jpg';
+  // imagem da ficha: arquivo da pasta do projeto (id) ou foto com endereço completo (ficha automática)
+  const ehUrl = s => /^https?:\/\//i.test(String(s || ''));
+  const img = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + id + '.jpg';
   const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
-  const thumb = (P, id) => (P.pasta || '') + 't' + id + '.jpg';
+  const thumb = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + 't' + id + '.jpg';
+  const nomeImg = (id, k) => ehUrl(id) ? 'foto-' + ((k || 0) + 1) + '.jpg' : id + '.jpg';
   // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
   // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
   const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
@@ -740,7 +767,7 @@ window.NEX = (function(){
     if(!vis){
       vis = document.createElement('div'); vis.className = 'vis'; vis.hidden = true;
       vis.innerHTML = '<div class="vis-top"><span class="vis-t"></span><span class="vis-acoes"></span><button type="button" class="vis-x" aria-label="Fechar">×</button></div>' +
-        '<div class="vis-area"><img alt=""></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
+        '<div class="vis-area"><img alt="" referrerpolicy="no-referrer"></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
       document.body.appendChild(vis);
       const area = vis.querySelector('.vis-area');
       vis.querySelector('.vis-x').onclick = () => fechar();
@@ -766,12 +793,22 @@ window.NEX = (function(){
   }
 
   // ---------- compartilhar arquivos (WhatsApp etc.) com alternativa de baixar ----------
+  // foto de outro site que não deixa baixar (ficha automática): vai o link no lugar do arquivo
   async function arquivos(lista){
-    return Promise.all(lista.map(async it => { const r = await fetch(it.src); const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }));
+    const fs = await Promise.all(lista.map(async it => {
+      try{ const r = await fetch(it.src); if(!r.ok) return null; const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }
+      catch(e){ return null; }
+    }));
+    return fs.filter(Boolean);
   }
   async function compartilhar(lista, texto){
     try{
       const fs = await arquivos(lista);
+      if(!fs.length){
+        const t = (texto ? texto + '\n' : '') + lista.map(it => it.src).join('\n');
+        if(navigator.share){ await navigator.share({text: t}); return 'links'; }
+        await navigator.clipboard.writeText(t); return 'copiado';
+      }
       if(navigator.canShare && navigator.canShare({files: fs})){ await navigator.share({files: fs, text: texto || undefined}); return 'ok'; }
       for(const f of fs){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
       return 'baixado';
@@ -792,20 +829,82 @@ window.NEX = (function(){
   const soDigitos = s => String(s || '').replace(/\D/g, '');
   const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
 
-  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, img, dim, thumb, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap};
+  // ---------- ficha automática: projeto sem ficha montada, feita com o que o app já tem ----------
+  // fotos (capa e fotos do projeto), unidades e valores do espelho, endereço, mapa e as distâncias do destaque.
+  // E: projeto do espelho ({id, nome, info, unidades, grade, faixas, endereco}); extra: {capa, fotos, tipologias, pagina}
+  const MESES_EXT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const FAIXAS_AUTO = [[30, 'até 30 m²'], [45, '30 a 45 m²'], [70, '45 a 70 m²'], [100, '70 a 100 m²'], [9999, 'acima de 100 m²']];
+  // "A 500 m do Shopping Frei Caneca e a 450 m do Mackenzie" -> [{nome: 'Shopping Frei Caneca', m: 500}, {nome: 'Mackenzie', m: 450}]
+  function pertoDe(txt){
+    const out = [];
+    for(const fr of String(txt || '').split(/;\s*|,\s+|\s+e\s+(?=(?:a|à)\s+\d)/i)){
+      const m = /(?:^|\s)(?:a|à)\s+(\d+(?:[.,]\d+)?)\s*(km|metros?|minutos?|min|m)(?![\p{L}\d])\.?\s*(a pé|de carro|de bicicleta|de bike)?\s+(?:d[aeo]s?|até)\s+(.+)$/iu.exec(' ' + fr.trim());
+      if(!m) continue;
+      let nome = m[4].split(/\s+e\s+(?:ao lado|perto|a poucos|entre)\b|\s+com\s+|\s*\(/i)[0].trim().replace(/[.;:]+$/, '');
+      if(nome.length < 3 || nome.length > 70) continue;
+      const v = parseFloat(m[1].replace(',', '.')), u = m[2].toLowerCase(), modo = (m[3] || '').toLowerCase();
+      const it = {nome: cap(nome)};
+      if(u === 'km') it.m = Math.round(v * 1000);
+      else if(u === 'm' || /^metro/.test(u)) it.m = Math.round(v);
+      else if(/pé/.test(modo)) it.pe = v; else if(/carro/.test(modo)) it.carro = v; else if(/bic|bike/.test(modo)) it.bike = v; else it.min = v;
+      out.push(it);
+    }
+    return out.slice(0, 6);
+  }
+  function fichaAuto(E, extra){
+    E = E || {}; extra = extra || {};
+    const i = E.info || {}, nome = String(E.nome || i.nome || E.id || '');
+    const revenda = /^rev-/.test(E.id || '') || /\(revenda\)/i.test(nome);
+    const fotos = [];
+    const add = (u, t) => { if(ehUrl(u) && !fotos.some(f => f.id === String(u))) fotos.push({id: String(u), t: String(t || '').slice(0, 80)}); };
+    add(extra.capa || i.capa, 'Fachada');
+    for(const f of (Array.isArray(extra.fotos) ? extra.fotos : Array.isArray(i.fotos) ? i.fotos : [])) if(f) add(f.u, f.t);
+    const mat = (Array.isArray(i.material) ? i.material : []).filter(x => x && ehUrl(x.u));
+    mat.filter(x => x.tipo === 'foto').forEach(x => add(x.u, x.t));
+    const plantas = mat.filter(x => x.tipo === 'planta').map((x, k) => ({id: String(x.u), t: String(x.t || 'Planta ' + (k + 1)).slice(0, 80)}));
+    // metragens e unidades do espelho
+    const areas = (Array.isArray(E.unidades) ? E.unidades : []).map(areaU).filter(a => a > 0);
+    const fmtA = v => (Math.round(v * 10) / 10).toLocaleString('pt-BR');
+    const aMin = areas.length ? Math.min.apply(null, areas) : null, aMax = areas.length ? Math.max.apply(null, areas) : null;
+    const me = /^(\d{4})-(\d{2})/.exec(i.entrega || '');
+    const entrega = i.fase === 'pronto' ? 'Pronto para morar' : me ? 'Entrega prevista em ' + MESES_EXT[+me[2] - 1] + ' de ' + me[1] : i.fase === 'breve' ? 'Lançamento em breve' : '';
+    const tip = String(extra.tipologias || i.tipologias || '').trim();
+    const cidade = i.cidade && !/^s[aã]o paulo$/i.test(i.cidade) ? i.cidade : '';
+    const end = String(i.endereco || E.endereco || [i.bairro, i.cidade].filter(Boolean).join(', ')).replace(/\s*·\s*/g, ', ').trim();
+    const fatos = [];
+    if(tip) fatos.push(['Tipologias', tip]);
+    if(aMin) fatos.push(['Metragens', aMin === aMax || fmtA(aMin) === fmtA(aMax) ? fmtA(aMin) + ' m²' : 'de ' + fmtA(aMin) + ' a ' + fmtA(aMax) + ' m²']);
+    if(entrega) fatos.push([i.fase === 'pronto' ? 'Fase' : 'Entrega', entrega.replace(/^Entrega prevista em /, '')]);
+    if(i.construtora) fatos.push(['Construtora', String(i.construtora)]);
+    if(i.bairro) fatos.push(['Bairro', i.bairro + (cidade ? ', ' + cidade : '')]);
+    const vg = i.vagas && typeof i.vagas === 'object' && i.vagas.t ? String(i.vagas.t).replace(/[.]$/, '') : '';
+    if(vg) fatos.push(['Vaga de garagem', vg]);
+    const perto = pertoDe(i.destaque);
+    const temGeo = i.lat != null && i.lng != null && isFinite(+i.lat) && isFinite(+i.lng);
+    const pagina = ehUrl(extra.pagina || i.pagina) ? String(extra.pagina || i.pagina) : null;
+    return {
+      id: E.id, nome, auto: true, revenda, pasta: '', pagina: 'ver.html', dim: {},
+      hero: fotos.length ? fotos[0].id : null, renders: fotos, plantas, faces: [],
+      colunas: revenda ? 0 : (+((E.grade || {}).colunas) || +E.colunas || 0),
+      faixas: Array.isArray(E.faixas) && E.faixas.length ? E.faixas : FAIXAS_AUTO,
+      endereco: end, entrega, chamada: String(i.destaque || ''),
+      intro: (tip ? tip + (i.bairro ? ', no bairro ' + i.bairro : '') + '. ' : i.bairro ? 'No bairro ' + i.bairro + '. ' : '') + (entrega ? entrega + '.' : ''),
+      fatos, perto, perto_fonte: perto.length ? 'Distâncias divulgadas pela construtora.' : '',
+      mapa: temGeo ? 'https://www.google.com/maps/search/?api=1&query=' + (+i.lat) + ',' + (+i.lng) : end ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(end) : null,
+      legal: 'Imagens e informações de divulgação da construtora, sujeitas a alteração. Valores e disponibilidade na data do envio.',
+      cat_info: {}, lazer: [], entregue: [], diferenciais: [], pagina_oficial: pagina
+    };
+  }
+
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe};
 })();
 
 (function(){
   'use strict';
-  const {$, LS, esc, BRL, BRLc, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, driveUrl, difArea, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
-  // projetos com central (a ordem é a das abas)
-  const PROJETOS = [
-    {id: 'raj-mendes', nome: 'RAJ Mendes'},
-    {id: 'consolacao', nome: 'Consolação'},
-    {id: 'sumare', nome: 'Sumaré'},
-    {id: 'nex-bela-cintra', nome: 'NEX Bela Cintra'},
-    {id: 'raj-2', nome: 'RAJ 2'}
-  ];
+  const {$, LS, esc, BRL, BRLc, m2, rpc, andarTxt, andarCurto, pad2, un, posTxt, face, planta, vista, img, thumb, nomeImg, driveUrl, difArea, faixaDe, opcoesPreco, svgAndar, visualizador, compartilhar, toast, quando, waNum, CFG} = NEX;
+  // fichas montadas (p/index.json, com material da construtora) e a lista de todos os projetos do espelho:
+  // projeto sem ficha montada abre com a ficha automática (fotos, unidades, valores e mapa do app)
+  let MANUAL = new Map(), LISTA = [];
   const K_COD = 'espelhos-codigo', K_EP = 'espelhos-endpoint', K_COR = 'espelhos-corretor', K_DONO = 'espelhos-dono', K_AV = 'espelhos-avisos', K_PROJ = 'nex-projeto', K_FILTRO = 'nex-filtro-';
   const BASE_URL = new URL('./', location.href).href;
   let codigo = LS.get(K_COD);
@@ -817,11 +916,13 @@ window.NEX = (function(){
   let edicao = null;   // fluxo sendo editado na ficha: {n, linhas, ref, refRotulo, alvo, auto, limite}
   let envRetorno = null;   // envio em andamento enquanto o corretor ajusta o fluxo de uma das unidades: {unids, cli, n}
   let F = {};
-  const disponiveis = new Set();   // projetos com página de apresentação publicada
+  const disponiveis = new Set();   // projetos que abrem aqui (todos os do espelho)
 
   const ST = {disponivel: ['Disponível', 'disp'], reservada: ['Reservada', 'res'], processo_final: ['Pend. pagamento do ato', 'res'], vendida: ['Vendida', 'vend']};
   const numPreco = s => { let t = String(s || '').trim(); if(!t) return null; const mil = /mil|k/i.test(t); t = t.replace(/,\d{1,2}$/, '').replace(/\D/g, ''); if(!t) return null; let n = +t; if(mil || n < 5000) n *= 1000; return n > 0 ? n : null; };
-  const nomeProj = id => (PROJETOS.find(p => p.id === id) || {}).nome || id;
+  const nomeProj = id => (LISTA.find(p => p.id === id) || MANUAL.get(id) || {}).nome || id;
+  const paginaDe = id => (cacheP[id] && cacheP[id].pagina) || (MANUAL.get(id) || {}).pagina || 'ver.html';
+  const normTxt = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
   // ---------------- fluxo personalizado (o corretor monta o fluxo que vai para o cliente) ----------------
   // guardado neste aparelho por projeto|unidade: {linhas: [{q, nome, valor, quando}], em}
@@ -938,8 +1039,12 @@ window.NEX = (function(){
   }
   async function carregarProjeto(id){
     if(!cacheP[id]){
-      const r = await fetch('p/' + id + '.json', {cache: 'no-cache'}); if(!r.ok) throw new Error('sem_apresentacao');
-      cacheP[id] = await r.json();
+      let P0 = null;
+      if(MANUAL.has(id)){
+        const r = await fetch('p/' + id + '.json', {cache: 'no-cache'});
+        if(r.ok) P0 = await r.json(); else if(r.status !== 404) throw new Error('sem_apresentacao');
+      }
+      cacheP[id] = P0 || await fichaAutoDe(id);
     }
     if(!(id in cacheT)){
       try{ const c = await rpc('catalogo_ler', {p_codigo: codigo, p_projeto: id}); cacheT[id] = (c && c.tabela) || null; }
@@ -947,6 +1052,48 @@ window.NEX = (function(){
     }
     return {P: cacheP[id], T: cacheT[id]};
   }
+  // ---------------- ficha automática ----------------
+  // fotos e tipologias (projeto_fotos), documentos da construtora (Linktree/Drive) e a página oficial
+  let DOCS = null;
+  const TIPO_DOC = [['book', 'Book do cliente'], ['memorial', 'Memorial descritivo'], ['convencao', 'Convenção de condomínio'], ['contrato', 'Contrato'],
+    ['matricula', 'Matrícula'], ['certidoes', 'Certidões'], ['societario', 'SPE (contrato social e CNPJ)'], ['scp', 'SCP'], ['credito', 'Crédito e cadastro']];
+  function materialDocs(p){
+    const out = [], ordem = c => { const k = TIPO_DOC.findIndex(t => t[1] === c); return k >= 0 ? k : c === 'Documentos' ? 50 : c === 'Pastas no Drive' ? 60 : 70; };
+    for(const x of (p.docs || [])){
+      const u = /^https:\/\//.test(String(x.u || '')) ? String(x.u) : null; if(!u && !x.id) continue;
+      const t = TIPO_DOC.find(z => z[0] === x.c);
+      out.push(Object.assign({c: t ? t[1] : 'Documentos', n: x.t || x.a || 'Documento', ext: String(x.x || 'pdf')}, u ? {u} : {id: x.id}));
+    }
+    for(const f of (p.pastas || [])) if(f && f.id) out.push({c: 'Pastas no Drive', n: f.c + (f.q ? ' · ' + f.q : ''), u: 'https://drive.google.com/drive/folders/' + encodeURIComponent(f.id), pasta: true});
+    if(/^https:\/\//.test(String(p.lt || ''))) out.push({c: 'Links', n: 'Linktree da construtora', u: String(p.lt), ext: 'link'});
+    return out.map((d, k) => [ordem(d.c), k, d]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(z => z[2]);
+  }
+  async function docsDe(id){
+    if(!DOCS) DOCS = rpc('documentos', {p_codigo: codigo}).catch(() => null);
+    const d = await DOCS; if(!d || !Array.isArray(d.construtoras)) return [];
+    for(const c of d.construtoras) for(const p of (c.projetos || [])) if(p.id === id) return materialDocs(p);
+    return [];
+  }
+  async function fichaAutoDe(id){
+    const E0 = DADOS && (DADOS.projetos || []).find(p => p.id === id);
+    if(!E0) throw new Error('sem_apresentacao');
+    const [ex, docs] = await Promise.all([rpc('projeto_fotos', {p_codigo: codigo, p_id: id}).catch(e => { if(/codigo/.test(e.message)) throw e; return null; }), docsDe(id)]);
+    const P0 = NEX.fichaAuto(E0, ex || {});
+    P0.material_oficial = docs.concat(P0.pagina_oficial ? [{c: 'Links', n: 'Página oficial do empreendimento', u: P0.pagina_oficial, ext: 'link'}] : []);
+    return P0;
+  }
+  // lista de projetos: fichas montadas primeiro (na ordem do p/index.json), depois os demais na ordem do espelho
+  function montarLista(){
+    const ordemM = [...MANUAL.keys()];
+    LISTA = ((DADOS && DADOS.projetos) || []).map((E0, k) => {
+      const m = MANUAL.get(E0.id), i = E0.info || {};
+      const cons = i.construtora || E0.grupo_nome || '';
+      return {id: E0.id, nome: (m && m.nome) || E0.nome || E0.id, auto: !m, bairro: i.bairro || '', cons, k: k,
+              busca: normTxt([E0.nome, m && m.nome, E0.curto, E0.id.replace(/-/g, ' '), i.bairro, i.cidade, cons, E0.endereco, i.endereco].filter(Boolean).join(' '))};
+    }).sort((a, b) => (a.auto - b.auto) || (a.auto ? a.k - b.k : ordemM.indexOf(a.id) - ordemM.indexOf(b.id)));
+    disponiveis.clear(); LISTA.forEach(p => disponiveis.add(p.id));
+  }
+
   async function trocarProjeto(id, semHash){
     if(!disponiveis.has(id)) id = [...disponiveis][0];
     const r = await carregarProjeto(id);
@@ -993,24 +1140,69 @@ window.NEX = (function(){
   }
 
   // ---------------- topo ----------------
+  // trocar de projeto: campo de busca com a lista (nome, bairro ou construtora; aceita erro de digitação)
   function renderProjs(){
-    const box = $('projs'); box.innerHTML = '';
-    for(const p of PROJETOS){
-      if(!disponiveis.has(p.id)) continue;
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'proj' + (p.id === PID ? ' on' : ''); b.textContent = p.nome;
-      b.setAttribute('aria-pressed', p.id === PID ? 'true' : 'false');
-      b.addEventListener('click', () => { if(p.id !== PID) trocarProjeto(p.id).catch(() => toast('Não consegui abrir agora.')); });
+    $('projs').hidden = LISTA.length < 2;
+    $('pj-q').placeholder = 'Trocar de projeto (' + LISTA.length + '): nome, bairro ou construtora';
+  }
+  function distEd(a, b){
+    const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 9;
+    let ant = Array.from({length: n + 1}, (x, j) => j);
+    for(let i = 1; i <= m; i++){ const cur = [i]; for(let j = 1; j <= n; j++) cur[j] = Math.min(ant[j] + 1, cur[j - 1] + 1, ant[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); ant = cur; }
+    return ant[n];
+  }
+  function achaProjs(q){
+    const toks = normTxt(q).split(' ').filter(Boolean), outros = LISTA.filter(p => p.id !== PID);
+    if(!toks.length) return outros;
+    let r = outros.filter(p => toks.every(t => p.busca.includes(t)));
+    if(!r.length) r = outros.filter(p => { const ws = p.busca.split(' '); return toks.every(t => p.busca.includes(t) || (t.length >= 5 && ws.some(w => w.length >= 4 && distEd(w, t) <= (t.length >= 10 ? 2 : 1)))); });
+    const q0 = normTxt(q), comeca = p => normTxt(p.nome).startsWith(q0) || normTxt(p.nome).split(' ').some(w => w.startsWith(toks[0]));
+    return r.map((p, k) => [p, comeca(p) ? 0 : 1, k]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(z => z[0]);
+  }
+  let pjSel = -1;
+  function mostrarProjs(){
+    const q = $('pj-q').value, r = achaProjs(q), box = $('pj-lista');
+    box.innerHTML = ''; pjSel = -1;
+    if(!r.length){ const v = document.createElement('div'); v.className = 'pj-vazio'; v.textContent = 'Nenhum projeto com “' + q.trim() + '”.'; box.appendChild(v); }
+    for(const p of r.slice(0, 80)){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pj-it'; b.setAttribute('role', 'option'); b.dataset.id = p.id;
+      b.innerHTML = '<b></b><small></small>';
+      b.querySelector('b').textContent = p.nome;
+      b.querySelector('small').textContent = [p.bairro, p.cons, p.auto ? 'ficha automática' : 'ficha completa'].filter(Boolean).join(' · ');
+      b.addEventListener('mousedown', e => e.preventDefault());
+      b.addEventListener('click', () => escolherProj(p.id));
       box.appendChild(b);
     }
-    box.hidden = box.children.length < 2;
+    box.hidden = false; $('pj-q').setAttribute('aria-expanded', 'true');
   }
+  function fecharProjs(){ $('pj-lista').hidden = true; $('pj-q').setAttribute('aria-expanded', 'false'); pjSel = -1; }
+  function escolherProj(id){
+    $('pj-q').value = ''; fecharProjs(); $('pj-q').blur();
+    if(id !== PID) trocarProjeto(id).catch(e => { if(/codigo/.test(e.message)){ LS.del(K_COD); codigo = null; mostrarGate('O código mudou. Digite o novo código do time.'); return; } toast('Não consegui abrir agora.'); });
+  }
+  $('pj-q').addEventListener('focus', mostrarProjs);
+  $('pj-q').addEventListener('input', mostrarProjs);
+  $('pj-q').addEventListener('blur', () => setTimeout(fecharProjs, 120));
+  $('pj-q').addEventListener('keydown', e => {
+    const its = [...$('pj-lista').querySelectorAll('.pj-it')];
+    if(e.key === 'Escape'){ $('pj-q').value = ''; fecharProjs(); $('pj-q').blur(); return; }
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      e.preventDefault(); if(!its.length) return;
+      pjSel = (pjSel + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length;
+      its.forEach((b, k) => { b.classList.toggle('on', k === pjSel); b.setAttribute('aria-selected', k === pjSel ? 'true' : 'false'); }); its[pjSel].scrollIntoView({block: 'nearest'});
+      return;
+    }
+    if(e.key === 'Enter'){ e.preventDefault(); const b = its[pjSel >= 0 ? pjSel : 0]; if(b) escolherProj(b.dataset.id); }
+  });
   // as abas ficam presas logo abaixo da barra do alto
   const ajustarBarra = () => document.documentElement.style.setProperty('--barra-h', document.querySelector('.barra').offsetHeight + 'px');
   ajustarBarra(); window.addEventListener('resize', ajustarBarra);
-  $('hero').addEventListener('click', () => { if(P && P.renders && P.renders.length) visualizador(P.renders.map(r => ({src: img(P, r.id), t: r.t, nome: r.id + '.jpg'})), 0, {acoes: acoesImg}); });
+  $('hero').addEventListener('click', () => { if(P && P.renders && P.renders.length) visualizador(P.renders.map((r, k) => ({src: img(P, r.id), t: r.t, nome: nomeImg(r.id, k)})), 0, {acoes: acoesImg}); });
+  $('hero').addEventListener('error', () => { $('hero').hidden = true; });
   function renderTopo(){
     document.title = 'Central de produto · ' + P.nome;
-    $('hero').src = thumb(P, P.hero); $('hero').alt = 'Fachada do ' + P.nome;
+    const h = $('hero');
+    if(P.hero){ h.hidden = false; h.src = thumb(P, P.hero); h.alt = 'Fachada do ' + P.nome; } else { h.hidden = true; h.removeAttribute('src'); }
     $('p-nome').textContent = P.nome;
     // endereço sem a cidade e a entrega abreviada (ex.: "entrega set/2029"), para caber em duas linhas no celular
     const ent = /(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro) de (\d{4})/i.exec(P.entrega || '');
@@ -1022,7 +1214,7 @@ window.NEX = (function(){
   // resumo do topo + blocos de metragem (que também filtram a lista)
   function renderStats(){
     const disp = U.filter(x => x.st === 'disponivel'), mn = minPreco(disp);
-    $('p-resumo').innerHTML = '<b>' + disp.length + '</b> disponíveis de ' + U.length + (mn ? ' · desde <b>' + milTxt(mn) + '</b>' : '');
+    $('p-resumo').innerHTML = '<b>' + disp.length + '</b> disponíveis de ' + U.length + (mn ? ' · desde <b>' + milTxt(mn) + '</b>' : '') + (P.auto ? ' <span class="auto-t">· ficha automática</span>' : '');
     const box = $('f-tip'); box.innerHTML = '';
     const itens = [['todas', 'Todas', disp]];
     for(const [, lbl] of (P.faixas || [])){ const g = disp.filter(x => x.faixa === lbl); if(g.length || F.faixa === lbl) itens.push([lbl, lbl, g]); }
@@ -1123,7 +1315,7 @@ window.NEX = (function(){
     const st = ST[x.st] || [x.st, 'cat'], pr = precoDe(x);
     b.innerHTML = '<img alt="" loading="lazy"><div><div class="l1"><span class="num"></span><span class="pill"></span><span class="pill cat"></span></div>' +
       '<div class="l2"></div><div class="l3"><span class="preco"></span><small class="alt"></small><span class="face"></span></div></div>';
-    const im = b.querySelector('img'); if(x.pl) im.src = thumb(P, x.pl.p.id); else im.style.visibility = 'hidden';
+    const im = b.querySelector('img'); if(x.pl) im.src = thumb(P, x.pl.p.id); else if(P.auto || !(P.plantas || []).length){ im.remove(); b.classList.add('sem-img'); } else im.style.visibility = 'hidden';
     b.querySelector('.num').textContent = x.n;
     const [p1, pc] = b.querySelectorAll('.pill');
     if(x.st === 'disponivel') p1.remove(); else { p1.textContent = st[0]; p1.classList.add(st[1]); }
@@ -1410,9 +1602,12 @@ window.NEX = (function(){
       bPl += '<img class="img-planta" id="fi-pl" src="' + esc(img(P, pl.p.id)) + '"' + NEX.dim(P, pl.p.id) + ' alt="' + esc(pl.p.t) + '">';
       const base = pl.p.finais ? 'final ' + pl.p.finais.map(pad2).join(', ') : (pl.p.tipos || []).map(t => NEX.tipoTxt(t)).join(', ');
       bPl += '<div class="leg">' + (pl.exata ? esc(pl.p.t) + (base ? ' · ' + esc(base) : '') + (pl.p.andares ? ' (' + esc(pl.p.andares) + ')' : '')
-            : 'Planta de referência: ' + esc(pl.p.t) + (base ? ', ' + esc(base) : '') + '. Mesma tipologia; esta unidade pode ser espelhada ou ter pequenas diferenças.') +
+            : 'Planta de referência: ' + esc(pl.p.t) + (base ? ', ' + esc(base) : '') + '. ' + (pl.nota ? esc(pl.nota) : 'Mesma tipologia; esta unidade pode ser espelhada ou ter pequenas diferenças.')) +
            (P.nota_planta_andar && P.nota_planta_andar[String(x.an)] ? ' ' + esc(P.nota_planta_andar[String(x.an)]) : '') +
            (difArea(pl, x.a) ? ' Metragem desta unidade no espelho de vendas: ' + esc(m2(x.a)) + ' (a planta é a ilustrativa do material da construtora).' : '') + '</div>';
+    } else if(P.auto){
+      const pp = (P.material_oficial || []).find(d => d.pasta && /planta/i.test(d.n));
+      bPl += '<div class="sem-vista">A planta desta unidade ainda não está no app.' + (pp ? ' <a href="' + esc(pp.u) + '" target="_blank" rel="noopener">Plantas no Drive da construtora ›</a>' : '') + '</div>';
     } else bPl += '<div class="sem-vista">A incorporadora não divulgou a planta humanizada desta unidade.</div>';
     bPl += '</div>';
     // vista
@@ -1441,9 +1636,12 @@ window.NEX = (function(){
            '<div class="legenda"><span><i style="background:var(--svg-alvo)"></i>esta unidade</span><span><i style="background:var(--svg-disp)"></i>disponível</span><span><i style="background:var(--svg-res)"></i>reservada</span><span><i style="background:var(--svg-vend)"></i>vendida</span>' + (P.andar_tipo ? '<span><i style="background:#f6b73c;border-radius:50%"></i>sol ao longo do dia</span>' : '') + '</div>' +
            '<div class="leg">' + esc(P.andar_legenda || (P.andar_tipo ? 'Sol conforme o estudo de insolação da incorporadora.' : P.andar_img ? 'Planta do pavimento divulgada pela incorporadora.' : 'Posição na linha do andar, como no espelho de vendas.')) + (x.face ? ' ' + esc(x.face.frase || ('Janela voltada para a ' + x.face.nome + '.')) : '') + '</div></div>';
     }
-    // parecidas
-    const par = pl ? U.filter(z => z.n !== x.n && z.st === 'disponivel' && z.pl && z.pl.p.id === pl.p.id).sort((a, b) => Math.abs(a.an - x.an) - Math.abs(b.an - x.an)).slice(0, 12) : [];
-    const bPar = pl ? '<div class="bloco"><h3>Mesma planta, disponíveis</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">Nenhuma outra disponível com esta planta.</div>') + '</div>' : '';
+    // parecidas: mesma planta; sem planta, mesma tipologia do espelho ou metragem quase igual
+    const tl = x.ex && x.ex.tl ? String(x.ex.tl) : '';
+    const parecida = z => pl ? (z.pl && z.pl.p.id === pl.p.id) : ((tl && z.ex && String(z.ex.tl || '') === tl && (!x.a || !z.a || Math.abs(z.a - x.a) <= 3)) || (!tl && x.a && z.a && Math.abs(z.a - x.a) <= 1.5));
+    const comPar = !!(pl || tl || x.a);
+    const par = comPar ? U.filter(z => z.n !== x.n && z.st === 'disponivel' && parecida(z)).sort((a, b) => Math.abs(a.an - x.an) - Math.abs(b.an - x.an)).slice(0, 12) : [];
+    const bPar = comPar ? '<div class="bloco"><h3>' + (pl ? 'Mesma planta, disponíveis' : 'Parecidas, disponíveis') + '</h3>' + (par.length ? '<div class="parecidas">' + par.map(z => '<button type="button" data-n="' + esc(z.n) + '"><b>' + esc(z.n) + '</b>' + esc(andarCurto(z.andar)) + (pl ? '' : z.a ? ' · ' + esc(m2(z.a)) : '') + ' · ' + (precoDe(z) ? BRL(precoDe(z)) : 'sem preço') + '</button>').join('') + '</div>' : '<div class="leg">' + (pl ? 'Nenhuma outra disponível com esta planta.' : 'Nenhuma outra disponível parecida com esta.') + '</div>') + '</div>' : '';
     const bVal = blocoValores(x);
     $('fi-corpo').innerHTML = tags + (telaLarga.matches
       ? '<div class="fx-grid"><div class="col">' + bPl + bAnd + bVi + '</div><div class="col">' + bVal + bPar + '</div></div>'
@@ -1464,18 +1662,21 @@ window.NEX = (function(){
     if(pl) l.push({src: img(P, pl.p.id), nome: 'planta-' + x.n + '.jpg'});
     if(pl && pl.p.decorado) l.push({src: img(P, pl.p.decorado), nome: 'decorado-' + x.n + '.jpg'});
     if(vi && vi.img) l.push({src: img(P, vi.img), nome: 'vista-' + x.n + '.jpg'});
-    l.push({src: img(P, P.hero), nome: 'fachada.jpg'});
+    if(P.hero) l.push({src: img(P, P.hero), nome: 'fachada.jpg'});
     return l;
   }
+  const avisoComp = (r, baixou) => { if(r === 'baixado') toast(baixou); else if(r === 'copiado') toast('Links das imagens copiados.'); };
   function acoesImg(it, box){
     const s = document.createElement('button'); s.type = 'button'; s.textContent = 'Compartilhar';
-    s.onclick = async () => { try{ const r = await compartilhar([it]); if(r === 'baixado') toast('Imagem baixada.'); }catch(e){ toast('Não consegui compartilhar agora.'); } };
+    s.onclick = async () => { try{ const r = await compartilhar([it]); avisoComp(r, 'Imagem baixada.'); }catch(e){ toast('Não consegui compartilhar agora.'); } };
     const a = document.createElement('a'); a.textContent = 'Baixar'; a.href = it.src; a.download = it.nome || '';
+    if(NEX.ehUrl(it.src) && !it.src.startsWith(location.origin)){ a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Abrir'; }   // foto de outro site: abre numa aba
     box.append(s, a);
   }
   $('fi-imgs').addEventListener('click', async () => {
     if(!atual) return;
-    try{ const r = await compartilhar(imagensDaUnidade(atual), 'Unidade ' + atual.n + ' · ' + P.nome); if(r === 'baixado') toast('Imagens baixadas.'); }
+    const l = imagensDaUnidade(atual); if(!l.length){ toast('Esta unidade ainda não tem imagens no app.'); return; }
+    try{ const r = await compartilhar(l, 'Unidade ' + atual.n + ' · ' + P.nome); avisoComp(r, 'Imagens baixadas.'); }
     catch(e){ toast('Não consegui compartilhar agora.'); }
   });
   $('fi-enviar').addEventListener('click', () => {
@@ -1490,13 +1691,24 @@ window.NEX = (function(){
 
   // ---------------- enviar ao cliente ----------------
   let envUnids = [], envProj = null, envNovo = false;
+  // a página do cliente de um projeto com ficha automática depende do servidor já atualizado (link_ver com "proj",
+  // que veio junto com o vínculo do Gênio); até lá, o envio dessas fichas fica fechado com um aviso
+  let srv040 = null;
+  async function servidorPronto(){
+    if(srv040 !== null) return srv040;
+    try{ await rpc('vinculo_status', {p_codigo: codigo, p_dono: dono(), p_vinculo: '-'}); srv040 = true; }
+    catch(e){ if(!(e && e.status)) return true; srv040 = e.status !== 404; }
+    return srv040;
+  }
+  const SEM_PAGINA_AUTO = 'A página do cliente para projetos com ficha automática entra no ar em breve. Por enquanto, mande pelo app: Buscar, marque a unidade e toque em "Enviar ao cliente".';
   function abrirEnvio(ns){
     envUnids = ns.slice(0, 3); envProj = PID; envNovo = true;
     const c = corretor(); $('en-cor').value = c.nome || ''; $('en-tel').value = c.tel || '';
     $('en-form').hidden = false; $('en-pronto').hidden = true; $('en-erro').textContent = '';
-    $('en-cli').value = '';
+    $('en-cli').value = ''; $('en-criar').disabled = false;
     renderEnvUnids(); $('envio').hidden = false; document.body.classList.add('sem-rolagem');
     avisoEnvio(); setTimeout(() => $('en-cli').focus(), 60);
+    if(P.auto) servidorPronto().then(ok => { if(!ok && envProj === PID){ $('en-erro').textContent = SEM_PAGINA_AUTO; $('en-criar').disabled = true; } });
   }
   function renderValoresEnvio(){
     const box = $('en-val'), antes = (box.querySelector('input:checked') || {}).value;
@@ -1646,6 +1858,7 @@ window.NEX = (function(){
     const nome = $('en-cor').value.trim(), tel = $('en-tel').value.trim();
     LS.set(K_COR, JSON.stringify(Object.assign(corretor(), {nome, tel})));
     $('en-criar').disabled = true; $('en-erro').textContent = '';
+    if(P.auto && !(await servidorPronto())){ $('en-erro').textContent = SEM_PAGINA_AUTO; return; }
     try{
       const ep = await meuEndpoint().catch(() => null);
       const r = await rpc('link_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_projeto: envProj, p_cliente: cli, p_corretor: nome, p_whats: tel,
@@ -1716,7 +1929,7 @@ window.NEX = (function(){
     if(!links.length){ box.innerHTML = '<div class="vazio">Nenhum link enviado deste aparelho ainda. Abra uma unidade e toque em “Enviar ao cliente”.</div>'; return; }
     for(const l of links){
       const d = document.createElement('div'); d.className = 'lk';
-      const url = BASE_URL + ((cacheP[l.projeto] && cacheP[l.projeto].pagina) || 'ver.html') + '?l=' + encodeURIComponent(l.id);
+      const url = BASE_URL + paginaDe(l.projeto) + '?l=' + encodeURIComponent(l.id);
       const vist = Object.keys(l.vistos || {}).filter(k => EV[k]).map(k => EV[k] + (l.vistos[k] > 1 ? ' ' + l.vistos[k] + '×' : ''));
       d.innerHTML = '<div class="l1"><b></b><span class="st"></span></div><div class="lkl un"></div><div class="lkl vi"></div><div class="row"></div>';
       d.querySelector('b').textContent = l.cliente;
@@ -1741,15 +1954,17 @@ window.NEX = (function(){
     const box = $(id); box.innerHTML = '';
     box.closest('.mat-sec').hidden = !itens.length;
     itens.forEach((it, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy"><span></span>';
+      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<img alt="" loading="lazy" referrerpolicy="no-referrer"><span></span>';
       b.querySelector('img').src = it.th; b.querySelector('span').textContent = it.t;
       b.onclick = () => visualizador(itens.map(z => ({src: z.src, t: z.t, nome: z.nome})), i, {acoes: acoesImg});
       box.appendChild(b);
     });
   }
   function renderMaterial(){
-    galeria('g-renders', (P.renders || []).map(r => ({src: img(P, r.id), th: thumb(P, r.id), t: r.t, nome: r.id + '.jpg'})));
-    galeria('g-plantas', (P.plantas || []).map(p => ({src: img(P, p.id), th: thumb(P, p.id), t: p.t + (p.finais ? ' · final ' + p.finais.map(pad2).join(', ') : p.tipos ? ' · ' + p.tipos.map(t => NEX.tipoTxt(t)).join(', ') : ''), nome: p.id + '.jpg'})));
+    $('mat-auto').hidden = !P.auto;
+    $('g-renders').previousElementSibling.textContent = P.auto ? 'Fotos do empreendimento' : 'Perspectivas';
+    galeria('g-renders', (P.renders || []).map((r, k) => ({src: img(P, r.id), th: thumb(P, r.id), t: r.t, nome: nomeImg(r.id, k)})));
+    galeria('g-plantas', (P.plantas || []).map((p, k) => ({src: img(P, p.id), th: thumb(P, p.id), t: p.t + (p.finais ? ' · final ' + p.finais.map(pad2).join(', ') : p.tipos ? ' · ' + p.tipos.map(t => NEX.tipoTxt(t)).join(', ') : ''), nome: NEX.ehUrl(p.id) ? 'planta-' + (k + 1) + '.jpg' : p.id + '.jpg'})));
     const vs = [];
     for(const f of (P.faces || [])) if(f.vistas) for(const a of Object.keys(f.vistas).map(Number).sort((a, b) => a - b)) vs.push({src: img(P, f.vistas[a]), th: thumb(P, f.vistas[a]), t: f.nome.replace('Rua ', 'R. ') + ' · ' + a + 'º pav.', nome: f.vistas[a] + '.jpg'});
     for(const v of (P.vistas_rooftop || [])) vs.push({src: img(P, v.id), th: thumb(P, v.id), t: v.t, nome: v.id + '.jpg'});
@@ -1767,7 +1982,7 @@ window.NEX = (function(){
       for(const d of docs){
         if(d.c !== cat){ if(cat !== null) h += '</div>'; cat = d.c; h += '<div class="doc-g"><h4>' + esc(cat) + '</h4>'; }
         const u = d.u || driveUrl(d.id);   // d.u: link direto (pasta do Drive, página externa)
-        const det = [d.pasta ? 'Pasta no Google Drive' : String(d.ext || '').toUpperCase(), d.mb != null ? String(d.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(' · ');
+        const det = [d.pasta ? 'Pasta no Google Drive' : d.ext === 'link' ? 'Página na internet' : String(d.ext || '').toUpperCase(), d.mb != null ? String(d.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(' · ');
         h += '<div class="doc"><div class="doc-i"><b>' + esc(d.n) + '</b><small>' + esc(det) + '</small></div>' +
              '<div class="doc-a"><a class="abtn" target="_blank" rel="noopener" href="' + esc(u) + '">Abrir</a><button class="abtn" type="button" data-u="' + esc(u) + '">Copiar link</button></div></div>';
       }
@@ -1811,13 +2026,13 @@ window.NEX = (function(){
     $('app').hidden = false;
     try{
       await carregarEspelho();
-      // só entram as abas dos projetos que têm apresentação publicada (lista em p/index.json)
+      // fichas montadas (p/index.json); os outros projetos do espelho abrem com a ficha automática
       const idx = await fetch('p/index.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null);
-      if(Array.isArray(idx) && idx.length) PROJETOS.splice(0, PROJETOS.length, ...idx);
-      const checks = await Promise.all(PROJETOS.map(p => fetch('p/' + p.id + '.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)));
-      PROJETOS.forEach((p, i) => { if(checks[i]){ cacheP[p.id] = checks[i]; disponiveis.add(p.id); } });
+      MANUAL = new Map((Array.isArray(idx) ? idx : []).filter(p => p && p.id).map(p => [p.id, p]));
+      montarLista();
+      if(!LISTA.length) throw new Error('sem_projetos');
       const pedido = new URLSearchParams(location.search).get('p');
-      const ini = (pedido && disponiveis.has(pedido)) ? pedido : (disponiveis.has(LS.get(K_PROJ)) ? LS.get(K_PROJ) : [...disponiveis][0]);
+      const ini = (pedido && disponiveis.has(pedido)) ? pedido : (disponiveis.has(LS.get(K_PROJ)) ? LS.get(K_PROJ) : LISTA[0].id);
       await trocarProjeto(ini, true);
       irPara();
       setInterval(verificarVersao, 60000);
@@ -1825,6 +2040,7 @@ window.NEX = (function(){
       carregarLinks();
     }catch(e){
       if(/codigo/.test(e.message)){ LS.del(K_COD); codigo = null; mostrarGate('O código mudou. Digite o novo código do time.'); return; }
+      console.error('Central de produto: falha ao abrir', e && e.message);
       $('lista').innerHTML = '<div class="vazio">Não consegui carregar agora. Verifique a internet e recarregue a página.</div>';
     }
   }
