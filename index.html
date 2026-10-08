@@ -890,6 +890,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 .bz-form .duo select{height:42px;border:1px solid var(--line-2);border-radius:10px;padding:0 8px;font:inherit;font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;background:var(--surface);color:var(--ink);flex:0 0 auto;width:auto;max-width:48%}
 .bz-bsug{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;text-transform:none;letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--vend-text)}
 .bz-bsug[hidden]{display:none}
+.bz-bsel{margin-top:6px}
+.bz-bsel[hidden]{display:none}
+.bz-bchip{display:inline-flex;align-items:center;gap:6px}
+.bz-bchip i{font-style:normal;font-size:15px;line-height:1;opacity:.75}
 .bz-bsug button{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
 .bz-ou{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500;margin-top:3px}
 .painel .campo input.bad{border-color:var(--vend-line)}
@@ -1385,9 +1389,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
           <div class="mk-c"><span>Vaga de garagem</span><div class="mk-chips" id="ba-vagas" role="group" aria-label="Vaga de garagem"></div></div>
           <div class="mk-c"><span>Fase da obra</span><div class="mk-chips" id="ba-fases" role="group" aria-label="Fase da obra"></div></div>
           <div class="mk-c"><span>Região</span><div class="mk-chips" id="ba-zonas" role="group" aria-label="Região"></div></div>
-          <div class="mk-c"><label for="ba-bairro">Bairro</label>
-            <div class="mk-duo bz-bairro"><input id="ba-bairro" list="ba-bairros" placeholder="Digite e escolha um bairro" autocomplete="off" spellcheck="false"><select id="ba-raio" aria-label="Distância máxima do bairro"><option value="1.5">até 1,5 km</option><option value="3" selected>até 3 km</option><option value="5">até 5 km</option><option value="8">até 8 km</option><option value="12">até 12 km</option></select></div>
+          <div class="mk-c"><label for="ba-bairro">Bairros</label>
+            <div class="mk-duo bz-bairro"><input id="ba-bairro" list="ba-bairros" placeholder="Digite e escolha um ou mais bairros" autocomplete="off" spellcheck="false"><select id="ba-raio" aria-label="Distância máxima do bairro"><option value="1.5">até 1,5 km</option><option value="3" selected>até 3 km</option><option value="5">até 5 km</option><option value="8">até 8 km</option><option value="12">até 12 km</option></select></div>
             <datalist id="ba-bairros"></datalist>
+            <div class="mk-chips bz-bsel" id="ba-bairros-sel" hidden></div>
             <div class="bz-bsug" id="ba-bairro-sug" hidden></div>
           </div>
           <details class="mk-mais" id="ba-mais">
@@ -2618,6 +2623,16 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     return Math.sqrt(x * x + y * y);
   }
   const distProj = (p, r) => r ? distKm(infoDe(p).lat, infoDe(p).lng, r.lat, r.lng) : null;
+  // Pedido do Luiz (08/10/2026): vários bairros de uma vez ("Consolação, Perdizes e Jardins"). Um bairro continua em
+  // c.regiao (avisos e links antigos); dois ou mais vão em c.regioes, e vale o que estiver perto de qualquer um deles
+  const regioesDe = c => (c && Array.isArray(c.regioes) && c.regioes.length ? c.regioes : c && c.regiao ? [c.regiao] : []);
+  const nomeRegioes = rs => { const n = rs.map(r => r.nome); return n.length <= 1 ? (n[0] || '') : n.slice(0, -1).join(', ') + ' ou ' + n[n.length - 1]; };
+  // o bairro mais perto dentro do raio de cada um ({d, r}), ou null se o projeto não está perto de nenhum
+  function pertoDe(p, rs){
+    let best = null;
+    for(const r of rs){ const d = distProj(p, r); if(d != null && d <= (+r.raio || 3) && (!best || d < best.d)) best = {d, r}; }
+    return best;
+  }
 
   // ---------- casamento (o mesmo do servidor, em _casar_buscas) ----------
   function casaProj(c, p){
@@ -2625,7 +2640,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(c.grupos && c.grupos.length && !c.grupos.includes(grupoDe(p))) return false;
     if(c.fases && c.fases.length && !c.fases.includes(faseDe(p))) return false;
     if(c.zonas && c.zonas.length && !c.zonas.includes(infoDe(p).zona)) return false;
-    if(c.regiao){ const d = distProj(p, c.regiao); if(d == null || d > (+c.regiao.raio || 3)) return false; }
+    { const rs = regioesDe(c); if(rs.length && !pertoDe(p, rs)) return false; }
     if(c.entrega_ate){   // "pronto": só prontos; "AAAA-MM": prontos e os com entrega até esse mês
       const i = infoDe(p);
       if(c.entrega_ate === 'pronto'){ if(faseDe(p) !== 'pronto') return false; }
@@ -2679,7 +2694,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(c.projetos && c.projetos.length) partes.push(nomesProjs(c.projetos));
     else if(c.grupos && c.grupos.length) partes.push('Só ' + c.grupos.map(g => GRUPO_NOME[g] || g).join(' e '));
     else partes.push('Todos os projetos');
-    if(c.regiao) partes.push('perto de ' + c.regiao.nome + ' (até ' + fmtKm(+c.regiao.raio || 3) + ')');
+    const rsT = regioesDe(c);
+    if(rsT.length) partes.push('perto de ' + nomeRegioes(rsT) + ' (até ' + fmtKm(+rsT[0].raio || 3) + ')');
     else if(c.zonas && c.zonas.length) partes.push(c.zonas.map(z => ZONA_NOME[z] || z).join(', '));
     if(c.fases && c.fases.length) partes.push(c.fases.map(f => (FASE_NOME[f] || f).toLowerCase()).join(' ou '));
     if(c.entrega_ate) partes.push(entregaTxtCrit(c.entrega_ate));
@@ -2698,7 +2714,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const tipo = so_loja ? 'lojas e salas comerciais' : (studio && dTxt ? 'studios e apartamentos de ' + dTxt : studio ? 'studios' : dTxt ? 'apartamentos de ' + dTxt : 'apartamentos') + (t.includes('loja') ? ' e lojas' : '') + (c.vaga_min ? ' com vaga' : '');
     const f = c.fases || [], FT = {pronto: 'prontos para morar', obras: 'em obras', lanc: 'em lançamento'};
     const fase = c.entrega_ate === 'pronto' ? 'prontos para morar' : f.length && f.length < 3 ? ['pronto', 'obras', 'lanc'].filter(x => f.includes(x)).map(x => FT[x]).join(' ou ') : '';
-    const onde = c.regiao ? 'perto de ' + c.regiao.nome : (c.zonas && c.zonas.length ? c.zonas.map(z => ZONA_EM[z] || z).join(' ou ') : '');
+    const rsO = regioesDe(c), onde = rsO.length ? 'perto de ' + nomeRegioes(rsO) : (c.zonas && c.zonas.length ? c.zonas.map(z => ZONA_EM[z] || z).join(' ou ') : '');
     const ex = [];
     const m2 = txtM2(c); if(m2) ex.push(m2);
     if(c.preco_max != null) ex.push('até ' + BRLmil(c.preco_max) + ((c.modo || 'pv') === 'pv' ? ' à vista' : ''));
@@ -2783,10 +2799,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('ba-avisar').addEventListener('click', () => salvarAviso());
 
   // ---------- Buscar agora ----------
-  const ba = {bairro: null, raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, vaga: 0, ent: '', ord: 'preco', q: ''};
+  const ba = {bairros: [], raio: 3, zonas: [], fases: [], tipos: [], grupos: [], projs: [], modo: 'pv', semLoja: true, vaga: 0, ent: '', ord: 'preco', q: ''};
   const PASSO_PROJ = 24;
   let baRes = [], baCrit = {}, baSel = new Set(), baAberto = {}, baMaisProj = PASSO_PROJ, baEdit = null, baT = null, bairroIdx = null, abaAtual = 'agora', baFicha = null;
-  const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null || c.vaga_min || c.entrega_ate));
+  const temFiltro = c => !!(c && ((c.projetos && c.projetos.length) || (c.grupos && c.grupos.length) || (c.fases && c.fases.length) || (c.tipos && c.tipos.length) || (c.zonas && c.zonas.length) || c.regiao || (c.regioes && c.regioes.length) || c.m2_min != null || c.m2_max != null || c.preco_max != null || c.andar_min != null || c.vaga_min || c.entrega_ate));
   function critBusca(){
     const c = {projetos: ba.projs.slice(), modo: ba.modo};
     // texto do campo de busca: vira a lista de empreendimentos que casam (o aviso salvo e o link usam essa lista)
@@ -2795,7 +2811,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(ba.grupos.length) c.grupos = ba.grupos.slice();
     if(ba.fases.length) c.fases = ba.fases.slice();
     if(ba.tipos.length) c.tipos = ba.tipos.slice();
-    if(ba.bairro) c.regiao = {nome: ba.bairro.nome, lat: Math.round(ba.bairro.lat * 1e5) / 1e5, lng: Math.round(ba.bairro.lng * 1e5) / 1e5, raio: ba.raio};
+    const regiao = b => ({nome: b.nome, lat: Math.round(b.lat * 1e5) / 1e5, lng: Math.round(b.lng * 1e5) / 1e5, raio: ba.raio});
+    if(ba.bairros.length === 1) c.regiao = regiao(ba.bairros[0]);
+    else if(ba.bairros.length > 1) c.regioes = ba.bairros.slice(0, 8).map(regiao);
     else if(ba.zonas.length) c.zonas = ba.zonas.slice();
     const a = numArea($('ba-m2a').value), b = numArea($('ba-m2b').value);
     if(a != null) c.m2_min = a; if(b != null) c.m2_max = b;
@@ -2837,7 +2855,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const s = document.createElement('span');
     if(!c.length){ s.textContent = 'Não achei esse bairro. Escolha um da lista ou use a região abaixo.'; box.appendChild(s); box.hidden = false; return; }
     s.textContent = 'Você quis dizer:'; box.appendChild(s);
-    c.slice(0, 4).forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.textContent = b.nome; x.addEventListener('click', () => { $('ba-bairro').value = b.nome; $('ba-bairro').dispatchEvent(new Event('input')); }); box.appendChild(x); });
+    c.slice(0, 4).forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.textContent = b.nome; x.addEventListener('click', () => addBairro(b)); box.appendChild(x); });
     box.hidden = false;
   }
   const marcarSeg = (id, v) => $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
@@ -2858,7 +2876,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   function renderChipsBusca(){
     opcoesEntrega();
     const mudou = () => { renderChipsBusca(); agendar(); };
-    chipsSel($('ba-zonas'), Object.entries(ZONA_NOME), ba.zonas, () => { if(ba.zonas.length && ($('ba-bairro').value || ba.bairro)){ ba.bairro = null; $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); } mudou(); });
+    chipsSel($('ba-zonas'), Object.entries(ZONA_NOME), ba.zonas, () => { if(ba.zonas.length && ($('ba-bairro').value || ba.bairros.length)){ ba.bairros = []; $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); } mudou(); });
+    renderBairrosSel();
     chipsSel($('ba-fases'), Object.entries(FASE_NOME), ba.fases, mudou);
     chipsSel($('ba-tipos'), TIPO_ORDEM.map(k => [k, TIPO_NOME[k]]), ba.tipos, mudou);
     // valor rápido e vaga: um só por vez
@@ -2884,7 +2903,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   function nFiltros(){   // quantos filtros estão ligados (no botão "Filtros" do celular)
     const c = critBusca();
     return [c.preco_max != null, c.m2_min != null || c.m2_max != null, !!(c.tipos && c.tipos.length), !!c.entrega_ate, !!c.vaga_min, !!(c.fases && c.fases.length),
-      !!(c.zonas && c.zonas.length) || !!c.regiao, !!(c.grupos && c.grupos.length), !!(c.projetos && c.projetos.length), c.andar_min != null].filter(Boolean).length;
+      !!(c.zonas && c.zonas.length) || regioesDe(c).length > 0, !!(c.grupos && c.grupos.length), !!(c.projetos && c.projetos.length), c.andar_min != null].filter(Boolean).length;
   }
   function opcoesEntrega(){
     const s = $('ba-ent'); if(s.options.length) return;
@@ -2921,9 +2940,10 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('ba-cli').value = cli || '';
     ba.q = ''; $('ba-q').value = ''; $('ba-q-x').hidden = true;
     ba.projs = (c.projetos || []).slice(); ba.grupos = (c.grupos || []).slice(); ba.fases = (c.fases || []).slice(); ba.tipos = (c.tipos || []).slice(); ba.zonas = (c.zonas || []).slice();
-    ba.bairro = c.regiao ? {nome: c.regiao.nome, lat: +c.regiao.lat, lng: +c.regiao.lng} : null;
-    $('ba-bairro').value = c.regiao ? c.regiao.nome : ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
-    setRaio(c.regiao ? (+c.regiao.raio || 3) : 3);
+    const rsF = regioesDe(c);
+    ba.bairros = rsF.map(r => ({nome: r.nome, lat: +r.lat, lng: +r.lng}));
+    $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
+    setRaio(rsF.length ? (+rsF[0].raio || 3) : 3);
     $('ba-m2a').value = c.m2_min != null ? String(c.m2_min).replace('.', ',') : '';
     $('ba-m2b').value = c.m2_max != null ? String(c.m2_max).replace('.', ',') : '';
     $('ba-preco').value = c.preco_max != null ? Math.round(c.preco_max).toLocaleString('pt-BR') : '';
@@ -2947,11 +2967,29 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     buscarAgora();
   }
   function agendar(){ clearTimeout(baT); baT = setTimeout(buscarAgora, 140); }
+  // bairro escolhido vira etiqueta (dá para somar vários) e o campo fica livre para o próximo
+  function addBairro(b){
+    if(!b) return;
+    if(!ba.bairros.some(x => norm(x.nome) === norm(b.nome))) ba.bairros.push({nome: b.nome, lat: +b.lat, lng: +b.lng});
+    $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
+    if(ba.zonas.length) ba.zonas = [];
+    renderChipsBusca(); agendar();
+  }
+  function renderBairrosSel(){
+    const box = $('ba-bairros-sel'); if(!box) return;
+    box.replaceChildren(); box.hidden = !ba.bairros.length;
+    ba.bairros.forEach((b, i) => {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'chip on bz-bchip'; x.setAttribute('aria-label', 'Tirar ' + b.nome);
+      x.append(b.nome, Object.assign(document.createElement('i'), {textContent: '×', ariaHidden: 'true'}));
+      x.addEventListener('click', () => { ba.bairros.splice(i, 1); renderChipsBusca(); agendar(); });
+      box.appendChild(x);
+    });
+    $('ba-bairro').placeholder = ba.bairros.length ? 'Somar outro bairro' : 'Digite e escolha um ou mais bairros';
+  }
   $('ba-bairro').addEventListener('input', () => {
     const v = $('ba-bairro').value, b = acharBairro(v);
-    ba.bairro = b; $('ba-bairro').classList.toggle('bad', !!v.trim() && !b); sugerirBairros(v);
-    if(b && ba.zonas.length){ ba.zonas = []; renderChipsBusca(); }
-    agendar();
+    if(b){ addBairro(b); return; }
+    $('ba-bairro').classList.toggle('bad', !!v.trim()); sugerirBairros(v);
   });
   $('ba-raio').addEventListener('change', () => { ba.raio = +$('ba-raio').value || 3; agendar(); });
   ['ba-m2a', 'ba-m2b', 'ba-preco'].forEach(id => $(id).addEventListener('input', () => { renderChipsBusca(); agendar(); }));
@@ -3029,7 +3067,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   function usarBairroQ(b){
     $('ba-q').value = ''; ba.q = ''; $('ba-q-x').hidden = true;
-    ba.bairro = b; ba.zonas = []; $('ba-bairro').value = b.nome; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
+    if(!ba.bairros.some(x => norm(x.nome) === norm(b.nome))) ba.bairros.push({nome: b.nome, lat: +b.lat, lng: +b.lng});
+    ba.zonas = []; $('ba-bairro').value = ''; $('ba-bairro').classList.remove('bad'); $('ba-bairro-sug').hidden = true;
     renderChipsBusca(); buscarAgora();
   }
   function usarGrupoQ(g){
@@ -3128,7 +3167,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(!dados) return;
     const c = critBusca(); baCrit = c;
     const m = new Map();
-    for(const {p, a} of encontrados(c)){ let g = m.get(p.id); if(!g){ g = {p, us: [], d: c.regiao ? distProj(p, c.regiao) : null}; m.set(p.id, g); } g.us.push(a); }
+    const rsB = regioesDe(c);
+    for(const {p, a} of encontrados(c)){ let g = m.get(p.id); if(!g){ const pt = rsB.length ? pertoDe(p, rsB) : null; g = {p, us: [], d: pt ? pt.d : null, r: pt ? pt.r : null}; m.set(p.id, g); } g.us.push(a); }
     const gr = [...m.values()];
     const pv = (p, a) => { const x = precoDe(p, a, c.modo); return x ? x.v : Infinity; };
     for(const g of gr){
@@ -3138,7 +3178,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const porPreco = (x, y) => ((x.min ? x.min.v : Infinity) - (y.min ? y.min.v : Infinity)) || (x.p.nome || '').localeCompare(y.p.nome || '', 'pt-BR');
     const m2De = g => { let b = Infinity; for(const a of g.us){ const pr = precoDe(g.p, a, c.modo), ar = areaDe(a); if(pr && ar > 0) b = Math.min(b, pr.v / ar); } return b; };
     const entK = g => { const i = infoDe(g.p); return faseDe(g.p) === 'pronto' ? '0000-00' : /^\d{4}-\d{2}/.test(i.entrega || '') ? String(i.entrega).slice(0, 7) : '9999-99'; };
-    if(ba.ord === 'perto' && c.regiao) gr.sort((x, y) => ((x.d == null ? 999 : x.d) - (y.d == null ? 999 : y.d)) || porPreco(x, y));
+    if(ba.ord === 'perto' && rsB.length) gr.sort((x, y) => ((x.d == null ? 999 : x.d) - (y.d == null ? 999 : y.d)) || porPreco(x, y));
     else if(ba.ord === 'm2'){ gr.forEach(g => { g.m2 = m2De(g); }); gr.sort((x, y) => (x.m2 - y.m2) || porPreco(x, y)); }
     else if(ba.ord === 'entrega') gr.sort((x, y) => entK(x).localeCompare(entK(y)) || porPreco(x, y));
     else if(ba.ord === 'unidades') gr.sort((x, y) => (y.us.length - x.us.length) || porPreco(x, y));
@@ -3184,8 +3224,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const nU = baRes.reduce((s, g) => s + g.us.length, 0);
     $('ba-cont').textContent = baRes.length ? baRes.length.toLocaleString('pt-BR') + (baRes.length === 1 ? ' empreendimento' : ' empreendimentos') + ' · ' + nU.toLocaleString('pt-BR') + (nU === 1 ? ' unidade' : ' unidades')
                                             : 'Nenhuma unidade disponível com esses filtros';
-    const op = $('ba-ordem').querySelector('option[value="perto"]'); op.hidden = op.disabled = !c.regiao;
-    if(!c.regiao && ba.ord === 'perto'){ ba.ord = 'preco'; $('ba-ordem').value = 'preco'; }
+    const temRegiao = regioesDe(c).length > 0;
+    const op = $('ba-ordem').querySelector('option[value="perto"]'); op.hidden = op.disabled = !temRegiao;
+    if(!temRegiao && ba.ord === 'perto'){ ba.ord = 'preco'; $('ba-ordem').value = 'preco'; }
     $('ba-crit').textContent = critLinha(c);
     const sug = $('ba-sug-box'); sug.replaceChildren();
     if(!nU){ sug.appendChild(sugestoesEl(c, 0)); $('ba-mais-res').hidden = true; return; }
@@ -3228,7 +3269,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     b.appendChild(capaCard(p));
     const inf = el('span', 'mk-info');
     inf.appendChild(el('b', 'mk-nome', p.nome || i.nome || p.id));
-    const dist = g.d != null && c.regiao ? 'a ' + fmtKm(Math.max(0.1, Math.round(g.d * 10) / 10)) + ' de ' + c.regiao.nome : null;
+    const dist = g.d != null && g.r ? 'a ' + fmtKm(Math.max(0.1, Math.round(g.d * 10) / 10)) + ' de ' + g.r.nome : null;
     inf.appendChild(el('span', 'mk-l2', [GRUPO_NOME[grupoDe(p)] || i.construtora, i.bairro, dist].filter(Boolean).join(' · ')));
     const l3 = el('span', 'mk-l3');
     if(FASE_SELO[fk]){ const f = el('i', 'mk-fase f-' + fk, FASE_SELO[fk]); l3.appendChild(f); }
@@ -3495,6 +3536,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(c.regiao){
       const prox = RAIOS.find(r => r > (+c.regiao.raio || 3));
       if(prox) add('Até ' + fmtKm(prox) + ' de ' + c.regiao.nome, Object.assign({}, c, {regiao: Object.assign({}, c.regiao, {raio: prox})}), () => setRaio(prox));
+    } else if(c.regioes && c.regioes.length){
+      const prox = RAIOS.find(r => r > (+c.regioes[0].raio || 3));
+      if(prox) add('Até ' + fmtKm(prox) + ' de ' + nomeRegioes(c.regioes), Object.assign({}, c, {regioes: c.regioes.map(r => Object.assign({}, r, {raio: prox}))}), () => setRaio(prox));
     }
     if(c.m2_min != null || c.m2_max != null){
       const c2 = Object.assign({}, c);
