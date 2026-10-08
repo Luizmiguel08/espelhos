@@ -3425,10 +3425,11 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: 'nex/' + (P.pasta || '') + r.id + '.jpg', th: 'nex/' + (P.pasta || '') + 't' + r.id + '.jpg', t: r.t || ''})).concat(novos);
     // sem ficha na central: fotos do cadastro do projeto (projeto_fotos), que somam as da pasta do Drive na revenda One
     const i = infoDe(p), out = [], ft = FT[p.id], capa = urlSegura((ft && ft.capa) || i.capa);
-    if(capa) out.push({src: capa, t: 'Fachada'});
+    // miniatura da capa: o Drive e o otimizador do site da construtora (/_next/image) entregam a imagem já reduzida
+    if(capa) out.push({src: capa, th: /googleusercontent\.com\/d\//.test(capa) ? capa.replace(/=w\d+$/, '=w480') : /\/_next\/image\/?\?url=/.test(capa) ? capa.replace(/([?&])w=\d+/, '$1w=384') : undefined, t: 'Fachada'});
     for(const f of (ft && Array.isArray(ft.fotos) ? ft.fotos : (i.fotos || []))){
       if(!f || !urlSegura(f.u) || f.u === capa || out.some(o => o.src === f.u)) continue;
-      out.push({src: f.u, th: /googleusercontent\.com\/d\//.test(f.u) ? f.u.replace(/=w\d+$/, '=w480') : undefined, t: f.t || ''});
+      out.push({src: f.u, th: urlSegura(f.th) || (/googleusercontent\.com\/d\//.test(f.u) ? f.u.replace(/=w\d+$/, '=w480') : undefined), t: f.t || ''});
     }
     return out.concat(novos);
   }
@@ -3521,10 +3522,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     const docs = ((P && P.material_oficial) || []).filter(d => d && (d.u || d.id));
     const book = P && P.book ? 'nex/' + (P.pasta || '') + P.book : (docs.find(d => d.c === 'Book do cliente' && d.ext === 'pdf') ? driveUrl(docs.find(d => d.c === 'Book do cliente' && d.ext === 'pdf').id) : null);
     if(book) lk(book, 'Book do empreendimento (PDF)', 'primary');
+    // sem ficha na central de produto: o book e os documentos da Documentação (o mesmo índice que o Gênio usa)
+    const DX = !P && window.DOCS && window.DOCS.docsDoProjeto ? window.DOCS.docsDoProjeto(p.id) : null, dxDocs = DX ? (DX.p.docs || []) : [];
+    const dxBook = book ? null : dxDocs.find(d => d.c === 'book' && /^book/i.test(d.t || '')) || dxDocs.find(d => d.c === 'book');
+    if(dxBook && (dxBook.id || /^https:\/\//.test(String(dxBook.u || '')))) lk(/^https:\/\//.test(String(dxBook.u || '')) ? dxBook.u : driveUrl(dxBook.id), 'Book do empreendimento (PDF)', 'primary');
     for(const z of ((P && P.tours) || [])) if(z && urlSegura(z.u)) lk(z.u, z.cli || z.t || 'Tour virtual');
     if(urlSegura(i.pagina)) lk(i.pagina, 'Página oficial ↗');
     lk('nex/?p=' + encodeURIComponent(p.id), 'Ficha completa');   // sem ficha montada, a central abre a ficha automática
     if(P && docs.length) lk('nex/?p=' + encodeURIComponent(p.id) + '#mat', 'Todo o material (' + docs.length + ')');
+    if(dxDocs.length){ const a = lk('#docs-' + p.id, 'Documentos do projeto (' + dxDocs.length + ')'); a.removeAttribute('target'); a.addEventListener('click', ev => { ev.preventDefault(); window.DOCS.abrir(p.id); }); }
     if(links.children.length) sec.appendChild(links);
     const peso = d => (d.ext === 'pdf' || d.pasta || d.u) ? 0 : 1;   // PDFs e pastas primeiro; vídeos e imagens por último
     const novosDocs = materialDe(p, ['pdf', 'video']).slice(-4).reverse().map(m => ({u: m.u, n: m.t, c: 'Enviado pelo WhatsApp', ext: m.tipo === 'pdf' ? 'pdf' : 'vídeo', mb: m.tam ? Math.round(m.tam / 1e5) / 10 : null}));
