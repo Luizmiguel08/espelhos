@@ -2335,7 +2335,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     try{
       const v = await rpc('espelho_versao', {p_codigo: codigo});
       robo = v.robo || robo;
-      if(forcar || !dados || v.mudou !== mudou || Date.now() - ultimoFull > 5*60000){
+      // baixa o espelho inteiro (~5 MB) só quando algo mudou de verdade (status, preço, ficha); a cada 30 min por segurança
+      if(forcar || !dados || v.mudou !== mudou || Date.now() - ultimoFull > 30*60000){
         const d = await rpc('espelho', {p_codigo: codigo});
         mudou = v.mudou; ultimoFull = Date.now();
         aplicar(d);
