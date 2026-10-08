@@ -537,7 +537,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202610071818
+// versão 202610072111
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -922,7 +922,7 @@ window.NEX = (function(){
   const K_COD = 'espelhos-codigo', K_EP = 'espelhos-endpoint', K_COR = 'espelhos-corretor', K_DONO = 'espelhos-dono', K_AV = 'espelhos-avisos', K_PROJ = 'nex-projeto', K_FILTRO = 'nex-filtro-';
   const BASE_URL = new URL('./', location.href).href;
   let codigo = LS.get(K_COD);
-  let DADOS = null, versao = null;
+  let DADOS = null, versao = null, mudouVisto = null, ultimoCheio = 0;
   const cacheP = {}, cacheT = {};
   let PID = null, P = null, E = null, T = null;
   let U = [], porN = new Map(), BASES = [];
@@ -1046,9 +1046,11 @@ window.NEX = (function(){
   });
 
   // ---------------- dados ----------------
-  async function carregarEspelho(){
+  async function carregarEspelho(v0){
+    let v = v0 || null;
+    if(!v){ try{ v = await rpc('espelho_versao', {p_codigo: codigo}); }catch(e){} }
     DADOS = await rpc('espelho', {p_codigo: codigo});
-    versao = DADOS.versao;
+    versao = DADOS.versao; mudouVisto = v ? v.mudou : null; ultimoCheio = Date.now();
     if(PID){ E = (DADOS.projetos || []).find(p => p.id === PID) || null; montarUnidades(); }
   }
   async function carregarProjeto(id){
@@ -1150,7 +1152,23 @@ window.NEX = (function(){
   }
   async function verificarVersao(){
     if(document.hidden || !codigo) return;
-    try{ const v = await rpc('espelho_versao', {p_codigo: codigo}); if(v.versao !== versao) await carregarEspelho(); else if(E) atualizarVivo(); }catch(e){}
+    try{
+      const v = await rpc('espelho_versao', {p_codigo: codigo});
+      // o espelho inteiro (~5 MB) só desce quando algo mudou de verdade (status, preço, ficha) ou a cada 30 min por segurança;
+      // a conferência do robô sem mudança só atualiza o "conferido" com a leitura que já vem na versão
+      if(mudouVisto === null || v.mudou !== mudouVisto || Date.now() - ultimoCheio > 30 * 60000) await carregarEspelho(v);
+      else { conferidoDoRobo(v.robo); if(E) atualizarVivo(); }
+    }catch(e){}
+  }
+  function conferidoDoRobo(robo){
+    if(!DADOS || !robo) return;
+    for(const r of Object.values(robo)){
+      const info = r && r.info; if(!info) continue;
+      for(const p of DADOS.projetos || []){
+        const em = info[p.id] && info[p.id].em;
+        if(em && (!p.conferido_em || new Date(em) > new Date(p.conferido_em))) p.conferido_em = em;
+      }
+    }
   }
 
   // ---------------- topo ----------------
