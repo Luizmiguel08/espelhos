@@ -3189,10 +3189,11 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('ba-crit').textContent = critLinha(c);
     const sug = $('ba-sug-box'); sug.replaceChildren();
     if(!nU){ sug.appendChild(sugestoesEl(c, 0)); $('ba-mais-res').hidden = true; return; }
-    baRes.slice(0, baMaisProj).forEach(g => box.appendChild(cardProj(g)));
-    const resto = baRes.length - baMaisProj;
-    $('ba-mais-res').hidden = resto <= 0;
-    if(resto > 0) $('ba-mais-res').textContent = 'Mostrar mais ' + Math.min(resto, PASSO_PROJ) + ' de ' + resto + (resto === 1 ? ' empreendimento' : ' empreendimentos');
+    // Pedido do Luiz (08/10/2026): todos os empreendimentos de uma vez, sem "Mostrar mais" (as fotos carregam conforme rola)
+    const frag = document.createDocumentFragment();
+    baRes.forEach(g => frag.appendChild(cardProj(g)));
+    box.appendChild(frag);
+    $('ba-mais-res').hidden = true;
     if(temFiltro(c) && (baRes.length < 3 || nU < 6)){ const s2 = sugestoesEl(c, nU); if(s2) sug.appendChild(s2); }
   }
   function capaCard(p){   // foto do card (mesmo tamanho da aba Mercado) ou o bloco com as iniciais
@@ -4950,6 +4951,17 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     $('mk-f-x').addEventListener('click', fecharFiltros); $('mk-ver').addEventListener('click', fecharFiltros);
     $('mk-f').addEventListener('submit', ev => { ev.preventDefault(); fecharFiltros(); });
     $('mk-mais').addEventListener('click', () => { mostrando += PASSO; render(false); });
+    // Pedido do Luiz (08/10/2026): sem clicar em "Mostrar mais". Quando o fim da lista chega perto, os próximos entram sozinhos
+    // (a base completa da Órulo tem milhares; de 24 em 24 o celular não pesa)
+    if('IntersectionObserver' in window){
+      const bt = $('mk-mais');
+      const io = new IntersectionObserver(es => {
+        if(!es.some(e => e.isIntersecting) || bt.hidden) return;
+        mostrando += PASSO; render(false);
+        io.unobserve(bt); io.observe(bt);   // se o botão continuar à vista, carrega mais uma leva
+      }, { root: bt.closest('.mk-res'), rootMargin: '0px 0px 800px 0px' });
+      io.observe(bt);
+    }
     $('mk-voltar').addEventListener('click', fecharPeloUsuario);
     $('mk-fi-x').addEventListener('click', fecharFichaPeloUsuario);
     $('mk-ficha').addEventListener('click', ev => { if(ev.target === $('mk-ficha')) fecharFichaPeloUsuario(); });
