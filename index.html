@@ -1057,6 +1057,25 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 .cp-top .cp-ajuda{margin:0}
 .cp-top select,.cp-env input{height:42px;border:1px solid var(--line-2);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);width:100%;min-width:0}
 .cp-lin{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.cp-tipo{align-self:flex-start}
+.cp-top[hidden]{display:none}
+.cp-esc-l{display:flex;flex-direction:column;gap:8px}
+.cp-esc-slot{display:grid;grid-template-columns:28px minmax(0,1.3fr) minmax(0,1fr) 36px;gap:8px;align-items:center}
+.cp-esc-n{width:28px;height:28px;border-radius:999px;background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.cp-esc-slot:first-child .cp-esc-n{background:var(--ink);color:var(--surface)}
+.cp-esc-x{width:36px;height:36px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink-2);font-size:18px;line-height:1;cursor:pointer}
+.cp-esc-x:disabled{opacity:.35;cursor:default}
+.cp-esc-mais{align-self:flex-start;height:38px}
+.cp-esc-mais[hidden]{display:none}
+.cp-dest{font-size:12.5px;color:var(--ink-2);padding-top:2px}
+@media (min-width:641px){.cp-grade.cp-grade-esc{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}}
+@media (max-width:640px){
+  .cp-esc-slot{grid-template-columns:28px minmax(0,1fr) 36px;grid-template-areas:"n p x" "n u x"}
+  .cp-esc-slot .cp-esc-n{grid-area:n;align-self:start;margin-top:7px}
+  .cp-esc-slot .cp-esc-p{grid-area:p}
+  .cp-esc-slot .cp-esc-u{grid-area:u}
+  .cp-esc-slot .cp-esc-x{grid-area:x;align-self:start}
+}
 .cp-lin select{width:auto;flex:1 1 130px}
 .cp-lin .abtn{height:42px}
 .cp-sair{align-self:flex-start;position:sticky;top:0;z-index:2}
@@ -1492,12 +1511,20 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     <div class="bz-v" id="bz-comparar" hidden>
       <button type="button" class="abtn cp-sair" id="cp-sair" hidden>Sair do modo apresentação</button>
       <div class="cp-top cp-int">
-        <p class="txt cp-ajuda">O cliente não gostou? Escolha o projeto que ele viu e o motivo: o app separa 3 a 4 opções parecidas, na mesma região, e mostra lado a lado com metragem, valor, entrega e diferença para o original.</p>
-        <div class="duo2">
-          <label class="campo"><span>Projeto que o cliente viu</span><select id="cp-proj" aria-label="Projeto que o cliente viu"></select></label>
-          <label class="campo"><span>Unidade de referência</span><select id="cp-un" aria-label="Unidade de referência"></select></label>
+        <div class="seg2 cp-tipo" id="cp-tipo" role="group" aria-label="Como comparar"><button type="button" data-v="parecidos" class="on">Opções parecidas</button><button type="button" data-v="escolha">Escolher as unidades</button></div>
+        <div id="cp-par" class="cp-top">
+          <p class="txt cp-ajuda">O cliente não gostou? Escolha o projeto que ele viu e o motivo: o app separa 3 a 4 opções parecidas, na mesma região, e mostra lado a lado com metragem, valor, entrega e diferença para o original.</p>
+          <div class="duo2">
+            <label class="campo"><span>Projeto que o cliente viu</span><select id="cp-proj" aria-label="Projeto que o cliente viu"></select></label>
+            <label class="campo"><span>Unidade de referência</span><select id="cp-un" aria-label="Unidade de referência"></select></label>
+          </div>
+          <div class="campo"><span>Por que ele não gostou?</span><div class="chips" id="cp-motivos"></div></div>
         </div>
-        <div class="campo"><span>Por que ele não gostou?</span><div class="chips" id="cp-motivos"></div></div>
+        <div id="cp-esc" class="cp-top" hidden>
+          <p class="txt cp-ajuda">Escolha de 2 a 4 unidades, de qualquer empreendimento. A primeira é a base: nas outras aparece a diferença para ela.</p>
+          <div id="cp-esc-l" class="cp-esc-l"></div>
+          <button type="button" class="abtn cp-esc-mais" id="cp-esc-mais">+ Adicionar unidade</button>
+        </div>
         <div class="cp-lin">
           <div class="seg2" id="cp-modo" role="group" aria-label="Valor a comparar"><button type="button" data-v="pv" class="on">À vista</button><button type="button" data-v="pp">Parcelado</button></div>
           <select id="cp-raio" aria-label="Distância máxima do projeto original"><option value="1.5">até 1,5 km</option><option value="3" selected>até 3 km</option><option value="5">até 5 km</option><option value="8">até 8 km</option><option value="12">até 12 km</option></select>
@@ -3954,7 +3981,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     entrega:  {a: .20, p: .20, e: .40, d: .10, f: .10},
     regiao:   {a: .25, p: .30, e: .15, d: .10, f: .20},
     tamanho:  {a: .35, p: .25, e: .15, d: .15, f: .10}};
-  const cp = {pid: null, n: null, motivo: 'parecido', modo: 'pv', raio: 3, sel: new Set(), incOrig: true, res: null, link: null, apres: false, msgEd: false};
+  const cp = {pid: null, n: null, motivo: 'parecido', modo: 'pv', raio: 3, sel: new Set(), incOrig: true, res: null, link: null, apres: false, msgEd: false,
+    tipo: 'parecidos', esc: [{pid: null, n: null}, {pid: null, n: null}], resEsc: null};
   const cpProj = id => dados ? dados.projetos.find(p => p.id === id) : null;
   const clamp01 = x => Math.max(0, Math.min(1, x));
   const cap1 = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -4220,6 +4248,8 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   function cpRender(){
     const box = $('cp-res'); box.replaceChildren(); $('cp-env').hidden = true;
+    if(cp.tipo === 'escolha'){ _cpTab = new Map(); cp.res = null; cpRenderEscolha(box); return; }
+    cp.resEsc = null;
     const proj = cpProj(cp.pid);
     if(!proj){ box.appendChild(el('div', 'vazio', 'Escolha acima o projeto que o cliente viu.')); cp.res = null; return; }
     const r = cpBuscar(); cp.res = r;
@@ -4244,6 +4274,114 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     box.appendChild(el('p', 'cp-nota', 'Comparação feita com a unidade disponível mais parecida de cada projeto. Valores da tabela de hoje; a situação de cada unidade vem do espelho ao vivo.' + (cp.modo === 'pv' ? '' : ' Valores parcelados; só entram projetos com prazo de pagamento parecido com o do original.')));
     const f1 = cpForaBloco(r); if(f1) box.appendChild(f1);
     $('cp-env').hidden = false; cpEnvioEstado(true);
+  }
+
+  // ---------- escolher as unidades: 2 a 4 de qualquer empreendimento, lado a lado (Luiz, 08/10/2026: "comparar a 203 do
+  //            Nurban Consolação com a 211 do Nex Bela Cintra, com todos os detalhes"). A primeira é a base das diferenças.
+  const CP_ESC_MAX = 4;
+  const CP_ST = {disponivel: 'Disponível', reservada: 'Reservada', processo_final: 'Pendente de pagamento do ato', vendida: 'Vendida'};
+  const cpCat = (p, a) => String((p.cat_nome && p.cat_nome[a[3]]) || a[3] || '');
+  function cpEscOpcoesUn(p){   // disponíveis (sem nenhuma, as que têm valor), por tipologia e valor
+    const ix = a => { const k = TIPO_ORDEM.indexOf(tipoK(tipologiaDe(p, a))); return k < 0 ? 9 : k; };
+    return cpUnidades(p).sort((x, y) => ix(x) - ix(y) || cpPreco(p, x, cp.modo).v - cpPreco(p, y, cp.modo).v).slice(0, 400);
+  }
+  function cpEscLista(){
+    const box = $('cp-esc-l'); box.replaceChildren();
+    const projs = [...dados.projetos].sort((x, y) => x.nome.localeCompare(y.nome, 'pt-BR'));
+    cp.esc.forEach((s, k) => {
+      const row = el('div', 'cp-esc-slot');
+      row.appendChild(el('span', 'cp-esc-n', String(k + 1)));
+      const sp = document.createElement('select'); sp.className = 'cp-esc-p'; sp.setAttribute('aria-label', 'Empreendimento da unidade ' + (k + 1));
+      const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Empreendimento…'; sp.appendChild(o0);
+      projs.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome + (infoDe(p).bairro ? ' · ' + infoDe(p).bairro : ''); sp.appendChild(o); });
+      sp.value = s.pid || '';
+      const p = cpProj(s.pid), us = p ? cpEscOpcoesUn(p) : [];
+      if(p && s.n == null && us.length === 1) s.n = String(us[0][0]);
+      const su = document.createElement('select'); su.className = 'cp-esc-u'; su.setAttribute('aria-label', 'Unidade ' + (k + 1));
+      const u0 = document.createElement('option'); u0.value = ''; u0.textContent = p ? (us.length ? 'Unidade…' : 'Sem unidade com valor') : 'Escolha o empreendimento'; su.appendChild(u0);
+      us.forEach(a => { const o = document.createElement('option'); o.value = String(a[0]);
+        o.textContent = a[0] + ' · ' + fmtM2(areaDe(a)) + ' m² · ' + andarTxt(a[4]) + ' · ' + BRL(cpPreco(p, a, cp.modo).v) + (/^(HIS|HMP)/i.test(a[3] || '') ? ' · ' + cpCat(p, a) : '') + (a[6] === 'disponivel' ? '' : ' (' + (CP_ST[a[6]] || 'indisponível').toLowerCase() + ')');
+        su.appendChild(o); });
+      su.disabled = !p; su.value = s.n != null ? String(s.n) : '';
+      if(su.value !== (s.n != null ? String(s.n) : '')){ s.n = null; su.value = ''; }
+      const x = el('button', 'cp-esc-x', '×'); x.type = 'button'; x.title = 'Tirar da comparação'; x.setAttribute('aria-label', 'Tirar a unidade ' + (k + 1)); x.disabled = cp.esc.length <= 2;
+      sp.addEventListener('change', () => { s.pid = sp.value || null; s.n = null; cpEscLista(); cpRender(); });
+      su.addEventListener('change', () => { s.n = su.value || null; cpRender(); });
+      x.addEventListener('click', () => { cp.esc.splice(k, 1); cpEscLista(); cpRender(); });
+      row.append(sp, su, x); box.appendChild(row);
+    });
+    $('cp-esc-mais').hidden = cp.esc.length >= CP_ESC_MAX;
+  }
+  function cpEscMetrs(){
+    return cp.esc.map(s => { const p = cpProj(s.pid), a = p && s.n != null ? p.unidades.find(x => String(x[0]) === String(s.n)) : null; return a ? cpMetr(p, a, cp.modo) : null; }).filter(Boolean);
+  }
+  function cpCardEsc(m, base, k){
+    const P = m.p, i = infoDe(P), dl = el('dl', 'cp-fatos'), o = k ? cpDeltas(m, base) : {};
+    const c = el('article', 'cp-card' + (k ? '' : ' cp-orig'));
+    const f = el('div', 'cp-foto'), url = cpCapa(P);
+    f.appendChild(el('span', 'cp-ini-p', iniciaisP(P.nome)));
+    if(url){ const im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.addEventListener('error', () => im.remove()); im.src = url; f.appendChild(im); }
+    f.appendChild(el('span', 'cp-selo', k ? 'Unidade ' + (k + 1) : 'Base · unidade 1'));
+    c.appendChild(f);
+    const b = el('div', 'cp-corpo');
+    b.appendChild(el('h4', null, P.nome));
+    const d = k && P.id !== base.p.id ? distKm(infoDe(base.p).lat, infoDe(base.p).lng, i.lat, i.lng) : null;
+    b.appendChild(el('p', 'cp-loc', [i.bairro, k && P.id === base.p.id ? 'mesmo empreendimento da base' : d != null ? 'a ' + fmtKm(d) + ' da base' : null].filter(Boolean).join(' · ')));
+    cpLinha(dl, 'Unidade', m.n + ' · ' + andarTxt(m.a[4]));
+    cpLinha(dl, 'Metragem', fmtM2(m.ar) + ' m²' + (m.tl ? ' · ' + m.tl : ''), o.a);
+    if(m.pr){
+      cpLinha(dl, cap1(m.pr.lbl), BRL(m.v), o.v);
+      cpLinha(dl, 'Por m²', BRL(m.pm2), o.m);
+      const outro = cpPreco(P, m.a, cp.modo === 'pv' ? 'pp' : 'pv');
+      if(outro && outro.k !== m.pr.k){
+        const baixo = Math.min(outro.v, m.v), alto = Math.max(outro.v, m.v), dsc = alto > 0 ? Math.round((1 - baixo / alto) * 100) : 0;
+        const pvBaixo = (outro.k === 'pv' ? outro.v <= m.v : m.v <= outro.v);
+        cpLinha(dl, cap1(outro.lbl), BRL(outro.v), dsc >= 1 && pvBaixo ? {t: 'à vista fica ' + dsc + '% abaixo', c: ''} : null);
+      }
+    } else cpLinha(dl, 'Valor', 'Consulte a tabela');
+    const cat = cpCat(P, m.a);
+    if(cat) cpLinha(dl, 'Categoria', cat, /^(HIS|HMP)/i.test(m.a[3] || '') ? {t: 'tem regra de renda e não pode ir para temporada', c: ''} : null);
+    const vg = vagasDe(P, m.a), vi = vagasInfo(P);
+    if(vg != null) cpLinha(dl, 'Vaga', vg > 0 ? vagaTxt(vg) : vi && vi.r === 'nenhuma' ? 'Sem vaga de garagem' : 'Sem vaga nesta unidade');
+    const pf = cpPerfil(P, m.a), tx = cpFluxoTxt(pf);
+    const cond = !tx && P.tabela && Array.isArray(P.tabela.condicoes) && P.tabela.condicoes[0] ? String(P.tabela.condicoes[0]).replace(/\s+\+\s+(?![^()]*\))/g, ' · ') : null;
+    cpLinha(dl, 'Fluxo da tabela', tx || cond || 'Consulte a tabela');
+    if(pf && (tx || pf.aprox)) cpLinha(dl, 'Prazo das parcelas', cpPrazoTxt(pf));
+    if(pf && pf.ate != null && pf.tot) cpLinha(dl, 'Pago até as chaves', BRL(Math.round(pf.ate)) + ' (' + pc1(pf.ate / pf.tot * 100) + ')');
+    cpLinha(dl, 'Entrega', entregaVal(P), o.e);
+    cpLinha(dl, 'Construtora', GRUPO_NOME[grupoDe(P)] || i.construtora || '—');
+    const nDisp = P.unidades.filter(a => a[6] === 'disponivel' && !ehLoja(a)).length;
+    cpLinha(dl, 'Situação', (CP_ST[m.a[6]] || 'Indisponível') + ' · ' + nDisp + (nDisp === 1 ? ' unidade à venda' : ' unidades à venda') + ' no projeto');
+    b.appendChild(dl);
+    if(i.destaque) b.appendChild(el('p', 'cp-dest', String(i.destaque)));
+    const ac = el('div', 'cp-ac cp-int');
+    const bt = (t, fn) => { const x = el('button', 'abtn', t); x.type = 'button'; x.addEventListener('click', fn); ac.appendChild(x); };
+    bt('Ver unidade', () => irUnidade(P.id, m.n));
+    bt('Ficha', () => abrirFichaProj({p: P, us: []}));
+    b.appendChild(ac); c.appendChild(b);
+    return c;
+  }
+  function cpRenderEscolha(box){
+    const ms = cpEscMetrs(); cp.resEsc = ms.length >= 2 ? ms : null;
+    if(ms.length < 2){ box.appendChild(el('div', 'vazio', ms.length ? 'Escolha mais uma unidade para comparar.' : 'Escolha acima as unidades que você quer comparar, de 2 a 4.')); return; }
+    const base = ms[0], ctx = el('p', 'cp-ctx');
+    ctx.innerHTML = 'Base: <b></b>';
+    ctx.querySelector('b').textContent = base.p.nome + ' · unidade ' + base.n + ' · ' + fmtM2(base.ar) + ' m²' + (base.tl ? ' · ' + base.tl : '') + (base.v ? ' · ' + BRL(base.v) + ' ' + base.pr.lbl : '');
+    box.appendChild(ctx);
+    const grade = el('div', 'cp-grade cp-grade-esc');
+    ms.forEach((m, k) => grade.appendChild(cpCardEsc(m, base, k)));
+    box.appendChild(grade);
+    box.appendChild(el('p', 'cp-nota', 'Valores da tabela de hoje; a situação de cada unidade vem do espelho ao vivo. Em verde, o que é melhor que a base; em vermelho, o que é pior.' + (cp.modo === 'pv' ? '' : ' Valores parcelados.')));
+    $('cp-env').hidden = false; cpEnvioEstado(true);
+  }
+  function cpTipoAplicar(){
+    marcarSeg('cp-tipo', cp.tipo);
+    $('cp-par').hidden = cp.tipo !== 'parecidos'; $('cp-esc').hidden = cp.tipo !== 'escolha'; $('cp-raio').hidden = cp.tipo !== 'parecidos';
+    if(cp.tipo === 'escolha'){
+      // a primeira vez, a unidade que ele estava vendo nas parecidas entra como base
+      if(!cp.esc.some(s => s.pid) && cp.pid) cp.esc[0] = {pid: cp.pid, n: cp.n != null ? String(cp.n) : (cp.res && cp.res.ref ? String(cp.res.ref.n) : null)};
+      cpEscLista();
+    }
   }
 
   // ---------- controles ----------
@@ -4279,12 +4417,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       try{ const u = ESPELHO.unidade && ESPELHO.unidade(); cp.n = u && u.u && u.u.key != null ? String(u.u.key) : null; }catch(e){ cp.n = null; }
     }
     marcarSeg('cp-modo', cp.modo); $('cp-raio').value = String(cp.raio);
-    cpPreencher(); cpMotivos(); cpRender();
+    cpPreencher(); cpMotivos(); cpTipoAplicar(); cpRender();
     const sair = $('cp-sair'); sair.hidden = !cp.apres;
   }
   $('cp-proj').addEventListener('change', () => { cp.pid = $('cp-proj').value || null; cp.n = null; cp.sel = new Set(); cpPreencherUn(); cpRender(); });
   $('cp-un').addEventListener('change', () => { cp.n = $('cp-un').value || null; cp.sel = new Set(); cpRender(); });
-  $('cp-modo').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { cp.modo = b.dataset.v; marcarSeg('cp-modo', cp.modo); cp.sel = new Set(); cpPreencherUn(); cpRender(); }));
+  $('cp-modo').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { cp.modo = b.dataset.v; marcarSeg('cp-modo', cp.modo); cp.sel = new Set(); cpPreencherUn(); if(cp.tipo === 'escolha') cpEscLista(); cpRender(); }));
+  $('cp-tipo').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if(cp.tipo === b.dataset.v) return; cp.tipo = b.dataset.v; cpTipoAplicar(); cpRender(); }));
+  $('cp-esc-mais').addEventListener('click', () => { if(cp.esc.length < CP_ESC_MAX){ cp.esc.push({pid: null, n: null}); cpEscLista(); const ss = $('cp-esc-l').querySelectorAll('.cp-esc-p'); if(ss.length) ss[ss.length - 1].focus(); } });
   $('cp-raio').addEventListener('change', () => { cp.raio = +$('cp-raio').value || 3; cp.sel = new Set(); cpRender(); });
   function cpApresentar(on){
     cp.apres = on; const pn = document.querySelector('#pn-buscas .painel'); if(pn) pn.classList.toggle('cp-apres', on);
@@ -4295,8 +4435,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('bf-alt').addEventListener('click', () => { const id = bfAlvo; if(!id) return; fecharFichaProj(); abrirBuscas('comparar'); cpAbrirAba(id); });
 
   // ---------- enviar ao cliente (link da seleção com o bloco "cmp") ----------
-  const cpSig = () => [cp.pid, cp.n, cp.motivo, cp.modo, cp.incOrig ? 1 : 0, [...cp.sel].sort().join(',')].join('|');
+  const cpSig = () => cp.tipo === 'escolha' ? ['esc', cp.modo, (cp.resEsc || []).map(m => m.p.id + ':' + m.n).join(',')].join('|')
+    : [cp.pid, cp.n, cp.motivo, cp.modo, cp.incOrig ? 1 : 0, [...cp.sel].sort().join(',')].join('|');
   function cpItens(){   // o original (referência) primeiro e a unidade comparada de cada alternativa escolhida
+    if(cp.tipo === 'escolha'){   // as unidades escolhidas, na ordem; o bloco "lado a lado" só com uma unidade por projeto
+      const ms = cp.resEsc || [], u = {};
+      ms.forEach(m => { if(!(m.p.id in u)) u[m.p.id] = m.n; });
+      return {its: ms.map(m => ({p: m.p.id, n: m.n})), u, distintos: Object.keys(u).length === ms.length};
+    }
     const r = cp.res; if(!r) return null;
     const its = [], u = {};
     if(cp.incOrig){ its.push({p: r.ref.p.id, n: r.ref.n}); u[r.ref.p.id] = r.ref.n; }
@@ -4306,7 +4452,9 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   function cpMsgTexto(link){
     const r = cp.res, cli = ($('cp-cli').value.trim().split(/\s+/)[0]) || '', cor = [$('cp-cor').value.trim(), $('cp-mtel').value.trim()].filter(Boolean).join(' · ');
     const intro = (CP_INTRO[cp.motivo] || CP_INTRO.parecido).replace('%s', r ? r.ref.p.nome : 'projeto');
-    return ['Oi' + (cli ? ', ' + cli : '') + '! Tudo bem?', 'Separei ' + intro + ', na mesma região, para você comparar lado a lado (metragem, valor, entrega):', '', link || MARCA, '', 'Qualquer dúvida, é só me chamar!' + (cor ? '\n' + cor : '')].join('\n');
+    const linha = cp.tipo === 'escolha' ? 'Separei estas unidades para você comparar lado a lado (metragem, valor, entrega e forma de pagamento):'
+      : 'Separei ' + intro + ', na mesma região, para você comparar lado a lado (metragem, valor, entrega):';
+    return ['Oi' + (cli ? ', ' + cli : '') + '! Tudo bem?', linha, '', link || MARCA, '', 'Qualquer dúvida, é só me chamar!' + (cor ? '\n' + cor : '')].join('\n');
   }
   function cpMsgMontar(){
     const ta = $('cp-msg'), url = cp.link && cp.link.sig === cpSig() ? cp.link.url : null;
@@ -4314,14 +4462,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ta.value = cpMsgTexto(url);
   }
   function cpEnvioEstado(primeira){
-    const n = cp.sel.size, box = $('cp-link'), ok = !!cp.link && cp.link.sig === cpSig();
+    const esc = cp.tipo === 'escolha', n = esc ? (cp.resEsc || []).length : cp.sel.size, box = $('cp-link'), ok = !!cp.link && cp.link.sig === cpSig();
     if(primeira){
       const c = cor0(); $('cp-cor').value = c.nome || ''; $('cp-mtel').value = c.tel || '';
       if(!$('cp-cli').value) $('cp-cli').value = '';
       cp.msgEd = false;
     }
-    $('cp-env-t').textContent = n ? 'O cliente vai ver o comparativo com ' + n + (n === 1 ? ' opção' : ' opções') + (cp.incOrig ? ' e o projeto que ele viu como referência' : '') + ', mais as unidades de cada uma, com fotos e valores.' : 'Marque pelo menos uma opção para enviar.';
-    ['cp-whats', 'cp-copiar'].forEach(id => { $(id).disabled = !n; });
+    $('cp-env-t').textContent = esc ? (n >= 2 ? 'O cliente vai ver as ' + n + ' unidades lado a lado, com fotos, valores e a forma de pagamento.' : 'Escolha pelo menos duas unidades para enviar.')
+      : n ? 'O cliente vai ver o comparativo com ' + n + (n === 1 ? ' opção' : ' opções') + (cp.incOrig ? ' e o projeto que ele viu como referência' : '') + ', mais as unidades de cada uma, com fotos e valores.' : 'Marque pelo menos uma opção para enviar.';
+    ['cp-whats', 'cp-copiar'].forEach(id => { $(id).disabled = esc ? n < 2 : !n; });
     const ver = $('cp-ver');
     if(ok){ ver.href = cp.link.url + '&previa=1'; ver.removeAttribute('aria-disabled'); } else { ver.removeAttribute('href'); ver.setAttribute('aria-disabled', 'true'); }
     box.className = 'be-link' + (ok ? ' ok' : ''); box.replaceChildren();
@@ -4331,17 +4480,19 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   const cor0 = () => { try{ return corretor() || {}; }catch(e){ return {}; } };
   async function cpCriarLink(){
-    const sig = cpSig(), r = cp.res, cli = $('cp-cli').value.trim();
-    if(!r || !cp.sel.size) return null;
+    const sig = cpSig(), r = cp.res, cli = $('cp-cli').value.trim(), esc = cp.tipo === 'escolha';
+    if(esc ? !(cp.resEsc && cp.resEsc.length >= 2) : (!r || !cp.sel.size)) return null;
     if(cp.link && cp.link.sig === sig) return cp.link;
     if(!cli){ toast('Escreva o nome do cliente para criar o link.'); $('cp-cli').focus(); return null; }
     if(cp.link && !cp.link.usado) rpc('selecao_apagar', {p_codigo: codigo, p_dono: dono(), p_id: cp.link.id}).catch(() => {});
     cp.link = null;
-    const {its, u} = cpItens(), cor = $('cp-cor').value.trim(), tel = $('cp-mtel').value.trim();
+    const {its, u, distintos} = cpItens(), cor = $('cp-cor').value.trim(), tel = $('cp-mtel').value.trim();
+    const busca = esc ? Object.assign({texto: ('Comparativo: ' + cp.resEsc.map(m => m.p.nome + ' ' + m.n).join(' x ')).slice(0, 200), modo: cp.modo}, distintos ? {cmp: {o: null, u, m: 'escolha'}} : {})
+      : {texto: ('Comparativo: ' + (CP_INTRO[cp.motivo] || CP_INTRO.parecido).replace('%s', r.ref.p.nome)).slice(0, 200), modo: cp.modo, cmp: {o: cp.incOrig ? r.ref.p.id : null, u, m: cp.motivo}};
     try{
       const ep = await epRapido();
       const x = await rpc('selecao_criar', {p_codigo: codigo, p_dono: dono(), p_endpoint: ep, p_cliente: cli, p_corretor: cor, p_whats: tel,
-        p_busca: {texto: ('Comparativo: ' + (CP_INTRO[cp.motivo] || CP_INTRO.parecido).replace('%s', r.ref.p.nome)).slice(0, 200), modo: cp.modo, cmp: {o: cp.incOrig ? r.ref.p.id : null, u, m: cp.motivo}},
+        p_busca: busca,
         p_itens: its});
       cp.link = {id: x.id, url: urlSel(x.id), sig, usado: false};
       LS.set(K_COR, JSON.stringify(Object.assign(cor0(), {nome: cor, tel})));
@@ -4373,6 +4524,20 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   $('cp-msg').addEventListener('input', () => { cp.msgEd = true; });
   ['cp-cli', 'cp-cor', 'cp-mtel'].forEach(id => $(id).addEventListener('input', () => { if(!cp.msgEd) cpMsgMontar(); }));
   $('cp-resumo').addEventListener('click', async () => {   // resumo em texto, sem link (para colar na conversa)
+    if(cp.tipo === 'escolha'){
+      const ms = cp.resEsc; if(!ms) return;
+      const base = ms[0], L = ['Comparativo lado a lado' + (cp.modo === 'pv' ? ' (à vista)' : ' (parcelado)'), ''];
+      ms.forEach((m, k) => {
+        const i = infoDe(m.p), o = k ? cpDeltas(m, base) : {}, pf = cpPerfil(m.p, m.a), tx = cpFluxoTxt(pf);
+        L.push((k + 1) + '. ' + m.p.nome + ', unidade ' + m.n + (i.bairro ? ' · ' + i.bairro : '') + (k ? '' : ' (base)'));
+        L.push('   ' + [fmtM2(m.ar) + ' m²' + (m.tl ? ' ' + m.tl : ''), andarTxt(m.a[4]), m.v ? BRL(m.v) + ' ' + m.pr.lbl : null, m.pm2 ? BRL(m.pm2) + '/m²' : null, cpCat(m.p, m.a) || null, entregaTxt(m.p)].filter(Boolean).join(' · '));
+        if(tx) L.push('   Fluxo: ' + tx + (pf.prazo >= 1 ? ' · ' + cpPrazoTxt(pf) : ''));
+        const d = [o.v && o.v.c && o.v.t, o.a && o.a.c && o.a.t, o.m && o.m.c && o.m.t, o.e && o.e.c && 'entrega ' + o.e.t].filter(Boolean);
+        if(d.length) L.push('   Em relação à base: ' + d.join(' · '));
+      });
+      try{ await navigator.clipboard.writeText(L.join('\n')); toast('Resumo copiado.'); }catch(e){ toast('Não consegui copiar o resumo.'); }
+      return;
+    }
     const r = cp.res; if(!r) return;
     const L = ['Comparativo com ' + r.ref.p.nome + ' (' + (r.ref.v ? BRL(r.ref.v) + ' ' + r.ref.pr.lbl + ' · ' : '') + fmtM2(r.ref.ar) + ' m²' + (r.ref.tl ? ' · ' + r.ref.tl : '') + ' · ' + entregaTxt(r.ref.p) + ')', ''];
     r.alts.filter(x => cp.sel.has(x.q.id)).forEach((x, k) => {
