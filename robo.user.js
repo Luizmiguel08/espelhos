@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.8.0
+// @version      1.8.1
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon) e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -22,7 +22,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.8.0';
+  const VERSAO = '1.8.1';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
@@ -151,6 +151,9 @@
     const rot = String(parseInt(p[2], 10)) + (p[3] ? '-' + p[3] : '') + (p[4] || '').replace(/^\.+|\.+$/g, '');
     return (m && Array.isArray(m.manter) && p[1] && m.manter.includes(p[1])) ? p[1] + '-' + rot : rot;
   }
+  // unidade de investidor (lista "inv" do mapa, vinda do servidor): o CV mostra como disponível, mas a Vitacon já vendeu
+  // (valor zerado ou simbólico na tabela, como disse o diretor da Vitacon em 08/10/2026); no app ela segue vendida
+  const investidor = (k, st, m) => (st === 'disponivel' && m && Array.isArray(m.inv) && m.inv.includes(k) ? 'vendida' : st);
   const SITUACAO_CV = { 1: 'disponivel', 2: 'reservada', 3: 'vendida', 5: 'processo_final' };
   async function lerCV() {
     const out = [];
@@ -174,14 +177,14 @@
           let j = null; try { j = JSON.parse((b.querySelector('div') || {}).textContent || ''); } catch (e) {}
           if (j && j['data-filtro-nome-unidade'] && SITUACAO_CV[j['data-filtro-situacao']]) {
             const k = modo === 'vitacon' ? chaveVitacon(j['data-filtro-nome-unidade'], j['data-filtro-areaprivativa'], mcfg) : chaveMaskan(j['data-filtro-nome-unidade'], j['data-filtro-idtipologia']);
-            if (k) s[k] = SITUACAO_CV[j['data-filtro-situacao']];
+            if (k) s[k] = investidor(k, SITUACAO_CV[j['data-filtro-situacao']], mcfg);
             return;
           }
         }
         const c = ([...b.classList].find(x => x.startsWith('div-')) || '').replace('div-', '');
         const sp = b.querySelector('span'); const n = sp ? sp.textContent.trim() : '';
         const k = !n ? null : modo === 'vitacon' ? chaveVitacon(n, null, mcfg) : porJson ? chaveMaskan(n, null) : n;
-        if (k && MAPA_CV[c]) s[k] = MAPA_CV[c];
+        if (k && MAPA_CV[c]) s[k] = investidor(k, MAPA_CV[c], mcfg);
       });
       out.push({ projeto, status: s });
     }
