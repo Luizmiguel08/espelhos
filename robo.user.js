@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.7.0
-// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana e Maskan) e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
+// @version      1.8.0
+// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon) e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://maskan.cvcrm.com.br/*
+// @match        https://vitacon.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -21,9 +22,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.7.0';
+  const VERSAO = '1.8.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL e CV: só a página principal
@@ -133,14 +134,31 @@
     if (Number(tip) === 17 || /^LOJA/i.test(s)) { const n = /^\d+$/.test(p) ? parseInt(p, 10) : 0; return n ? 'Loja ' + n : 'Loja'; }
     return p;
   }
+  // Vitacon: "U-0503", "A-1203", "U1503-01", "LOJA 01"... No app fica o número sem zeros à esquerda; o prefixo só fica quando a
+  // torre ou o tipo repete o número (lista "manter" de cada mapa, vinda do servidor) e as lojas viram "Loja N". Vagas e
+  // lockers ficam de fora (mesma regra usada para montar os projetos, vitacon/cv/montar_vitacon_cv.py).
+  function chaveVitacon(nome, area, m) {
+    const s = semAcento(String(nome || '')).replace(/\s+/g, '');
+    if (/^V[DSGPTU]-?\d/.test(s) || /^\d+P$/.test(s) || /^VAGA/.test(s)) return null;
+    const a = parseFloat(String(area == null ? '' : area).replace(',', '.'));
+    if (a > 0 && a < 3) return null;
+    if (/^[AB]?(LOJA|LJ)/.test(s) || s === 'RESTAURANTE') {
+      const d = String(nome).match(/\d+/g), t = /^([AB])LOJA/.exec(s);
+      return (d || t) ? ('Loja ' + (t ? t[1] : '') + (d ? String(parseInt(d[d.length - 1], 10)) : '')).trim() : (s === 'RESTAURANTE' ? 'Restaurante' : 'Loja');
+    }
+    const p = /^([A-Z]{1,2})?-?(\d{2,5})(?:-(\d{2}))?([A-Z.]*)$/.exec(s);
+    if (!p) return String(nome).trim();
+    const rot = String(parseInt(p[2], 10)) + (p[3] ? '-' + p[3] : '') + (p[4] || '').replace(/^\.+|\.+$/g, '');
+    return (m && Array.isArray(m.manter) && p[1] && m.manter.includes(p[1])) ? p[1] + '-' + rot : rot;
+  }
   const SITUACAO_CV = { 1: 'disponivel', 2: 'reservada', 3: 'vendida', 5: 'processo_final' };
   async function lerCV() {
     const out = [];
     const padrao = FONTE === 'cv' ? [['23', 'consolacao'], ['28', 'sumare']] : [];
-    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto]) : padrao;
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas) && cfgFonte.mapas.length) ? cfgFonte.mapas.map(m => [String(m.id), m.projeto, m]) : padrao;
     const painel = (cfgFonte && /^[a-z]+$/.test(cfgFonte.painel || '')) ? cfgFonte.painel : 'imobiliaria';
-    const porJson = !!(cfgFonte && cfgFonte.chave === 'maskan');
-    for (const [id, projeto] of mapas) {
+    const modo = cfgFonte && cfgFonte.chave, porJson = modo === 'maskan' || modo === 'vitacon';
+    for (const [id, projeto, mcfg] of mapas) {
       // um mapa com problema não derruba os outros (a lista vem do servidor, com os projetos em rodízio)
       let html;
       try {
@@ -154,11 +172,16 @@
       blocos.forEach(b => {
         if (porJson) {
           let j = null; try { j = JSON.parse((b.querySelector('div') || {}).textContent || ''); } catch (e) {}
-          if (j && j['data-filtro-nome-unidade'] && SITUACAO_CV[j['data-filtro-situacao']]) { s[chaveMaskan(j['data-filtro-nome-unidade'], j['data-filtro-idtipologia'])] = SITUACAO_CV[j['data-filtro-situacao']]; return; }
+          if (j && j['data-filtro-nome-unidade'] && SITUACAO_CV[j['data-filtro-situacao']]) {
+            const k = modo === 'vitacon' ? chaveVitacon(j['data-filtro-nome-unidade'], j['data-filtro-areaprivativa'], mcfg) : chaveMaskan(j['data-filtro-nome-unidade'], j['data-filtro-idtipologia']);
+            if (k) s[k] = SITUACAO_CV[j['data-filtro-situacao']];
+            return;
+          }
         }
         const c = ([...b.classList].find(x => x.startsWith('div-')) || '').replace('div-', '');
         const sp = b.querySelector('span'); const n = sp ? sp.textContent.trim() : '';
-        if (n && MAPA_CV[c]) s[porJson ? chaveMaskan(n, null) : n] = MAPA_CV[c];
+        const k = !n ? null : modo === 'vitacon' ? chaveVitacon(n, null, mcfg) : porJson ? chaveMaskan(n, null) : n;
+        if (k && MAPA_CV[c]) s[k] = MAPA_CV[c];
       });
       out.push({ projeto, status: s });
     }
@@ -780,6 +803,7 @@
         st.sessao = true;
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
+                  : FONTE === 'cvvitacon' ? 'A sessão do CV da Vitacon expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Vitacon continuarem ao vivo.'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {

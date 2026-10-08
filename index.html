@@ -1349,6 +1349,15 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       <div id="or-msg" class="aviso" hidden></div>
     </div>
 
+    <div class="sec" id="sec-importar" hidden>
+      <h3>Importar espelhos</h3>
+      <p class="txt">Para carregar espelhos montados fora do app, como os da Vitacon lidos do CV. Escolha o arquivo .json que o Claude mandou. Projetos de outra construtora não são alterados.</p>
+      <div class="row"><label class="abtn" for="imp-arq">Escolher arquivo</label><input type="file" id="imp-arq" accept=".json,application/json" hidden></div>
+      <p class="txt" id="imp-resumo" hidden></p>
+      <div class="row"><button class="abtn primary" type="button" id="imp-ok" hidden>Importar</button><button class="abtn" type="button" id="imp-cancelar" hidden>Cancelar</button></div>
+      <div id="imp-msg" class="aviso" hidden></div>
+    </div>
+
     <div class="sec">
       <h3>Acesso</h3>
       <p class="txt" id="acesso-t">—</p>
@@ -2263,7 +2272,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     key: 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP',
     vapid: 'BI8mWAmkgfYL1lUm7gPdQ3JYK-YmFS_drWs7PfvbsU50oBFJKtbULXwWKp3BSE0cnWyAeBBIlXErynB_oQ6QmZo',
     fonte: {'raj-mendes':'bll', 'consolacao':'cv', 'sumare':'cv', 'nex-bela-cintra':'one'},
-    fonteNome: {bll:'BLL', cv:'CV CRM', one:'Portal da ONE'}
+    fonteNome: {bll:'BLL', cv:'CV CRM', cvmaskan:'CV da Maskan', cvvitacon:'CV da Vitacon', one:'Portal da ONE'}
   };
   const $ = id => document.getElementById(id);
   const LS = {
@@ -2273,7 +2282,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   };
   const K_COD='espelhos-codigo', K_CACHE='espelhos-cache', K_AV='espelhos-avisos';
   const GRUPO_NOME = {vitaurbana: 'VitaUrbana', one: 'Construtora One', jra: 'Construtora JRA'};
-  const GRUPO_RODIZIO = {vitaurbana: 10, one: 30, jra: 1};   // minutos, mais ou menos, entre duas leituras de cada projeto do grupo (1 = todo ciclo, sem rodízio)
+  const GRUPO_RODIZIO = {vitaurbana: 10, one: 30, jra: 1, vitacon: 25};   // minutos, mais ou menos, entre duas leituras de cada projeto do grupo (1 = todo ciclo, sem rodízio)
   const curto = p => p.curto || p.nome;
   const minus = t => /^[A-Z]{2,}$/.test(t) ? t : String(t).toLowerCase();
   let codigo = LS.get(K_COD), dados = null, mudou = null, robo = {}, nivel = null, carregando = false, ultimoFull = 0, swReg = null, promptInst = null;
@@ -2488,10 +2497,55 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   }
   function abrirPainel(){
     $('painel').hidden = false; msgAv('', '');
-    renderAvisos(); renderInstalar(); renderRobo(); renderPrefResumo();
+    renderAvisos(); renderInstalar(); renderRobo(); renderPrefResumo(); renderImportar();
     $('acesso-t').innerHTML = nivel === 'admin' ? 'Você entrou com o <b>código de administrador</b>: além das vendas, recebe os alertas do robô (por exemplo, sessão da BLL expirada).' : 'Você entrou com o <b>código do time</b>.';
     if(window.__onPainel){ try{ window.__onPainel(); }catch(e){} }   // Integração Órulo (app_parts/mercado.js)
   }
+  // ---------- importar espelhos (só administrador; sql/043_importar_espelhos.sql) ----------
+  let impItens = null;
+  function msgImp(txt, tipo){ const m = $('imp-msg'); m.textContent = txt; m.className = 'aviso' + (tipo ? ' '+tipo : ''); m.hidden = !txt; }
+  function limparImp(){ impItens = null; $('imp-ok').hidden = true; $('imp-cancelar').hidden = true; $('imp-resumo').hidden = true; }
+  function renderImportar(){ const s = $('sec-importar'); if(s) s.hidden = nivel !== 'admin'; }
+  $('imp-arq').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = ''; limparImp(); msgImp('');
+    if(!f) return;
+    if(f.size > 12e6) return msgImp('Arquivo grande demais para importar (máximo 12 MB).', 'bad');
+    let j = null; try{ j = JSON.parse(await f.text()); }catch(err){ return msgImp('Esse arquivo não é um espelho do app (não abriu como JSON).', 'bad'); }
+    const itens = Array.isArray(j) ? j : (j && Array.isArray(j.projetos) ? j.projetos : null);
+    const ok = itens && itens.length > 0 && itens.every(x => x && /^[a-z0-9-]{3,60}$/.test(x.id || '') && x.dados && x.dados.id === x.id
+      && Array.isArray(x.dados.unidades) && /^[a-z0-9-]{2,40}$/.test(x.dados.grupo || '') && x.dados.nome);
+    if(!ok) return msgImp('Esse arquivo não tem espelhos no formato do app.', 'bad');
+    const grupos = [...new Set(itens.map(x => x.dados.grupo_nome || x.dados.grupo))];
+    const disp = itens.reduce((t, x) => t + x.dados.unidades.filter(u => u[6] === 'disponivel').length, 0);
+    const ja = itens.filter(x => dados && dados.projetos.some(p => p.id === x.id)).length;
+    $('imp-resumo').innerHTML = '<b>' + itens.length + (itens.length === 1 ? ' projeto' : ' projetos') + '</b> da ' + grupos.join(', ').replace(/</g, '&lt;') + ', com '
+      + disp.toLocaleString('pt-BR') + ' unidades disponíveis. ' + (ja ? ja + (ja === 1 ? ' já está' : ' já estão') + ' no app e ' + (ja === 1 ? 'será substituído.' : 'serão substituídos.') : 'Todos entram como novos.');
+    $('imp-resumo').hidden = false; $('imp-ok').hidden = false; $('imp-cancelar').hidden = false; impItens = itens;
+  });
+  $('imp-cancelar').addEventListener('click', () => { limparImp(); msgImp(''); });
+  $('imp-ok').addEventListener('click', async () => {
+    if(!impItens || nivel !== 'admin') return;
+    const itens = impItens, b = $('imp-ok'); b.disabled = true; $('imp-cancelar').hidden = true;
+    // lotes de até ~300 KB, para não estourar o limite de uma chamada
+    const lotes = []; let atual = [], tam = 0;
+    for(const x of itens){ const t = JSON.stringify(x).length; if(atual.length && (tam + t > 300000 || atual.length >= 25)){ lotes.push(atual); atual = []; tam = 0; } atual.push(x); tam += t; }
+    if(atual.length) lotes.push(atual);
+    let feitos = 0;
+    try{
+      for(const l of lotes){
+        msgImp('Importando… ' + feitos + ' de ' + itens.length + ' projetos');
+        const r = await rpc('importar_espelhos', {p_codigo: codigo, p_itens: l});
+        feitos += (r && r.projetos) || 0;
+      }
+      limparImp(); msgImp('Pronto: ' + feitos + ' projetos importados. Atualizando o app…', 'good');
+      await carregar(true);
+      msgImp('Pronto: ' + feitos + ' projetos importados e já aparecem no app.', 'good');
+    }catch(err){
+      const t = String(err && err.body || '');
+      msgImp((erroCodigo(err) ? 'Só o código de administrador pode importar.' : /outro_grupo/.test(t) ? 'Um dos projetos do arquivo é de outra construtora no app, e nada desse lote foi gravado.'
+        : 'Parou depois de ' + feitos + ' de ' + itens.length + ' projetos. Tente de novo: o que já entrou fica salvo.'), 'bad');
+    }finally{ b.disabled = false; }
+  });
   $('btn-avisos').addEventListener('click', abrirPainel);
   $('painel-x').addEventListener('click', () => { $('painel').hidden = true; });
   $('painel').addEventListener('click', e => { if(e.target === $('painel')) $('painel').hidden = true; });
