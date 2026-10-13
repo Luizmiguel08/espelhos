@@ -2312,7 +2312,7 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
   const GRUPO_RODIZIO = {vitaurbana: 10, one: 30, jra: 1, vitacon: 25};   // minutos, mais ou menos, entre duas leituras de cada projeto do grupo (1 = todo ciclo, sem rodízio)
   const curto = p => p.curto || p.nome;
   const minus = t => /^[A-Z]{2,}$/.test(t) ? t : String(t).toLowerCase();
-  let codigo = LS.get(K_COD), dados = null, mudou = null, robo = {}, nivel = null, carregando = false, ultimoFull = 0, swReg = null, promptInst = null;
+  let codigo = LS.get(K_COD), dados = null, mudou = null, robo = {}, nivel = null, carregando = false, ultimoFull = 0, falhasFull = 0, esperaFull = 0, swReg = null, promptInst = null;
 
   async function rpc(fn, args){
     const r = await fetch(CFG.url + '/rest/v1/rpc/' + fn, {method:'POST', headers:{'apikey':CFG.key, 'Content-Type':'application/json'}, body: JSON.stringify(args), cache:'no-store'});
@@ -2376,9 +2376,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     try{
       const v = await rpc('espelho_versao', {p_codigo: codigo});
       robo = v.robo || robo;
-      // baixa o espelho inteiro (~5 MB) só quando algo mudou de verdade (status, preço, ficha); a cada 30 min por segurança
-      if(forcar || !dados || v.mudou !== mudou || Date.now() - ultimoFull > 30*60000){
-        const d = await rpc('espelho', {p_codigo: codigo});
+      // baixa o espelho inteiro (~5 MB) só quando algo mudou de verdade (status, preço, ficha); a cada 30 min por segurança.
+      // Se a carga cheia falhar, espera 1, 2, 4, 8 e até 10 min antes de tentar de novo, mostrando o que já está guardado
+      // (em 13/10/2026 a repetição a cada 15 s em cada aba aberta entupiu o banco).
+      if((forcar || !dados || v.mudou !== mudou || Date.now() - ultimoFull > 30*60000) && (forcar || Date.now() >= esperaFull)){
+        let d;
+        try{ d = await rpc('espelho', {p_codigo: codigo}); }
+        catch(e){ if(!erroCodigo(e)){ falhasFull++; esperaFull = Date.now() + Math.min(10*60000, 60000 * 2 ** (falhasFull - 1)); } throw e; }
+        falhasFull = 0; esperaFull = 0;
         mudou = v.mudou; ultimoFull = Date.now();
         aplicar(d);
         LS.set(K_CACHE, JSON.stringify({d, mudou}));
