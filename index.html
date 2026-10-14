@@ -1740,11 +1740,11 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     <div class="ec-scene-header"><h3>Selecione alguém para acompanhar sua atividade</h3><div class="ec-rooms" role="group" aria-label="Visão do escritório"><button type="button" class="ec-room" data-room="geral" aria-pressed="true">Visão geral</button><button type="button" class="ec-room" data-room="genio" aria-pressed="false">Sala Gênio</button><button type="button" class="ec-room" data-room="espelho" aria-pressed="false">Sala Espelho</button></div></div>
     <div class="ec-stage-layout">
       <section class="ec-scene-block" aria-label="As duas salas">
-        <div class="ec-scene-shell" id="ec-scene-shell"><div class="ec-rolagem" id="ec-rolagem" tabindex="0" aria-label="Panorama do escritório. Use as setas para navegar pelas salas."><div class="ec-cena" id="ec-cena" data-view="geral"><canvas id="ec-canvas" width="1280" height="720" role="img" aria-label="Escritório Fortal em pixel art, com duas salas separadas por vidro. Gênio, Mila, Flávia e Sérgio na sala do Gênio; Otto, Téo, Rô, Murilo, Dora e Lia na sala do Espelho, andando, conversando e tocando a buzina."></canvas><div class="ec-hotspots" id="ec-hotspots"></div><div class="ec-scene-loading" id="ec-scene-loading">Montando o escritório…</div></div></div></div>
+        <div class="ec-scene-shell" id="ec-scene-shell"><div class="ec-rolagem" id="ec-rolagem" tabindex="0" aria-label="Panorama do escritório. Use as setas para navegar pelas salas."><div class="ec-cena" id="ec-cena" data-view="geral"><canvas id="ec-canvas" width="1280" height="720" role="img" aria-label="Escritório Fortal em pixel art, com duas salas separadas por vidro. Gênio, Mila, Flávia, Sérgio, Júlia, Caio e Bento na sala do Gênio; Otto, Téo, Rô, Murilo, Dora, Lia, Hugo, Nina e Rafa na sala do Espelho, andando, conversando e tocando a buzina."></canvas><div class="ec-hotspots" id="ec-hotspots"></div><div class="ec-scene-loading" id="ec-scene-loading">Montando o escritório…</div></div></div></div>
         <div class="ec-scene-footer"><p class="ec-motion-note" id="ec-motion-note">Conversas, gritos e buzina são clima de escritório. O que aconteceu de verdade aparece no balão dourado e na lista.</p><span class="ec-drag-hint">Arraste para explorar →</span></div>
         <section class="ec-selected" aria-label="Agente selecionado"><span class="ec-selected-mark" id="ec-selected-mark" aria-hidden="true">G</span><div class="ec-selected-main"><h3><span id="ec-selected-name">Gênio</span><small id="ec-selected-role">Recepção</small></h3><p id="ec-selected-text">Recebe os pedidos do WhatsApp e encaminha à equipe.</p><time id="ec-selected-time">Aguardando o diário de atividade.</time></div></section>
       </section>
-      <aside class="ec-agents" aria-labelledby="ec-agents-title"><div class="ec-aside-head"><h3 id="ec-agents-title">Agora</h3><span>10 agentes</span></div><div id="ec-equipe"></div><p class="ec-team-foot">Os números contam registros recebidos hoje, não tarefas ainda em execução.</p></aside>
+      <aside class="ec-agents" aria-labelledby="ec-agents-title"><div class="ec-aside-head"><h3 id="ec-agents-title">Agora</h3><span>16 agentes</span></div><div id="ec-equipe"></div><p class="ec-team-foot">Os números contam registros recebidos hoje, não tarefas ainda em execução.</p></aside>
     </div>
     <section class="ec-journal" aria-labelledby="ec-journal-title"><div class="ec-journal-head"><h3 id="ec-journal-title">Últimos movimentos</h3><p id="ec-journal-summary">Diário da equipe</p></div><ol class="ec-mov" id="ec-mov"></ol><p class="ec-vazio" id="ec-vazio">Consultando o diário de atividade…</p></section>
   </div>
@@ -5902,12 +5902,18 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     {id:'mila', nome:'Mila', papel:'Material', sala:0, desc:'Espelho, fotos, plantas, book e link para o cliente.'},
     {id:'flavia', nome:'Flávia', papel:'Fluxo', sala:0, desc:'Fluxo de pagamento, card da proposta e rentabilidade.'},
     {id:'sergio', nome:'Sérgio', papel:'Secretário', sala:0, desc:'Compromissos, avisos no WhatsApp e Google Agenda.'},
+    {id:'julia', nome:'Júlia', papel:'Jurídico', sala:0, desc:'Contrato, distrato, escritura e SCP. Orienta o corretor; não substitui advogado.'},
+    {id:'caio', nome:'Caio', papel:'Financeiro', sala:0, desc:'Financiamento, taxas, impostos e as contas para o cliente.'},
+    {id:'bento', nome:'Bento', papel:'Imobiliário', sala:0, desc:'Negociação, objeções e leitura do mercado e do bairro.'},
     {id:'otto', nome:'Otto', papel:'Organização', sala:1, desc:'Confere os projetos, avisa buscas salvas e conta o que mudou.'},
     {id:'teo', nome:'Téo', papel:'Tabelas', sala:1, desc:'Carrega tabelas novas de preço, confere as somas e atualiza a revenda One todo dia.'},
     {id:'ro', nome:'Rô', papel:'Robô de status', sala:1, desc:'Acompanha disponível, reservada e vendida nos sistemas das construtoras.'},
     {id:'murilo', nome:'Murilo', papel:'Mercado', sala:1, desc:'Recebe a Órulo e atualiza as outras incorporadoras.'},
-    {id:'dora', nome:'Dora', papel:'Documentos', sala:1, desc:'Fichas, plantas, books e central de documentação.'},
-    {id:'lia', nome:'Lia', papel:'Lupa', sala:1, desc:'Busca para o cliente e links de seleção.'}
+    {id:'dora', nome:'Dora', papel:'Documentos', sala:1, desc:'Fichas, plantas, books, central de documentação e leitura de PDF e foto.'},
+    {id:'lia', nome:'Lia', papel:'Lupa', sala:1, desc:'Busca para o cliente e links de seleção.'},
+    {id:'hugo', nome:'Hugo', papel:'Construtoras', sala:1, desc:'Histórico e números das construtoras, com a fonte de cada um.'},
+    {id:'nina', nome:'Nina', papel:'Notícias', sala:1, desc:'Notícias do mercado toda manhã, com fonte, para encaminhar ao cliente.'},
+    {id:'rafa', nome:'Rafa', papel:'CRM', sala:1, desc:'Tarefas, visitas, esteira e o resumo do dia de cada corretor no CRM.'}
   ];
   const AG = Object.fromEntries(EQUIPE.map((a,i) => [a.id,{...a,index:i,count:0,last:null}]));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -5940,8 +5946,14 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
       case 'teo': s=e.t==='revenda'?'Atualizou a revenda One':'Carregou uma tabela nova'; break;
       case 'ro': s='Registrou '+n+(n===1?' mudança de status':' mudanças de status'); break;
       case 'murilo': s=e.t==='mercado'?'Respondeu sobre o Mercado':e.t==='webhook'?'Recebeu aviso da Órulo':'Atualizou o Mercado com a Órulo'; break;
-      case 'dora': s=e.t==='documento'?'Enviou documento da central':'Atualizou a central de documentos'; break;
+      case 'dora': s=e.t==='documento'?'Enviou documento da central':e.t==='leitura'?'Leu um PDF ou foto para o corretor':'Atualizou a central de documentos'; break;
       case 'lia': s=e.t==='abriu'?'Registrou a abertura de um link':'Criou um link para cliente'; break;
+      case 'julia': s=e.t==='scp'?'Explicou a compra pela SCP':'Respondeu uma dúvida de contrato'; break;
+      case 'caio': s='Fez a conta de financiamento ou imposto'; break;
+      case 'bento': s='Ajudou numa negociação'; break;
+      case 'hugo': s='Contou o histórico de uma construtora'; break;
+      case 'nina': s='Mandou as notícias do mercado'; break;
+      case 'rafa': s=e.t==='manha'?'Mandou o resumo da manhã':'Trouxe os números do CRM'; break;
       default: s='Registrou uma atividade';
     }
     return (e.ok===false?'Registro com falha: ':'')+s+p;
@@ -6117,7 +6129,13 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ro:['Status atualizado','Reservaram uma agora','Robô rodando','Voltou pra disponível'],
     murilo:['Órulo atualizou','O mercado mexeu hoje','Lançamento novo na praça','Concorrente subiu preço'],
     dora:['Documento na central','Planta nova chegou','Memorial atualizado','Ficha pronta'],
-    lia:['Seleção montada','Link aberto agora','Busca do cliente pronta','Separei três opções']};
+    lia:['Seleção montada','Link aberto agora','Busca do cliente pronta','Separei três opções'],
+    julia:['Cláusula conferida','Distrato tem regra','Olha o registro','SCP explicada'],
+    caio:['Taxa de hoje na mão','Conta da parcela pronta','ITBI calculado','Cabe na renda'],
+    bento:['Objeção respondida','Bora negociar','Argumento pronto','Cliente esquentou'],
+    hugo:['Histórico conferido','Entregas da construtora','Fonte na mão','Reclame Aqui olhado'],
+    nina:['Notícia do dia','Boletim pronto','Dado novo do FipeZap','Pode encaminhar'],
+    rafa:['Tarefas do dia','Lead novo no CRM','Esteira atualizada','Retorno atrasado']};
   const RESPOSTAS=['Fechado!','Já mando','Bora!','Deixa comigo','Agora mesmo','Boa!','Tô vendo aqui','Show!','Manda ver'];
   const GRITOS=['FECHOOOU!','VENDEEEU!','BORA, TIME!','UHUUUL!','É FORTAL!','MAIS UMA!','TÁ ON!','ASSINOU!'];
   const PAUSA=['Café?','Mais um café','Água, alguém?','Pausa rápida'];
@@ -6133,10 +6151,18 @@ a.abtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
     ro:{pele:'#e8c3a0',cabelo:'#b9b9bd',estilo:'chanel',roupa:'#8a8f98',calca:'#2c3340',extra:'fone'},
     murilo:{pele:'#b77b52',cabelo:'#17110d',estilo:'curto',roupa:'#6b3a7a',calca:'#232a36'},
     dora:{pele:'#e9c09a',cabelo:'#8a5a33',estilo:'longo',roupa:'#d98a8a',calca:'#2b3142'},
-    lia:{pele:'#8d5a3b',cabelo:'#120d0a',estilo:'cacheado',roupa:'#2f6fd1',calca:'#262d3a'}};
+    lia:{pele:'#8d5a3b',cabelo:'#120d0a',estilo:'cacheado',roupa:'#2f6fd1',calca:'#262d3a'},
+    julia:{pele:'#e7b993',cabelo:'#2a1a12',estilo:'chanel',roupa:'#2b2d42',calca:'#1f2430',extra:'oculos'},
+    caio:{pele:'#c7956a',cabelo:'#1c140f',estilo:'curto',roupa:'#2f7a4e',calca:'#232a36'},
+    bento:{pele:'#9a6643',cabelo:'#0f0b08',estilo:'curto',roupa:'#c0782f',calca:'#2a2f3a',extra:'barba'},
+    hugo:{pele:'#e2b58c',cabelo:'#5a3b24',estilo:'curto',roupa:'#4b5d73',calca:'#1e2430'},
+    nina:{pele:'#d6a07a',cabelo:'#3b2416',estilo:'longo',roupa:'#b04a6b',calca:'#2b3142'},
+    rafa:{pele:'#b9835a',cabelo:'#16100c',estilo:'cacheado',roupa:'#1f8a8a',calca:'#252c38',extra:'fone'}};
   // mesa de cada um (x, y, largura em ladrilhos); o lugar fica atrás da mesa, virado para a frente
   const MESA={genio:{x:3,y:7,w:3,rec:1},mila:{x:2,y:3,w:2},flavia:{x:6,y:3,w:2},sergio:{x:8,y:7,w:2},
-    otto:{x:14,y:3,w:2},teo:{x:18,y:3,w:2},ro:{x:22,y:3,w:2},murilo:{x:14,y:7,w:2},dora:{x:18,y:7,w:2},lia:{x:22,y:7,w:2}};
+    otto:{x:14,y:3,w:2},teo:{x:18,y:3,w:2},ro:{x:22,y:3,w:2},murilo:{x:14,y:7,w:2},dora:{x:18,y:7,w:2},lia:{x:22,y:7,w:2},
+    // 14/10/2026: jurídico, financeiro e imobiliário na sala do Gênio; construtoras, notícias e CRM na sala do Espelho
+    julia:{x:9,y:3,w:2},caio:{x:2,y:10,w:2},bento:{x:7,y:10,w:2},rafa:{x:14,y:10,w:2},hugo:{x:20,y:10,w:2},nina:{x:23,y:10,w:2}};
   const ASSENTO=Object.fromEntries(Object.entries(MESA).map(([id,m])=>[id,[m.x+(m.rec?1:0),m.y-1]]));
   const PONTOS={cafe:[[9,1],[10,1]],agua:[[13,1],[14,1]],tv:[[16,1],[17,1]],buzina:[[24,0],[24,1]],sofa:[[16,9],[17,9],[18,9]],
     janela:[[1,4],[1,6]],recepcao:[[4,8],[5,8]]};
