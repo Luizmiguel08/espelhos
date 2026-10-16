@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.8.1
-// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon) e no portal da ONE (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
+// @version      1.9.0
+// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE e no Dommus da Mundo Apto (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://maskan.cvcrm.com.br/*
 // @match        https://vitacon.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
+// @match        https://mundoapto.dommus2.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
@@ -22,12 +23,12 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.8.1';
+  const VERSAO = '1.9.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
-  if (FONTE !== 'one' && !TOPO) return;          // BLL e CV: só a página principal
+  if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
   let INTERVALO = FONTE === 'bll' ? 60000 : 90000;
   const ID = Math.random().toString(36).slice(2);
   const st = { fase: 'iniciando', ultimo: null, mudancas: 0, erro: null, sessao: false, aviso: null };
@@ -187,6 +188,64 @@
         if (k && MAPA_CV[c]) s[k] = investidor(k, MAPA_CV[c], mcfg);
       });
       out.push({ projeto, status: s });
+    }
+    return out;
+  }
+
+  // ---------- leitura Dommus (Mundo Apto) ----------
+  // Usa a mesma consulta da tela do espelho (ajax/Unidades.php, ação "buscar"): todas as unidades do empreendimento, com a
+  // situação e, nas disponíveis, o preço. Só lê. Mesma regra usada para montar os projetos (central_mundoapto/montar_mundoapto.py):
+  // vagas ficam de fora, lojas viram "Loja N", a letra depois do número ("2310 P", "509 ´P", "2901 M") sai e unidade
+  // disponível com valor simbólico (abaixo de R$ 100 mil) fica como vendida. Dados de cliente e corretor não saem daqui.
+  const D_SIMBOLICO = 100000;
+  const txtD = v => String(v == null ? '' : v).toUpperCase();
+  const valD = v => { const x = parseFloat(v); return isFinite(x) ? x : null; };          // "**********" (indisponível) vira null
+  const ehVagaD = u => txtD(u.tipoUnidade).startsWith('VAGA') || txtD(u.nome_bloco).includes('VAGA') || txtD(u.rotulo_unidade).startsWith('VG') || txtD(u.rotulo_unidade).startsWith('VAGA');
+  const ehLojaD = u => { const r = txtD(u.rotulo_unidade), t = txtD(u.tipoUnidade); return t.includes('LOJA') || r.includes('LOJA') || /LJ\d/.test(r) || t.startsWith('NR1-3'); };
+  function numD(rot) { const r = String(rot == null ? '' : rot).trim(); const m = /^(\d+)\s*[´`']?\s*([A-Z])$/.exec(r); return m ? m[1] : r; }
+  function stD(u) {
+    if (!String(u.descricao_disponibilidade || '').startsWith('DISPON')) return 'vendida';
+    const v = valD(u.valor_unidade);
+    return v != null && v < D_SIMBOLICO ? 'vendida' : 'disponivel';
+  }
+  function precoD(u) {
+    const v = valD(u.valor_unidade);
+    if (v == null || v < D_SIMBOLICO) return null;
+    const o = { pp: Math.round(v * 100) / 100 };
+    const av = valD(u.valor_avaliacao_padrao); if (av != null && av > 0) o.av = Math.round(av);
+    return o;
+  }
+  function montarDommus(us, blocos) {             // unidades do Dommus -> { status: {unidade: situação}, precos: {unidade: {pp, av}} }
+    if (Array.isArray(blocos) && blocos.length) us = us.filter(u => blocos.includes(u.rotulo_bloco));
+    const status = {}, precos = {};
+    const pos = (k, u) => { const s = stD(u); status[k] = s; if (s === 'disponivel') { const p = precoD(u); if (p) precos[k] = p; } };
+    for (const u of us) if (!ehVagaD(u) && !ehLojaD(u)) pos(numD(u.rotulo_unidade), u);
+    const lojas = us.filter(u => ehLojaD(u) && !ehVagaD(u)).sort((a, b) => { const x = String(a.rotulo_unidade || ''), y = String(b.rotulo_unidade || ''); return x < y ? -1 : x > y ? 1 : 0; });
+    lojas.forEach((u, i) => pos('Loja ' + (String(u.rotulo_unidade || '').replace(/\D/g, '').slice(-2).replace(/^0+/, '') || String(i + 1)), u));
+    return { status, precos };
+  }
+  async function lerDommus() {
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas)) ? cfgFonte.mapas : [];
+    if (!mapas.length) throw new Error('sem a lista de projetos do servidor');
+    const out = [], cache = {};
+    for (const m of mapas) {
+      const alvos = Array.isArray(m.alvos) ? m.alvos : [{ projeto: m.projeto, blocos: m.blocos }];
+      let us = cache[m.id];
+      if (!us) {
+        let r, t = '', j = null;
+        try {
+          r = await fetch('/2.0/ajax/Unidades.php', { method: 'POST', credentials: 'include', cache: 'no-store',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+            body: new URLSearchParams({ idSessaoPhp: '', action: 'buscar', id_empreendimento: String(m.id), filtrar: 'true' }) });
+          t = await r.text();
+        } catch (e) { alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'rede' })); continue; }
+        if (r.status === 401 || r.status === 403 || (r.redirected && !/Unidades\.php/.test(r.url))) throw new Sessao('login');
+        try { j = JSON.parse(t); } catch (e) {}
+        if (!Array.isArray(j)) { if (/senha|login|<form/i.test(t)) throw new Sessao('login'); alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'resposta ' + r.status })); continue; }
+        if (!j.length) { alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'espelho vazio' })); continue; }
+        us = cache[m.id] = j;
+      }
+      for (const a of alvos) { const l = montarDommus(us, a.blocos); out.push({ projeto: a.projeto, status: l.status, precos: l.precos }); }
     }
     return out;
   }
@@ -787,11 +846,15 @@
       if (outroVivo()) { st.fase = 'espera'; return; }
       batimento(); st.fase = 'lendo';
       await lerConfigFonte();
-      const leituras = FONTE === 'bll' ? await lerBLL() : await lerCV();
+      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : await lerCV();
       let m = 0; const falhas = [];
       for (const l of leituras) {
         if (l.erro) { falhas.push(l.projeto); continue; }
         try {
+          if (l.precos) {                         // Dommus: preço das disponíveis antes da situação (a unidade liberada já chega com preço)
+            try { await rpc('precos_robo', { p_chave: chave(), p_projeto: l.projeto, p_precos: l.precos, p_fonte: FONTE }); }
+            catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
+          }
           const res = await rpc('sincronizar', { p_chave: chave(), p_projeto: l.projeto, p_status: l.status, p_fonte: FONTE });
           if (res && res.ok === false) { falhas.push(l.projeto); continue; }
           m += (res && res.mudancas ? res.mudancas.length : 0);
@@ -807,6 +870,7 @@
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
                   : FONTE === 'cvvitacon' ? 'A sessão do CV da Vitacon expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Vitacon continuarem ao vivo.'
+                  : FONTE === 'dommus' ? 'A sessão do Dommus da Mundo Apto expirou no Chrome do computador. Faça login de novo para os projetos da Mundo Apto continuarem ao vivo.'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
