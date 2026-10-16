@@ -537,7 +537,7 @@ details.cond{margin-top:8px}details.cond summary{cursor:pointer;font-size:13px;c
 </div>
 
 <script>
-// versão 202610072111
+// versão 202610161520
 // Central de produto — utilidades comuns (corretor e cliente)
 window.NEX = (function(){
   'use strict';
@@ -1016,6 +1016,12 @@ window.NEX = (function(){
     l.valor = resto > 0 ? Math.round(resto / q * 100) / 100 : 0;
     return {i, resto, alvo};
   }
+  // as outras parcelas chegaram (ou passaram) no total: a linha de fechamento ficou sem valor
+  function passaTxt(fc, ls){
+    const outras = Math.round((fc.alvo - fc.resto) * 100) / 100, lf = ls[fc.i] || {};
+    return fc.resto < 0 ? 'As outras parcelas somam ' + fmtV(outras) + ', mais que o total de ' + fmtV(fc.alvo) + '. Diminua alguma delas.'
+      : 'As outras parcelas já somam ' + fmtV(fc.alvo) + ' e não sobra valor para “' + tituloLinha(lf) + '”. Diminua alguma delas.';
+  }
   // a condição personalizada de uma unidade aplicada a outra: mesma entrada e parcelas; a linha de fechamento acompanha o valor
   function derivarPers(x, pz){
     const ref = refDe(x); if(!ref || !pz || !Array.isArray(pz.linhas) || !pz.linhas.length) return null;
@@ -1489,7 +1495,7 @@ window.NEX = (function(){
     } else dif.textContent = '';
     // financiamento: quanto do valor e o limite da tabela
     const fin = $('fe-fin'), inf = infoFin(edicao.linhas, tot);
-    if(fc && fc.resto <= 0){ fin.textContent = 'As outras parcelas já passam de ' + fmtV(fc.alvo) + '. Diminua alguma delas.'; fin.className = 'erro'; }
+    if(fc && fc.resto <= 0){ fin.textContent = passaTxt(fc, edicao.linhas); fin.className = 'erro'; }
     else if(inf){
       const acima = edicao.limite != null && inf.pct > edicao.limite + 0.05;
       fin.textContent = 'Financiamento: ' + fmtV(inf.v) + ' · ' + pctTxt(inf.pct) + ' do valor' + (acima ? '. Acima dos ' + pctTxt(edicao.limite) + ' da tabela: confirme com o banco e a incorporadora.' : '');
@@ -1503,7 +1509,7 @@ window.NEX = (function(){
   function validarEdicao(){
     const ls = edicao.linhas;
     if(!ls.length) return 'Inclua pelo menos uma parcela.';
-    const fc = recalcular(); if(fc && fc.resto <= 0) return 'As outras parcelas já passam de ' + fmtV(fc.alvo) + '. Diminua alguma delas.';
+    const fc = recalcular(); if(fc && fc.resto <= 0) return passaTxt(fc, ls);
     for(const l of ls){
       if(!String(l.nome || '').trim()) return 'Dê um nome a cada parcela (ex.: Ato, mensais, Financiamento).';
       if(!(+l.q >= 1 && +l.q <= 480 && Number.isInteger(+l.q))) return 'A quantidade de "' + tituloLinha(l) + '" precisa ser um número inteiro de 1 a 480.';
@@ -1552,11 +1558,18 @@ window.NEX = (function(){
       if(add != null){
         if(edicao.linhas.length >= MAX_LINHAS) return;
         const m = MODELOS[+add], nova = {q: m.q, nome: m.nome, valor: 0, quando: typeof m.quando === 'function' ? m.quando() : m.quando};
-        const fin = edicao.linhas.findIndex(l => /financ|chaves|saldo|repasse/i.test(l.nome));
-        const pos = /financ/i.test(m.nome) || fin < 0 ? edicao.linhas.length : (/^ato$/i.test(m.nome) ? 0 : fin);
+        const fin = edicao.linhas.findIndex(l => /financ|chaves|saldo|repasse/i.test(l.nome)), ehF = /financ/i.test(m.nome);
+        // o ato no começo, o financiamento no fim (ele fecha a conta), o resto antes do financiamento ou no fim
+        let pos = ehF ? edicao.linhas.length : /^ato$/i.test(m.nome) ? 0 : fin >= 0 ? fin : edicao.linhas.length;
+        // a linha nova é para digitar: se ali ela virasse a que fecha a conta (fluxo sem financiamento, ex.: entrada + mensais), entra antes da atual
+        if(!ehF){
+          const atual = edicao.linhas[linhaFechamento(edicao.linhas)];
+          const fica = k => { const t = edicao.linhas.slice(); t.splice(k, 0, nova); return t[linhaFechamento(t)] === atual; };
+          if(!fica(pos)){ const k = edicao.linhas.indexOf(atual); if(k >= 0 && fica(k)) pos = k; }
+        }
         edicao.linhas.splice(pos, 0, nova);
         renderFicha(); $('fi-corpo').scrollTop = y;
-        const inp = document.querySelector('#fi-corpo .fe-ln[data-i="' + pos + '"] .fe-v input'); if(inp) inp.focus();
+        const inp = document.querySelector('#fi-corpo .fe-ln[data-i="' + pos + '"] .fe-v input:not([readonly])'); if(inp) inp.focus();
         return;
       }
       if(del != null){ if(edicao.linhas.length > 1){ edicao.linhas.splice(+del, 1); renderFicha(); $('fi-corpo').scrollTop = y; } return; }
@@ -1569,8 +1582,8 @@ window.NEX = (function(){
         const alvo = numBR(edicao.alvo), err = $('fe-erro');
         if(!alvo || alvo <= 0){ err.textContent = 'Digite o total que quer fechar (ex.: 295.000).'; return; }
         const i = linhaFechamento(edicao.linhas), l = edicao.linhas[i], q = +l.q || 1;
-        const resto = alvo - (totalDe(edicao.linhas) - q * (+l.valor || 0));
-        if(resto <= 0){ err.textContent = 'Com as outras parcelas já passa de ' + fmtV(alvo) + '. Diminua alguma delas antes.'; return; }
+        const resto = Math.round((alvo - (totalDe(edicao.linhas) - q * (+l.valor || 0))) * 100) / 100;
+        if(resto <= 0){ err.textContent = passaTxt({i, resto, alvo}, edicao.linhas); return; }
         l.valor = Math.round(resto / q * 100) / 100;
         renderFicha(); $('fi-corpo').scrollTop = y;
         if(Math.abs(totalDe(edicao.linhas) - alvo) >= 0.01) toast('Arredondei centavos: o total ficou ' + fmtV(totalDe(edicao.linhas)) + '.');
