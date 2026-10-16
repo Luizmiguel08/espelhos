@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.10.0
-// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE e no Dommus da Mundo Apto (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
+// @version      1.11.0
+// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto e no espelho da Lavvi na Lior (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://maskan.cvcrm.com.br/*
@@ -10,6 +10,7 @@
 // @match        https://portaldevendas.oneinnovation.com.br/*
 // @match        https://mundoapto.dommus2.com.br/*
 // @match        https://painel.dommus.com.br/*
+// @match        https://app.liorassociados.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
@@ -24,9 +25,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.10.0';
+  const VERSAO = '1.11.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
@@ -288,6 +289,63 @@
         us = cache[m.id] = j;
       }
       for (const a of alvos) { const l = montarDommus(us, a.blocos); out.push({ projeto: a.projeto, status: l.status, precos: l.precos }); }
+    }
+    return out;
+  }
+
+  // ---------- leitura Lior (espelho de vendas da Lavvi, api-m.lavvi.com.br) ----------
+  // Só lê (GET no sales-mirror) com o login que já está aberto nesta aba (cookie accessToken). Da resposta só usa código,
+  // situação e valor das unidades; os dados de corretor e cliente que vêm junto são ignorados e não saem da aba.
+  const MAPA_LIOR = { 10: 'disponivel', 11: 'reservada', 9: 'processo_final', 13: 'processo_final', 15: 'processo_final', 23: 'processo_final', 24: 'processo_final', 26: 'processo_final', 28: 'processo_final' };   // o resto (vendida, quitada, permuta, bloqueada, rateio...) = vendida
+  function tokenLior() {
+    const c = document.cookie.split(/;\s*/).find(x => x.indexOf('accessToken=') === 0);
+    try { return c ? decodeURIComponent(c.slice(12)) : ''; } catch (e) { return ''; }
+  }
+  function montarLior(esp, alvo, fator) {          // espelho da Lior -> { status: {unidade: situação}, precos: {unidade: {pp}} } de um projeto do app
+    const fs = (alvo.blocos || []).map(x => String(x).toUpperCase());
+    const blocos = new Set((esp.project_block || []).filter(b => !fs.length || fs.some(f => String(b.name || '').toUpperCase().includes(f))).map(b => b.id));
+    const por = new Map();
+    for (const f of (esp.project_final || [])) for (const u of (f.project_unit || [])) {
+      const b = u.block_id != null ? u.block_id : f.block_id;
+      if (!blocos.has(b) || u.code == null || String(u.code).trim() === '') continue;
+      const k = String(u.code).trim(), s = u.status_id == null ? null : u.status_id;
+      const vpp = (s === 10 || s === 11) ? u.value_plus_percentage : null;
+      const v = por.get(k);
+      if (!v) { por.set(k, { s, vpp }); continue; }   // duplex repetido: fica a situação "à venda" e o primeiro valor
+      if (v.vpp == null) v.vpp = vpp;
+      if (v.s == null || ((s === 10 || s === 11) && v.s !== 10 && v.s !== 11)) { if (s != null) v.s = s; }
+    }
+    const status = {}, precos = {};
+    for (const [k, v] of por) {
+      const st = MAPA_LIOR[v.s] || 'vendida';
+      status[k] = st;
+      const p = v.vpp == null ? 0 : Number(Number(v.vpp).toFixed(2));   // valor da Lior em reais e centavos
+      if ((st === 'disponivel' || st === 'reservada') && p > 0) precos[k] = { pp: Number((p * fator).toFixed(2)) };   // valor da Lior x fator = listagem do mês
+    }
+    return { status, precos };
+  }
+  async function lerLior() {
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas)) ? cfgFonte.mapas : [];
+    if (!mapas.length) throw new Error('sem a lista de projetos do servidor');
+    const tok = tokenLior();
+    if (!tok) throw new Sessao('sem login');
+    const out = [];
+    for (const m of mapas) {
+      const alvos = Array.isArray(m.alvos) ? m.alvos : [];
+      let r = null, j = null;
+      try {
+        r = await fetch('https://api-m.lavvi.com.br/api/v1/sales-mirror/' + encodeURIComponent(m.id), { headers: { Authorization: 'Bearer ' + tok, Accept: 'application/json' }, cache: 'no-store' });
+        if (r.status === 401 || r.status === 403) throw new Sessao('login');
+        if (r.ok) j = await r.json();
+      } catch (e) { if (e instanceof Sessao) throw e; alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'rede' })); continue; }
+      const esp = j && Array.isArray(j.project_final) ? j : (j && j.data && Array.isArray(j.data.project_final) ? j.data : null);
+      if (!esp) { alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'resposta ' + (r ? r.status : '?') })); continue; }
+      const fator = Number(m.fator) > 0 ? Number(m.fator) : 1;
+      for (const a of alvos) {
+        const l = montarLior(esp, a, fator);
+        if (!Object.keys(l.status).length) { out.push({ projeto: a.projeto, erro: 'espelho vazio' }); continue; }
+        out.push({ projeto: a.projeto, status: l.status, precos: l.precos });
+      }
     }
     return out;
   }
@@ -888,12 +946,12 @@
       if (outroVivo()) { st.fase = 'espera'; return; }
       batimento(); st.fase = 'lendo';
       await lerConfigFonte();
-      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : await lerCV();
+      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : FONTE === 'lior' ? await lerLior() : await lerCV();
       let m = 0; const falhas = [];
       for (const l of leituras) {
         if (l.erro) { falhas.push(l.projeto); continue; }
         try {
-          if (l.precos) {                         // Dommus: preço das disponíveis antes da situação (a unidade liberada já chega com preço)
+          if (l.precos) {                         // Dommus e Lior: preço antes da situação (a unidade liberada já chega com preço)
             try { await rpc('precos_robo', { p_chave: chave(), p_projeto: l.projeto, p_precos: l.precos, p_fonte: FONTE }); }
             catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
           }
@@ -914,6 +972,7 @@
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
                   : FONTE === 'cvvitacon' ? 'A sessão do CV da Vitacon expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Vitacon continuarem ao vivo.'
                   : FONTE === 'dommus' ? 'A sessão do Dommus da Mundo Apto expirou no Chrome do computador. Faça login de novo para os projetos da Mundo Apto continuarem ao vivo.'
+                  : FONTE === 'lior' ? 'O login da Lior (espelho da Lavvi) venceu no Chrome do computador. Entre de novo na Lior para os projetos da Lavvi continuarem ao vivo (o login dura 24 horas).'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
