@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.9.0
+// @version      1.10.0
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE e no Dommus da Mundo Apto (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -9,6 +9,7 @@
 // @match        https://vitacon.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
 // @match        https://mundoapto.dommus2.com.br/*
+// @match        https://painel.dommus.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
@@ -23,9 +24,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.9.0';
+  const VERSAO = '1.10.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
@@ -60,7 +61,7 @@
   </style><div class="b" id="b"><div class="l" id="l"><span class="d"></span><span id="t">Robô do Espelho</span></div>
   <div class="f"><input id="k" type="password" placeholder="Cole a chave do robô (ROBO-...)" autocomplete="off"><button id="s">Salvar</button></div></div>`;
   const $ = id => sh.getElementById(id);
-  let mostrar = FONTE !== 'one';                  // na ONE, o selo só aparece no quadro do espelho
+  let mostrar = FONTE !== 'one' && FONTE !== 'dommusgu';   // na ONE, o selo só aparece no quadro do espelho; no painel do Dommus, só ao renovar
   const montar = () => { if (mostrar && document.body && document.body.tagName === 'BODY' && !host$.isConnected) document.body.appendChild(host$); };
   montar();
   $('l').addEventListener('click', () => $('b').classList.toggle('aberto'));
@@ -96,6 +97,40 @@
     const t = await r.text();
     if (!r.ok) { const e = new Error(t); e.status = r.status; throw e; }
     return t ? JSON.parse(t) : null;
+  }
+
+  // ---------- painel do Dommus: volta para o VENDE quando a entrada do espelho vence ----------
+  // A entrada no VENDE (espelho da Mundo Apto) vence umas 3 h depois do login, mas o painel continua logado. Quando foi o robô
+  // que mandou a aba para cá, ou quando a aba do robô caiu aqui sozinha, ele clica em "Acessar" no card VENDE. Nunca digita
+  // senha: se o painel pedir login, só avisa. Painel aberto por você não é mexido.
+  if (FONTE === 'dommusgu') {
+    const agora = Date.now(), renov = gget('dommus:renov', 0), hbD = gget('hb:dommus', null);
+    const pedido = agora - renov < 5 * 60000;
+    const caiu = !!hbD && agora - hbD.t < 15 * 60000 && /dommus2\.com\.br/.test(document.referrer || '') && agora - renov > 30 * 60000;
+    if (!pedido && !caiu) return;
+    const avisar = msg => { if (chave()) rpc('alerta_robo', { p_chave: chave(), p_fonte: 'dommus', p_msg: msg }).catch(() => {}); };
+    mostrar = true;
+    if (agora - gget('dommus:clique', 0) < 10 * 60000) {   // já clicou em Acessar há pouco e caiu de novo: não insiste
+      st.sessao = true; pintar();
+      avisar('Não consegui voltar para o espelho da Mundo Apto pelo painel do Dommus. Entre no VENDE pelo Chrome do computador para os projetos continuarem ao vivo.');
+      return;
+    }
+    if (caiu) gset('dommus:renov', agora);
+    st.aviso = 'voltando para o espelho da Mundo Apto'; pintar();
+    const t0 = Date.now();
+    const tentar = () => {
+      if (/\/login/.test(location.pathname) || document.querySelector('input[type=password]')) {
+        st.aviso = null; st.sessao = true; pintar();
+        avisar('O painel do Dommus pediu login de novo no Chrome do computador. Entre com a senha para os projetos da Mundo Apto continuarem ao vivo.');
+        return;
+      }
+      const b = [...document.querySelectorAll('button.btn-acessar')].find(x => !x.disabled && /^VENDE\b/i.test((((x.closest('.conteudo-section') || x.parentElement).querySelector('.title')) || {}).textContent || ''));
+      if (b) { gset('dommus:clique', Date.now()); b.click(); return; }
+      if (Date.now() - t0 < 60000) setTimeout(tentar, 2000);
+      else { st.aviso = 'não achei o Acessar do VENDE no painel'; pintar(); }
+    };
+    setTimeout(tentar, 2500);
+    return;
   }
 
   // ---------- leitura BLL e CV ----------
@@ -223,6 +258,13 @@
     const lojas = us.filter(u => ehLojaD(u) && !ehVagaD(u)).sort((a, b) => { const x = String(a.rotulo_unidade || ''), y = String(b.rotulo_unidade || ''); return x < y ? -1 : x > y ? 1 : 0; });
     lojas.forEach((u, i) => pos('Loja ' + (String(u.rotulo_unidade || '').replace(/\D/g, '').slice(-2).replace(/^0+/, '') || String(i + 1)), u));
     return { status, precos };
+  }
+  function renovarDommus() {                       // sessão do VENDE vencida: vai ao painel e volta pelo Acessar (no máximo 1 vez a cada 30 min)
+    if (Date.now() - gget('dommus:renov', 0) < 30 * 60000) return false;
+    gset('dommus:renov', Date.now());
+    st.aviso = 'renovando a entrada no Dommus'; st.sessao = false;
+    setTimeout(() => { location.href = 'https://painel.dommus.com.br/dashboard'; }, 1500);
+    return true;
   }
   async function lerDommus() {
     const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas)) ? cfgFonte.mapas : [];
@@ -866,6 +908,7 @@
       batimento();
     } catch (e) {
       if (e instanceof Sessao) {
+        if (FONTE === 'dommus' && renovarDommus()) return;
         st.sessao = true;
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
