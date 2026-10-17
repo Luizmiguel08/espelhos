@@ -1144,6 +1144,17 @@ a.opcao{text-decoration:none}
   .mais-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
 }
 .pg-mais > .nota{margin-top:16px}
+/* filtro com sufixo (m², /m²): o "Sem limite" não passa mais por baixo do sufixo */
+.campo-suf input{text-overflow:ellipsis}
+.campo-suf input::placeholder{font-size:14px}
+/* quando o projeto foi conferido no sistema (Tabela e ficha) */
+.dd-frescor{margin:0;display:flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:var(--apoio)}
+.dd-frescor.vivo{color:var(--texto)}
+.dd-frescor i{width:8px;height:8px;border-radius:50%;background:var(--s-livre-l);flex-shrink:0}
+.dd-aviso{margin-top:2px}
+#tab-lista > .dd-frescor{margin:2px 0 4px}
+#tab-lista > .dd-aviso{margin:0 0 10px}
+.painel-proj .dd-frescor{margin-top:-4px}
 
 /* ---------------- x_material.css ---------------- */
 /* material completo do projeto e da unidade (a folha da unidade tem 20px de margem lateral) */
@@ -1153,7 +1164,9 @@ a.opcao{text-decoration:none}
 .mt-fu-tira::-webkit-scrollbar{display:none}
 .mt-fu-tira .mos-item{flex:0 0 auto;width:150px;height:104px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--sup2);cursor:zoom-in}
 .mt-fu-tira .mos-item img{width:100%;height:100%;object-fit:cover;display:block}
-.mt-un-ficha{align-self:flex-start}
+.mt-un-links{display:flex;flex-wrap:wrap;gap:4px 20px}
+.mt-un-nota{margin-top:-8px}
+.mt-desc{font-size:12px;color:var(--apoio);font-weight:560}
 .docs .tipo{font-size:11px;letter-spacing:-.02em}
 
 /* ---------------- x_docs.css ---------------- */

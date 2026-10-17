@@ -470,7 +470,7 @@
     setTimeout(() => { const i = $('#cod'); if(i) i.focus(); }, 60);
     f.addEventListener('submit', async ev => {
       ev.preventDefault();
-      const c = $('#cod').value.trim(); if(!c) return;
+      const c = $('#cod').value.trim().toUpperCase(); if(!c) return;
       const b = $('#cod-ok'); b.disabled = true; b.textContent = 'Conferindo…'; $('#cod-erro').textContent = '';
       try{
         const r = await rpc('corretor_resumo', {p_codigo: c});
@@ -1607,14 +1607,15 @@
         avisos = !!r.avisos;
       }
       const qtd = itens.length, nome1 = primeiroNome(cli);
-      const msg = 'Olá, ' + nome1 + '! ' + (formato === 'pers' ? 'Separei a ficha do ' + p.nome + ' com a condição de pagamento que montei para você: ' : formato === 'ficha' ? 'Separei a ficha do ' + p.nome + ' para você, com fotos, plantas e os valores: '
+      const msg = 'Olá, ' + nome1 + ', tudo bem? ' + (formato === 'pers' ? 'Separei a ficha do ' + p.nome + ' com a condição de pagamento que montei para você: ' : formato === 'ficha' ? 'Separei a ficha do ' + p.nome + ' para você, com fotos, plantas e os valores: '
         : st.cmp ? 'Separei ' + qtd + ' opções para você comparar lado a lado, com fotos e valores: ' : st.multi ? 'Separei ' + (qtd === 1 ? 'uma opção' : qtd + ' opções') + ' para você, com fotos e valores: ' : 'Separei ' + (qtd === 1 ? 'uma opção' : qtd + ' opções') + ' do ' + p.nome + ' para você, com fotos e valores: ') + url;
       S.envioPronto = {url, msg};
       const dlg = $('#folha-envio'); if(!dlg) return;
       corpoFolha('<div class="aviso ok" role="status">' + ICO.ok + '<p>Link pronto para ' + esc(nome1) + '. ' + (formato === 'pers' ? 'Ficha com o fluxo personalizado' : formato === 'ficha' ? 'Ficha' : 'Página') + ' com ' + esc(plural(qtd, 'unidade', 'unidades')) + '.' + (pelaTabela.length ? ' ' + esc((pelaTabela.length === 1 ? 'A ' + pelaTabela[0] + ' foi' : 'As unidades ' + pelaTabela.join(', ') + ' foram') + ' pela tabela: a mesma entrada e parcelas passam do valor dela.') : '') + (avisos ? ' Você recebe um aviso neste aparelho quando ' + esc(nome1) + ' abrir.' : '') + '</p></div>' +
         '<label class="campo">Mensagem<textarea id="env-msg" rows="5">' + esc(msg) + '</textarea><small>Dá para mudar o texto antes de mandar.</small></label>' +
+        '<label class="campo">WhatsApp do cliente<input id="env-tel-cli" type="tel" inputmode="tel" autocomplete="off" maxlength="20" placeholder="Opcional"><small>Com o número, o botão do WhatsApp abre a conversa do cliente direto. O número não fica salvo.</small></label>' +
         '<p class="link-pronto">' + esc(url) + '</p>' +
-        '<a class="btn" href="' + esc(url) + '" target="_blank" rel="noopener">Ver como o cliente vê ' + ICO.seta + '</a>',
+        '<a class="btn" href="' + esc(url + (url.indexOf('?') >= 0 ? '&' : '?') + 'previa=1') + '" target="_blank" rel="noopener">Ver como o cliente vê ' + ICO.seta + '</a>',
         '<button type="button" class="btn" data-acao="env-copiar">' + ICO.copiar + 'Copiar</button><a class="btn btn-pri" id="env-wa" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-acao="env-wa">' + ICO.zap + 'WhatsApp</a>', dlg);
       if(st.multi){ if(!st.cmp) S.sel.clear(); if(location.hash === '#/imoveis') atualizarImoveis(); }
       else{ S.ui.tabSel.delete(p.id); atualizarTabela(); }
@@ -3322,7 +3323,7 @@
       case 'env-fmt': if(S.envio){ S.envio.formato = v; $$('[data-acao="env-fmt"]').forEach(b => b.setAttribute('aria-checked', b.dataset.v === v)); const md = $('#env-modo-f'); if(md) md.hidden = v === 'pers'; } break;
       case 'env-criar': criarEnvio(); break;
       case 'env-copiar': { const m = $('#env-msg'); copiar(m ? m.value : (S.envioPronto || {}).msg, 'Mensagem com o link copiada.'); break; }
-      case 'env-wa': { const m = $('#env-msg'); if(m) el.href = 'https://wa.me/?text=' + encodeURIComponent(m.value); break; }
+      case 'env-wa': { const m = $('#env-msg'), t = $('#env-tel-cli'), n = t ? t.value.replace(/\D/g, '') : ''; if(m) el.href = 'https://wa.me/' + (n.length >= 10 ? (n.length <= 11 ? '55' + n : n) : '') + '?text=' + encodeURIComponent(m.value); break; }
       // ---- fotos do projeto
       case 'luz': abrirLuz(S.fotosAtuais, +el.dataset.i || 0, nomeDaRota()); break;
       case 'luz-planta': abrirLuz((S.plantasAtuais || []).map(pl => ({src: pl.src, t: pl.t + (pl.sub ? ', ' + pl.sub : '')})), +el.dataset.i || 0, nomeDaRota()); break;
@@ -3447,12 +3448,14 @@
     for(const f of HASH_X){ try{ const r = f(h); if(r) return r; }catch(e){} }
     let m;
     if(/^#buscar-agora$/.test(h)) return '#/imoveis';
-    if(/^#buscar$/.test(h)) return '#/enviadas';
+    if(/^#buscar/.test(h)) return '#/enviadas';            // #buscar e #buscar-enviadas (aviso de link aberto)
     if((m = /^#resumo(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(h))) return '#/resumo' + (m[1] ? '/' + m[1] : '');
     if(/^#mercado$/.test(h)) return '#/mercado';
     if((m = /^#docs(?:-([a-z0-9-]+))?$/.exec(h))) return '#/docs' + (m[1] ? '/' + m[1] : '');
     if(/^#escritorio$/.test(h)) return '#/escritorio';
-    if((m = /^#([a-z0-9-]+)-u([A-Za-z0-9 ._-]+)$/.exec(h)) && S.byId.has(m[1])){ S.abrirUnidade = {pid: m[1], n: decodeURIComponent(m[2])}; return '#/tabelas/' + m[1]; }
+    // unidade: #<projeto>-u<unidade>, com o número às vezes codificado (%20) nos avisos do servidor
+    { const s = h.slice(1); let i = s.indexOf('-u');
+      while(i > 0){ const pid = s.slice(0, i); if(S.byId.has(pid)){ let n = s.slice(i + 2); try{ n = decodeURIComponent(n); }catch(e){} if(n){ S.abrirUnidade = {pid, n}; return '#/tabelas/' + pid; } } i = s.indexOf('-u', i + 1); } }
     if((m = /^#([a-z0-9-]+)$/.exec(h)) && S.byId.has(m[1])) return '#/tabelas/' + m[1];
     return null;
   }
@@ -3610,6 +3613,8 @@
     const nD = dp && Array.isArray(dp.docs) ? dp.docs.length : 0, nP = dp && Array.isArray(dp.pastas) ? dp.pastas.length : 0;
     if(nD || nP) extra.push(mtItem({u: '#/docs/' + p.id, t: 'Documentos do projeto', s: [nD ? plural(nD, 'documento', 'documentos') : '', nP ? plural(nP, 'pasta no Drive', 'pastas no Drive') : ''].filter(Boolean).join(' e ') + ', com link para copiar', x: 'docs'}, true));
     for(const z of ((c && Array.isArray(c.tours)) ? c.tours : [])) if(z && urlSegura(z.u)) extra.push(mtItem({u: z.u, t: z.cli || z.t || 'Tour virtual', s: 'Tour virtual', x: 'tour'}));
+    // material oficial que é só um link (pasta do Drive, espelho e tabela mais novos): a base só lista arquivos com id
+    for(const m of ((c && Array.isArray(c.material_oficial)) ? c.material_oficial : [])) if(m && !m.id && urlSegura(m.u)) extra.push(mtItem({u: m.u, t: m.c || m.n || 'Material da construtora', s: /drive\.google\.com\/drive\/folders/.test(m.u) ? 'Pasta no Google Drive' : (m.n && m.n !== m.c ? m.n : 'Link da construtora'), x: /folders/.test(m.u) ? 'pasta' : 'link'}));
     const nMat = c && Array.isArray(c.material_oficial) ? c.material_oficial.length : 0;
     if(nMat > 6) extra.push(mtItem({u: ESP + 'nex/?p=' + encodeURIComponent(p.id) + '#mat', t: 'Todo o material da construtora', s: plural(nMat, 'arquivo', 'arquivos') + ' na ficha completa', x: 'mais'}));
     const mapa = mtMapa(p, det);
@@ -3635,13 +3640,29 @@
     const linhas = [];
     if(+ex.cond > 0) linhas.push(['Condomínio', BRL(+ex.cond) + ' por mês']);
     if(+ex.iptu > 0) linhas.push(['IPTU', BRL(+ex.iptu)]);
+    if(ex.gd) linhas.push(['Garden', 'Sim']);
+    if(ex.dist) linhas.push(['Histórico', 'Previamente distratada']);
     if(linhas.length) h = mtInserir(h, '<dl class="un-fatos">', '</dl>', linhas.map(x => '<div><dt>' + esc(x[0]) + '</dt><dd class="num">' + esc(x[1]) + '</dd></div>').join('')) || h;
+    const livre = a[6] !== 'vendida';
+    // à vista com o desconto sobre o parcelado, como no app anterior
+    if(livre && +ex.pp > 0 && +ex.pv > 0 && +ex.pv < +ex.pp){ const d = Math.round((1 - ex.pv / ex.pp) * 1000) / 10; if(d > 0) h = h.replace('<div><span>À vista</span>', '<div><span>À vista <small class="mt-desc">' + esc('−' + d.toLocaleString('pt-BR') + '%') + '</small></span>'); }
+    const notas = [];
+    if(livre && +ex.pt > 0) notas.push('Preço de tabela ' + BRL(+ex.pt) + '. Esta unidade está com condição promocional.');
+    if(ex.aj) notas.push('★ ' + String(ex.aj));
+    const tab = det.dados.tabela || {};
+    if(livre && ex.c != null && !tab.fluxos && Array.isArray(tab.condicoes) && tab.condicoes[ex.c]) notas.push('Condição desta unidade: ' + String(tab.condicoes[ex.c]));
+    if(notas.length){
+      const i = h.indexOf('<dl class="un-fatos">'), j = i >= 0 ? h.indexOf('</dl>', i) : -1;
+      if(j >= 0) h = h.slice(0, j + 5) + notas.map(t => '<p class="nota mt-un-nota">' + esc(t) + '</p>').join('') + h.slice(j + 5);
+    }
     if(/^https:\/\/drive\.google\.com\//.test(String(ex.fu || ''))){
       const k = p.id + '|' + n;
       h += '<div class="mt-fu" data-fu="' + esc(k) + '"><p class="rotulo">Fotos da unidade</p><div class="fotos-linha mt-fu-tira"><div class="brilho" style="height:104px;width:150px;border-radius:12px"></div><div class="brilho" style="height:104px;width:150px;border-radius:12px"></div></div></div>';
       setTimeout(() => mtFotosUnidade(p.id, n), 0);
     }
-    h += '<a class="link-mais mt-un-ficha" href="' + esc(ESP + 'nex/?p=' + encodeURIComponent(p.id) + '#u' + encodeURIComponent(n)) + '" target="_blank" rel="noopener">Ficha completa da unidade ' + ICO.seta + '</a>';
+    const pastaU = /^https:\/\/drive\.google\.com\//.test(String(ex.fu || '')) ? String(ex.fu) : null;
+    h += '<div class="mt-un-links">' + (pastaU ? '<a class="link-mais" href="' + esc(pastaU) + '" target="_blank" rel="noopener">Pasta da unidade no Drive ' + ICO.seta + '</a>' : '') +
+      '<a class="link-mais mt-un-ficha" href="' + esc(ESP + 'nex/?p=' + encodeURIComponent(p.id) + '#u' + encodeURIComponent(n)) + '" target="_blank" rel="noopener">Ficha completa da unidade ' + ICO.seta + '</a></div>';
     return h;
   };
   async function mtFotosUnidade(pid, n){
@@ -3939,7 +3960,9 @@
     try{ return await r.pushManager.getSubscription(); }catch(e){ return null; }
   }
   function avPrefs(){ try{ const o = JSON.parse(LS.get(AV_K.av) || 'null'); return o && Array.isArray(o.projs) ? o : null; }catch(e){ return null; } }
-  const avProjs = () => { const o = avPrefs(); return o ? o.projs.filter(x => typeof x === 'string' && x) : []; };
+  // sem escolha salva, vale a mesma de saída do app anterior: os projetos da casa, fora das construtoras parceiras
+  const AV_PADRAO = ['consolacao', 'sumare', 'raj-mendes', 'raj-2', 'nex-bela-cintra'];
+  const avProjs = () => { const o = avPrefs(); return o ? o.projs.filter(x => typeof x === 'string' && x) : AV_PADRAO.filter(id => S.byId.has(id)); };
   const avGravarProjs = ids => LS.set(AV_K.av, JSON.stringify({projs: [...new Set(ids)]}));
   async function avInscrever(sub){
     const j = sub.toJSON(), k = j.keys || {};
@@ -5285,7 +5308,7 @@
         d && d.lancamento ? ['Lançamento', mes(d.lancamento)] : null,
         e.es != null && isFinite(+e.es) ? ['Estoque', (+e.es).toLocaleString('pt-BR') + (e.tt > 0 ? ' de ' + (+e.tt).toLocaleString('pt-BR') : '') + ' unid.'] : null,
         isFinite(m2) ? ['R$/m² a partir de', BRL(m2)] : null,
-        d && (d.torres > 0 || d.andares > 0) ? ['Prédio', [d.torres > 0 ? plural(+d.torres, 'torre', 'torres') : '', d.andares > 0 ? d.andares + ' andares' : ''].filter(Boolean).join(', ')] : null
+        d && (d.torres > 0 || d.andares > 0) ? ['Prédio', [d.torres > 0 ? plural(+d.torres, 'torre', 'torres') : '', d.andares > 0 ? plural(+d.andares, 'andar', 'andares') : ''].filter(Boolean).join(', ')] : null
       ].filter(x => x && x[1]);
       return '<ul class="fatos">' + fatos.map(f => '<li><small>' + esc(f[0]) + '</small><b>' + esc(f[1]) + '</b></li>').join('') + '</ul>';
     }
@@ -6068,7 +6091,7 @@
       const el = $('#ec-tv-txt'); if(!el) return;
       const s = estoque(), total = s.d + s.r + s.v + s.o, n = x => x.toLocaleString('pt-BR');
       const txt = !s.ok ? 'Quadro da TV: os espelhos ainda não carregaram.' : !total ? 'Quadro da TV: nenhuma unidade nos espelhos.' :
-        'Quadro da TV: ' + n(s.d) + ' livres, ' + n(s.r) + ' reservadas e ' + n(s.v) + ' vendidas nos espelhos' + (s.o ? ', mais ' + n(s.o) + ' em processo ou outra situação' : '') +
+        'Quadro da TV: ' + n(s.d) + (s.d === 1 ? ' livre, ' : ' livres, ') + n(s.r) + (s.r === 1 ? ' reservada e ' : ' reservadas e ') + n(s.v) + (s.v === 1 ? ' vendida' : ' vendidas') + ' nos espelhos' + (s.o ? ', mais ' + n(s.o) + ' em processo ou outra situação' : '') +
         '. Hoje, ' + plural(s.vh, 'venda', 'vendas') + ' e ' + plural(s.rh, 'reserva', 'reservas') + '.';
       if(el.textContent !== txt) el.textContent = txt;
     }
@@ -7235,7 +7258,7 @@
     const grupos = [...new Set(itens.map(x => x.dados.grupo_nome || nomeGrupo(x.dados.grupo) || x.dados.grupo))];
     const disp = itens.reduce((t, x) => t + x.dados.unidades.filter(u => u[6] === 'disponivel').length, 0);
     const ja = itens.filter(x => S.byId.has(x.id)).length;
-    PF.imp = {itens, resumo: '<b>' + esc(plural(itens.length, 'projeto', 'projetos')) + '</b> da ' + esc(grupos.join(', ')) + ', com ' + esc(disp.toLocaleString('pt-BR')) + ' unidades disponíveis. ' +
+    PF.imp = {itens, resumo: '<b>' + esc(plural(itens.length, 'projeto', 'projetos')) + '</b> da ' + esc(grupos.join(', ')) + ', com ' + esc(disp.toLocaleString('pt-BR') + (disp === 1 ? ' unidade disponível. ' : ' unidades disponíveis. ')) +
       esc(ja ? ja + (ja === 1 ? ' já está no app e vai ser substituído.' : ' já estão no app e vão ser substituídos.') : 'Todos entram como novos.')};
     pfImpMsg('');
   };
@@ -7250,7 +7273,7 @@
     let feitos = 0;
     try{
       for(const l of lotes){
-        pfImpMsg('Importando, ' + feitos + ' de ' + itens.length + ' projetos.');
+        pfImpMsg('Importando, ' + feitos + ' de ' + plural(itens.length, 'projeto', 'projetos') + '.');
         const r = await rpc('importar_espelhos', {p_codigo: S.cod, p_itens: l}, 60000);
         feitos += (r && r.projetos) || 0;
       }
@@ -7261,7 +7284,7 @@
       const t = String((e && (e.body || e.message)) || '');
       PF.imp = null;
       pfImpMsg(codigoInvalido(e) ? 'Só o código de administrador pode importar.' : /outro_grupo/.test(t) ? 'Um dos projetos do arquivo é de outra construtora no app, e nada desse lote foi gravado.'
-        : 'Parou depois de ' + feitos + ' de ' + itens.length + ' projetos. Tente de novo: o que já entrou fica salvo.', 'erro');
+        : 'Parou depois de ' + feitos + ' de ' + plural(itens.length, 'projeto', 'projetos') + '. Tente de novo: o que já entrou fica salvo.', 'erro');
     }
   };
   ACOES_X['pf-instalar'] = async () => {
@@ -7293,6 +7316,188 @@
 
   // o cache antigo do espelho inteiro (uns 5 MB) não é mais usado aqui e só ocupa o espaço do navegador
   LS.del('espelhos-cache');
+
+  // ---------------- x_dados.js ----------------
+  // ================= DADOS AO VIVO E SEM INTERNET =================
+  // 1. Espelho aberto ao vivo: quando o resumo de cada minuto mostra mudança no projeto aberto (Tabela ou ficha),
+  //    o app busca o espelho dele de novo e repinta, como o app anterior fazia.
+  // 2. Sem internet: o último espelho de cada projeto aberto e a lista de unidades ficam guardados no aparelho
+  //    (Cache Storage, fora do localStorage), e a Tabela, a ficha e o Imóveis abrem com o que ficou salvo.
+  // 3. Fotos do Drive: quando o cadastro já tem 6 fotos ou mais, o servidor não junta as da pasta do Drive na ficha;
+  //    o app anterior juntava (função projeto_fotos), então aqui elas entram depois, sem atrasar a abertura.
+  const DD = {sig: new Map(), gravado: new Map(), fotosPedidas: new Set(), busy: false, pend: null};
+  const DD_CACHE = 'dados-espelhos-v1';   // nome fora do prefixo "espelhos-", que o service worker limpa a cada versão
+  const DD_MAX = 20;
+  const ddReq = k => new Request(ESP + '__dados__/' + encodeURIComponent(k));
+  async function ddGuardar(k, v){
+    try{
+      if(!('caches' in window)) return;
+      const c = await caches.open(DD_CACHE);
+      await c.put(ddReq(k), new Response(JSON.stringify(v), {headers: {'content-type': 'application/json'}}));
+      let idx = []; try{ idx = JSON.parse(LS.get('espelhos-dados-idx') || '[]'); }catch(e){}
+      idx = idx.filter(x => x && x.k !== k); idx.push({k, em: Date.now()});
+      const proj = idx.filter(x => /^p-/.test(x.k));
+      for(const x of proj.slice(0, Math.max(0, proj.length - DD_MAX))){ await c.delete(ddReq(x.k)); idx = idx.filter(y => y.k !== x.k); }
+      LS.set('espelhos-dados-idx', JSON.stringify(idx));
+    }catch(e){}
+  }
+  async function ddLer(k){
+    try{ if(!('caches' in window)) return null; const c = await caches.open(DD_CACHE); const r = await c.match(ddReq(k)); return r ? await r.json() : null; }catch(e){ return null; }
+  }
+  // assinatura do projeto no resumo: muda quando vende, reserva, libera ou o preço muda
+  const ddSig = id => { const p = S.byId.get(id); if(!p) return ''; const m = S.M.find(x => x.p === id); return [p.livres, p.reservadas, p.processo, p.vendidas, p.preco, m ? m.em + ':' + m.n + ':' + m.para : ''].join('|'); };
+  const ddUnSig = v => ((v && v.dados && v.dados.unidades) || []).map(a => a[0] + a[6] + JSON.stringify(a[7] || '')).join(';');
+
+  // ---- detalhe do projeto: guarda o último, usa o guardado sem internet, junta as fotos do Drive
+  const _detalheDD = detalhe;
+  detalhe = function(id, forcar){
+    const r = _detalheDD(id, forcar);
+    if(!r || typeof r.then !== 'function') return r;   // já estava na memória
+    return r.then(v => {
+      if(v && v.dados){
+        DD.sig.set(id, ddSig(id));
+        const us = ddUnSig(v), g = DD.gravado.get(id);
+        if(!g || g.us !== us || Date.now() - g.em > 5 * 60e3){ DD.gravado.set(id, {us, em: Date.now()}); ddGuardar('p-' + id, v); }
+        ddFotosDrive(id, v);
+      }
+      return v;
+    }, async e => {
+      if(codigoInvalido(e)) throw e;
+      const v = await ddLer('p-' + id);
+      if(v && v.dados){ S.det.set(id, {v, em: Date.now() - 50000}); return v; }
+      throw e;
+    });
+  };
+  function ddFotosDrive(id, v){
+    const i = v.info || {};
+    if(DD.fotosPedidas.has(id) || !(i.drive && i.drive.fotos) || !Array.isArray(i.fotos) || i.fotos.length < 6 || !S.cod) return;
+    DD.fotosPedidas.add(id);
+    rpc('projeto_fotos', {p_codigo: S.cod, p_id: id}).then(r => {
+      const novas = r && Array.isArray(r.fotos) ? r.fotos.filter(f => f && urlImg(f.u)) : [];
+      const ch = S.det.get(id), alvo = ch && ch.v; if(!alvo || !novas.length) return;
+      const tem = new Set((alvo.fotos || []).map(f => f && original(urlImg(f.u) || '')));
+      const add = novas.filter(f => !tem.has(original(urlImg(f.u))));
+      if(!add.length) return;
+      alvo.fotos = (alvo.fotos || []).concat(add);
+      if(location.hash === '#/p/' + id && !document.querySelector('dialog[open]')) render();
+    }).catch(() => { DD.fotosPedidas.delete(id); });
+  }
+
+  // ---- unidades de todos os projetos (Imóveis): guarda a última lista e usa sem internet
+  const _aplicarUnidadesDD = aplicarUnidades;
+  aplicarUnidades = function(r){
+    _aplicarUnidadesDD(r);
+    const g = DD.gravado.get('u');
+    if(!g || g.v !== r.versao || Date.now() - g.em > 10 * 60e3){ DD.gravado.set('u', {v: r.versao, em: Date.now()}); ddGuardar('u', r); }
+  };
+  const _carregarUnidadesDD = carregarUnidades;
+  carregarUnidades = async function(forcar){
+    const r = await _carregarUnidadesDD(forcar);
+    if(S.U || !S.Uerro) return r;
+    const c = await ddLer('u');
+    if(c && c.u){ _aplicarUnidadesDD(c); S.Uerro = true; if(location.hash === '#/imoveis' && !document.querySelector('dialog[open]:not(#folha-filtros)')) atualizarImoveis(); }
+    return S.U;
+  };
+
+  // ---- espelho aberto ao vivo
+  async function ddAoVivo(){
+    const m = /^#\/(tabelas|p)\/([a-z0-9-]+)$/.exec(location.hash || '');
+    if(!m || !S.carregado || !S.cod || DD.busy || S.offline) return;
+    const id = m[2], ch = S.det.get(id);
+    if(!ch || !ch.v || ch.pr) return;
+    if(DD.sig.get(id) === ddSig(id)) return;
+    DD.busy = true;
+    try{
+      const antes = ddUnSig(ch.v);
+      const v = await detalhe(id, true);
+      if(location.hash !== '#/' + m[1] + '/' + id || !v) return;
+      if(ddUnSig(v) === antes) return;
+      if(document.querySelector('dialog[open]')){ DD.pend = location.hash; return; }
+      ddRepintar(m[1]);
+    }catch(e){ /* sem internet: fica o que está na tela */ }
+    finally{ DD.busy = false; }
+  }
+  function ddRepintar(rota){
+    if(rota === 'tabelas') atualizarTabela();
+    else{ const ae = document.activeElement; if(!(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))) render(); }
+  }
+  const _refrescarDD = refrescar;
+  refrescar = function(){ const r = _refrescarDD(); ddAoVivo(); return r; };
+  // folha fechada depois de uma mudança: repinta o que ficou para trás
+  document.addEventListener('close', ev => {
+    if(!DD.pend || !(ev.target instanceof HTMLDialogElement)) return;
+    setTimeout(() => {
+      if(!DD.pend || document.querySelector('dialog[open]')) return;
+      const h = DD.pend; DD.pend = null;
+      const m = /^#\/(tabelas|p)\/([a-z0-9-]+)$/.exec(h);
+      if(m && location.hash === h) ddRepintar(m[1]);
+    }, 60);
+  }, true);
+
+  // ---- quando cada projeto foi conferido no sistema (o robô relê mesmo quando nada muda)
+  // O resumo só traz a data da última mudança; a leitura por projeto vem do espelho_versao (leve), uma vez por minuto
+  // no máximo e só nas telas de Tabela e ficha. Projeto sem robô mostra de onde vem (PDF, tabela, anúncios) e o aviso.
+  DD.robo = null; DD.roboEm = 0; DD.roboPr = null;
+  function ddRobo(){
+    if(DD.roboPr || Date.now() - DD.roboEm < 60e3 || !S.cod) return DD.roboPr || Promise.resolve(DD.robo);
+    DD.roboPr = rpc('espelho_versao', {p_codigo: S.cod}).then(r => {
+      const m = {};
+      for(const [f, o] of Object.entries((r && r.robo) || {})){
+        const inf = o && o.info && typeof o.info === 'object' ? o.info : {};
+        for(const [pid, x] of Object.entries(inf)) if(x && x.em && Date.parse(x.em)) m[pid] = {em: x.em, f, visto: o.visto_em};
+      }
+      DD.robo = m; DD.roboEm = Date.now(); return m;
+    }).catch(() => DD.robo).finally(() => { DD.roboPr = null; });
+    return DD.roboPr;
+  }
+  function ddFrescor(id, det){
+    const r = DD.robo && DD.robo[id], d = (det && det.dados) || {}, mm = d.manual && typeof d.manual === 'object' ? d.manual : null;
+    if(r){
+      const t = Date.parse(r.em), min = (Date.now() - t) / 60000;
+      return {txt: 'Conferido no sistema ' + (diaKey(t) === diaKey(Date.now()) ? 'às ' + hora(t) : quandoTxt(t)), vivo: min <= 15, aviso: ''};
+    }
+    if(mm && mm.rotulo) return {txt: String(mm.rotulo) + (mm.valor ? ' ' + String(mm.valor) : ''), vivo: false, aviso: mm.titulo ? String(mm.titulo) : ''};
+    return null;
+  }
+  const ddFrescorHtml = (id, det) => {
+    const f = ddFrescor(id, det); if(!f) return '';
+    return '<p class="dd-frescor' + (f.vivo ? ' vivo' : '') + '">' + (f.vivo ? '<i aria-hidden="true"></i>' : '') + esc(f.txt) + (f.vivo ? ', ao vivo' : '') + '</p>' + (f.aviso ? '<p class="nota dd-aviso">' + esc(f.aviso) + '</p>' : '');
+  };
+  const _tabListaHtmlDD = tabListaHtml;
+  tabListaHtml = function(p, det){ return ddFrescorHtml(p.id, det) + _tabListaHtmlDD(p, det); };
+  const _painelProjDD = painelProj;
+  painelProj = function(p, det, c){
+    let h = _painelProjDD(p, det, c);
+    const f = ddFrescor(p.id, det);
+    if(f){
+      h = h.replace(/, espelho lido [^.<]*\./, '.').replace(/<p class="nota">espelho lido [^.<]*\.<\/p>/, '');
+      const i = h.lastIndexOf('</section>');
+      if(i >= 0) h = h.slice(0, i) + ddFrescorHtml(p.id, det) + h.slice(i);
+    }
+    return h;
+  };
+  // ao entrar na Tabela ou na ficha, busca as leituras e repinta se mudou o que aparece
+  window.addEventListener('hashchange', () => { if(/^#\/(tabelas|p)\/[a-z0-9-]+$/.test(location.hash)) ddRoboTela(); });
+  async function ddRoboTela(){
+    const m = /^#\/(tabelas|p)\/([a-z0-9-]+)$/.exec(location.hash || ''); if(!m || !S.cod) return;
+    const ch = S.det.get(m[2]), antes = JSON.stringify(ddFrescor(m[2], ch && ch.v));
+    await ddRobo();
+    if(location.hash !== '#/' + m[1] + '/' + m[2]) return;
+    const c2 = S.det.get(m[2]); if(!c2 || !c2.v) return;
+    if(JSON.stringify(ddFrescor(m[2], c2.v)) === antes || document.querySelector('dialog[open]')) return;
+    const ae = document.activeElement; if(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
+    render();   // a linha de cima da Tabela fica fora da lista, então repinta a tela toda (a rolagem fica onde está)
+  }
+  setTimeout(() => { if(S.cod) ddRobo(); }, 3000);   // já chega na Tabela sabendo a hora de cada leitura
+  const _refrescarDD2 = refrescar;
+  refrescar = function(){ const r = _refrescarDD2(); if(/^#\/(tabelas|p)\/[a-z0-9-]+$/.test(location.hash)) ddRoboTela(); return r; };
+  if(/^#\/(tabelas|p)\/[a-z0-9-]+$/.test(location.hash)) setTimeout(ddRoboTela, 1500);
+  // a Tabela deixa de dizer "Espelho lido <última mudança>" quando sabe a hora da conferência no sistema
+  const _tabelaHtmlDD = tabelaHtml;
+  tabelaHtml = function(p, det){
+    const h = _tabelaHtmlDD(p, det);
+    return ddFrescor(p.id, det) ? h.replace(/\. Espelho lido [^.<]*\.<\/p>/, '.</p>') : h;
+  };
 
   // ================= início =================
   aplicarTema(LS.get(K.tema) || 'escuro');
