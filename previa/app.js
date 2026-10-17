@@ -7453,8 +7453,10 @@
   function ddFrescor(id, det){
     const r = DD.robo && DD.robo[id], d = (det && det.dados) || {}, mm = d.manual && typeof d.manual === 'object' ? d.manual : null;
     if(r){
-      const t = Date.parse(r.em), min = (Date.now() - t) / 60000;
-      return {txt: 'Conferido no sistema ' + (diaKey(t) === diaKey(Date.now()) ? 'às ' + hora(t) : quandoTxt(t)), vivo: min <= 15, aviso: ''};
+      // ao vivo: o robô respondeu nos últimos minutos e o projeto entrou no rodízio dele (a ONE relê cada projeto a cada meia hora)
+      const t = Date.parse(r.em), min = (Date.now() - t) / 60000, robo = (Date.now() - Date.parse(r.visto || '')) / 60000;
+      const vivo = robo <= 6 && min <= (r.f === 'one' ? 75 : 25);
+      return {txt: 'Conferido no sistema ' + (diaKey(t) === diaKey(Date.now()) ? 'às ' + hora(t) : quandoTxt(t)), vivo, aviso: ''};
     }
     if(mm && mm.rotulo) return {txt: String(mm.rotulo) + (mm.valor ? ' ' + String(mm.valor) : ''), vivo: false, aviso: mm.titulo ? String(mm.titulo) : ''};
     return null;
