@@ -1168,6 +1168,10 @@ a.opcao{text-decoration:none}
 .mt-un-nota{margin-top:-8px}
 .mt-desc{font-size:12px;color:var(--apoio);font-weight:560}
 .docs .tipo{font-size:11px;letter-spacing:-.02em}
+/* "Baixar e enviar": material oficial da construtora */
+.mt-mat{display:flex;flex-direction:column;gap:6px}
+.mt-mat .t-3{margin:0}
+.mt-mat .q{font-size:14px;color:var(--apoio);font-weight:560}
 
 /* ---------------- x_docs.css ---------------- */
 /* Documentos das construtoras */

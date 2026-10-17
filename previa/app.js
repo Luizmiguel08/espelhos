@@ -3701,6 +3701,41 @@
     return pr;
   };
 
+  // ---- "Baixar e enviar": todo o material oficial da construtora, como na central dos Espelhos
+  // (o app do corretor só oferecia o book; material técnico, book de vistas, cartilha e implantação ficavam de fora)
+  function mtMaterialOficial(p, det, c){
+    const out = [], vistos = new Set();
+    const add = (id, u, t, s, x) => { const k = id || u; if(!k || vistos.has(k)) return; vistos.add(k); out.push({u, t, s, x}); };
+    for(const m of ((c && Array.isArray(c.material_oficial)) ? c.material_oficial : [])){
+      if(!m) continue;
+      const u = m.id ? driveArq(m.id) : urlSegura(m.u); if(!u) continue;
+      const nome = m.n && m.n !== m.c ? String(m.n) : '';
+      add(m.id, u, m.c || m.n || 'Material da construtora', [nome, m.id ? String(m.ext || 'pdf').toUpperCase() : (/folders/.test(u) ? 'Pasta no Drive' : 'Link'), m.mb ? String(m.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(', '), m.id ? (m.ext || 'pdf') : (/folders/.test(u) ? 'pasta' : 'link'));
+    }
+    const dp = det.docs && det.docs.projeto && det.docs.projeto.id === p.id ? det.docs.projeto : null;
+    for(const x of ((dp && Array.isArray(dp.docs)) ? dp.docs : [])){
+      if(!x) continue;
+      const u = urlSegura(x.u) || (x.id && x.x !== 'link' && !/^[a-z]+-/.test(x.id) ? driveArq(x.id) : null); if(!u) continue;
+      add(x.id, u, x.t || x.a || 'Documento', [x.a, x.d].filter(Boolean).join(', '), x.x || 'pdf');
+    }
+    for(const m of (Array.isArray(det.info && det.info.material) ? det.info.material : [])) if(m && (m.tipo === 'pdf' || m.tipo === 'video') && urlSegura(m.u)) add(null, m.u, m.t || (m.tipo === 'pdf' ? 'PDF' : 'Vídeo'), m.tipo === 'pdf' ? 'PDF' : 'Vídeo', m.tipo === 'pdf' ? 'pdf' : 'mp4');
+    return out;
+  }
+  const _menuBaixarHtml = menuBaixarHtml;
+  menuBaixarHtml = function(p, det, c){
+    const h = _menuBaixarHtml(p, det, c);
+    const docs = mtMaterialOficial(p, det, c);
+    if(!docs.length) return h;
+    const max = 24, nome = p.nome || '';
+    const sec = '<section class="mt-mat" aria-labelledby="mt-mat-t"><h3 class="t-3" id="mt-mat-t">Material da construtora <span class="q">' + docs.length + '</span></h3>' +
+      '<p class="nota">Arquivos originais da construtora. Abra no Drive ou copie o link para mandar ao cliente.</p><ul class="docs dc-docs mt-mat-docs">' +
+      docs.slice(0, max).map(d => '<li><a href="' + esc(d.u) + '" target="_blank" rel="noopener" aria-label="' + esc('Abrir ' + d.t) + '"><span class="tipo" aria-hidden="true">' + esc(String(d.x).slice(0, 4)) + '</span><span class="t"><b>' + esc(d.t) + '</b>' + (d.s ? '<small>' + esc(d.s) + '</small>' : '') + '</span></a>' +
+        '<button type="button" class="ico-btn dc-cp" data-acao="dc-copiar" data-u="' + esc(d.u) + '" data-t="' + esc(nome + ' · ' + d.t) + '" aria-label="' + esc('Copiar o link de ' + d.t) + '">' + ICO.copiar + '</button></li>').join('') + '</ul>' +
+      (docs.length > max ? '<a class="link-mais" href="#/docs/' + esc(p.id) + '">Ver os ' + docs.length + ' arquivos ' + ICO.seta + '</a>' : '') + '</section>';
+    const i = h.indexOf('<div class="opcoes">'), j = i >= 0 ? h.indexOf('</div>', i) : -1;
+    return j >= 0 ? h.slice(0, j + 6) + sec + h.slice(j + 6) : h + sec;
+  };
+
   // ---------------- x_docs.js ----------------
   // ================= DOCUMENTOS DAS CONSTRUTORAS (#/docs, #/docs/<projeto>) =================
   // O índice vem do servidor (função "documentos"): por construtora, os projetos com book, memorial, convenção, contrato,
