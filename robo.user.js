@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.11.0
+// @version      1.12.0
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto e no espelho da Lavvi na Lior (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://maskan.cvcrm.com.br/*
 // @match        https://vitacon.cvcrm.com.br/*
+// @match        https://cambur.cvcrm.com.br/*
 // @match        https://portaldevendas.oneinnovation.com.br/*
 // @match        https://mundoapto.dommus2.com.br/*
 // @match        https://painel.dommus.com.br/*
@@ -25,9 +26,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.11.0';
+  const VERSAO = '1.12.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
@@ -191,6 +192,8 @@
   // unidade de investidor (lista "inv" do mapa, vinda do servidor): o CV mostra como disponível, mas a Vitacon já vendeu
   // (valor zerado ou simbólico na tabela, como disse o diretor da Vitacon em 08/10/2026); no app ela segue vendida
   const investidor = (k, st, m) => (st === 'disponivel' && m && Array.isArray(m.inv) && m.inv.includes(k) ? 'vendida' : st);
+  // bloco que o servidor manda ignorar no mapa (lista "ignorar" com os ids de bloco do CV): aparece no mapa, mas não é do projeto
+  const foraBloco = (j, m) => !!(m && Array.isArray(m.ignorar) && m.ignorar.length && Object.keys(j).some(k => /bloco/i.test(k) && m.ignorar.map(String).includes(String(j[k]).trim())));
   const SITUACAO_CV = { 1: 'disponivel', 2: 'reservada', 3: 'vendida', 5: 'processo_final' };
   async function lerCV() {
     const out = [];
@@ -212,6 +215,7 @@
       blocos.forEach(b => {
         if (porJson) {
           let j = null; try { j = JSON.parse((b.querySelector('div') || {}).textContent || ''); } catch (e) {}
+          if (j && foraBloco(j, mcfg)) return;
           if (j && j['data-filtro-nome-unidade'] && SITUACAO_CV[j['data-filtro-situacao']]) {
             const k = modo === 'vitacon' ? chaveVitacon(j['data-filtro-nome-unidade'], j['data-filtro-areaprivativa'], mcfg) : chaveMaskan(j['data-filtro-nome-unidade'], j['data-filtro-idtipologia']);
             if (k) s[k] = investidor(k, SITUACAO_CV[j['data-filtro-situacao']], mcfg);
@@ -971,6 +975,7 @@
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
                   : FONTE === 'cvvitacon' ? 'A sessão do CV da Vitacon expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Vitacon continuarem ao vivo.'
+                  : FONTE === 'cvcambur' ? 'A sessão do CV da Cambur expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Cambur continuarem ao vivo.'
                   : FONTE === 'dommus' ? 'A sessão do Dommus da Mundo Apto expirou no Chrome do computador. Faça login de novo para os projetos da Mundo Apto continuarem ao vivo.'
                   : FONTE === 'lior' ? 'O login da Lior (espelho da Lavvi) venceu no Chrome do computador. Entre de novo na Lior para os projetos da Lavvi continuarem ao vivo (o login dura 24 horas).'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
