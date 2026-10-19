@@ -7536,6 +7536,100 @@
     return ddFrescor(p.id, det) ? h.replace(/\. Espelho lido [^.<]*\.<\/p>/, '.</p>') : h;
   };
 
+  // ---------------- x_plantas.js ----------------
+  // ================= PLANTA DA UNIDADE: mais fontes =================
+  // 1. Fotos com título de planta ("Planta 24,59 m² (final 4)", "Planta studio 18,14 m²", "Planta 32,9 m² (final 13, 2º ao 14º andar)",
+  //    "Planta do 13º pavimento"), como as que vieram do site da Vitacon, contam como planta mesmo sem k "planta".
+  // 2. Quando nenhuma planta marcada serve, a busca segue para as outras fontes em vez de parar.
+  // tipologia escrita no título ("studio", "1 dorm", "2 dormitórios"); número solto não conta (24,59 m² não é 2 dorms)
+  const plTipoK = s => { const t = norm(String(s || '')); if(/stud|kitn/.test(t)) return 'S'; const m = /(\d)\s*(?:dorm|quarto|suite)/.exec(t); if(m) return +m[1] >= 3 ? '3' : m[1]; return /\bloja/.test(t) ? 'L' : null; };
+  const plAreaTit = t => { const m = /(\d{1,3}(?:[.,]\d{1,2})?)\s*m²/i.exec(String(t || '')); return m ? +m[1].replace(',', '.') : null; };
+  function plFinaisTit(t){
+    const m = /\bfina(?:l|is)\s+(\d{1,3}(?![\dº°])(?:\s*(?:,|\be\b|\ba\b|\bao\b)\s*\d{1,3}(?![\dº°]))*)/i.exec(String(t || '')); if(!m) return [];   // "final 13, 2º ao 14º andar": o 2º é andar
+    const out = []; const ts = m[1].split(/\s*(,|\be\b|\ba\b|\bao\b)\s*/i).filter(Boolean);
+    for(let i = 0; i < ts.length; i++){
+      if(/^\d+$/.test(ts[i])){ if(/^(a|ao)$/i.test(ts[i + 1] || '') && /^\d+$/.test(ts[i + 2] || '')){ const x = +ts[i], y = +ts[i + 2]; if(y >= x && y - x <= 60) for(let k = x; k <= y; k++) out.push(k); i += 2; } else out.push(+ts[i]); }
+    }
+    return out;
+  }
+  function plAndaresTit(t){
+    const s = String(t || ''), out = andaresDoTitulo(s);
+    const m = /(\d{1,2})[º°]\s*(?:ao|a)\s*(\d{1,2})[º°]\s*(?:pavimentos?|andar)/i.exec(s) || null;
+    if(!out.length && m) out.push([+m[1], +m[2]]);
+    const p = /(\d{1,2})[º°]\s*pavimento/i.exec(s); if(!out.length && p) out.push([+p[1], +p[1]]);
+    return out;
+  }
+  // todas as plantas que o cadastro tem, num formato só: {src, t, sub, as, fins, andares, pav, opc, tec}
+  function plantasTodas(det, c){
+    const out = [], vistos = new Set();
+    const add = (src, tt, as, fins, andares) => {
+      if(!src || vistos.has(src)) return; vistos.add(src);
+      const partes = String(tt || 'Planta').split(/\s+·\s+/);
+      out.push({src, t: partes[0], sub: partes.slice(1).join(', '), tt: String(tt || ''), as, fins, andares,
+        pav: /pavimento|andar tipo|planta do andar/i.test(tt), opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt)});
+    };
+    for(const x of plantasFotos(det)) add(x.src, x.tt, x.as.length ? x.as : (plAreaTit(x.tt) ? [plAreaTit(x.tt)] : []), x.fins.length ? x.fins : plFinaisTit(x.tt), x.andares.length ? x.andares : plAndaresTit(x.tt));
+    for(const f of (det && det.fotos) || []){
+      if(!f || f.k === 'planta' || !/^\s*planta\b/i.test(String(f.t || '')) || /implanta/i.test(String(f.t || ''))) continue;
+      const src = urlImg(f.u), tt = String(f.t); if(!src) continue;
+      add(src, tt, plAreaTit(tt) ? [plAreaTit(tt)] : [], plFinaisTit(tt), plAndaresTit(tt));
+    }
+    const info = (det && det.info) || {};
+    for(const x of (Array.isArray(info.plantas) ? info.plantas : [])){
+      const src = urlImg(x && x.u), tt = String((x && x.t) || 'Planta'); if(!src || /implanta/i.test(tt)) continue;
+      const as = Array.isArray(x.a) ? x.a.map(Number).filter(v => v > 0) : (plAreaTit(tt) ? [plAreaTit(tt)] : []);
+      add(src, tt, as, plFinaisTit(tt), plAndaresTit(tt));
+    }
+    for(const m of (Array.isArray(info.material) ? info.material : [])) if(m && m.tipo === 'planta' && urlSegura(m.u)) add(m.u, m.t || 'Planta', plAreaTit(m.t) ? [plAreaTit(m.t)] : [], plFinaisTit(m.t), plAndaresTit(m.t));
+    return out;
+  }
+  // final da unidade: o rótulo da coluna do espelho ou, sem ele, o fim do número ("1507" no 15º andar é o final 07)
+  function plFinalU(det, a){
+    const f = finalNum(det, a); if(f != null) return f;
+    const n = String(a[0] || ''), an = String(a[4] == null ? '' : a[4]);
+    if(/^\d{3,5}$/.test(n) && /^\d{1,2}$/.test(an) && n.startsWith(an) && n.length - an.length >= 1 && n.length - an.length <= 2) return +n.slice(an.length);
+    return null;
+  }
+  function plantaReserva(det, c, a){
+    const ar = areaU(a), fin = plFinalU(det, a), an = andarNum(a), tk = tipoKDe(tipologiaU(det, a) || '');
+    const cands = plantasTodas(det, c).filter(x => !x.pav).map(x => {
+      const fOk = x.fins.length && fin != null ? x.fins.includes(fin) : null;
+      const inteira = x.as.length === 1 && Number.isInteger(x.as[0]);
+      const d = ar > 0 && x.as.length ? Math.min(...x.as.map(v => Math.abs(v - ar))) : 99;
+      const faixa = ar > 0 && x.as.length >= 2 && ar >= Math.min(...x.as) - 0.3 && ar <= Math.max(...x.as) + 0.3;
+      const andarOk = !x.andares.length || an == null || x.andares.some(([de, ate]) => an >= de && an <= ate);
+      const tOk = !tk || !plTipoK(x.tt) || plTipoK(x.tt) === tk;
+      return {x, fOk, d, aOk: d <= (inteira ? 1 : 0.6) || faixa, andarOk, tOk};
+    }).filter(o => o.andarOk && o.tOk && (o.fOk === false ? o.d <= 0.3 : (o.aOk || (o.fOk === true && (o.d <= 3 || !o.x.as.length)))));   // outro final com a mesma metragem: planta da tipologia; planta sem metragem ("Planta studio (final 1)"): vale pelo final e pelo tipo
+    if(!cands.length) return null;
+    cands.sort((p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.d - q.d);
+    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6);
+    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: (m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05), opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
+  }
+  const _plantaDaUnidadeX = plantaDaUnidade;
+  plantaDaUnidade = function(det, c, a){ return _plantaDaUnidadeX(det, c, a) || plantaReserva(det, c, a); };
+  // planta do andar inteiro também pelos títulos ("Planta do 13º pavimento")
+  const _pavimentoDaUnidadeX = pavimentoDaUnidade;
+  pavimentoDaUnidade = function(det, a){
+    const r = _pavimentoDaUnidadeX(det, a); if(r) return r;
+    const an = andarNum(a); if(an == null) return null;
+    const ps = plantasTodas(det, null).filter(x => x.pav && x.andares.some(([de, ate]) => an >= de && an <= ate));
+    return ps.length ? {src: ps[0].src, t: ps[0].t, sub: ps[0].sub} : null;
+  };
+  // na galeria, as fotos que são plantas saem das fotos e ficam na seção Plantas
+  const _plantasDoProjetoX = plantasDoProjeto;
+  plantasDoProjeto = function(det, c){
+    const base = _plantasDoProjetoX(det, c);
+    const tem = new Set(base.map(x => x.src));
+    const extra = plantasTodas(det, c).filter(x => !tem.has(x.src)).sort((p, q) => p.pav - q.pav || (p.as[0] || 0) - (q.as[0] || 0)).map(x => ({src: x.src, t: x.t, sub: x.sub}));
+    return base.concat(extra);
+  };
+  const _fotosDoProjetoX = fotosDoProjeto;
+  fotosDoProjeto = function(det, c){
+    const pls = new Set(plantasTodas(det, c).map(x => original(x.src)));
+    return _fotosDoProjetoX(det, c).filter(f => !pls.has(original(f.src)));
+  };
+
   // ================= início =================
   aplicarTema(LS.get(K.tema) || 'escuro');
   try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { if((LS.get(K.tema) || 'escuro') === 'sistema') aplicarTema('sistema'); }); }catch(e){}

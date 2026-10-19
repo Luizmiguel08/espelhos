@@ -125,6 +125,10 @@ a{color:var(--accent)}
 .u-pl{position:relative;border:0;padding:0;background:#fff;border-radius:12px;overflow:hidden;cursor:zoom-in;aspect-ratio:4/3}
 .u-pl img{width:100%;height:100%;object-fit:contain}
 .u-pl span{position:absolute;left:8px;bottom:8px;background:rgba(14,15,18,.78);color:var(--ink);border-radius:8px;padding:3px 8px;font-size:12px}
+.u-fotos-t{margin:0;color:var(--ink-2);font-size:13px}
+.u-fotos{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;margin:-4px 0 0;padding-bottom:2px;scrollbar-width:thin}
+.u-fotos button{flex:0 0 auto;width:96px;aspect-ratio:1;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--line);cursor:zoom-in;scroll-snap-align:start}
+.u-fotos img{width:100%;height:100%;object-fit:cover;display:block}
 .u-pr{margin:0;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:10px}
 .u-pr div{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .u-pr dt{color:var(--muted);font-size:13px}
@@ -887,6 +891,63 @@ window.NEX = (function(){
       c.appendChild(l);
     }
   }
+  // ---------- planta pelas fotos do projeto (quando não há ficha da central) ----------
+  // fotos marcadas como planta (k "planta": metragens em a, finais em fin) e fotos com título de planta
+  // ("Planta studio 25,9 m²", "Planta 1 dorm. 31,3 m² (final 2)"). As regras são as mesmas do app dos corretores.
+  const normT = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const plArea = t => { const m = /(\d{1,3}(?:[.,]\d{1,2})?)\s*m²/i.exec(String(t || '')); return m ? +m[1].replace(',', '.') : null; };
+  const tipoUn = s => { const t = normT(s); return /^stud|^kitn/.test(t) ? 'S' : /^1/.test(t) ? '1' : /^2/.test(t) ? '2' : /^[3-9]/.test(t) ? '3' : /loja/.test(t) ? 'L' : null; };
+  const tipoPl = s => { const t = normT(s); if(/stud|kitn/.test(t)) return 'S'; const m = /(\d)\s*(?:dorm|quarto|suite)/.exec(t); if(m) return +m[1] >= 3 ? '3' : m[1]; return /\bloja/.test(t) ? 'L' : null; };
+  function plFinais(t){
+    const m = /\bfina(?:l|is)\s+(\d{1,3}(?![\dº°])(?:\s*(?:,|\be\b|\ba\b|\bao\b)\s*\d{1,3}(?![\dº°]))*)/i.exec(String(t || '')); if(!m) return [];
+    const out = [], ts = m[1].split(/\s*(,|\be\b|\ba\b|\bao\b)\s*/i).filter(Boolean);
+    for(let i = 0; i < ts.length; i++){
+      if(!/^\d+$/.test(ts[i])) continue;
+      if(/^(a|ao)$/i.test(ts[i + 1] || '') && /^\d+$/.test(ts[i + 2] || '')){ const x = +ts[i], y = +ts[i + 2]; if(y >= x && y - x <= 60) for(let k = x; k <= y; k++) out.push(k); i += 2; }
+      else out.push(+ts[i]);
+    }
+    return out;
+  }
+  function plAndares(t){
+    const s = String(t || ''), out = [], re = /(\d{1,2})[º°]\s*(?:ao|a)\s*(\d{1,2})[º°]/gi; let m;
+    while((m = re.exec(s))) out.push([+m[1], +m[2]]);
+    if(!out.length){ const x = /(\d{1,2})[º°]\s*(?:pavimento|andar)/i.exec(s); if(x) out.push([+x[1], +x[1]]); }
+    return out;
+  }
+  // final da unidade: o fim do número ("1507" no 15º andar é o final 07); sem isso, a coluna do espelho
+  function finalUn(u){
+    const n = String(u.n || ''), an = String(u.an == null ? '' : u.an);
+    if(/^\d{3,5}$/.test(n) && /^\d{1,2}$/.test(an) && n.startsWith(an) && n.length - an.length >= 1 && n.length - an.length <= 2) return +n.slice(an.length);
+    return u.col != null && u.col !== '' && !isNaN(+u.col) ? (+u.col) + 1 : null;
+  }
+  function plantaDasFotos(p, u){
+    const ar = +u.a || 0, fin = finalUn(u), an = andarN(u.an), tk = tipoUn(u.tl || '');
+    const cands = [];
+    for(const f of (Array.isArray(p.fotos) ? p.fotos : [])){
+      if(!f || !f.u) continue;
+      const tt = String(f.t || 'Planta').trim();
+      if(f.k !== 'planta' && (!/^\s*planta\b/i.test(tt) || /implanta/i.test(tt))) continue;
+      if(/pavimento|andar tipo|planta do andar|implanta/i.test(tt)) continue;
+      const as = Array.isArray(f.a) && f.a.length ? f.a.map(Number).filter(v => v > 0) : (plArea(tt) ? [plArea(tt)] : []);
+      let fins = Array.isArray(f.fin) ? f.fin.map(x => /^\d{1,3}$/.test(String(x).trim()) ? +x : NaN) : [];
+      if(!fins.length || fins.some(isNaN)) fins = plFinais(tt);
+      const ands = plAndares(tt);
+      const fOk = fins.length && fin != null ? fins.includes(fin) : null;
+      const inteira = as.length === 1 && Number.isInteger(as[0]);
+      const d = ar > 0 && as.length ? Math.min(...as.map(v => Math.abs(v - ar))) : 99;
+      const faixa = ar > 0 && as.length >= 2 && ar >= Math.min(...as) - 0.3 && ar <= Math.max(...as) + 0.3;
+      const andarOk = !ands.length || an == null || ands.some(([de, ate]) => an >= de && an <= ate);
+      const tOk = !tk || !tipoPl(tt) || tipoPl(tt) === tk;
+      const aOk = d <= (inteira ? 1 : 0.6) || faixa;
+      if(!(andarOk && tOk && (fOk === false ? d <= 0.3 : (aOk || (fOk === true && (d <= 3 || !as.length)))))) continue;   // outro final com a mesma metragem: planta da tipologia
+      cands.push({f, tt, fOk, d, nA: as.length, opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt)});
+    }
+    if(!cands.length) return null;
+    cands.sort((x, y) => (y.fOk === true) - (x.fOk === true) || x.opc - y.opc || x.tec - y.tec || x.d - y.d);
+    const m = cands[0];
+    return {src: String(m.f.u), t: m.tt.split(/\s+·\s+/)[0] || 'Planta', exata: (m.fOk === true && m.nA > 0) || (m.fOk !== false && m.d <= 0.05)};
+  }
+  const miniFoto = (u, w) => String(u).replace(/(googleusercontent\.com\/d\/[A-Za-z0-9_-]+)=w\d+$/, '$1=w' + w);
   function cardU(p, u, P){
     const st = ST[u.st] || ['nao', 'Indisponível'];
     const a = document.createElement('article'); a.className = 'u' + (u.st === 'disponivel' ? '' : ' fora'); a.id = 'u-' + p.id + '-' + u.n;
@@ -905,6 +966,32 @@ window.NEX = (function(){
       b.append(im, l);
       b.addEventListener('click', () => { evento('fotos', p.id); visualizador([{src: cImg(P, pl.p.id), t: pl.p.t + ' · unidade ' + u.n + (pl.exata ? '' : ' (mesma tipologia; pode ser espelhada)')}].concat(pl.p.decorado ? [{src: cImg(P, pl.p.decorado), t: 'Decorado · ' + pl.p.t}] : []), 0); });
       a.appendChild(b);
+    } else {
+      const pf = plantaDasFotos(p, u);
+      if(pf){
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'u-pl';
+        const im = document.createElement('img'); im.loading = 'lazy'; im.alt = pf.t; im.src = miniFoto(pf.src, 800);
+        im.addEventListener('error', () => { if(!im.dataset.f && im.src !== pf.src){ im.dataset.f = '1'; im.src = pf.src; } else b.remove(); });
+        const l = document.createElement('span'); l.textContent = (pf.exata ? 'Planta' : 'Planta da tipologia') + ' · toque para ampliar';
+        b.append(im, l);
+        b.addEventListener('click', () => { evento('fotos', p.id); visualizador([{src: pf.src, t: pf.t + ' · unidade ' + u.n + (pf.exata ? '' : ' (mesma tipologia; pode ser espelhada)')}], 0); });
+        a.appendChild(b);
+      }
+    }
+    // fotos da própria unidade (revenda: a pasta do imóvel no Drive)
+    const uf = (Array.isArray(u.fotos) ? u.fotos : []).filter(f => f && NEX.ehUrl(f.u));
+    if(uf.length){
+      const tt = document.createElement('p'); tt.className = 'u-fotos-t'; tt.textContent = uf.length === 1 ? 'Foto da unidade' : uf.length + ' fotos da unidade · deslize para o lado';
+      const tr = document.createElement('div'); tr.className = 'u-fotos';
+      uf.forEach((f, k) => {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Ampliar a foto ' + (k + 1) + ' da unidade ' + u.n);
+        const im = document.createElement('img'); im.loading = 'lazy'; im.alt = ''; im.src = miniFoto(f.u, 320);
+        im.addEventListener('error', () => { b.remove(); if(!tr.querySelector('button')){ tr.remove(); tt.remove(); } });
+        b.appendChild(im);
+        b.addEventListener('click', () => { evento('fotos', p.id); const vis = [...tr.querySelectorAll('button')]; visualizador(vis.map((x, i) => ({src: miniFoto(uf[+x.dataset.k].u, 1600), t: 'Unidade ' + u.n + ' · foto ' + (i + 1) + ' de ' + vis.length})), Math.max(0, vis.indexOf(b))); });
+        b.dataset.k = k; tr.appendChild(b);
+      });
+      a.append(tt, tr);
     }
     const pr = (u.precos || []).filter(x => x && x.v != null);
     if(pr.length){
