@@ -1,10 +1,10 @@
 /* Service worker dos Espelhos de Vendas 3.0: abre sem internet, guarda as fotos das fichas e mostra os avisos de venda,
    reserva e buscas salvas. A casca é a do app do corretor; os avisos são os mesmos do app anterior. */
-const VERSAO = 'espelhos-casca-b2bbf50d6d';
+const VERSAO = 'espelhos-casca-0c5cb21e9e';
 const FOTOS = 'espelhos-fotos';
 const MAX_FOTOS = 250;
 const CASCA = [
-  './', 'index.html', 'app.css?v=b2bbf50d6d', 'app.js?v=b2bbf50d6d', 'manifest.webmanifest', 'fonts/mona-sans.woff2',
+  './', 'index.html', 'app.css?v=0c5cb21e9e', 'app.js?v=0c5cb21e9e', 'manifest.webmanifest', 'fonts/mona-sans.woff2',
   'img/logo-fortal.png', 'icons/icon-192.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'
 ];
 const ESCOPO = new URL('./', self.location).pathname;

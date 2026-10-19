@@ -1497,3 +1497,17 @@ a.env-u.av-un:hover b{text-decoration:underline;text-underline-offset:3px}
 .pf-arq{position:relative;cursor:pointer}
 .pf-arq:focus-within{outline:2px solid var(--texto);outline-offset:2px}
 .pf-arq svg{width:20px;height:20px}
+
+/* ---------------- x_movel.css ---------------- */
+/* Celular. O corpo da folha cresce a partir do conteúdo (flex-basis auto): com 0%, o Safari do iPhone
+   encolhia o corpo e a folha abria presa no pé da tela, só com o cabeçalho. */
+.folha-corpo{flex:1 1 auto}
+/* folha sem rodapé: o fim da lista não fica embaixo da barra do iPhone */
+.folha-corpo:has(+ .folha-pe[hidden]){padding-bottom:calc(22px + env(safe-area-inset-bottom, 0px))}
+@media (max-width:1023.98px){
+  /* a página atrás da folha não rola junto */
+  html:has(dialog.folha[open]){overflow:hidden}
+  /* o cabeçalho é a alça: arrastar para baixo fecha */
+  .folha-cab{touch-action:none}
+  .folha-cab::before{width:44px;height:5px;top:7px}
+}

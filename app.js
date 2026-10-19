@@ -7536,6 +7536,65 @@
     return ddFrescor(p.id, det) ? h.replace(/\. Espelho lido [^.<]*\.<\/p>/, '.</p>') : h;
   };
 
+  // ---------------- x_movel.js ----------------
+  // ================= CELULAR: folhas inteiras, arrastar para fechar e o botão voltar =================
+  // 1. No iPhone, o corpo da folha (flex-basis 0%) encolhia até sobrar só o cabeçalho: a folha abria "presa" no pé da tela.
+  //    A correção está no x_movel.css (o corpo cresce a partir do conteúdo).
+  // 2. Arrastar o cabeçalho da folha para baixo fecha a folha; soltar antes do ponto devolve a folha para o lugar.
+  // 3. O botão voltar do celular (Android) fecha a folha aberta em vez de sair da tela.
+  const mvCelular = () => !matchMedia('(min-width: 1024px)').matches;
+  let mvSeq = 0;
+  function mvArrastar(d){
+    const cab = d.querySelector('.folha-cab'); if(!cab || d.dataset.arrasta) return;
+    d.dataset.arrasta = '1';
+    let y0 = 0, t0 = 0, dy = 0, ativo = false;
+    cab.addEventListener('touchstart', ev => {
+      if(!mvCelular() || ev.touches.length !== 1 || (ev.target.closest && ev.target.closest('button, a, input, select, textarea'))) return;
+      ativo = true; y0 = ev.touches[0].clientY; t0 = Date.now(); dy = 0;
+      d.style.animation = 'none'; d.style.transition = 'none';
+    }, {passive: true});
+    cab.addEventListener('touchmove', ev => {
+      if(!ativo) return;
+      dy = Math.max(0, ev.touches[0].clientY - y0);
+      d.style.transform = dy ? 'translateY(' + dy + 'px)' : '';
+      if(ev.cancelable) ev.preventDefault();
+    }, {passive: false});
+    const soltar = () => {
+      if(!ativo) return; ativo = false;
+      const v = dy / Math.max(1, Date.now() - t0);
+      if(dy > 110 || (dy > 36 && v > 0.55)){
+        d.style.transition = 'transform .18s ease-in'; d.style.transform = 'translateY(105%)';
+        setTimeout(() => { try{ d.close(); }catch(e){} }, 170);
+      } else {
+        d.style.transition = 'transform .2s ease-out'; d.style.transform = '';
+        setTimeout(() => { d.style.transition = ''; }, 230);
+      }
+    };
+    cab.addEventListener('touchend', soltar, {passive: true});
+    cab.addEventListener('touchcancel', soltar, {passive: true});
+  }
+  const _abrirFolhaMV = abrirFolha;
+  abrirFolha = function(id, titulo, corpo, pe, cls){
+    // trocando uma folha por outra (da unidade para a proposta, por exemplo): o voltar continua valendo para a folha nova
+    const trocando = !!(document.querySelector('#folhas dialog.folha[open]') && history.state && history.state.mvFolha);
+    _abrirFolhaMV(id, titulo, corpo, pe, cls);
+    const d = document.querySelector('#folhas dialog.folha'); if(!d) return;
+    mvArrastar(d);
+    if(!mvCelular()) return;
+    const marca = 'f' + Date.now().toString(36) + (++mvSeq);
+    d.dataset.mv = marca;
+    try{
+      const st = Object.assign({}, history.state || {}, {mvFolha: marca});
+      if(trocando) history.replaceState(st, ''); else history.pushState(st, '');
+    }catch(e){ return; }
+    // fechou pelo X, pelo fundo ou arrastando: tira do histórico o passo que a folha pôs
+    d.addEventListener('close', () => { if(history.state && history.state.mvFolha === marca) history.back(); });
+  };
+  window.addEventListener('popstate', () => {
+    const d = document.querySelector('#folhas dialog.folha[open]');
+    if(d && d.dataset.mv && !(history.state && history.state.mvFolha === d.dataset.mv)) d.close();
+  });
+
   // ---------------- x_plantas.js ----------------
   // ================= PLANTA DA UNIDADE: mais fontes =================
   // 1. Fotos com título de planta ("Planta 24,59 m² (final 4)", "Planta studio 18,14 m²", "Planta 32,9 m² (final 13, 2º ao 14º andar)",
