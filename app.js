@@ -7667,8 +7667,8 @@
     let exataOk = true;
     // 2. o mesmo final em outro andar, com a mesma metragem: planta da tipologia (o material não trouxe a do andar)
     if(!cands.length){ cands = todas.filter(o => o.fOk === true && !o.andarOk && (o.d <= 0.3 || !o.x.as.length)); exataOk = false; }
-    // 3. outro final com a mesma metragem, só quando o material não tem planta nenhuma do final da unidade
-    if(!cands.length && !todas.some(o => o.fOk === true)){ cands = todas.filter(o => o.fOk === false && o.andarOk && o.d <= 0.3); exataOk = false; }
+    // 3. outro final com a mesma metragem, só quando o material não tem planta do final da unidade para aquele andar (a do garden não conta para os andares de cima)
+    if(!cands.length && !todas.some(o => o.fOk === true && o.andarOk)){ cands = todas.filter(o => o.fOk === false && o.andarOk && o.d <= 0.3); exataOk = false; }
     if(!cands.length) return null;
     cands.sort(ordem);
     const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6 && o.fOk === m.fOk && o.andarOk === m.andarOk);
