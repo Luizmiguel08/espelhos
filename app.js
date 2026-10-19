@@ -7651,20 +7651,31 @@
   }
   function plantaReserva(det, c, a){
     const ar = areaU(a), fin = plFinalU(det, a), an = andarNum(a), tk = tipoKDe(tipologiaU(det, a) || '');
-    const cands = plantasTodas(det, c).filter(x => !x.pav).map(x => {
+    const todas = plantasTodas(det, c).filter(x => !x.pav).map(x => {
       const fOk = x.fins.length && fin != null ? x.fins.includes(fin) : null;
       const inteira = x.as.length === 1 && Number.isInteger(x.as[0]);
       const d = ar > 0 && x.as.length ? Math.min(...x.as.map(v => Math.abs(v - ar))) : 99;
       const faixa = ar > 0 && x.as.length >= 2 && ar >= Math.min(...x.as) - 0.3 && ar <= Math.max(...x.as) + 0.3;
       const andarOk = !x.andares.length || an == null || x.andares.some(([de, ate]) => an >= de && an <= ate);
+      const dAndar = an == null || !x.andares.length ? 0 : Math.min(...x.andares.map(([de, ate]) => an < de ? de - an : an > ate ? an - ate : 0));
       const tOk = !tk || !plTipoK(x.tt) || plTipoK(x.tt) === tk;
-      return {x, fOk, d, aOk: d <= (inteira ? 1 : 0.6) || faixa, andarOk, tOk};
-    }).filter(o => o.andarOk && o.tOk && (o.fOk === false ? o.d <= 0.3 : (o.aOk || (o.fOk === true && (o.d <= 3 || !o.x.as.length)))));   // outro final com a mesma metragem: planta da tipologia; planta sem metragem ("Planta studio (final 1)"): vale pelo final e pelo tipo
+      return {x, fOk, d, aOk: d <= (inteira ? 1 : 0.6) || faixa, andarOk, dAndar, tOk};
+    }).filter(o => o.tOk);
+    const ordem = (p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.dAndar - q.dAndar || p.d - q.d;
+    // 1. a planta do final e do andar da unidade (ou sem final, pela metragem); planta sem metragem ("Planta studio (final 1)") vale pelo final e pelo tipo
+    let cands = todas.filter(o => o.andarOk && o.fOk !== false && (o.aOk || (o.fOk === true && (o.d <= 3 || !o.x.as.length))));
+    let exataOk = true;
+    // 2. o mesmo final em outro andar, com a mesma metragem: planta da tipologia (o material não trouxe a do andar)
+    if(!cands.length){ cands = todas.filter(o => o.fOk === true && !o.andarOk && (o.d <= 0.3 || !o.x.as.length)); exataOk = false; }
+    // 3. outro final com a mesma metragem, só quando o material não tem planta nenhuma do final da unidade
+    if(!cands.length && !todas.some(o => o.fOk === true)){ cands = todas.filter(o => o.fOk === false && o.andarOk && o.d <= 0.3); exataOk = false; }
     if(!cands.length) return null;
-    cands.sort((p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.d - q.d);
-    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6);
-    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: (m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05), opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
+    cands.sort(ordem);
+    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6 && o.fOk === m.fOk && o.andarOk === m.andarOk);
+    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: exataOk && ((m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05)), opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
   }
+  const _andaresDoTituloX = andaresDoTitulo;
+  andaresDoTitulo = function(t){ const r = _andaresDoTituloX(t); if(/(^|\s|·)t[ée]rreo\b/i.test(String(t || ''))) r.push([0, 0]); return r; };
   const _plantaDaUnidadeX = plantaDaUnidade;
   plantaDaUnidade = function(det, c, a){ return _plantaDaUnidadeX(det, c, a) || plantaReserva(det, c, a); };
   // planta do andar inteiro também pelos títulos ("Planta do 13º pavimento")
@@ -7681,7 +7692,18 @@
     const base = _plantasDoProjetoX(det, c);
     const tem = new Set(base.map(x => x.src));
     const extra = plantasTodas(det, c).filter(x => !tem.has(x.src)).sort((p, q) => p.pav - q.pav || (p.as[0] || 0) - (q.as[0] || 0)).map(x => ({src: x.src, t: x.t, sub: x.sub}));
-    return base.concat(extra);
+    const lista = base.concat(extra);
+    if(lista.length <= 24) return lista;
+    // uma planta por final e por andar (Nurban: 127 no Rua das Palmeiras): na ficha do projeto fica uma por final,
+    // a que vale para mais andares; a folha da unidade continua com a planta exata do andar dela
+    const info = new Map(plantasTodas(det, c).map(x => [x.src, x]));
+    const vao = x => (x.andares.length ? x.andares.reduce((s, [de, ate]) => s + ate - de + 1, 0) : 0);
+    const melhor = new Map();
+    for(const x of lista){ const y = info.get(x.src); if(!y || !y.fins.length || y.pav || y.opc) continue; const k = y.fins.join(','); const m = melhor.get(k); if(!m || vao(y) > vao(m)) melhor.set(k, y); }
+    if(!melhor.size) return lista;
+    const fica = new Set([...melhor.values()].map(y => y.src));
+    const out = lista.filter(x => { const y = info.get(x.src); return !y || !y.fins.length || y.pav ? true : fica.has(x.src); });
+    return out.length < lista.length ? out : lista;
   };
   const _fotosDoProjetoX = fotosDoProjeto;
   fotosDoProjeto = function(det, c){

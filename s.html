@@ -684,8 +684,10 @@ window.NEX = (function(){
     if(P && P.renders && P.renders.length) return P.renders.map(r => ({src: cImg(P, r.id), th: cThumb(P, r.id), t: r.t, cobre: false}));
     const out = [];
     if(p.capa) out.push({src: p.capa, t: 'Fachada'});
-    for(const f of (p.fotos || [])) if(f && f.u && f.u !== p.capa) out.push({src: f.u, t: f.t || ''});
-    return out;
+    // projeto com uma planta por final e andar (dezenas): as plantas ficam no cartão de cada unidade, fora da galeria
+    const muitas = (p.fotos || []).filter(f => f && f.k === 'planta').length > 12;
+    for(const f of (p.fotos || [])) if(f && f.u && f.u !== p.capa && !(muitas && f.k === 'planta')) out.push({src: f.u, t: f.t || ''});
+    return out.slice(0, 40);
   }
   function capaDe(p){ const P = CEN[p.id]; if(P && P.hero) return cImg(P, P.hero); return p.capa || (p.fotos && p.fotos[0] && p.fotos[0].u) || null; }
 
