@@ -670,12 +670,12 @@
   // R$/m², andar, vaga, enquadramento, extras). Os de unidade usam o índice de unidades livres; até ele chegar,
   // vale a conta aproximada pelo resumo do projeto.
   const prU = (u, f) => f.modo === 'pv' ? u.pv : u.p;
-  const temFU = (f, ign) => !!((ign !== 'preco' && (f.pmin || f.pmax)) || (ign !== 'tipos' && f.tipos.length) || (ign !== 'area' && (f.amin || f.amax)) || (ign !== 'm2' && f.m2) ||
+  const temFU = (f, ign) => !!((ign !== 'preco' && (f.pmin || f.pmax || f.modo === 'pv')) || (ign !== 'tipos' && f.tipos.length) || (ign !== 'area' && (f.amin || f.amax)) || (ign !== 'm2' && f.m2) ||
     (ign !== 'andar' && f.andar) || (ign !== 'vaga' && f.vaga) || (ign !== 'cats' && f.cats.length) || (ign !== 'extras' && f.extras.length) || (ign !== 'bolso' && bolsoLigado(f)));
   const catBate = (c, alvo) => alvo === 'H' ? /^H/.test(c || '') : c === alvo;
   function passaU(u, f, ign){
     const pr = prU(u, f);
-    if(ign !== 'preco' && (f.pmin || f.pmax)){ if(!(pr > 0)) return false; if(f.pmin && pr < f.pmin) return false; if(f.pmax && pr > f.pmax) return false; }
+    if(ign !== 'preco' && (f.pmin || f.pmax || f.modo === 'pv')){ if(!(pr > 0)) return false; if(f.pmin && pr < f.pmin) return false; if(f.pmax && pr > f.pmax) return false; }
     if(ign !== 'tipos' && f.tipos.length && !f.tipos.includes(u.k)) return false;
     if(ign !== 'area' && (f.amin || f.amax)){ if(!(u.a > 0)) return false; if(f.amin && u.a < f.amin) return false; if(f.amax && u.a > f.amax) return false; }
     if(ign !== 'm2' && f.m2){ if(!(pr > 0 && u.a >= 10) || pr / u.a > f.m2) return false; }
@@ -690,6 +690,7 @@
   function aproxP(p, f, ign){   // sem o índice de unidades: usa o resumo do projeto
     const pr = f.modo === 'pv' ? p.avista : (p.preco != null ? p.preco : p.avista);
     if(ign !== 'preco' && f.pmax && !(pr > 0 && pr <= f.pmax)) return false;
+    if(ign !== 'preco' && f.modo === 'pv' && !(pr > 0)) return false;
     if(ign !== 'tipos' && f.tipos.length && !f.tipos.some(k => p.tipos.includes(k))) return false;
     if(ign !== 'area' && (f.amin || f.amax)){ if(f.amin && !(p.amax >= f.amin)) return false; if(f.amax && !(p.amin > 0 && p.amin <= f.amax)) return false; }
     if(ign !== 'm2' && f.m2 && !(p.pm2 > 0 && p.pm2 <= f.m2)) return false;
@@ -847,7 +848,7 @@
       '<button type="button" class="btn-filtro so-estreito' + (n ? ' ligado' : '') + '" id="btn-filtros" data-acao="abrir-filtros" aria-label="' + (n ? 'Filtros, ' + n + (n === 1 ? ' ligado' : ' ligados') : 'Filtros') + '">' + ICO.filtro + (n ? '<span class="bolha" aria-hidden="true">' + n + '</span>' : '') + '</button></div>' +
       '<div class="imv-grade">' +
       (largo() ? '<aside class="painel-f" id="painel-f" aria-label="Filtros">' + painelHtml() + '</aside>' : '') +
-      '<div class="imv-col"><div id="imv-chips"></div>' +
+      '<div class="imv-col"><div id="imv-chips"></div><div id="imv-pag"></div>' +
       '<div class="contagem"><p id="imv-n" aria-live="polite"></p><label class="sr" for="ordem">Ordenar por</label>' +
       '<select id="ordem" data-input="ordem" class="sel">' + ORDEM_TXT.map(o => '<option value="' + o[0] + '"' + (f.ordem === o[0] ? ' selected' : '') + (o[0] === 'perto' && !f.perto ? ' disabled' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
       '<div id="imv-aviso"></div><div id="imv-res"></div></div></div>';
@@ -859,6 +860,7 @@
     const L = filtrosAtivos(f);
     $('#imv-chips').innerHTML = L.length ? '<div class="pilulas ativos" aria-label="Filtros ligados">' + L.map(x => '<button type="button" class="pilula peq" data-acao="tirar" data-v="' + esc(x[0]) + '" aria-label="Tirar o filtro ' + esc(x[1]) + '">' + esc(x[1]) + ICO.x + '</button>').join('') +
       '<button type="button" class="link-mais" data-acao="limpar-tudo">Limpar tudo</button></div>' : '';
+    { const pg = $('#imv-pag'); if(pg) pg.innerHTML = pagImoveisHtml(f); }
     const fu = temFU(f);
     const nU = fu && S.U ? res.reduce((s, r) => s + (r.us ? r.us.length : 0), 0) : null;
     const totU = S.U ? res.reduce((s, r) => s + (r.us ? r.us.length : (S.U.get(r.p.id) || []).length), 0) : null;
@@ -949,7 +951,7 @@
     const f = S.f, fc = facetas(f);
     const sec = (id, tit, corpo, dica) => '<section class="fsec" data-sec="' + id + '"><h3>' + esc(tit) + (dica ? '<small>' + esc(dica) + '</small>' : '') + '</h3>' + corpo + '</section>';
     let h = '';
-    h += sec('preco', 'Preço', '<div class="seg" role="group" aria-label="Qual preço">' + [['pp', 'Tabela'], ['pv', 'À vista']].map(x => '<button type="button" data-acao="f-modo" data-v="' + x[0] + '" aria-pressed="' + (f.modo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
+    h += sec('preco', 'Preço', '<div class="seg" role="group" aria-label="Qual preço">' + [['pp', 'Parcelado'], ['pv', 'À vista']].map(x => '<button type="button" data-acao="f-modo" data-v="' + x[0] + '" aria-pressed="' + (f.modo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
       '<div class="campos-2">' + campoNum('f-pmin', 'De', f.pmin, 'R$ 0') + campoNum('f-pmax', 'Até', f.pmax, 'Sem limite') + '</div>' +
       '<div class="pilulas">' + [[300000, '300 mil'], [400000, '400 mil'], [500000, '500 mil'], [750000, '750 mil'], [1000000, '1 mi'], [1500000, '1,5 mi'], [2000000, '2 mi']].map(o => '<button type="button" class="pilula peq" data-acao="f-pmax" data-v="' + o[0] + '" aria-pressed="' + (f.pmax === o[0] && !f.pmin) + '">até ' + o[1] + '</button>').join('') + '</div>', 'por unidade');
     h += sec('bolso', 'Cabe no bolso do cliente', bolsoCampos(f));
@@ -1449,18 +1451,18 @@
       '<p class="sub">' + esc([tab.nome ? nomeTabela(tab.nome) : 'Sem tabela publicada', tabEm ? 'atualizada ' + tabEm : ''].filter(Boolean).join(', ')) + '. Espelho lido ' + esc(lido || 'hoje') + '.</p>' +
       '<div class="tab-ctl-lin">' +
       (espTemGrade(det) ? '<div class="seg seg-vista" role="group" aria-label="Como ver as unidades"><button type="button" data-acao="tab-vista" data-v="espelho" aria-pressed="' + (vista === 'espelho') + '">' + ICO.predio + 'Espelho</button><button type="button" data-acao="tab-vista" data-v="lista" aria-pressed="' + (vista === 'lista') + '">' + ICO.lista + 'Lista</button></div>' : '') +
-      (pc.length > 1 ? '<div class="seg" role="group" aria-label="Preço mostrado">' + pc.map(x => '<button type="button" data-acao="tab-modo" data-id="' + esc(p.id) + '" data-v="' + esc(x.k) + '" aria-pressed="' + (modo === x.k) + '">' + esc(x.label) + '</button>').join('') + '</div>' : '') +
+      (pc.length > 1 ? '<div class="seg" role="group" aria-label="Pagamento">' + pc.map(x => '<button type="button" data-acao="tab-modo" data-id="' + esc(p.id) + '" data-v="' + esc(x.k) + '" aria-pressed="' + (modo === x.k) + '">' + esc(pagRot(x)) + '</button>').join('') + '</div>' : '') +
       '<label class="busca mini"><span class="sr">Buscar unidade</span>' + ICO.lupa + '<input type="search" inputmode="search" autocomplete="off" placeholder="' + (vista === 'espelho' ? 'Nº da unidade' : 'Unidade ou tipologia') + '" value="' + esc(S.ui.tabQ) + '" data-input="tab-q"></label></div>' +
       (tab.regra_curta ? '<p class="nota">' + esc(tab.regra_curta) + '</p>' : '') + '</div>' +
       '<div id="tab-lista">' + tabListaHtml(p, det) + '</div>';
   }
   function tabListaHtml(p, det){
-    if(vistaTab(det) === 'espelho') return espelhoCorpoHtml(p, det);
+    if(vistaTab(det) === 'espelho') return tabMenorHtml(p, det) + espelhoCorpoHtml(p, det);
     const pc = precosCampos(det).slice(0, 3), modo = modoTabela(p, det);
     const sel = S.ui.tabSel.get(p.id) || new Set();
     const {us, cont, recentes} = unidadesTabela(p, det, modo);
     const c = S.centralV.get(p.id) || null;
-    let h = '<div class="pilulas rola tab-fil" role="group" aria-label="Quais unidades">' + [['livres', 'Livres', cont.livres], ['mov', 'Mexeram hoje e ontem', cont.mov], ['todas', 'Todas', cont.todas]].map(x => '<button type="button" class="pilula peq" data-acao="tab-fil" data-v="' + x[0] + '" aria-pressed="' + (S.ui.tabFiltro === x[0]) + '">' + esc(x[1]) + '<span class="n">' + x[2] + '</span></button>').join('') + '</div>' +
+    let h = tabMenorHtml(p, det) + '<div class="pilulas rola tab-fil" role="group" aria-label="Quais unidades">' + [['livres', 'Livres', cont.livres], ['mov', 'Mexeram hoje e ontem', cont.mov], ['todas', 'Todas', cont.todas]].map(x => '<button type="button" class="pilula peq" data-acao="tab-fil" data-v="' + x[0] + '" aria-pressed="' + (S.ui.tabFiltro === x[0]) + '">' + esc(x[1]) + '<span class="n">' + x[2] + '</span></button>').join('') + '</div>' +
       espChipsHtml(espUnidades(det, c), espFiltro(p.id), modo, det, recentes, c, true);
     if(!us.length) h += '<p class="texto-2 vazio-txt">' + (S.ui.tabQ.trim() ? 'Nenhuma unidade com “' + esc(S.ui.tabQ.trim()) + '”.' : S.ui.tabFiltro === 'livres' ? 'Nenhuma unidade livre com esse filtro.' : S.ui.tabFiltro === 'mov' ? 'Nenhuma unidade mexeu nas últimas 36 horas.' : 'Nada com esse filtro.') + '</p>';
     const lim = S.ui.tabMostra || 150;
@@ -7860,6 +7862,60 @@
     const d = document.querySelector('#folhas dialog.folha[open]');
     if(d && d.dataset.mv && !(history.state && history.state.mvFolha === d.dataset.mv)) d.close();
   });
+
+  // ---------------- x_pagamento.js ----------------
+  // Pagamento: Parcelado | À vista, no Imóveis (todas as unidades do filtro) e na Tabela de cada projeto, com a unidade
+  // mais barata de cada jeito em destaque. Parcelado é o preço de tabela (pp); À vista é o pv, que só algumas construtoras
+  // publicam. No Imóveis, escolher À vista deixa só o que tem preço à vista (ganchos em temFU, passaU e aproxP no build.py).
+  const pagRot = x => x.k === 'pp' ? 'Parcelado' : x.k === 'pv' ? 'À vista' : x.label;
+  const pagItem = (rot, b, attrs, sub) => b
+    ? '<button type="button" class="pag-item" ' + attrs + '><span>' + esc(rot) + '</span><b class="num">' + esc(BRL(b.v)) + '</b><small>' + esc(sub) + '</small></button>'
+    : '';
+  const pagNada = (rot, txt) => '<span class="pag-item pag-nada"><span>' + esc(rot) + '</span><small>' + esc(txt) + '</small></span>';
+
+  // ---------- Imóveis ----------
+  function pagMenor(f, k){   // a unidade mais barata do filtro no preço k (ou o projeto, enquanto o índice de unidades não chega)
+    const res = resultado(Object.assign({}, f, {modo: k}));
+    let b = null;
+    for(const r of res){
+      if(S.U){
+        for(const u of (r.us || S.U.get(r.p.id) || [])){ const v = k === 'pv' ? u.pv : u.p; if(v > 0 && (!b || v < b.v)) b = {v, p: r.p, n: u.n}; }
+      }else{
+        const v = k === 'pv' ? r.p.avista : r.p.preco;
+        if(v > 0 && (!b || v < b.v)) b = {v, p: r.p, n: null};
+      }
+    }
+    return b;
+  }
+  function pagImoveisHtml(f){
+    const seg = '<div class="seg seg-pag" role="group" aria-label="Pagamento">' + [['pp', 'Parcelado'], ['pv', 'À vista']].map(x =>
+      '<button type="button" data-acao="f-modo" data-v="' + x[0] + '" aria-pressed="' + (f.modo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>';
+    const its = [['pp', 'Menor parcelado'], ['pv', 'Menor à vista']].map(([k, rot]) => {
+      const b = pagMenor(f, k);
+      if(!b) return k === 'pv' ? pagNada(rot, 'nenhum no filtro') : '';
+      return pagItem(rot, b, 'data-acao="pag-un" data-p="' + esc(b.p.id) + '"' + (b.n != null ? ' data-n="' + esc(b.n) + '"' : ''), (b.n != null ? b.n + ', ' : '') + nomeCurto(b.p));
+    }).join('');
+    return '<div class="pag-lin">' + seg + '<div class="pag-menores">' + its + '</div></div>';
+  }
+  ACOES_X['pag-un'] = async el => {   // abre a folha da unidade sem sair do Imóveis
+    const pid = el.dataset.p, n = el.dataset.n;
+    if(n == null){ location.hash = '#/tabelas/' + pid; return; }
+    try{ await detalhe(pid); }catch(e){ location.hash = '#' + pid + '-u' + encodeURIComponent(n); return; }
+    abrirUnidadeEsp(pid, n);
+  };
+
+  // ---------- Tabela do projeto ----------
+  function tabMenorHtml(p, det){
+    const U = espUnidades(det, S.centralV.get(p.id) || null), f = espFiltro(p.id);
+    const tem = k => U.some(u => precoU(u.a, k));
+    const menor = k => { let b = null; for(const u of U){ if(u.st !== 'disponivel' || !espBate(u, f, k)) continue; const v = precoU(u.a, k); if(v && (!b || v < b.v)) b = {v, n: u.n}; } return b; };
+    const its = [['pp', 'Menor parcelado'], ['pv', 'Menor à vista']].map(([k, rot]) => {
+      if(!tem(k)) return k === 'pv' ? pagNada('À vista', 'a construtora não publica') : '';
+      const b = menor(k);
+      return b ? pagItem(rot, b, 'data-acao="esp-u" data-n="' + esc(b.n) + '"', 'Unidade ' + b.n) : pagNada(rot, 'nenhuma livre no filtro');
+    }).join('');
+    return its ? '<div class="pag-menores tab-menor">' + its + '</div>' : '';
+  }
 
   // ---------------- x_plantas.js ----------------
   // ================= PLANTA DA UNIDADE: mais fontes =================
