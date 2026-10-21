@@ -880,7 +880,7 @@
       if(f.extras.length || f.cats.length || f.andar || f.vaga || f.m2) dicas.push('tirar algum extra');
       if(bolsoLigado(f)) dicas.push('subir a entrada ou a parcela');
       box.innerHTML = '<div class="vazio"><h2 class="t-3">Nada com esses filtros</h2><p class="texto-2">' + esc(dicas.length ? 'Tente ' + (dicas.length === 1 ? dicas[0] : dicas.slice(0, -1).join(', ') + ' ou ' + dicas[dicas.length - 1]) + '.' : 'Tente outra combinação.') + '</p>' +
-        '<button type="button" class="btn" data-acao="limpar-tudo">Limpar os filtros</button></div>';
+        (bolsoLigado(f) ? bolsoVazio(f) : '') + '<button type="button" class="btn" data-acao="limpar-tudo">Limpar os filtros</button></div>';
     }else if(f.ver === 'unidades') box.innerHTML = unidadesHtml(res) + barraSelHtml();
     else{
       const mostra = res.slice(0, f.mostra);
@@ -7564,7 +7564,7 @@
     if(!S.B){ if(!S.Berro || Date.now() - (S.Bfalhou || 0) > 30000) carregarBolso(); return true; }   // enquanto carrega (ou sem rede), não esconde nada; o aviso diz
     const b = u.bo; if(!b) return false;
     if(f.be && b.e > f.be) return false;
-    if(f.bm && b.m > f.bm) return false;
+    if(f.bm && !(b.m > 0 && b.m <= f.bm)) return false;   // sem mensal (pronto, à vista) não cabe em "por mês até"
     if(f.bf && b.fi > f.bf) return false;
     return true;
   }
@@ -7595,7 +7595,16 @@
   function bolsoCampos(f){
     return '<div class="campos-2">' + campoNum('f-be', 'Entrada até', f.be, 'R$ 0') + campoNum('f-bm', 'Por mês até', f.bm, 'R$ 0') + '</div>' +
       '<div class="campos-2">' + campoNum('f-bf', 'Financia até', f.bf, 'Sem limite') + '</div>' +
-      '<p class="nota">Entrada é o ato, o sinal e as parcelas dos primeiros meses. A conta usa o fluxo da tabela de cada projeto; reforços anuais e parcela única aparecem em cada unidade.</p>';
+      '<p class="nota">Entrada é o ato, o sinal e as parcelas dos primeiros meses. Por mês é a mensal paga até as chaves: com ele preenchido, unidade sem mensal (pronta ou à vista) fica de fora. Reforços e financiamento aparecem em cada unidade.</p>';
+  }
+  function bolsoVazio(f){   // nada no filtro: o menor valor que existe hoje nos espelhos, para o corretor saber até onde dá para descer
+    if(!S.B) return '';
+    let me = Infinity, mm = Infinity;
+    for(const m of S.B.values()) for(const b of m.values()){ if(b.e > 0 && b.e < me) me = b.e; if(b.m > 0 && b.m < mm) mm = b.m; }
+    const p = [];
+    if(f.be && me < Infinity && f.be < me) p.push('a menor entrada nos espelhos é de ' + brlCurto(me));
+    if(f.bm && mm < Infinity && f.bm < mm) p.push((p.length ? 'a menor mensal, de ' : 'a menor mensal nos espelhos é de ') + brlCurto(mm));
+    return p.length ? '<p class="texto-2">Hoje ' + esc(p.join(' e ')) + '.</p>' : '';
   }
   function bolsoCard(r){   // linha do cartão do projeto com o filtro ligado
     if(!bolsoLigado(S.f) || !r || !r.us || !r.us.length) return '';
