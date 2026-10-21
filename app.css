@@ -1514,6 +1514,16 @@ dialog.folha.mk-folha-doc{max-width:1100px}
 .pf-arq:focus-within{outline:2px solid var(--texto);outline-offset:2px}
 .pf-arq svg{width:20px;height:20px}
 
+/* ---------------- x_bolso.css ---------------- */
+/* busca pelo bolso: resumo do fluxo na lista de unidades e no cartão do projeto */
+/* linha do fluxo embaixo da unidade, na largura toda (não aperta a coluna do preço) */
+.tu-bolso{grid-column:2 / -1;padding-left:50px;font-size:12.5px;line-height:17px;color:var(--apoio)}
+@container (min-width:660px){
+  .tu-lin > .tu-bolso{grid-column:2 / -1;padding-left:50px;margin-top:-8px}
+  .tu-lin > .tu-e{padding-left:12px}
+}
+.card-bolso{display:block;margin-top:6px;font-size:13px;line-height:18px;color:var(--apoio)}
+
 /* ---------------- x_movel.css ---------------- */
 /* Celular. O corpo da folha cresce a partir do conteúdo (flex-basis auto): com 0%, o Safari do iPhone
    encolhia o corpo e a folha abria presa no pé da tela, só com o cabeçalho. */

@@ -151,7 +151,7 @@
   const tipoNome = k => ({S: 'Studio', 1: '1 dorm.', 2: '2 dorms', 3: '3 dorms ou +', L: 'Loja'}[k] || '');
 
   // ================= estado =================
-  const F0 = () => ({q: '', cons: [], fases: [], zonas: [], bairros: [], pmin: 0, pmax: 0, modo: 'pp', tipos: [], amin: 0, amax: 0, m2: 0, andar: 0, vaga: 0, ent: '', cats: [], extras: [], mov: '', perto: null, livres: true, ordem: 'vendidos', ver: 'projetos', mostra: 12});
+  const F0 = () => ({q: '', cons: [], fases: [], zonas: [], bairros: [], pmin: 0, pmax: 0, modo: 'pp', tipos: [], amin: 0, amax: 0, m2: 0, andar: 0, vaga: 0, ent: '', cats: [], extras: [], mov: '', perto: null, be: 0, bm: 0, bf: 0, livres: true, ordem: 'vendidos', ver: 'projetos', mostra: 12});
   const S = {
     cod: LS.get(K.cod), carregado: false, offline: false, carregando: null, resumo: null, geradoEm: 0,
     P: [], byId: new Map(), M: [], dias7: [], hoje: '', U: null, Uem: 0, Ucarregando: null, Uerro: false,
@@ -509,6 +509,7 @@
       '<span class="card-corpo"><span class="card-quem">' + esc([quemDe(p), p.bairro].filter(Boolean).join(', ')) + '</span>' +
       '<span class="card-nome">' + esc(p.nome) + '</span>' +
       (v != null ? '<span class="card-preco"><small>' + esc(rot) + '</small><b class="num">' + esc(BRL(v)) + '</b></span>' : '<span class="card-preco sem">Tabela a publicar</span>') +
+      (o.bolso ? '<span class="card-bolso">' + esc(o.bolso) + '</span>' : '') +
       '<span class="card-info">' + esc(info) + '.</span>' +
       (o.n != null ? '<span class="card-match">' + esc(plural(o.n, 'unidade livre', 'unidades livres')) + ' no filtro</span>'
         : '<span class="card-est">' + esc(p.livres ? plural(p.livres, 'livre', 'livres') + ' de ' + p.total.toLocaleString('pt-BR') : 'Esgotado no espelho') + '</span>') +
@@ -670,7 +671,7 @@
   // vale a conta aproximada pelo resumo do projeto.
   const prU = (u, f) => f.modo === 'pv' ? u.pv : u.p;
   const temFU = (f, ign) => !!((ign !== 'preco' && (f.pmin || f.pmax)) || (ign !== 'tipos' && f.tipos.length) || (ign !== 'area' && (f.amin || f.amax)) || (ign !== 'm2' && f.m2) ||
-    (ign !== 'andar' && f.andar) || (ign !== 'vaga' && f.vaga) || (ign !== 'cats' && f.cats.length) || (ign !== 'extras' && f.extras.length));
+    (ign !== 'andar' && f.andar) || (ign !== 'vaga' && f.vaga) || (ign !== 'cats' && f.cats.length) || (ign !== 'extras' && f.extras.length) || (ign !== 'bolso' && bolsoLigado(f)));
   const catBate = (c, alvo) => alvo === 'H' ? /^H/.test(c || '') : c === alvo;
   function passaU(u, f, ign){
     const pr = prU(u, f);
@@ -682,6 +683,7 @@
     if(ign !== 'vaga' && f.vaga){ if(!(u.vg >= f.vaga)) return false; }
     if(ign !== 'cats' && f.cats.length && !f.cats.some(c => catBate(u.c, c))) return false;
     if(ign !== 'extras' && f.extras.length){ for(const x of f.extras){ if(!(u.f & BIT[x])) return false; } }
+    if(ign !== 'bolso' && bolsoLigado(f) && !cabeNoBolso(u, f)) return false;
     return true;
   }
   const FLAG_P = {mob: 'm', pcd: 'p', gd: 'g', dist: 'd', promo: 'o', cob: 'c'};
@@ -799,6 +801,7 @@
     f.extras.forEach(x => L.push(['extras:' + x, (EXTRAS.find(e => e[0] === x) || [x, x])[1]]));
     if(f.mov) L.push(['mov', f.mov === 'hoje' ? 'Mexeu hoje' : 'Vendeu na semana']);
     if(!f.livres) L.push(['livres', 'Com esgotados']);
+    if(bolsoLigado(f)) L.push(['bolso', bolsoChip(f)]);
     return L;
   }
   function tirarFiltro(k){
@@ -808,7 +811,7 @@
     else if(g === 'modo') f.modo = 'pp';
     else if(g === 'area'){ f.amin = 0; f.amax = 0; }
     else if(g === 'm2') f.m2 = 0; else if(g === 'andar') f.andar = 0; else if(g === 'vaga') f.vaga = 0;
-    else if(g === 'ent') f.ent = ''; else if(g === 'mov') f.mov = ''; else if(g === 'livres') f.livres = true;
+    else if(g === 'bolso'){ f.be = 0; f.bm = 0; f.bf = 0; } else if(g === 'ent') f.ent = ''; else if(g === 'mov') f.mov = ''; else if(g === 'livres') f.livres = true;
     else if(g === 'perto'){ f.perto = null; if(f.ordem === 'perto') f.ordem = 'vendidos'; }
     else if(Array.isArray(f[g])) f[g] = f[g].filter(x => x !== v);
   }
@@ -822,6 +825,7 @@
     if(f.bairros.length) partes.push(noBairro(f.bairros.slice(0, 3).join(', ')));
     else if(f.zonas.length) partes.push('na zona ' + f.zonas.map(z => ZONA[z] || z).join(' ou '));
     if(f.ent) partes.push(f.ent === 'pronto' ? 'prontos para morar' : 'com chaves até ' + f.ent);
+    if(bolsoLigado(f)) partes.push(bolsoFrase(f));
     return partes.join(' ').slice(0, 200);
   }
 
@@ -864,7 +868,7 @@
     const sub = $('#imv-sub');
     if(sub) sub.textContent = plural(S.P.length, 'projeto', 'projetos') + (S.U ? ', ' + plural([...S.U.values()].reduce((s, a) => s + a.length, 0), 'unidade livre', 'unidades livres') : '') + ' nos espelhos, ao vivo';
     const aviso = $('#imv-aviso');
-    if(aviso) aviso.innerHTML = fu && !S.U ? '<p class="aviso fino" role="status">' + (S.Uerro ? 'Não consegui abrir as unidades agora. O filtro está usando o resumo de cada projeto.' : 'Carregando as unidades para filtrar uma por uma…') + '</p>' : '';
+    if(aviso) aviso.innerHTML = fu && !S.U ? '<p class="aviso fino" role="status">' + (S.Uerro ? 'Não consegui abrir as unidades agora. O filtro está usando o resumo de cada projeto.' : 'Carregando as unidades para filtrar uma por uma…') + '</p>' : bolsoLigado(f) && !S.B ? '<p class="aviso fino" role="status">' + (S.Berro ? 'Não consegui abrir o fluxo das unidades agora. A busca pelo bolso volta quando a conexão voltar.' : 'Carregando o fluxo de pagamento das unidades…') + '</p>' : '';
     const nf = nFiltros(f), bf = $('#btn-filtros');
     if(bf){ bf.classList.toggle('ligado', !!nf); bf.setAttribute('aria-label', nf ? 'Filtros, ' + nf + (nf === 1 ? ' ligado' : ' ligados') : 'Filtros'); const b = bf.querySelector('.bolha'); if(nf){ if(b) b.textContent = nf; else bf.insertAdjacentHTML('beforeend', '<span class="bolha" aria-hidden="true">' + nf + '</span>'); } else if(b) b.remove(); }
     const sel = $('#ordem'); if(sel){ const o = sel.querySelector('option[value="perto"]'); if(o) o.disabled = !f.perto; if(sel.value !== f.ordem) sel.value = f.ordem; }
@@ -874,12 +878,13 @@
       if(f.pmin || f.pmax) dicas.push('mudar o preço'); if(f.tipos.length) dicas.push('trocar a tipologia'); if(f.amin || f.amax) dicas.push('abrir a metragem');
       if(f.ent) dicas.push('aceitar entrega mais longe'); if(f.q.trim()) dicas.push('buscar outro nome ou bairro'); if(f.cons.length || f.fases.length || f.zonas.length || f.bairros.length) dicas.push('abrir a construtora ou a região');
       if(f.extras.length || f.cats.length || f.andar || f.vaga || f.m2) dicas.push('tirar algum extra');
+      if(bolsoLigado(f)) dicas.push('subir a entrada ou a parcela');
       box.innerHTML = '<div class="vazio"><h2 class="t-3">Nada com esses filtros</h2><p class="texto-2">' + esc(dicas.length ? 'Tente ' + (dicas.length === 1 ? dicas[0] : dicas.slice(0, -1).join(', ') + ' ou ' + dicas[dicas.length - 1]) + '.' : 'Tente outra combinação.') + '</p>' +
         '<button type="button" class="btn" data-acao="limpar-tudo">Limpar os filtros</button></div>';
     }else if(f.ver === 'unidades') box.innerHTML = unidadesHtml(res) + barraSelHtml();
     else{
       const mostra = res.slice(0, f.mostra);
-      box.innerHTML = '<div class="grade-cards">' + mostra.map(r => cardProj(r.p, {min: r.us ? r.min : null, n: r.us ? r.n : null, dist: r.dist})).join('') + '</div>' +
+      box.innerHTML = '<div class="grade-cards">' + mostra.map(r => cardProj(r.p, {min: r.us ? r.min : null, n: r.us ? r.n : null, dist: r.dist, bolso: bolsoCard(r)})).join('') + '</div>' +
         (res.length > f.mostra ? '<button type="button" class="btn btn-largo" data-acao="mais-res">Mostrar mais ' + Math.min(12, res.length - f.mostra) + ' de ' + (res.length - f.mostra) + '</button>' : '') + barraSelHtml();
     }
     atualizarPainel();
@@ -920,7 +925,7 @@
         '<span role="cell" class="tu-x">' + par(tipo, area) + '</span>' +
         '<span role="cell" class="tu-x">' + par(andar, [vaga, x.u.f & 1 ? 'mobiliado' : ''].filter(Boolean).join(', ')) + '</span>' +
         '<span role="cell" class="tu-p num">' + (x.pr > 0 ? '<b>' + esc(BRL(x.pr)) + '</b>' : '<span class="apoio">sem preço</span>') + (m2 ? '<small>' + esc(BRL(m2)) + '/m²</small>' : '') + '</span>' +
-        '<span role="cell" class="tu-x tu-e">' + esc(entregaCurta(x.p)) + '</span></div>';
+        '<span role="cell" class="tu-x tu-e">' + esc(entregaCurta(x.p)) + '</span>' + (bolsoLigado(f) ? '<span role="cell" class="tu-bolso">' + esc(bolsoCurto(x.u.bo)) + '</span>' : '') + '</div>';
     };
     return '<div class="tab-unid"><div class="tu-corpo" role="table" aria-label="Unidades livres no filtro">' +
       '<div class="tu-lin cab" role="row"><span role="columnheader"><span class="sr">Marcar</span></span><span role="columnheader">Projeto</span><span role="columnheader">Unidade</span><span role="columnheader">Tipo e área</span><span role="columnheader">Andar e vaga</span><span role="columnheader" class="dir">' + (f.modo === 'pv' ? 'À vista' : 'Preço') + '</span><span role="columnheader">Entrega</span></div>' +
@@ -947,6 +952,7 @@
     h += sec('preco', 'Preço', '<div class="seg" role="group" aria-label="Qual preço">' + [['pp', 'Tabela'], ['pv', 'À vista']].map(x => '<button type="button" data-acao="f-modo" data-v="' + x[0] + '" aria-pressed="' + (f.modo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
       '<div class="campos-2">' + campoNum('f-pmin', 'De', f.pmin, 'R$ 0') + campoNum('f-pmax', 'Até', f.pmax, 'Sem limite') + '</div>' +
       '<div class="pilulas">' + [[300000, '300 mil'], [400000, '400 mil'], [500000, '500 mil'], [750000, '750 mil'], [1000000, '1 mi'], [1500000, '1,5 mi'], [2000000, '2 mi']].map(o => '<button type="button" class="pilula peq" data-acao="f-pmax" data-v="' + o[0] + '" aria-pressed="' + (f.pmax === o[0] && !f.pmin) + '">até ' + o[1] + '</button>').join('') + '</div>', 'por unidade');
+    h += sec('bolso', 'Cabe no bolso do cliente', bolsoCampos(f));
     h += sec('tipos', 'Tipologia', '<div class="pilulas">' + TIPOS.map(x => chipF('tipos', x[0], x[1], f.tipos.includes(x[0]), fc.tipos[x[0]])).join('') + '</div>');
     h += sec('area', 'Metragem', '<div class="campos-2">' + campoNum('f-amin', 'De', f.amin, '0', 'm²') + campoNum('f-amax', 'Até', f.amax, 'Sem limite', 'm²') + '</div>' +
       '<div class="pilulas">' + [[0, 30, 'até 30 m²'], [30, 45, '30 a 45'], [45, 65, '45 a 65'], [65, 90, '65 a 90'], [90, 0, '90 m² ou +']].map(o => '<button type="button" class="pilula peq" data-acao="f-area" data-v="' + o[0] + '-' + o[1] + '" aria-pressed="' + (f.amin === o[0] && f.amax === o[1]) + '">' + o[2] + '</button>').join('') + '</div>');
@@ -3386,7 +3392,7 @@
   document.addEventListener('change', async ev => {
     const el = ev.target, k = el.dataset && el.dataset.input; if(!k) return;
     if(k === 'ordem'){ S.f.ordem = el.value; salvarF(); atualizarImoveis(); }
-    else if(k === 'fnum'){ const c = el.dataset.campo, val = lerValor(el.value, c); if(CAMPO_F[c] && S.f[CAMPO_F[c]] !== val){ S.f[CAMPO_F[c]] = val; mudouFiltro(); } el.value = val ? val.toLocaleString('pt-BR') : ''; }
+    else if(k === 'fnum'){ const c = el.dataset.campo, val = lerValor(el.value, c); if(CAMPO_F[c] && S.f[CAMPO_F[c]] !== val){ S.f[CAMPO_F[c]] = val; setTimeout(mudouFiltro, 0); } el.value = val ? val.toLocaleString('pt-BR') : ''; }
     else if(k === 'env-u'){ const n = $$('#env-us input:checked').length; if(n > 40){ el.checked = false; toast('Até 40 unidades por link.'); } }
     else if(k === 'cp-un'){ if(S.cp){ S.cp.n = el.value || null; S.cp.fora = new Set(); render(); } }
     else if(k === 'cp-raio'){ if(S.cp){ S.cp.raio = +el.value || 3; S.cp.fora = new Set(); render(); } }
@@ -4185,6 +4191,7 @@
     if(f.cats && f.cats.length) fora.push('O enquadramento: ' + avListaE(f.cats.map(k => (CATS.find(x => x[0] === k) || [k, k])[1])));
     if(f.extras && f.extras.length) fora.push('Os extras da unidade: ' + avListaE(f.extras.map(k => (EXTRAS.find(x => x[0] === k) || [k, k])[1])));
     if(f.mov) fora.push(f.mov === 'hoje' ? 'O filtro Mexeu hoje' : 'O filtro Vendeu na semana');
+    if(typeof bolsoChip === 'function' && (f.be || f.bm || f.bf)){ const t = bolsoChip(f); fora.push('A busca pelo bolso: ' + t.charAt(0).toLowerCase() + t.slice(1)); }
     return {c, fora, obs};
   }
   function avNomesProjs(ids){   // construtora inteira vira "Vitacon (todos)"
@@ -7499,6 +7506,108 @@
 
   // o cache antigo do espelho inteiro (uns 5 MB) não é mais usado aqui e só ocupa o espaço do navegador
   LS.del('espelhos-cache');
+
+  // ---------------- x_bolso.js ----------------
+  // Busca pelo bolso: o corretor diz quanto o cliente tem de entrada, quanto paga por mês e (se quiser) quanto financia,
+  // e o filtro de Imóveis mostra só as unidades em que o fluxo da tabela cabe. O resumo do fluxo de cada unidade vem
+  // do servidor em corretor_bolso, chamada só quando o filtro é ligado (u.bo = {e, m, nm, r, fi}):
+  //   e  = entrada: ato, sinal e as parcelas curtas do começo (60/90 dias, 30/60/90)
+  //   m  = valor de uma mensal (somando as séries de mensais que correm juntas)
+  //   nm = número de mensais
+  //   r  = reforços: anuais, semestrais, parcela única e intermediárias
+  //   fi = saldo no financiamento
+  // Unidade sem fluxo na tabela fica de fora enquanto o filtro estiver ligado.
+  CAMPO_F['f-be'] = 'be'; CAMPO_F['f-bm'] = 'bm'; CAMPO_F['f-bf'] = 'bf';
+  const _lerValorBase = lerValor;
+  lerValor = function(s, campo){
+    let n = _lerValorBase(s, campo);
+    const cru = String(s || '').toLowerCase();
+    if(n > 0 && !/mil|mi\b|milh|m$/.test(cru.replace(/\s/g, ''))){
+      if((campo === 'f-be' || campo === 'f-bf') && n < 1000) n *= 1e3;        // "50" = 50 mil
+      if(campo === 'f-bm' && n < 50) n = Math.round(n * 1e3);                  // "3" ou "3,5" = 3 mil ou 3,5 mil por mês
+    }
+    return n;
+  };
+  const bolsoLigado = f => !!(f && (f.be || f.bm || f.bf));
+  // resumo do fluxo vem de corretor_bolso (só quando o filtro é ligado) e é pendurado nas unidades de S.U
+  function pendurarBolso(){
+    if(!S.U || !S.B) return;
+    for(const [pid, us] of S.U){ const m = S.B.get(pid); for(const u of us) u.bo = m ? m.get(String(u.n)) || null : null; }
+  }
+  async function carregarBolso(forcar){
+    if(!S.cod) return null;
+    if(S.Bcarregando) return S.Bcarregando;
+    if(S.B && !forcar && Date.now() - S.Bem < 300000) return S.B;
+    S.Bcarregando = (async () => {
+      try{
+        const r = await rpc('corretor_bolso', {p_codigo: S.cod}, 40000), mapa = new Map();
+        for(const pid in (r.u || {})){
+          const m = new Map();
+          for(const lin of String(r.u[pid]).split(';')){
+            if(!lin) continue;
+            const c = lin.split('|');
+            m.set(c[0], {e: +c[1] || 0, m: +c[2] || 0, nm: +c[3] || 0, r: +c[4] || 0, fi: +c[5] || 0});
+          }
+          mapa.set(pid, m);
+        }
+        S.B = mapa; S.Bem = Date.now(); S.Berro = false; pendurarBolso();
+      }catch(e){ if(codigoInvalido(e)){ sair('Esse código não vale mais. Digite o código novo do time.'); return null; } S.Berro = true; S.Bfalhou = Date.now(); }
+      finally{ S.Bcarregando = null; }
+      if(location.hash === '#/imoveis' && !document.querySelector('dialog[open]:not(#folha-filtros)')) atualizarImoveis();
+      return S.B;
+    })();
+    return S.Bcarregando;
+  }
+  const _aplicarUnidadesBase = aplicarUnidades;
+  aplicarUnidades = function(r){ _aplicarUnidadesBase(r); pendurarBolso(); };
+  function cabeNoBolso(u, f){
+    if(!S.B){ if(!S.Berro || Date.now() - (S.Bfalhou || 0) > 30000) carregarBolso(); return true; }   // enquanto carrega (ou sem rede), não esconde nada; o aviso diz
+    const b = u.bo; if(!b) return false;
+    if(f.be && b.e > f.be) return false;
+    if(f.bm && b.m > f.bm) return false;
+    if(f.bf && b.fi > f.bf) return false;
+    return true;
+  }
+  const brlCurto = v => v >= 1e6 ? BRLc(v) : v >= 1e4 ? 'R$ ' + Math.round(v / 1e3).toLocaleString('pt-BR') + ' mil' : BRL(v);
+  function bolsoChip(f){
+    const p = [];
+    if(f.be) p.push('Entrada até ' + milTxt(f.be));
+    if(f.bm) p.push((p.length ? 'até ' : 'Até ') + (f.bm >= 1e4 ? milTxt(f.bm) : BRL(f.bm)) + ' por mês');
+    if(f.bf) p.push((p.length ? 'financia até ' : 'Financia até ') + milTxt(f.bf));
+    return p.join(', ');
+  }
+  function bolsoFrase(f){   // para o texto da seleção do cliente
+    const p = [];
+    if(f.be) p.push('entrada até ' + brlCurto(f.be));
+    if(f.bm) p.push('parcelas até ' + brlCurto(f.bm) + ' por mês');
+    if(f.bf) p.push('financiamento até ' + brlCurto(f.bf));
+    return p.length ? 'com ' + (p.length > 1 ? p.slice(0, -1).join(', ') + ' e ' + p[p.length - 1] : p[0]) : '';
+  }
+  function bolsoCurto(b){   // linha de apoio na lista de unidades
+    if(!b) return 'sem fluxo na tabela';
+    const p = [];
+    if(b.e) p.push('entrada ' + brlCurto(b.e));
+    if(b.m) p.push(b.nm + 'x ' + brlCurto(b.m));
+    if(b.r) p.push('reforços ' + brlCurto(b.r));
+    if(b.fi) p.push('financia ' + brlCurto(b.fi));
+    return p.join(', ');
+  }
+  function bolsoCampos(f){
+    return '<div class="campos-2">' + campoNum('f-be', 'Entrada até', f.be, 'R$ 0') + campoNum('f-bm', 'Por mês até', f.bm, 'R$ 0') + '</div>' +
+      '<div class="campos-2">' + campoNum('f-bf', 'Financia até', f.bf, 'Sem limite') + '</div>' +
+      '<p class="nota">Entrada é o ato, o sinal e as parcelas dos primeiros meses. A conta usa o fluxo da tabela de cada projeto; reforços anuais e parcela única aparecem em cada unidade.</p>';
+  }
+  function bolsoCard(r){   // linha do cartão do projeto com o filtro ligado
+    if(!bolsoLigado(S.f) || !r || !r.us || !r.us.length) return '';
+    let be = null, bm = null;
+    for(const u of r.us){
+      if(!u.bo) continue;
+      if(be == null || u.bo.e < be) be = u.bo.e;
+      if(u.bo.m > 0 && (bm == null || u.bo.m < bm)) bm = u.bo.m;
+    }
+    if(be == null) return '';
+    return 'Entrada a partir de ' + brlCurto(be) + (bm != null ? ', mensais a partir de ' + brlCurto(bm) : '');
+  }
 
   // ---------------- x_dados.js ----------------
   // ================= DADOS AO VIVO E SEM INTERNET =================
