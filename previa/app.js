@@ -151,7 +151,7 @@
   const tipoNome = k => ({S: 'Studio', 1: '1 dorm.', 2: '2 dorms', 3: '3 dorms ou +', L: 'Loja'}[k] || '');
 
   // ================= estado =================
-  const F0 = () => ({q: '', cons: [], fases: [], zonas: [], bairros: [], pmin: 0, pmax: 0, modo: 'pp', tipos: [], amin: 0, amax: 0, m2: 0, andar: 0, vaga: 0, ent: '', cats: [], extras: [], mov: '', perto: null, livres: true, ordem: 'vendidos', ver: 'projetos', mostra: 12});
+  const F0 = () => ({q: '', cons: [], fases: [], zonas: [], bairros: [], pmin: 0, pmax: 0, modo: 'pp', tipos: [], amin: 0, amax: 0, m2: 0, andar: 0, vaga: 0, ent: '', cats: [], extras: [], mov: '', perto: null, be: 0, bm: 0, bf: 0, livres: true, ordem: 'vendidos', ver: 'projetos', mostra: 12});
   const S = {
     cod: LS.get(K.cod), carregado: false, offline: false, carregando: null, resumo: null, geradoEm: 0,
     P: [], byId: new Map(), M: [], dias7: [], hoje: '', U: null, Uem: 0, Ucarregando: null, Uerro: false,
@@ -509,6 +509,7 @@
       '<span class="card-corpo"><span class="card-quem">' + esc([quemDe(p), p.bairro].filter(Boolean).join(', ')) + '</span>' +
       '<span class="card-nome">' + esc(p.nome) + '</span>' +
       (v != null ? '<span class="card-preco"><small>' + esc(rot) + '</small><b class="num">' + esc(BRL(v)) + '</b></span>' : '<span class="card-preco sem">Tabela a publicar</span>') +
+      (o.bolso ? '<span class="card-bolso">' + esc(o.bolso) + '</span>' : '') +
       '<span class="card-info">' + esc(info) + '.</span>' +
       (o.n != null ? '<span class="card-match">' + esc(plural(o.n, 'unidade livre', 'unidades livres')) + ' no filtro</span>'
         : '<span class="card-est">' + esc(p.livres ? plural(p.livres, 'livre', 'livres') + ' de ' + p.total.toLocaleString('pt-BR') : 'Esgotado no espelho') + '</span>') +
@@ -670,7 +671,7 @@
   // vale a conta aproximada pelo resumo do projeto.
   const prU = (u, f) => f.modo === 'pv' ? u.pv : u.p;
   const temFU = (f, ign) => !!((ign !== 'preco' && (f.pmin || f.pmax)) || (ign !== 'tipos' && f.tipos.length) || (ign !== 'area' && (f.amin || f.amax)) || (ign !== 'm2' && f.m2) ||
-    (ign !== 'andar' && f.andar) || (ign !== 'vaga' && f.vaga) || (ign !== 'cats' && f.cats.length) || (ign !== 'extras' && f.extras.length));
+    (ign !== 'andar' && f.andar) || (ign !== 'vaga' && f.vaga) || (ign !== 'cats' && f.cats.length) || (ign !== 'extras' && f.extras.length) || (ign !== 'bolso' && bolsoLigado(f)));
   const catBate = (c, alvo) => alvo === 'H' ? /^H/.test(c || '') : c === alvo;
   function passaU(u, f, ign){
     const pr = prU(u, f);
@@ -682,6 +683,7 @@
     if(ign !== 'vaga' && f.vaga){ if(!(u.vg >= f.vaga)) return false; }
     if(ign !== 'cats' && f.cats.length && !f.cats.some(c => catBate(u.c, c))) return false;
     if(ign !== 'extras' && f.extras.length){ for(const x of f.extras){ if(!(u.f & BIT[x])) return false; } }
+    if(ign !== 'bolso' && bolsoLigado(f) && !cabeNoBolso(u, f)) return false;
     return true;
   }
   const FLAG_P = {mob: 'm', pcd: 'p', gd: 'g', dist: 'd', promo: 'o', cob: 'c'};
@@ -799,6 +801,7 @@
     f.extras.forEach(x => L.push(['extras:' + x, (EXTRAS.find(e => e[0] === x) || [x, x])[1]]));
     if(f.mov) L.push(['mov', f.mov === 'hoje' ? 'Mexeu hoje' : 'Vendeu na semana']);
     if(!f.livres) L.push(['livres', 'Com esgotados']);
+    if(bolsoLigado(f)) L.push(['bolso', bolsoChip(f)]);
     return L;
   }
   function tirarFiltro(k){
@@ -808,7 +811,7 @@
     else if(g === 'modo') f.modo = 'pp';
     else if(g === 'area'){ f.amin = 0; f.amax = 0; }
     else if(g === 'm2') f.m2 = 0; else if(g === 'andar') f.andar = 0; else if(g === 'vaga') f.vaga = 0;
-    else if(g === 'ent') f.ent = ''; else if(g === 'mov') f.mov = ''; else if(g === 'livres') f.livres = true;
+    else if(g === 'bolso'){ f.be = 0; f.bm = 0; f.bf = 0; } else if(g === 'ent') f.ent = ''; else if(g === 'mov') f.mov = ''; else if(g === 'livres') f.livres = true;
     else if(g === 'perto'){ f.perto = null; if(f.ordem === 'perto') f.ordem = 'vendidos'; }
     else if(Array.isArray(f[g])) f[g] = f[g].filter(x => x !== v);
   }
@@ -822,6 +825,7 @@
     if(f.bairros.length) partes.push(noBairro(f.bairros.slice(0, 3).join(', ')));
     else if(f.zonas.length) partes.push('na zona ' + f.zonas.map(z => ZONA[z] || z).join(' ou '));
     if(f.ent) partes.push(f.ent === 'pronto' ? 'prontos para morar' : 'com chaves até ' + f.ent);
+    if(bolsoLigado(f)) partes.push(bolsoFrase(f));
     return partes.join(' ').slice(0, 200);
   }
 
@@ -864,7 +868,7 @@
     const sub = $('#imv-sub');
     if(sub) sub.textContent = plural(S.P.length, 'projeto', 'projetos') + (S.U ? ', ' + plural([...S.U.values()].reduce((s, a) => s + a.length, 0), 'unidade livre', 'unidades livres') : '') + ' nos espelhos, ao vivo';
     const aviso = $('#imv-aviso');
-    if(aviso) aviso.innerHTML = fu && !S.U ? '<p class="aviso fino" role="status">' + (S.Uerro ? 'Não consegui abrir as unidades agora. O filtro está usando o resumo de cada projeto.' : 'Carregando as unidades para filtrar uma por uma…') + '</p>' : '';
+    if(aviso) aviso.innerHTML = fu && !S.U ? '<p class="aviso fino" role="status">' + (S.Uerro ? 'Não consegui abrir as unidades agora. O filtro está usando o resumo de cada projeto.' : 'Carregando as unidades para filtrar uma por uma…') + '</p>' : bolsoLigado(f) && !S.B ? '<p class="aviso fino" role="status">' + (S.Berro ? 'Não consegui abrir o fluxo das unidades agora. A busca pelo bolso volta quando a conexão voltar.' : 'Carregando o fluxo de pagamento das unidades…') + '</p>' : '';
     const nf = nFiltros(f), bf = $('#btn-filtros');
     if(bf){ bf.classList.toggle('ligado', !!nf); bf.setAttribute('aria-label', nf ? 'Filtros, ' + nf + (nf === 1 ? ' ligado' : ' ligados') : 'Filtros'); const b = bf.querySelector('.bolha'); if(nf){ if(b) b.textContent = nf; else bf.insertAdjacentHTML('beforeend', '<span class="bolha" aria-hidden="true">' + nf + '</span>'); } else if(b) b.remove(); }
     const sel = $('#ordem'); if(sel){ const o = sel.querySelector('option[value="perto"]'); if(o) o.disabled = !f.perto; if(sel.value !== f.ordem) sel.value = f.ordem; }
@@ -874,12 +878,13 @@
       if(f.pmin || f.pmax) dicas.push('mudar o preço'); if(f.tipos.length) dicas.push('trocar a tipologia'); if(f.amin || f.amax) dicas.push('abrir a metragem');
       if(f.ent) dicas.push('aceitar entrega mais longe'); if(f.q.trim()) dicas.push('buscar outro nome ou bairro'); if(f.cons.length || f.fases.length || f.zonas.length || f.bairros.length) dicas.push('abrir a construtora ou a região');
       if(f.extras.length || f.cats.length || f.andar || f.vaga || f.m2) dicas.push('tirar algum extra');
+      if(bolsoLigado(f)) dicas.push('subir a entrada ou a parcela');
       box.innerHTML = '<div class="vazio"><h2 class="t-3">Nada com esses filtros</h2><p class="texto-2">' + esc(dicas.length ? 'Tente ' + (dicas.length === 1 ? dicas[0] : dicas.slice(0, -1).join(', ') + ' ou ' + dicas[dicas.length - 1]) + '.' : 'Tente outra combinação.') + '</p>' +
         '<button type="button" class="btn" data-acao="limpar-tudo">Limpar os filtros</button></div>';
     }else if(f.ver === 'unidades') box.innerHTML = unidadesHtml(res) + barraSelHtml();
     else{
       const mostra = res.slice(0, f.mostra);
-      box.innerHTML = '<div class="grade-cards">' + mostra.map(r => cardProj(r.p, {min: r.us ? r.min : null, n: r.us ? r.n : null, dist: r.dist})).join('') + '</div>' +
+      box.innerHTML = '<div class="grade-cards">' + mostra.map(r => cardProj(r.p, {min: r.us ? r.min : null, n: r.us ? r.n : null, dist: r.dist, bolso: bolsoCard(r)})).join('') + '</div>' +
         (res.length > f.mostra ? '<button type="button" class="btn btn-largo" data-acao="mais-res">Mostrar mais ' + Math.min(12, res.length - f.mostra) + ' de ' + (res.length - f.mostra) + '</button>' : '') + barraSelHtml();
     }
     atualizarPainel();
@@ -920,7 +925,7 @@
         '<span role="cell" class="tu-x">' + par(tipo, area) + '</span>' +
         '<span role="cell" class="tu-x">' + par(andar, [vaga, x.u.f & 1 ? 'mobiliado' : ''].filter(Boolean).join(', ')) + '</span>' +
         '<span role="cell" class="tu-p num">' + (x.pr > 0 ? '<b>' + esc(BRL(x.pr)) + '</b>' : '<span class="apoio">sem preço</span>') + (m2 ? '<small>' + esc(BRL(m2)) + '/m²</small>' : '') + '</span>' +
-        '<span role="cell" class="tu-x tu-e">' + esc(entregaCurta(x.p)) + '</span></div>';
+        '<span role="cell" class="tu-x tu-e">' + esc(entregaCurta(x.p)) + '</span>' + (bolsoLigado(f) ? '<span role="cell" class="tu-bolso">' + esc(bolsoCurto(x.u.bo)) + '</span>' : '') + '</div>';
     };
     return '<div class="tab-unid"><div class="tu-corpo" role="table" aria-label="Unidades livres no filtro">' +
       '<div class="tu-lin cab" role="row"><span role="columnheader"><span class="sr">Marcar</span></span><span role="columnheader">Projeto</span><span role="columnheader">Unidade</span><span role="columnheader">Tipo e área</span><span role="columnheader">Andar e vaga</span><span role="columnheader" class="dir">' + (f.modo === 'pv' ? 'À vista' : 'Preço') + '</span><span role="columnheader">Entrega</span></div>' +
@@ -947,6 +952,7 @@
     h += sec('preco', 'Preço', '<div class="seg" role="group" aria-label="Qual preço">' + [['pp', 'Tabela'], ['pv', 'À vista']].map(x => '<button type="button" data-acao="f-modo" data-v="' + x[0] + '" aria-pressed="' + (f.modo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
       '<div class="campos-2">' + campoNum('f-pmin', 'De', f.pmin, 'R$ 0') + campoNum('f-pmax', 'Até', f.pmax, 'Sem limite') + '</div>' +
       '<div class="pilulas">' + [[300000, '300 mil'], [400000, '400 mil'], [500000, '500 mil'], [750000, '750 mil'], [1000000, '1 mi'], [1500000, '1,5 mi'], [2000000, '2 mi']].map(o => '<button type="button" class="pilula peq" data-acao="f-pmax" data-v="' + o[0] + '" aria-pressed="' + (f.pmax === o[0] && !f.pmin) + '">até ' + o[1] + '</button>').join('') + '</div>', 'por unidade');
+    h += sec('bolso', 'Cabe no bolso do cliente', bolsoCampos(f));
     h += sec('tipos', 'Tipologia', '<div class="pilulas">' + TIPOS.map(x => chipF('tipos', x[0], x[1], f.tipos.includes(x[0]), fc.tipos[x[0]])).join('') + '</div>');
     h += sec('area', 'Metragem', '<div class="campos-2">' + campoNum('f-amin', 'De', f.amin, '0', 'm²') + campoNum('f-amax', 'Até', f.amax, 'Sem limite', 'm²') + '</div>' +
       '<div class="pilulas">' + [[0, 30, 'até 30 m²'], [30, 45, '30 a 45'], [45, 65, '45 a 65'], [65, 90, '65 a 90'], [90, 0, '90 m² ou +']].map(o => '<button type="button" class="pilula peq" data-acao="f-area" data-v="' + o[0] + '-' + o[1] + '" aria-pressed="' + (f.amin === o[0] && f.amax === o[1]) + '">' + o[2] + '</button>').join('') + '</div>');
@@ -3386,7 +3392,7 @@
   document.addEventListener('change', async ev => {
     const el = ev.target, k = el.dataset && el.dataset.input; if(!k) return;
     if(k === 'ordem'){ S.f.ordem = el.value; salvarF(); atualizarImoveis(); }
-    else if(k === 'fnum'){ const c = el.dataset.campo, val = lerValor(el.value, c); if(CAMPO_F[c] && S.f[CAMPO_F[c]] !== val){ S.f[CAMPO_F[c]] = val; mudouFiltro(); } el.value = val ? val.toLocaleString('pt-BR') : ''; }
+    else if(k === 'fnum'){ const c = el.dataset.campo, val = lerValor(el.value, c); if(CAMPO_F[c] && S.f[CAMPO_F[c]] !== val){ S.f[CAMPO_F[c]] = val; setTimeout(mudouFiltro, 0); } el.value = val ? val.toLocaleString('pt-BR') : ''; }
     else if(k === 'env-u'){ const n = $$('#env-us input:checked').length; if(n > 40){ el.checked = false; toast('Até 40 unidades por link.'); } }
     else if(k === 'cp-un'){ if(S.cp){ S.cp.n = el.value || null; S.cp.fora = new Set(); render(); } }
     else if(k === 'cp-raio'){ if(S.cp){ S.cp.raio = +el.value || 3; S.cp.fora = new Set(); render(); } }
@@ -4185,6 +4191,7 @@
     if(f.cats && f.cats.length) fora.push('O enquadramento: ' + avListaE(f.cats.map(k => (CATS.find(x => x[0] === k) || [k, k])[1])));
     if(f.extras && f.extras.length) fora.push('Os extras da unidade: ' + avListaE(f.extras.map(k => (EXTRAS.find(x => x[0] === k) || [k, k])[1])));
     if(f.mov) fora.push(f.mov === 'hoje' ? 'O filtro Mexeu hoje' : 'O filtro Vendeu na semana');
+    if(typeof bolsoChip === 'function' && (f.be || f.bm || f.bf)){ const t = bolsoChip(f); fora.push('A busca pelo bolso: ' + t.charAt(0).toLowerCase() + t.slice(1)); }
     return {c, fora, obs};
   }
   function avNomesProjs(ids){   // construtora inteira vira "Vitacon (todos)"
@@ -5526,13 +5533,17 @@
     const mkZap = t => { let d = String(t).replace(/\D/g, ''); if(d.length === 10 || d.length === 11) d = '55' + d; return d; };
     const mkPrimeiro = v => Array.isArray(v) ? v.find(x => x != null && String(x).trim()) : (v != null && String(v).trim() ? v : null);
     function mkIcoArq(tipo){ const t = mkNorm(tipo); return /tabela/.test(t) ? ICO.planilha : /book|apresenta|folder/.test(t) ? ICO.livro : /planta/.test(t) ? ICO.planta : ICO.arquivo; }
-    function mkMatCorpo(r){
+    function mkMatCorpo(r, extra){
       const ORD = ['Tabela', 'Book', 'Apresentação', 'Folder', 'Planta técnica', 'Memorial descritivo', 'Ficha técnica', 'Outros'];
       const posi = t => { const i = ORD.indexOf(t); return i < 0 ? 99 : i; };
       const arqs = (Array.isArray(r.arquivos) ? r.arquivos : []).filter(a => a && a.id != null).slice().sort((a, b) => posi(a.tipo) - posi(b.tipo));
-      let h = arqs.length ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
-        '<span class="t"><b>' + esc(a.tipo || 'Arquivo') + '</b>' + (a.nome ? '<small>' + esc(a.nome) + '</small>' : '') + '</span>' + ICO.seta + '</button></li>').join('') + '</ul>'
+      let h = (arqs.length || extra) ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '" data-tipo="' + esc(a.tipo || '') + '" data-nome="' + esc(a.nome || '') + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
+        '<span class="t"><b>' + esc(a.tipo || 'Arquivo') + '</b>' + (a.nome ? '<small>' + esc(a.nome) + '</small>' : '') + '</span>' + ICO.seta + '</button></li>').join('') + (extra || '') + '</ul>'
         : '<p class="texto-2">Nenhum arquivo cadastrado na Órulo para este empreendimento.</p>';
+      if(extra != null){   // folha do material: diz o que a Órulo não tem
+        if(!arqs.length) h += '<p class="nota">A Órulo não tem book nem tabela em arquivo para este empreendimento.</p>';
+        else if(!arqs.some(a => /book|apresenta/.test(mkNorm(a.tipo)))) h += '<p class="nota">A Órulo não tem o book deste empreendimento, só ' + esc([...new Set(arqs.map(a => String(a.tipo || 'arquivo').toLowerCase()))].join(', ')) + '.</p>';
+      }
       const cts = Array.isArray(r.contatos) ? r.contatos.filter(c => c && typeof c === 'object') : [];
       const cm = cts.find(c => c.comissao_corretor != null || c.comissao_imobiliaria != null);
       if(cm) h += '<p class="texto-2"><b>Comissão:</b> ' + esc([cm.comissao_corretor != null ? 'corretor ' + mkPct(cm.comissao_corretor) : '', cm.comissao_imobiliaria != null ? 'imobiliária ' + mkPct(cm.comissao_imobiliaria) : ''].filter(Boolean).join(', ')) + '</p>';
@@ -5591,18 +5602,155 @@
       })();
       mk.matPedido.set(k, pr);
     }
-    async function mkAbrirArquivo(el){
-      const tk = mkToken(), e = mkFichaAberta(); if(!tk || !e) return;
-      const w = window.open('', '_blank');   // abre já, no toque (o celular bloqueia janela aberta depois de esperar)
-      if(w){ try{ w.document.title = 'Abrindo…'; w.document.body.innerHTML = '<p style="font:16px sans-serif;padding:24px">Abrindo o arquivo da Órulo…</p>'; }catch(err){} }
-      el.disabled = true;
+    // "Book e tabela": folha com todo o material do empreendimento: arquivos da Órulo (tabela, book...), fotos e plantas
+    function mkHubExtra(){
+      const nf = (S.fotosAtuais || []).length, np = (S.plantasAtuais || []).length;
+      const item = (acao, ico, t, sub) => '<li><button type="button" class="mk-doc" data-acao="' + acao + '" data-i="0"><span class="tipo" aria-hidden="true">' + ico + '</span><span class="t"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span>' + ICO.seta + '</button></li>';
+      return (nf ? item('luz', ICO.fotos, 'Fotos', plural(nf, 'foto', 'fotos')) : '') + (np ? item('luz-planta', ICO.planta, 'Plantas', plural(np, 'planta', 'plantas')) : '');
+    }
+    function mkAbrirMaterial(id){
+      const e = mk.porId.get(String(id)) || mkFichaAberta(); if(!e || !(mk.ST && mk.ST.login)) return;
+      if(!mkToken()){
+        const m = $('#mk-mat'); if(m) m.scrollIntoView({behavior: menosMov() ? 'auto' : 'smooth', block: 'start'});
+        mkConectar(e.i); return;
+      }
+      const k = String(e.i), extra = mkHubExtra();
+      const pe = '<a class="btn" href="' + esc(mkUrlOrulo(e, (mk.fichas.get(k) || {}).d)) + '" target="_blank" rel="noopener">Abrir na Órulo ' + MKI.fora + '</a>';
+      const corpo = m => '<div class="mk-mat-c">' + (m && m.r ? mkMatCorpo(m.r, extra) : (extra ? '<ul class="docs mk-docs">' + extra + '</ul>' : '') + (m ? m.html : mkMatEspera)) + '</div>';
+      abrirFolha('mk-mat', 'Material do empreendimento', corpo(mk.mats.get(k)), pe);
+      mkMaterialCarregar(e);
+      const pr = mk.matPedido.get(k);
+      if(pr) pr.then(() => { const d = $('#folha-mk-mat'); if(d) corpoFolha(corpo(mk.mats.get(k)), null, d); });
+    }
+    // Arquivo da Órulo (tabela, book...) aberto dentro do app. O arquivo vem direto da Órulo (tabelas.orulo.com.br libera o
+    // app) e fica só na memória enquanto a folha está aberta. PDF: no computador, o leitor do próprio navegador; no celular,
+    // onde o navegador não mostra PDF dentro da página, as páginas são desenhadas com o pdf.js, só as que estão perto da tela.
+    const MK_PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    let mkPdfPr = null;
+    function mkPdfLib(){
+      if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+      if(mkPdfPr) return mkPdfPr;
+      mkPdfPr = new Promise((ok, falha) => {
+        const s = document.createElement('script'); s.src = MK_PDFJS + 'pdf.min.js'; s.async = true; s.crossOrigin = 'anonymous';
+        s.onload = () => { const L = window.pdfjsLib; if(!L){ mkPdfPr = null; falha(new Error('pdfjs')); return; } L.GlobalWorkerOptions.workerSrc = MK_PDFJS + 'pdf.worker.min.js'; ok(L); };
+        s.onerror = () => { mkPdfPr = null; s.remove(); falha(new Error('pdfjs')); };
+        document.head.appendChild(s);
+      });
+      return mkPdfPr;
+    }
+    const mkMB = n => (n / 1048576).toLocaleString('pt-BR', {maximumFractionDigits: n < 10485760 ? 1 : 0}) + ' MB';
+    function mkNomeArq(doc){
+      let n = String(doc.nome || doc.tipo || 'arquivo').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'arquivo';
+      if(!/\.[a-z0-9]{2,4}$/i.test(n)){ const ext = doc.mime === 'application/pdf' ? 'pdf' : (/^image\/(jpe?g|png|webp)$/.exec(doc.mime) || [])[1]; if(ext) n += '.' + ext.replace('jpeg', 'jpg'); }
+      return n;
+    }
+    const mkVisorEspera = t => '<div class="esqueleto" aria-busy="true"><div class="brilho mk-visor-brilho"></div><p class="sub" id="mk-visor-st">' + esc(t) + '</p></div>';
+    function mkVisorErro(doc, msg){
+      const box = $('#mk-visor'); if(!box || mk.doc !== doc) return;
+      box.innerHTML = '<div class="aviso erro"><p>' + esc(msg) + '</p></div><div class="btn-linha"><button type="button" class="btn" data-acao="mk-doc-tentar">Tentar de novo</button>' +
+        (doc.url ? '<a class="btn" href="' + esc(doc.url) + '" target="_blank" rel="noopener">Abrir em outra aba ' + MKI.fora + '</a>' : '') + '</div>';
+    }
+    const mkDocPe = () => '<button type="button" class="btn" data-acao="mk-doc-baixar" disabled>' + ICO.baixar + 'Baixar</button>' +
+      '<button type="button" class="btn btn-pri" data-acao="mk-doc-enviar" disabled>' + ICO.enviar + 'Enviar ao cliente</button>';
+    function mkAbrirArquivo(el){
+      const e = mkFichaAberta(); if(!e) return;
+      mkVerArquivo(e, el.dataset.arq, el.dataset.tipo, el.dataset.nome);
+    }
+    async function mkVerArquivo(e, arq, tipo, nome){
+      const tk = mkToken(); if(!tk || !e) return;
+      if(mk.doc && mk.doc.ctrl) mk.doc.ctrl.abort();
+      const doc = mk.doc = {e, arq: String(arq), tipo: tipo || 'Arquivo', nome: nome || '', blob: null, mime: '', url: null, obj: null, ctrl: new AbortController(), pdf: null, io: null, zoom: 1, ratio: 1.414};
+      const cab = '<div class="mk-visor-cab">' + (doc.nome ? '<p class="sub mk-visor-nome">' + esc(doc.nome) + '</p>' : '<span></span>') +
+        '<button type="button" class="link-mais" data-acao="mk-material" data-id="' + esc(e.i) + '">Todo o material</button></div>';
+      abrirFolha('mk-doc', doc.tipo, cab + '<div class="mk-visor" id="mk-visor" aria-live="polite">' + mkVisorEspera('Buscando o arquivo na Órulo…') + '</div>', mkDocPe(), 'folha-alta mk-folha-doc');
+      const dlg = $('#folha-mk-doc');
+      if(dlg) dlg.addEventListener('close', () => { doc.ctrl.abort(); if(doc.io) doc.io.disconnect(); if(doc.pdf){ try{ doc.pdf.destroy(); }catch(err){} } if(doc.obj) URL.revokeObjectURL(doc.obj); if(mk.doc === doc) mk.doc = null; });
+      const st = t => { const s = $('#mk-visor-st'); if(s && mk.doc === doc) s.textContent = t; };
       try{
-        const r = await mkFn({acao: 'arquivo', t: tk.t, id: e.i, arquivo: el.dataset.arq});
+        let r = await mkFn({acao: 'arquivo', t: tk.t, id: e.i, arquivo: doc.arq});
+        if(r && !r.ok && r.erro === 'reconectar' && tk.r){
+          const nv = await mkFn({acao: 'renovar', r: tk.r});
+          if(nv.ok && nv.t){ LS.set(MK_K_OR, JSON.stringify({t: nv.t, r: nv.r || tk.r, e: nv.e || tk.e || null})); r = await mkFn({acao: 'arquivo', t: nv.t, id: e.i, arquivo: doc.arq}); }
+        }
+        if(mk.doc !== doc) return;
         const u = r && r.ok ? mkUrl(r.url) : null;
-        if(u){ if(w){ try{ w.opener = null; }catch(err){} w.location.href = u; } else location.href = u; }
-        else{ if(w) w.close(); toast(r && r.erro === 'reconectar' ? 'A sua conexão com a Órulo venceu. Conecte de novo na ficha.' : 'Não consegui abrir o arquivo agora.'); }
-      }catch(err){ if(w) w.close(); toast('Sem conexão com a Órulo agora.'); }
-      finally{ el.disabled = false; }
+        if(!u){ mkVisorErro(doc, r && r.erro === 'reconectar' ? 'A sua conexão com a Órulo venceu. Conecte de novo na ficha.' : 'A Órulo não devolveu o arquivo agora.'); return; }
+        doc.url = u;
+        if(!doc.nome && r.nome) doc.nome = String(r.nome);
+        st('Baixando o arquivo…');
+        const res = await fetch(u, {signal: doc.ctrl.signal});
+        if(!res.ok) throw new Error('http ' + res.status);
+        const total = +res.headers.get('content-length') || 0;
+        let blob;
+        if(res.body && res.body.getReader){
+          const rd = res.body.getReader(), partes = []; let n = 0, ult = 0;
+          for(;;){
+            const {done, value} = await rd.read(); if(done) break;
+            partes.push(value); n += value.length;
+            if(n - ult > 262144){ ult = n; st('Baixando o arquivo… ' + mkMB(n) + (total ? ' de ' + mkMB(total) : '')); }
+          }
+          blob = new Blob(partes, {type: res.headers.get('content-type') || ''});
+        } else blob = await res.blob();
+        if(mk.doc !== doc) return;
+        doc.blob = blob; doc.mime = String(blob.type || '').split(';')[0].trim().toLowerCase();
+        const ehPdf = doc.mime === 'application/pdf' || /\.pdf$/i.test(new URL(u).pathname);
+        if(ehPdf && doc.mime !== 'application/pdf'){ doc.blob = new Blob([blob], {type: 'application/pdf'}); doc.mime = 'application/pdf'; }
+        $$('#folha-mk-doc [data-acao="mk-doc-baixar"], #folha-mk-doc [data-acao="mk-doc-enviar"]').forEach(b => { b.disabled = false; });
+        const box = $('#mk-visor'); if(!box) return;
+        if(ehPdf && !ehToque()){
+          doc.obj = URL.createObjectURL(doc.blob);
+          box.innerHTML = '<iframe class="mk-pdf" title="' + esc(doc.tipo) + '" src="' + esc(doc.obj) + '#view=FitH"></iframe>';
+        } else if(ehPdf){
+          st('Montando as páginas…');
+          await mkPdfDesenhar(doc, box);
+        } else if(/^image\//.test(doc.mime)){
+          doc.obj = URL.createObjectURL(doc.blob);
+          box.innerHTML = '<img class="mk-img-doc" alt="' + esc(doc.tipo) + '" src="' + esc(doc.obj) + '">';
+        } else {
+          box.innerHTML = '<div class="vazio"><p>Este tipo de arquivo não abre dentro do app.</p><p class="sub">Use Baixar para salvar no aparelho.</p></div>';
+        }
+      }catch(err){
+        if(err && err.name === 'AbortError') return;
+        mkVisorErro(doc, 'Não consegui abrir o arquivo agora.');
+      }
+    }
+    async function mkPdfDesenhar(doc, box){
+      const L = await mkPdfLib();
+      const pdf = await L.getDocument({data: new Uint8Array(await doc.blob.arrayBuffer())}).promise;
+      if(mk.doc !== doc){ try{ pdf.destroy(); }catch(err){} return; }
+      doc.pdf = pdf;
+      const v1 = (await pdf.getPage(1)).getViewport({scale: 1});
+      doc.ratio = v1.height / v1.width;
+      box.innerHTML = '<div class="mk-visor-barra"><span class="sub">' + esc(plural(pdf.numPages, 'página', 'páginas')) + '</span><span class="mk-zoom">' +
+        '<button type="button" class="ico-btn" data-acao="mk-doc-zoom" data-z="-1" aria-label="Diminuir">−</button><span class="num" id="mk-zoom-v">100%</span>' +
+        '<button type="button" class="ico-btn" data-acao="mk-doc-zoom" data-z="1" aria-label="Aumentar">+</button></span></div><div class="mk-pags" id="mk-pags"></div>';
+      const pags = $('#mk-pags');
+      for(let i = 1; i <= pdf.numPages; i++){ const c = document.createElement('canvas'); c.className = 'mk-pag'; c.dataset.p = i; c.setAttribute('aria-label', 'Página ' + i); pags.appendChild(c); }
+      doc.io = new IntersectionObserver(es => es.forEach(x => {
+        if(x.isIntersecting) mkPdfPagina(doc, x.target);
+        else if(x.target.dataset.feito === '1'){ x.target.width = 0; x.target.height = 0; x.target.dataset.feito = ''; }   // longe da tela: solta a memória
+      }), {root: box.closest('.folha-corpo'), rootMargin: '900px 0px'});
+      mkPdfMedir(doc);
+    }
+    function mkPdfMedir(doc){
+      const pags = $('#mk-pags'); if(!pags || !doc.io) return;
+      doc.io.disconnect();
+      const w = Math.round((pags.clientWidth || 340) * doc.zoom);
+      $$('.mk-pag', pags).forEach(c => { c.style.width = w + 'px'; c.style.height = Math.round(w * doc.ratio) + 'px'; c.width = 0; c.height = 0; c.dataset.feito = ''; c.dataset.w = w; doc.io.observe(c); });
+      const z = $('#mk-zoom-v'); if(z) z.textContent = Math.round(doc.zoom * 100) + '%';
+    }
+    async function mkPdfPagina(doc, c){
+      if(!doc.pdf || c.dataset.feito === '1' || c.dataset.feito === 'em') return;
+      c.dataset.feito = 'em';
+      const w = +c.dataset.w || 340;
+      try{
+        const pg = await doc.pdf.getPage(+c.dataset.p);
+        if(+c.dataset.w !== w || mk.doc !== doc){ c.dataset.feito = ''; return; }
+        const dpr = Math.min(2, window.devicePixelRatio || 1), v = pg.getViewport({scale: 1}), vp = pg.getViewport({scale: w / v.width * dpr});
+        c.width = Math.round(vp.width); c.height = Math.round(vp.height); c.style.height = Math.round(vp.height / dpr) + 'px';
+        await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
+        c.dataset.feito = +c.dataset.w === w ? '1' : '';
+      }catch(err){ c.dataset.feito = ''; }
     }
     // volta do login da Órulo: o token fica guardado no servidor (10 min) e sai uma vez só para quem tem o estado
     async function mkPegarPendente(){
@@ -5769,10 +5917,17 @@
       'mk-env-val': el => { if(!mk.env) return; mk.env.valores = el.dataset.v === '1'; $$('[data-acao="mk-env-val"]').forEach(b => b.setAttribute('aria-pressed', b === el)); },
       'mk-env-copiar': () => { const m = $('#mk-env-msg'); if(m) copiar(m.value, 'Mensagem com o link copiada.'); },
       'mk-env-wa': el => { const m = $('#mk-env-msg'); if(m) el.href = 'https://wa.me/?text=' + encodeURIComponent(m.value); },
-      'mk-material': el => {
-        const m = $('#mk-mat'); if(m) m.scrollIntoView({behavior: menosMov() ? 'auto' : 'smooth', block: 'start'});
-        if(mk.ST && mk.ST.login && !mkToken()) mkConectar(el.dataset.id);
+      'mk-material': el => mkAbrirMaterial(el.dataset.id),
+      'mk-doc-baixar': () => { const d = mk.doc; if(d && d.blob) salvarBlob(d.blob, mkNomeArq(d)); },
+      'mk-doc-enviar': () => {   // direto do toque: o compartilhamento do aparelho exige o gesto
+        const d = mk.doc; if(!d || !d.blob) return;
+        const f = new File([d.blob], mkNomeArq(d), {type: d.mime || 'application/octet-stream'});
+        let ok = false; try{ ok = !!(navigator.share && navigator.canShare && navigator.canShare({files: [f]})); }catch(err){ ok = false; }
+        if(ok){ compartilhar([f], ''); return; }
+        salvarBlob(d.blob, f.name); toast('O arquivo foi salvo no aparelho. Anexe na conversa com o cliente.', 5000);
       },
+      'mk-doc-zoom': el => { const d = mk.doc; if(!d || !d.pdf) return; const Z = [1, 1.5, 2, 3]; const i = Z.indexOf(d.zoom); const j = Math.max(0, Math.min(Z.length - 1, (i < 0 ? 0 : i) + (+el.dataset.z || 0))); if(Z[j] === d.zoom) return; d.zoom = Z[j]; mkPdfMedir(d); },
+      'mk-doc-tentar': () => { const d = mk.doc; if(d) mkVerArquivo(d.e, d.arq, d.tipo, d.nome); },
       'mk-or-conectar': el => mkConectar(el.dataset.id),
       'mk-or-sair': () => { LS.del(MK_K_OR); mk.mats.clear(); mkRepintarMaterial(); toast('Órulo desconectada deste aparelho.'); },
       'mk-arq': el => mkAbrirArquivo(el),
@@ -7352,6 +7507,108 @@
   // o cache antigo do espelho inteiro (uns 5 MB) não é mais usado aqui e só ocupa o espaço do navegador
   LS.del('espelhos-cache');
 
+  // ---------------- x_bolso.js ----------------
+  // Busca pelo bolso: o corretor diz quanto o cliente tem de entrada, quanto paga por mês e (se quiser) quanto financia,
+  // e o filtro de Imóveis mostra só as unidades em que o fluxo da tabela cabe. O resumo do fluxo de cada unidade vem
+  // do servidor em corretor_bolso, chamada só quando o filtro é ligado (u.bo = {e, m, nm, r, fi}):
+  //   e  = entrada: ato, sinal e as parcelas curtas do começo (60/90 dias, 30/60/90)
+  //   m  = valor de uma mensal (somando as séries de mensais que correm juntas)
+  //   nm = número de mensais
+  //   r  = reforços: anuais, semestrais, parcela única e intermediárias
+  //   fi = saldo no financiamento
+  // Unidade sem fluxo na tabela fica de fora enquanto o filtro estiver ligado.
+  CAMPO_F['f-be'] = 'be'; CAMPO_F['f-bm'] = 'bm'; CAMPO_F['f-bf'] = 'bf';
+  const _lerValorBase = lerValor;
+  lerValor = function(s, campo){
+    let n = _lerValorBase(s, campo);
+    const cru = String(s || '').toLowerCase();
+    if(n > 0 && !/mil|mi\b|milh|m$/.test(cru.replace(/\s/g, ''))){
+      if((campo === 'f-be' || campo === 'f-bf') && n < 1000) n *= 1e3;        // "50" = 50 mil
+      if(campo === 'f-bm' && n < 50) n = Math.round(n * 1e3);                  // "3" ou "3,5" = 3 mil ou 3,5 mil por mês
+    }
+    return n;
+  };
+  const bolsoLigado = f => !!(f && (f.be || f.bm || f.bf));
+  // resumo do fluxo vem de corretor_bolso (só quando o filtro é ligado) e é pendurado nas unidades de S.U
+  function pendurarBolso(){
+    if(!S.U || !S.B) return;
+    for(const [pid, us] of S.U){ const m = S.B.get(pid); for(const u of us) u.bo = m ? m.get(String(u.n)) || null : null; }
+  }
+  async function carregarBolso(forcar){
+    if(!S.cod) return null;
+    if(S.Bcarregando) return S.Bcarregando;
+    if(S.B && !forcar && Date.now() - S.Bem < 300000) return S.B;
+    S.Bcarregando = (async () => {
+      try{
+        const r = await rpc('corretor_bolso', {p_codigo: S.cod}, 40000), mapa = new Map();
+        for(const pid in (r.u || {})){
+          const m = new Map();
+          for(const lin of String(r.u[pid]).split(';')){
+            if(!lin) continue;
+            const c = lin.split('|');
+            m.set(c[0], {e: +c[1] || 0, m: +c[2] || 0, nm: +c[3] || 0, r: +c[4] || 0, fi: +c[5] || 0});
+          }
+          mapa.set(pid, m);
+        }
+        S.B = mapa; S.Bem = Date.now(); S.Berro = false; pendurarBolso();
+      }catch(e){ if(codigoInvalido(e)){ sair('Esse código não vale mais. Digite o código novo do time.'); return null; } S.Berro = true; S.Bfalhou = Date.now(); }
+      finally{ S.Bcarregando = null; }
+      if(location.hash === '#/imoveis' && !document.querySelector('dialog[open]:not(#folha-filtros)')) atualizarImoveis();
+      return S.B;
+    })();
+    return S.Bcarregando;
+  }
+  const _aplicarUnidadesBase = aplicarUnidades;
+  aplicarUnidades = function(r){ _aplicarUnidadesBase(r); pendurarBolso(); };
+  function cabeNoBolso(u, f){
+    if(!S.B){ if(!S.Berro || Date.now() - (S.Bfalhou || 0) > 30000) carregarBolso(); return true; }   // enquanto carrega (ou sem rede), não esconde nada; o aviso diz
+    const b = u.bo; if(!b) return false;
+    if(f.be && b.e > f.be) return false;
+    if(f.bm && b.m > f.bm) return false;
+    if(f.bf && b.fi > f.bf) return false;
+    return true;
+  }
+  const brlCurto = v => v >= 1e6 ? BRLc(v) : v >= 1e4 ? 'R$ ' + Math.round(v / 1e3).toLocaleString('pt-BR') + ' mil' : BRL(v);
+  function bolsoChip(f){
+    const p = [];
+    if(f.be) p.push('Entrada até ' + milTxt(f.be));
+    if(f.bm) p.push((p.length ? 'até ' : 'Até ') + (f.bm >= 1e4 ? milTxt(f.bm) : BRL(f.bm)) + ' por mês');
+    if(f.bf) p.push((p.length ? 'financia até ' : 'Financia até ') + milTxt(f.bf));
+    return p.join(', ');
+  }
+  function bolsoFrase(f){   // para o texto da seleção do cliente
+    const p = [];
+    if(f.be) p.push('entrada até ' + brlCurto(f.be));
+    if(f.bm) p.push('parcelas até ' + brlCurto(f.bm) + ' por mês');
+    if(f.bf) p.push('financiamento até ' + brlCurto(f.bf));
+    return p.length ? 'com ' + (p.length > 1 ? p.slice(0, -1).join(', ') + ' e ' + p[p.length - 1] : p[0]) : '';
+  }
+  function bolsoCurto(b){   // linha de apoio na lista de unidades
+    if(!b) return 'sem fluxo na tabela';
+    const p = [];
+    if(b.e) p.push('entrada ' + brlCurto(b.e));
+    if(b.m) p.push(b.nm + 'x ' + brlCurto(b.m));
+    if(b.r) p.push('reforços ' + brlCurto(b.r));
+    if(b.fi) p.push('financia ' + brlCurto(b.fi));
+    return p.join(', ');
+  }
+  function bolsoCampos(f){
+    return '<div class="campos-2">' + campoNum('f-be', 'Entrada até', f.be, 'R$ 0') + campoNum('f-bm', 'Por mês até', f.bm, 'R$ 0') + '</div>' +
+      '<div class="campos-2">' + campoNum('f-bf', 'Financia até', f.bf, 'Sem limite') + '</div>' +
+      '<p class="nota">Entrada é o ato, o sinal e as parcelas dos primeiros meses. A conta usa o fluxo da tabela de cada projeto; reforços anuais e parcela única aparecem em cada unidade.</p>';
+  }
+  function bolsoCard(r){   // linha do cartão do projeto com o filtro ligado
+    if(!bolsoLigado(S.f) || !r || !r.us || !r.us.length) return '';
+    let be = null, bm = null;
+    for(const u of r.us){
+      if(!u.bo) continue;
+      if(be == null || u.bo.e < be) be = u.bo.e;
+      if(u.bo.m > 0 && (bm == null || u.bo.m < bm)) bm = u.bo.m;
+    }
+    if(be == null) return '';
+    return 'Entrada a partir de ' + brlCurto(be) + (bm != null ? ', mensais a partir de ' + brlCurto(bm) : '');
+  }
+
   // ---------------- x_dados.js ----------------
   // ================= DADOS AO VIVO E SEM INTERNET =================
   // 1. Espelho aberto ao vivo: quando o resumo de cada minuto mostra mudança no projeto aberto (Tabela ou ficha),
@@ -7534,6 +7791,181 @@
   tabelaHtml = function(p, det){
     const h = _tabelaHtmlDD(p, det);
     return ddFrescor(p.id, det) ? h.replace(/\. Espelho lido [^.<]*\.<\/p>/, '.</p>') : h;
+  };
+
+  // ---------------- x_movel.js ----------------
+  // ================= CELULAR: folhas inteiras, arrastar para fechar e o botão voltar =================
+  // 1. No iPhone, o corpo da folha (flex-basis 0%) encolhia até sobrar só o cabeçalho: a folha abria "presa" no pé da tela.
+  //    A correção está no x_movel.css (o corpo cresce a partir do conteúdo).
+  // 2. Arrastar o cabeçalho da folha para baixo fecha a folha; soltar antes do ponto devolve a folha para o lugar.
+  // 3. O botão voltar do celular (Android) fecha a folha aberta em vez de sair da tela.
+  const mvCelular = () => !matchMedia('(min-width: 1024px)').matches;
+  let mvSeq = 0;
+  function mvArrastar(d){
+    const cab = d.querySelector('.folha-cab'); if(!cab || d.dataset.arrasta) return;
+    d.dataset.arrasta = '1';
+    let y0 = 0, t0 = 0, dy = 0, ativo = false;
+    cab.addEventListener('touchstart', ev => {
+      if(!mvCelular() || ev.touches.length !== 1 || (ev.target.closest && ev.target.closest('button, a, input, select, textarea'))) return;
+      ativo = true; y0 = ev.touches[0].clientY; t0 = Date.now(); dy = 0;
+      d.style.animation = 'none'; d.style.transition = 'none';
+    }, {passive: true});
+    cab.addEventListener('touchmove', ev => {
+      if(!ativo) return;
+      dy = Math.max(0, ev.touches[0].clientY - y0);
+      d.style.transform = dy ? 'translateY(' + dy + 'px)' : '';
+      if(ev.cancelable) ev.preventDefault();
+    }, {passive: false});
+    const soltar = () => {
+      if(!ativo) return; ativo = false;
+      const v = dy / Math.max(1, Date.now() - t0);
+      if(dy > 110 || (dy > 36 && v > 0.55)){
+        d.style.transition = 'transform .18s ease-in'; d.style.transform = 'translateY(105%)';
+        setTimeout(() => { try{ d.close(); }catch(e){} }, 170);
+      } else {
+        d.style.transition = 'transform .2s ease-out'; d.style.transform = '';
+        setTimeout(() => { d.style.transition = ''; }, 230);
+      }
+    };
+    cab.addEventListener('touchend', soltar, {passive: true});
+    cab.addEventListener('touchcancel', soltar, {passive: true});
+  }
+  const _abrirFolhaMV = abrirFolha;
+  abrirFolha = function(id, titulo, corpo, pe, cls){
+    // trocando uma folha por outra (da unidade para a proposta, por exemplo): o voltar continua valendo para a folha nova
+    const trocando = !!(document.querySelector('#folhas dialog.folha[open]') && history.state && history.state.mvFolha);
+    _abrirFolhaMV(id, titulo, corpo, pe, cls);
+    const d = document.querySelector('#folhas dialog.folha'); if(!d) return;
+    mvArrastar(d);
+    if(!mvCelular()) return;
+    const marca = 'f' + Date.now().toString(36) + (++mvSeq);
+    d.dataset.mv = marca;
+    try{
+      const st = Object.assign({}, history.state || {}, {mvFolha: marca});
+      if(trocando) history.replaceState(st, ''); else history.pushState(st, '');
+    }catch(e){ return; }
+    // fechou pelo X, pelo fundo ou arrastando: tira do histórico o passo que a folha pôs
+    d.addEventListener('close', () => { if(history.state && history.state.mvFolha === marca) history.back(); });
+  };
+  window.addEventListener('popstate', () => {
+    const d = document.querySelector('#folhas dialog.folha[open]');
+    if(d && d.dataset.mv && !(history.state && history.state.mvFolha === d.dataset.mv)) d.close();
+  });
+
+  // ---------------- x_plantas.js ----------------
+  // ================= PLANTA DA UNIDADE: mais fontes =================
+  // 1. Fotos com título de planta ("Planta 24,59 m² (final 4)", "Planta studio 18,14 m²", "Planta 32,9 m² (final 13, 2º ao 14º andar)",
+  //    "Planta do 13º pavimento"), como as que vieram do site da Vitacon, contam como planta mesmo sem k "planta".
+  // 2. Quando nenhuma planta marcada serve, a busca segue para as outras fontes em vez de parar.
+  // tipologia escrita no título ("studio", "1 dorm", "2 dormitórios"); número solto não conta (24,59 m² não é 2 dorms)
+  const plTipoK = s => { const t = norm(String(s || '')); if(/stud|kitn/.test(t)) return 'S'; const m = /(\d)\s*(?:dorm|quarto|suite)/.exec(t); if(m) return +m[1] >= 3 ? '3' : m[1]; return /\bloja/.test(t) ? 'L' : null; };
+  const plAreaTit = t => { const m = /(\d{1,3}(?:[.,]\d{1,2})?)\s*m²/i.exec(String(t || '')); return m ? +m[1].replace(',', '.') : null; };
+  function plFinaisTit(t){
+    const m = /\bfina(?:l|is)\s+(\d{1,3}(?![\dº°])(?:\s*(?:,|\be\b|\ba\b|\bao\b)\s*\d{1,3}(?![\dº°]))*)/i.exec(String(t || '')); if(!m) return [];   // "final 13, 2º ao 14º andar": o 2º é andar
+    const out = []; const ts = m[1].split(/\s*(,|\be\b|\ba\b|\bao\b)\s*/i).filter(Boolean);
+    for(let i = 0; i < ts.length; i++){
+      if(/^\d+$/.test(ts[i])){ if(/^(a|ao)$/i.test(ts[i + 1] || '') && /^\d+$/.test(ts[i + 2] || '')){ const x = +ts[i], y = +ts[i + 2]; if(y >= x && y - x <= 60) for(let k = x; k <= y; k++) out.push(k); i += 2; } else out.push(+ts[i]); }
+    }
+    return out;
+  }
+  function plAndaresTit(t){
+    const s = String(t || ''), out = andaresDoTitulo(s);
+    const m = /(\d{1,2})[º°]\s*(?:ao|a)\s*(\d{1,2})[º°]\s*(?:pavimentos?|andar)/i.exec(s) || null;
+    if(!out.length && m) out.push([+m[1], +m[2]]);
+    const p = /(\d{1,2})[º°]\s*pavimento/i.exec(s); if(!out.length && p) out.push([+p[1], +p[1]]);
+    return out;
+  }
+  // todas as plantas que o cadastro tem, num formato só: {src, t, sub, as, fins, andares, pav, opc, tec}
+  function plantasTodas(det, c){
+    const out = [], vistos = new Set();
+    const add = (src, tt, as, fins, andares) => {
+      if(!src || vistos.has(src)) return; vistos.add(src);
+      const partes = String(tt || 'Planta').split(/\s+·\s+/);
+      out.push({src, t: partes[0], sub: partes.slice(1).join(', '), tt: String(tt || ''), as, fins, andares,
+        pav: /pavimento|andar tipo|planta do andar/i.test(tt), opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt)});
+    };
+    for(const x of plantasFotos(det)) add(x.src, x.tt, x.as.length ? x.as : (plAreaTit(x.tt) ? [plAreaTit(x.tt)] : []), x.fins.length ? x.fins : plFinaisTit(x.tt), x.andares.length ? x.andares : plAndaresTit(x.tt));
+    for(const f of (det && det.fotos) || []){
+      if(!f || f.k === 'planta' || !/^\s*planta\b/i.test(String(f.t || '')) || /implanta/i.test(String(f.t || ''))) continue;
+      const src = urlImg(f.u), tt = String(f.t); if(!src) continue;
+      add(src, tt, plAreaTit(tt) ? [plAreaTit(tt)] : [], plFinaisTit(tt), plAndaresTit(tt));
+    }
+    const info = (det && det.info) || {};
+    for(const x of (Array.isArray(info.plantas) ? info.plantas : [])){
+      const src = urlImg(x && x.u), tt = String((x && x.t) || 'Planta'); if(!src || /implanta/i.test(tt)) continue;
+      const as = Array.isArray(x.a) ? x.a.map(Number).filter(v => v > 0) : (plAreaTit(tt) ? [plAreaTit(tt)] : []);
+      add(src, tt, as, plFinaisTit(tt), plAndaresTit(tt));
+    }
+    for(const m of (Array.isArray(info.material) ? info.material : [])) if(m && m.tipo === 'planta' && urlSegura(m.u)) add(m.u, m.t || 'Planta', plAreaTit(m.t) ? [plAreaTit(m.t)] : [], plFinaisTit(m.t), plAndaresTit(m.t));
+    return out;
+  }
+  // final da unidade: o rótulo da coluna do espelho ou, sem ele, o fim do número ("1507" no 15º andar é o final 07)
+  function plFinalU(det, a){
+    const f = finalNum(det, a); if(f != null) return f;
+    const n = String(a[0] || ''), an = String(a[4] == null ? '' : a[4]);
+    if(/^\d{3,5}$/.test(n) && /^\d{1,2}$/.test(an) && n.startsWith(an) && n.length - an.length >= 1 && n.length - an.length <= 2) return +n.slice(an.length);
+    return null;
+  }
+  function plantaReserva(det, c, a){
+    const ar = areaU(a), fin = plFinalU(det, a), an = andarNum(a), tk = tipoKDe(tipologiaU(det, a) || '');
+    const todas = plantasTodas(det, c).filter(x => !x.pav).map(x => {
+      const fOk = x.fins.length && fin != null ? x.fins.includes(fin) : null;
+      const inteira = x.as.length === 1 && Number.isInteger(x.as[0]);
+      const d = ar > 0 && x.as.length ? Math.min(...x.as.map(v => Math.abs(v - ar))) : 99;
+      const faixa = ar > 0 && x.as.length >= 2 && ar >= Math.min(...x.as) - 0.3 && ar <= Math.max(...x.as) + 0.3;
+      const andarOk = !x.andares.length || an == null || x.andares.some(([de, ate]) => an >= de && an <= ate);
+      const dAndar = an == null || !x.andares.length ? 0 : Math.min(...x.andares.map(([de, ate]) => an < de ? de - an : an > ate ? an - ate : 0));
+      const tOk = !tk || !plTipoK(x.tt) || plTipoK(x.tt) === tk;
+      return {x, fOk, d, aOk: d <= (inteira ? 1 : 0.6) || faixa, andarOk, dAndar, tOk};
+    }).filter(o => o.tOk);
+    const ordem = (p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.dAndar - q.dAndar || p.d - q.d;
+    // 1. a planta do final e do andar da unidade (ou sem final, pela metragem); planta sem metragem ("Planta studio (final 1)") vale pelo final e pelo tipo
+    let cands = todas.filter(o => o.andarOk && o.fOk !== false && (o.aOk || (o.fOk === true && (o.d <= 3 || !o.x.as.length))));
+    let exataOk = true;
+    // 2. o mesmo final em outro andar, com a mesma metragem: planta da tipologia (o material não trouxe a do andar)
+    if(!cands.length){ cands = todas.filter(o => o.fOk === true && !o.andarOk && (o.d <= 0.3 || !o.x.as.length)); exataOk = false; }
+    // 3. outro final com a mesma metragem, só quando o material não tem planta do final da unidade para aquele andar (a do garden não conta para os andares de cima)
+    if(!cands.length && !todas.some(o => o.fOk === true && o.andarOk)){ cands = todas.filter(o => o.fOk === false && o.andarOk && o.d <= 0.3); exataOk = false; }
+    if(!cands.length) return null;
+    cands.sort(ordem);
+    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6 && o.fOk === m.fOk && o.andarOk === m.andarOk);
+    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: exataOk && ((m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05)), opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
+  }
+  const _andaresDoTituloX = andaresDoTitulo;
+  andaresDoTitulo = function(t){ const r = _andaresDoTituloX(t); if(/(^|\s|·)t[ée]rreo\b/i.test(String(t || ''))) r.push([0, 0]); return r; };
+  const _plantaDaUnidadeX = plantaDaUnidade;
+  plantaDaUnidade = function(det, c, a){ return _plantaDaUnidadeX(det, c, a) || plantaReserva(det, c, a); };
+  // planta do andar inteiro também pelos títulos ("Planta do 13º pavimento")
+  const _pavimentoDaUnidadeX = pavimentoDaUnidade;
+  pavimentoDaUnidade = function(det, a){
+    const r = _pavimentoDaUnidadeX(det, a); if(r) return r;
+    const an = andarNum(a); if(an == null) return null;
+    const ps = plantasTodas(det, null).filter(x => x.pav && x.andares.some(([de, ate]) => an >= de && an <= ate));
+    return ps.length ? {src: ps[0].src, t: ps[0].t, sub: ps[0].sub} : null;
+  };
+  // na galeria, as fotos que são plantas saem das fotos e ficam na seção Plantas
+  const _plantasDoProjetoX = plantasDoProjeto;
+  plantasDoProjeto = function(det, c){
+    const base = _plantasDoProjetoX(det, c);
+    const tem = new Set(base.map(x => x.src));
+    const extra = plantasTodas(det, c).filter(x => !tem.has(x.src)).sort((p, q) => p.pav - q.pav || (p.as[0] || 0) - (q.as[0] || 0)).map(x => ({src: x.src, t: x.t, sub: x.sub}));
+    const lista = base.concat(extra);
+    if(lista.length <= 24) return lista;
+    // uma planta por final e por andar (Nurban: 127 no Rua das Palmeiras): na ficha do projeto fica uma por final,
+    // a que vale para mais andares; a folha da unidade continua com a planta exata do andar dela
+    const info = new Map(plantasTodas(det, c).map(x => [x.src, x]));
+    const vao = x => (x.andares.length ? x.andares.reduce((s, [de, ate]) => s + ate - de + 1, 0) : 0);
+    const melhor = new Map();
+    for(const x of lista){ const y = info.get(x.src); if(!y || !y.fins.length || y.pav || y.opc) continue; const k = y.fins.join(','); const m = melhor.get(k); if(!m || vao(y) > vao(m)) melhor.set(k, y); }
+    if(!melhor.size) return lista;
+    const fica = new Set([...melhor.values()].map(y => y.src));
+    const out = lista.filter(x => { const y = info.get(x.src); return !y || !y.fins.length || y.pav ? true : fica.has(x.src); });
+    return out.length < lista.length ? out : lista;
+  };
+  const _fotosDoProjetoX = fotosDoProjeto;
+  fotosDoProjeto = function(det, c){
+    const pls = new Set(plantasTodas(det, c).map(x => original(x.src)));
+    return _fotosDoProjetoX(det, c).filter(f => !pls.has(original(f.src)));
   };
 
   // ================= início =================

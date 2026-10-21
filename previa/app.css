@@ -1353,6 +1353,22 @@ a.env-u.av-un:hover b{text-decoration:underline;text-underline-offset:3px}
 .mk-acoes{display:flex;flex-wrap:wrap;gap:8px}
 .mk-acoes .btn{flex:1 1 160px}
 .mk-acoes:not(:has(> :not([hidden]))){display:none}
+/* leitor do material da Órulo (tabela, book) dentro do app */
+dialog.folha.mk-folha-doc{max-width:1100px}
+.mk-folha-doc .folha-corpo{padding:12px 14px 16px;gap:10px}
+.mk-visor-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mk-visor-nome{margin:0;min-width:0;overflow-wrap:anywhere}
+.mk-visor-cab .link-mais{flex-shrink:0}
+.mk-visor{display:flex;flex-direction:column;gap:10px;min-height:40vh}
+.mk-visor-brilho{height:56vh}
+.mk-pdf{display:block;width:100%;height:70vh;height:70dvh;border:0;border-radius:var(--r1);background:#fff}
+.mk-visor-barra{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mk-zoom{display:inline-flex;align-items:center;gap:2px}
+.mk-zoom .ico-btn{font-size:20px;line-height:1}
+.mk-zoom .num{min-width:48px;text-align:center;color:var(--apoio)}
+.mk-pags{display:block}
+.mk-pag{display:block;margin:0 auto 10px;background:#fff;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.mk-img-doc{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:var(--r1)}
 
 /* ---------------- x_escritorio.css ---------------- */
 /* Escritório (só administrador): a cena em pixel art do app anterior numa página do app, com a equipe e o diário.
@@ -1497,3 +1513,27 @@ a.env-u.av-un:hover b{text-decoration:underline;text-underline-offset:3px}
 .pf-arq{position:relative;cursor:pointer}
 .pf-arq:focus-within{outline:2px solid var(--texto);outline-offset:2px}
 .pf-arq svg{width:20px;height:20px}
+
+/* ---------------- x_bolso.css ---------------- */
+/* busca pelo bolso: resumo do fluxo na lista de unidades e no cartão do projeto */
+/* linha do fluxo embaixo da unidade, na largura toda (não aperta a coluna do preço) */
+.tu-bolso{grid-column:2 / -1;padding-left:50px;font-size:12.5px;line-height:17px;color:var(--apoio)}
+@container (min-width:660px){
+  .tu-lin > .tu-bolso{grid-column:2 / -1;padding-left:50px;margin-top:-8px}
+  .tu-lin > .tu-e{padding-left:12px}
+}
+.card-bolso{display:block;margin-top:6px;font-size:13px;line-height:18px;color:var(--apoio)}
+
+/* ---------------- x_movel.css ---------------- */
+/* Celular. O corpo da folha cresce a partir do conteúdo (flex-basis auto): com 0%, o Safari do iPhone
+   encolhia o corpo e a folha abria presa no pé da tela, só com o cabeçalho. */
+.folha-corpo{flex:1 1 auto}
+/* folha sem rodapé: o fim da lista não fica embaixo da barra do iPhone */
+.folha-corpo:has(+ .folha-pe[hidden]){padding-bottom:calc(22px + env(safe-area-inset-bottom, 0px))}
+@media (max-width:1023.98px){
+  /* a página atrás da folha não rola junto */
+  html:has(dialog.folha[open]){overflow:hidden}
+  /* o cabeçalho é a alça: arrastar para baixo fecha */
+  .folha-cab{touch-action:none}
+  .folha-cab::before{width:44px;height:5px;top:7px}
+}
