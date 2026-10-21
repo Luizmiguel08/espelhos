@@ -1353,6 +1353,22 @@ a.env-u.av-un:hover b{text-decoration:underline;text-underline-offset:3px}
 .mk-acoes{display:flex;flex-wrap:wrap;gap:8px}
 .mk-acoes .btn{flex:1 1 160px}
 .mk-acoes:not(:has(> :not([hidden]))){display:none}
+/* leitor do material da Órulo (tabela, book) dentro do app */
+dialog.folha.mk-folha-doc{max-width:1100px}
+.mk-folha-doc .folha-corpo{padding:12px 14px 16px;gap:10px}
+.mk-visor-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mk-visor-nome{margin:0;min-width:0;overflow-wrap:anywhere}
+.mk-visor-cab .link-mais{flex-shrink:0}
+.mk-visor{display:flex;flex-direction:column;gap:10px;min-height:40vh}
+.mk-visor-brilho{height:56vh}
+.mk-pdf{display:block;width:100%;height:70vh;height:70dvh;border:0;border-radius:var(--r1);background:#fff}
+.mk-visor-barra{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mk-zoom{display:inline-flex;align-items:center;gap:2px}
+.mk-zoom .ico-btn{font-size:20px;line-height:1}
+.mk-zoom .num{min-width:48px;text-align:center;color:var(--apoio)}
+.mk-pags{display:block}
+.mk-pag{display:block;margin:0 auto 10px;background:#fff;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.mk-img-doc{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:var(--r1)}
 
 /* ---------------- x_escritorio.css ---------------- */
 /* Escritório (só administrador): a cena em pixel art do app anterior numa página do app, com a equipe e o diário.

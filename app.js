@@ -5530,7 +5530,7 @@
       const ORD = ['Tabela', 'Book', 'Apresentação', 'Folder', 'Planta técnica', 'Memorial descritivo', 'Ficha técnica', 'Outros'];
       const posi = t => { const i = ORD.indexOf(t); return i < 0 ? 99 : i; };
       const arqs = (Array.isArray(r.arquivos) ? r.arquivos : []).filter(a => a && a.id != null).slice().sort((a, b) => posi(a.tipo) - posi(b.tipo));
-      let h = arqs.length ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
+      let h = arqs.length ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '" data-tipo="' + esc(a.tipo || '') + '" data-nome="' + esc(a.nome || '') + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
         '<span class="t"><b>' + esc(a.tipo || 'Arquivo') + '</b>' + (a.nome ? '<small>' + esc(a.nome) + '</small>' : '') + '</span>' + ICO.seta + '</button></li>').join('') + '</ul>'
         : '<p class="texto-2">Nenhum arquivo cadastrado na Órulo para este empreendimento.</p>';
       const cts = Array.isArray(r.contatos) ? r.contatos.filter(c => c && typeof c === 'object') : [];
@@ -5591,18 +5591,157 @@
       })();
       mk.matPedido.set(k, pr);
     }
-    async function mkAbrirArquivo(el){
-      const tk = mkToken(), e = mkFichaAberta(); if(!tk || !e) return;
-      const w = window.open('', '_blank');   // abre já, no toque (o celular bloqueia janela aberta depois de esperar)
-      if(w){ try{ w.document.title = 'Abrindo…'; w.document.body.innerHTML = '<p style="font:16px sans-serif;padding:24px">Abrindo o arquivo da Órulo…</p>'; }catch(err){} }
-      el.disabled = true;
+    // "Book e tabela": folha com o material da Órulo (um arquivo só abre direto no leitor)
+    function mkAbrirMaterial(id){
+      const e = mk.porId.get(String(id)) || mkFichaAberta(); if(!e || !(mk.ST && mk.ST.login)) return;
+      if(!mkToken()){
+        const m = $('#mk-mat'); if(m) m.scrollIntoView({behavior: menosMov() ? 'auto' : 'smooth', block: 'start'});
+        mkConectar(e.i); return;
+      }
+      const k = String(e.i), pe = '<a class="btn" href="' + esc(mkUrlOrulo(e, (mk.fichas.get(k) || {}).d)) + '" target="_blank" rel="noopener">Abrir na Órulo ' + MKI.fora + '</a>';
+      const arqsDe = m => (m && m.r && Array.isArray(m.r.arquivos) ? m.r.arquivos : []).filter(a => a && a.id != null);
+      const pronto = mk.mats.get(k);
+      if(pronto && pronto.r && arqsDe(pronto).length === 1 && Date.now() - pronto.em < MK_MAT_VALE){ const a = arqsDe(pronto)[0]; mkVerArquivo(e, a.id, a.tipo, a.nome); return; }
+      abrirFolha('mk-mat', 'Book e tabela', '<div class="mk-mat-c">' + (pronto && pronto.r ? mkMatCorpo(pronto.r) : pronto ? pronto.html : mkMatEspera) + '</div>', pe);
+      mkMaterialCarregar(e);
+      const pr = mk.matPedido.get(k);
+      if(pr) pr.then(() => {
+        const d = $('#folha-mk-mat'); if(!d) return;
+        const m = mk.mats.get(k); if(!m) return;
+        const um = arqsDe(m); if(um.length === 1){ mkVerArquivo(e, um[0].id, um[0].tipo, um[0].nome); return; }
+        corpoFolha('<div class="mk-mat-c">' + (m.r ? mkMatCorpo(m.r) : m.html) + '</div>', null, d);
+      });
+    }
+    // Arquivo da Órulo (tabela, book...) aberto dentro do app. O arquivo vem direto da Órulo (tabelas.orulo.com.br libera o
+    // app) e fica só na memória enquanto a folha está aberta. PDF: no computador, o leitor do próprio navegador; no celular,
+    // onde o navegador não mostra PDF dentro da página, as páginas são desenhadas com o pdf.js, só as que estão perto da tela.
+    const MK_PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    let mkPdfPr = null;
+    function mkPdfLib(){
+      if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+      if(mkPdfPr) return mkPdfPr;
+      mkPdfPr = new Promise((ok, falha) => {
+        const s = document.createElement('script'); s.src = MK_PDFJS + 'pdf.min.js'; s.async = true; s.crossOrigin = 'anonymous';
+        s.onload = () => { const L = window.pdfjsLib; if(!L){ mkPdfPr = null; falha(new Error('pdfjs')); return; } L.GlobalWorkerOptions.workerSrc = MK_PDFJS + 'pdf.worker.min.js'; ok(L); };
+        s.onerror = () => { mkPdfPr = null; s.remove(); falha(new Error('pdfjs')); };
+        document.head.appendChild(s);
+      });
+      return mkPdfPr;
+    }
+    const mkMB = n => (n / 1048576).toLocaleString('pt-BR', {maximumFractionDigits: n < 10485760 ? 1 : 0}) + ' MB';
+    function mkNomeArq(doc){
+      let n = String(doc.nome || doc.tipo || 'arquivo').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'arquivo';
+      if(!/\.[a-z0-9]{2,4}$/i.test(n)){ const ext = doc.mime === 'application/pdf' ? 'pdf' : (/^image\/(jpe?g|png|webp)$/.exec(doc.mime) || [])[1]; if(ext) n += '.' + ext.replace('jpeg', 'jpg'); }
+      return n;
+    }
+    const mkVisorEspera = t => '<div class="esqueleto" aria-busy="true"><div class="brilho mk-visor-brilho"></div><p class="sub" id="mk-visor-st">' + esc(t) + '</p></div>';
+    function mkVisorErro(doc, msg){
+      const box = $('#mk-visor'); if(!box || mk.doc !== doc) return;
+      box.innerHTML = '<div class="aviso erro"><p>' + esc(msg) + '</p></div><div class="btn-linha"><button type="button" class="btn" data-acao="mk-doc-tentar">Tentar de novo</button>' +
+        (doc.url ? '<a class="btn" href="' + esc(doc.url) + '" target="_blank" rel="noopener">Abrir em outra aba ' + MKI.fora + '</a>' : '') + '</div>';
+    }
+    const mkDocPe = () => '<button type="button" class="btn" data-acao="mk-doc-baixar" disabled>' + ICO.baixar + 'Baixar</button>' +
+      '<button type="button" class="btn btn-pri" data-acao="mk-doc-enviar" disabled>' + ICO.enviar + 'Enviar ao cliente</button>';
+    function mkAbrirArquivo(el){
+      const e = mkFichaAberta(); if(!e) return;
+      mkVerArquivo(e, el.dataset.arq, el.dataset.tipo, el.dataset.nome);
+    }
+    async function mkVerArquivo(e, arq, tipo, nome){
+      const tk = mkToken(); if(!tk || !e) return;
+      const m = mk.mats.get(String(e.i)), varios = !!(m && m.r && Array.isArray(m.r.arquivos) && m.r.arquivos.filter(a => a && a.id != null).length > 1);
+      if(mk.doc && mk.doc.ctrl) mk.doc.ctrl.abort();
+      const doc = mk.doc = {e, arq: String(arq), tipo: tipo || 'Arquivo', nome: nome || '', blob: null, mime: '', url: null, obj: null, ctrl: new AbortController(), pdf: null, io: null, zoom: 1, ratio: 1.414};
+      const cab = (doc.nome || varios) ? '<div class="mk-visor-cab">' + (doc.nome ? '<p class="sub mk-visor-nome">' + esc(doc.nome) + '</p>' : '<span></span>') +
+        (varios ? '<button type="button" class="link-mais" data-acao="mk-material" data-id="' + esc(e.i) + '">Outros arquivos</button>' : '') + '</div>' : '';
+      abrirFolha('mk-doc', doc.tipo, cab + '<div class="mk-visor" id="mk-visor" aria-live="polite">' + mkVisorEspera('Buscando o arquivo na Órulo…') + '</div>', mkDocPe(), 'folha-alta mk-folha-doc');
+      const dlg = $('#folha-mk-doc');
+      if(dlg) dlg.addEventListener('close', () => { doc.ctrl.abort(); if(doc.io) doc.io.disconnect(); if(doc.pdf){ try{ doc.pdf.destroy(); }catch(err){} } if(doc.obj) URL.revokeObjectURL(doc.obj); if(mk.doc === doc) mk.doc = null; });
+      const st = t => { const s = $('#mk-visor-st'); if(s && mk.doc === doc) s.textContent = t; };
       try{
-        const r = await mkFn({acao: 'arquivo', t: tk.t, id: e.i, arquivo: el.dataset.arq});
+        let r = await mkFn({acao: 'arquivo', t: tk.t, id: e.i, arquivo: doc.arq});
+        if(r && !r.ok && r.erro === 'reconectar' && tk.r){
+          const nv = await mkFn({acao: 'renovar', r: tk.r});
+          if(nv.ok && nv.t){ LS.set(MK_K_OR, JSON.stringify({t: nv.t, r: nv.r || tk.r, e: nv.e || tk.e || null})); r = await mkFn({acao: 'arquivo', t: nv.t, id: e.i, arquivo: doc.arq}); }
+        }
+        if(mk.doc !== doc) return;
         const u = r && r.ok ? mkUrl(r.url) : null;
-        if(u){ if(w){ try{ w.opener = null; }catch(err){} w.location.href = u; } else location.href = u; }
-        else{ if(w) w.close(); toast(r && r.erro === 'reconectar' ? 'A sua conexão com a Órulo venceu. Conecte de novo na ficha.' : 'Não consegui abrir o arquivo agora.'); }
-      }catch(err){ if(w) w.close(); toast('Sem conexão com a Órulo agora.'); }
-      finally{ el.disabled = false; }
+        if(!u){ mkVisorErro(doc, r && r.erro === 'reconectar' ? 'A sua conexão com a Órulo venceu. Conecte de novo na ficha.' : 'A Órulo não devolveu o arquivo agora.'); return; }
+        doc.url = u;
+        if(!doc.nome && r.nome) doc.nome = String(r.nome);
+        st('Baixando o arquivo…');
+        const res = await fetch(u, {signal: doc.ctrl.signal});
+        if(!res.ok) throw new Error('http ' + res.status);
+        const total = +res.headers.get('content-length') || 0;
+        let blob;
+        if(res.body && res.body.getReader){
+          const rd = res.body.getReader(), partes = []; let n = 0, ult = 0;
+          for(;;){
+            const {done, value} = await rd.read(); if(done) break;
+            partes.push(value); n += value.length;
+            if(n - ult > 262144){ ult = n; st('Baixando o arquivo… ' + mkMB(n) + (total ? ' de ' + mkMB(total) : '')); }
+          }
+          blob = new Blob(partes, {type: res.headers.get('content-type') || ''});
+        } else blob = await res.blob();
+        if(mk.doc !== doc) return;
+        doc.blob = blob; doc.mime = String(blob.type || '').split(';')[0].trim().toLowerCase();
+        const ehPdf = doc.mime === 'application/pdf' || /\.pdf$/i.test(new URL(u).pathname);
+        if(ehPdf && doc.mime !== 'application/pdf'){ doc.blob = new Blob([blob], {type: 'application/pdf'}); doc.mime = 'application/pdf'; }
+        $$('#folha-mk-doc [data-acao="mk-doc-baixar"], #folha-mk-doc [data-acao="mk-doc-enviar"]').forEach(b => { b.disabled = false; });
+        const box = $('#mk-visor'); if(!box) return;
+        if(ehPdf && !ehToque()){
+          doc.obj = URL.createObjectURL(doc.blob);
+          box.innerHTML = '<iframe class="mk-pdf" title="' + esc(doc.tipo) + '" src="' + esc(doc.obj) + '#view=FitH"></iframe>';
+        } else if(ehPdf){
+          st('Montando as páginas…');
+          await mkPdfDesenhar(doc, box);
+        } else if(/^image\//.test(doc.mime)){
+          doc.obj = URL.createObjectURL(doc.blob);
+          box.innerHTML = '<img class="mk-img-doc" alt="' + esc(doc.tipo) + '" src="' + esc(doc.obj) + '">';
+        } else {
+          box.innerHTML = '<div class="vazio"><p>Este tipo de arquivo não abre dentro do app.</p><p class="sub">Use Baixar para salvar no aparelho.</p></div>';
+        }
+      }catch(err){
+        if(err && err.name === 'AbortError') return;
+        mkVisorErro(doc, 'Não consegui abrir o arquivo agora.');
+      }
+    }
+    async function mkPdfDesenhar(doc, box){
+      const L = await mkPdfLib();
+      const pdf = await L.getDocument({data: new Uint8Array(await doc.blob.arrayBuffer())}).promise;
+      if(mk.doc !== doc){ try{ pdf.destroy(); }catch(err){} return; }
+      doc.pdf = pdf;
+      const v1 = (await pdf.getPage(1)).getViewport({scale: 1});
+      doc.ratio = v1.height / v1.width;
+      box.innerHTML = '<div class="mk-visor-barra"><span class="sub">' + esc(plural(pdf.numPages, 'página', 'páginas')) + '</span><span class="mk-zoom">' +
+        '<button type="button" class="ico-btn" data-acao="mk-doc-zoom" data-z="-1" aria-label="Diminuir">−</button><span class="num" id="mk-zoom-v">100%</span>' +
+        '<button type="button" class="ico-btn" data-acao="mk-doc-zoom" data-z="1" aria-label="Aumentar">+</button></span></div><div class="mk-pags" id="mk-pags"></div>';
+      const pags = $('#mk-pags');
+      for(let i = 1; i <= pdf.numPages; i++){ const c = document.createElement('canvas'); c.className = 'mk-pag'; c.dataset.p = i; c.setAttribute('aria-label', 'Página ' + i); pags.appendChild(c); }
+      doc.io = new IntersectionObserver(es => es.forEach(x => {
+        if(x.isIntersecting) mkPdfPagina(doc, x.target);
+        else if(x.target.dataset.feito === '1'){ x.target.width = 0; x.target.height = 0; x.target.dataset.feito = ''; }   // longe da tela: solta a memória
+      }), {root: box.closest('.folha-corpo'), rootMargin: '900px 0px'});
+      mkPdfMedir(doc);
+    }
+    function mkPdfMedir(doc){
+      const pags = $('#mk-pags'); if(!pags || !doc.io) return;
+      doc.io.disconnect();
+      const w = Math.round((pags.clientWidth || 340) * doc.zoom);
+      $$('.mk-pag', pags).forEach(c => { c.style.width = w + 'px'; c.style.height = Math.round(w * doc.ratio) + 'px'; c.width = 0; c.height = 0; c.dataset.feito = ''; c.dataset.w = w; doc.io.observe(c); });
+      const z = $('#mk-zoom-v'); if(z) z.textContent = Math.round(doc.zoom * 100) + '%';
+    }
+    async function mkPdfPagina(doc, c){
+      if(!doc.pdf || c.dataset.feito === '1' || c.dataset.feito === 'em') return;
+      c.dataset.feito = 'em';
+      const w = +c.dataset.w || 340;
+      try{
+        const pg = await doc.pdf.getPage(+c.dataset.p);
+        if(+c.dataset.w !== w || mk.doc !== doc){ c.dataset.feito = ''; return; }
+        const dpr = Math.min(2, window.devicePixelRatio || 1), v = pg.getViewport({scale: 1}), vp = pg.getViewport({scale: w / v.width * dpr});
+        c.width = Math.round(vp.width); c.height = Math.round(vp.height); c.style.height = Math.round(vp.height / dpr) + 'px';
+        await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
+        c.dataset.feito = +c.dataset.w === w ? '1' : '';
+      }catch(err){ c.dataset.feito = ''; }
     }
     // volta do login da Órulo: o token fica guardado no servidor (10 min) e sai uma vez só para quem tem o estado
     async function mkPegarPendente(){
@@ -5769,10 +5908,17 @@
       'mk-env-val': el => { if(!mk.env) return; mk.env.valores = el.dataset.v === '1'; $$('[data-acao="mk-env-val"]').forEach(b => b.setAttribute('aria-pressed', b === el)); },
       'mk-env-copiar': () => { const m = $('#mk-env-msg'); if(m) copiar(m.value, 'Mensagem com o link copiada.'); },
       'mk-env-wa': el => { const m = $('#mk-env-msg'); if(m) el.href = 'https://wa.me/?text=' + encodeURIComponent(m.value); },
-      'mk-material': el => {
-        const m = $('#mk-mat'); if(m) m.scrollIntoView({behavior: menosMov() ? 'auto' : 'smooth', block: 'start'});
-        if(mk.ST && mk.ST.login && !mkToken()) mkConectar(el.dataset.id);
+      'mk-material': el => mkAbrirMaterial(el.dataset.id),
+      'mk-doc-baixar': () => { const d = mk.doc; if(d && d.blob) salvarBlob(d.blob, mkNomeArq(d)); },
+      'mk-doc-enviar': () => {   // direto do toque: o compartilhamento do aparelho exige o gesto
+        const d = mk.doc; if(!d || !d.blob) return;
+        const f = new File([d.blob], mkNomeArq(d), {type: d.mime || 'application/octet-stream'});
+        let ok = false; try{ ok = !!(navigator.share && navigator.canShare && navigator.canShare({files: [f]})); }catch(err){ ok = false; }
+        if(ok){ compartilhar([f], ''); return; }
+        salvarBlob(d.blob, f.name); toast('O arquivo foi salvo no aparelho. Anexe na conversa com o cliente.', 5000);
       },
+      'mk-doc-zoom': el => { const d = mk.doc; if(!d || !d.pdf) return; const Z = [1, 1.5, 2, 3]; const i = Z.indexOf(d.zoom); const j = Math.max(0, Math.min(Z.length - 1, (i < 0 ? 0 : i) + (+el.dataset.z || 0))); if(Z[j] === d.zoom) return; d.zoom = Z[j]; mkPdfMedir(d); },
+      'mk-doc-tentar': () => { const d = mk.doc; if(d) mkVerArquivo(d.e, d.arq, d.tipo, d.nome); },
       'mk-or-conectar': el => mkConectar(el.dataset.id),
       'mk-or-sair': () => { LS.del(MK_K_OR); mk.mats.clear(); mkRepintarMaterial(); toast('Órulo desconectada deste aparelho.'); },
       'mk-arq': el => mkAbrirArquivo(el),
