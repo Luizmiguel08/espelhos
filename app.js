@@ -5526,13 +5526,17 @@
     const mkZap = t => { let d = String(t).replace(/\D/g, ''); if(d.length === 10 || d.length === 11) d = '55' + d; return d; };
     const mkPrimeiro = v => Array.isArray(v) ? v.find(x => x != null && String(x).trim()) : (v != null && String(v).trim() ? v : null);
     function mkIcoArq(tipo){ const t = mkNorm(tipo); return /tabela/.test(t) ? ICO.planilha : /book|apresenta|folder/.test(t) ? ICO.livro : /planta/.test(t) ? ICO.planta : ICO.arquivo; }
-    function mkMatCorpo(r){
+    function mkMatCorpo(r, extra){
       const ORD = ['Tabela', 'Book', 'Apresentação', 'Folder', 'Planta técnica', 'Memorial descritivo', 'Ficha técnica', 'Outros'];
       const posi = t => { const i = ORD.indexOf(t); return i < 0 ? 99 : i; };
       const arqs = (Array.isArray(r.arquivos) ? r.arquivos : []).filter(a => a && a.id != null).slice().sort((a, b) => posi(a.tipo) - posi(b.tipo));
-      let h = arqs.length ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '" data-tipo="' + esc(a.tipo || '') + '" data-nome="' + esc(a.nome || '') + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
-        '<span class="t"><b>' + esc(a.tipo || 'Arquivo') + '</b>' + (a.nome ? '<small>' + esc(a.nome) + '</small>' : '') + '</span>' + ICO.seta + '</button></li>').join('') + '</ul>'
+      let h = (arqs.length || extra) ? '<ul class="docs mk-docs">' + arqs.map(a => '<li><button type="button" class="mk-doc" data-acao="mk-arq" data-arq="' + esc(a.id) + '" data-tipo="' + esc(a.tipo || '') + '" data-nome="' + esc(a.nome || '') + '"><span class="tipo" aria-hidden="true">' + mkIcoArq(a.tipo) + '</span>' +
+        '<span class="t"><b>' + esc(a.tipo || 'Arquivo') + '</b>' + (a.nome ? '<small>' + esc(a.nome) + '</small>' : '') + '</span>' + ICO.seta + '</button></li>').join('') + (extra || '') + '</ul>'
         : '<p class="texto-2">Nenhum arquivo cadastrado na Órulo para este empreendimento.</p>';
+      if(extra != null){   // folha do material: diz o que a Órulo não tem
+        if(!arqs.length) h += '<p class="nota">A Órulo não tem book nem tabela em arquivo para este empreendimento.</p>';
+        else if(!arqs.some(a => /book|apresenta/.test(mkNorm(a.tipo)))) h += '<p class="nota">A Órulo não tem o book deste empreendimento, só ' + esc([...new Set(arqs.map(a => String(a.tipo || 'arquivo').toLowerCase()))].join(', ')) + '.</p>';
+      }
       const cts = Array.isArray(r.contatos) ? r.contatos.filter(c => c && typeof c === 'object') : [];
       const cm = cts.find(c => c.comissao_corretor != null || c.comissao_imobiliaria != null);
       if(cm) h += '<p class="texto-2"><b>Comissão:</b> ' + esc([cm.comissao_corretor != null ? 'corretor ' + mkPct(cm.comissao_corretor) : '', cm.comissao_imobiliaria != null ? 'imobiliária ' + mkPct(cm.comissao_imobiliaria) : ''].filter(Boolean).join(', ')) + '</p>';
@@ -5591,26 +5595,25 @@
       })();
       mk.matPedido.set(k, pr);
     }
-    // "Book e tabela": folha com o material da Órulo (um arquivo só abre direto no leitor)
+    // "Book e tabela": folha com todo o material do empreendimento: arquivos da Órulo (tabela, book...), fotos e plantas
+    function mkHubExtra(){
+      const nf = (S.fotosAtuais || []).length, np = (S.plantasAtuais || []).length;
+      const item = (acao, ico, t, sub) => '<li><button type="button" class="mk-doc" data-acao="' + acao + '" data-i="0"><span class="tipo" aria-hidden="true">' + ico + '</span><span class="t"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span>' + ICO.seta + '</button></li>';
+      return (nf ? item('luz', ICO.fotos, 'Fotos', plural(nf, 'foto', 'fotos')) : '') + (np ? item('luz-planta', ICO.planta, 'Plantas', plural(np, 'planta', 'plantas')) : '');
+    }
     function mkAbrirMaterial(id){
       const e = mk.porId.get(String(id)) || mkFichaAberta(); if(!e || !(mk.ST && mk.ST.login)) return;
       if(!mkToken()){
         const m = $('#mk-mat'); if(m) m.scrollIntoView({behavior: menosMov() ? 'auto' : 'smooth', block: 'start'});
         mkConectar(e.i); return;
       }
-      const k = String(e.i), pe = '<a class="btn" href="' + esc(mkUrlOrulo(e, (mk.fichas.get(k) || {}).d)) + '" target="_blank" rel="noopener">Abrir na Órulo ' + MKI.fora + '</a>';
-      const arqsDe = m => (m && m.r && Array.isArray(m.r.arquivos) ? m.r.arquivos : []).filter(a => a && a.id != null);
-      const pronto = mk.mats.get(k);
-      if(pronto && pronto.r && arqsDe(pronto).length === 1 && Date.now() - pronto.em < MK_MAT_VALE){ const a = arqsDe(pronto)[0]; mkVerArquivo(e, a.id, a.tipo, a.nome); return; }
-      abrirFolha('mk-mat', 'Book e tabela', '<div class="mk-mat-c">' + (pronto && pronto.r ? mkMatCorpo(pronto.r) : pronto ? pronto.html : mkMatEspera) + '</div>', pe);
+      const k = String(e.i), extra = mkHubExtra();
+      const pe = '<a class="btn" href="' + esc(mkUrlOrulo(e, (mk.fichas.get(k) || {}).d)) + '" target="_blank" rel="noopener">Abrir na Órulo ' + MKI.fora + '</a>';
+      const corpo = m => '<div class="mk-mat-c">' + (m && m.r ? mkMatCorpo(m.r, extra) : (extra ? '<ul class="docs mk-docs">' + extra + '</ul>' : '') + (m ? m.html : mkMatEspera)) + '</div>';
+      abrirFolha('mk-mat', 'Material do empreendimento', corpo(mk.mats.get(k)), pe);
       mkMaterialCarregar(e);
       const pr = mk.matPedido.get(k);
-      if(pr) pr.then(() => {
-        const d = $('#folha-mk-mat'); if(!d) return;
-        const m = mk.mats.get(k); if(!m) return;
-        const um = arqsDe(m); if(um.length === 1){ mkVerArquivo(e, um[0].id, um[0].tipo, um[0].nome); return; }
-        corpoFolha('<div class="mk-mat-c">' + (m.r ? mkMatCorpo(m.r) : m.html) + '</div>', null, d);
-      });
+      if(pr) pr.then(() => { const d = $('#folha-mk-mat'); if(d) corpoFolha(corpo(mk.mats.get(k)), null, d); });
     }
     // Arquivo da Órulo (tabela, book...) aberto dentro do app. O arquivo vem direto da Órulo (tabelas.orulo.com.br libera o
     // app) e fica só na memória enquanto a folha está aberta. PDF: no computador, o leitor do próprio navegador; no celular,
@@ -5648,11 +5651,10 @@
     }
     async function mkVerArquivo(e, arq, tipo, nome){
       const tk = mkToken(); if(!tk || !e) return;
-      const m = mk.mats.get(String(e.i)), varios = !!(m && m.r && Array.isArray(m.r.arquivos) && m.r.arquivos.filter(a => a && a.id != null).length > 1);
       if(mk.doc && mk.doc.ctrl) mk.doc.ctrl.abort();
       const doc = mk.doc = {e, arq: String(arq), tipo: tipo || 'Arquivo', nome: nome || '', blob: null, mime: '', url: null, obj: null, ctrl: new AbortController(), pdf: null, io: null, zoom: 1, ratio: 1.414};
-      const cab = (doc.nome || varios) ? '<div class="mk-visor-cab">' + (doc.nome ? '<p class="sub mk-visor-nome">' + esc(doc.nome) + '</p>' : '<span></span>') +
-        (varios ? '<button type="button" class="link-mais" data-acao="mk-material" data-id="' + esc(e.i) + '">Outros arquivos</button>' : '') + '</div>' : '';
+      const cab = '<div class="mk-visor-cab">' + (doc.nome ? '<p class="sub mk-visor-nome">' + esc(doc.nome) + '</p>' : '<span></span>') +
+        '<button type="button" class="link-mais" data-acao="mk-material" data-id="' + esc(e.i) + '">Todo o material</button></div>';
       abrirFolha('mk-doc', doc.tipo, cab + '<div class="mk-visor" id="mk-visor" aria-live="polite">' + mkVisorEspera('Buscando o arquivo na Órulo…') + '</div>', mkDocPe(), 'folha-alta mk-folha-doc');
       const dlg = $('#folha-mk-doc');
       if(dlg) dlg.addEventListener('close', () => { doc.ctrl.abort(); if(doc.io) doc.io.disconnect(); if(doc.pdf){ try{ doc.pdf.destroy(); }catch(err){} } if(doc.obj) URL.revokeObjectURL(doc.obj); if(mk.doc === doc) mk.doc = null; });
