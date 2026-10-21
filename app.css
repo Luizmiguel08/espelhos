@@ -1537,3 +1537,9 @@ dialog.folha.mk-folha-doc{max-width:1100px}
   .folha-cab{touch-action:none}
   .folha-cab::before{width:44px;height:5px;top:7px}
 }
+/* "Como o cliente paga" (folha da unidade): seta à direita do resumo, para cima quando aberto */
+.un-fluxo summary{position:relative;padding-right:28px;list-style:none}
+.un-fluxo summary::-webkit-details-marker{display:none}
+.un-fluxo summary::after{content:'';position:absolute;right:6px;top:50%;width:8px;height:8px;margin-top:-7px;border-right:2px solid var(--apoio);border-bottom:2px solid var(--apoio);transform:rotate(45deg);transition:transform .2s}
+.un-fluxo[open] summary::after{margin-top:-3px;transform:rotate(-135deg)}
+@media (prefers-reduced-motion: reduce){.un-fluxo summary::after{transition:none}}

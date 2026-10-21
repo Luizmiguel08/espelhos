@@ -2107,7 +2107,7 @@
     if(mid) h += '<div class="un-midia">' + mid + '</div>';
     else if(c === undefined) h += '<div class="brilho" style="height:180px;border-radius:14px"></div>';
     const fx = fluxoHtml(det, a);
-    if(fx) h += '<details class="un-fluxo"' + (ehToque() && !persDe(p.id, n) ? '' : ' open') + '><summary>Como o cliente paga' + (fx && persDe(p.id, n) ? '<small>pela tabela</small>' : '') + '</summary>' + fx + '</details>';
+    if(fx) h += '<details class="un-fluxo" open><summary>Como o cliente paga' + (fx && persDe(p.id, n) ? '<small>pela tabela</small>' : '') + '</summary>' + fx + '</details>';
     h += persSecaoHtml(p, det, a);
     if(c && c.aviso_planta && pl) h += '<p class="nota">' + esc(c.aviso_planta) + '</p>';
     return h;
