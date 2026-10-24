@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.12.0
-// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto e no espelho da Lavvi na Lior (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
+// @version      1.13.0
+// @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto, no espelho da Lavvi na Lior e no Anapro da Metrocasa (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
 // @match        https://maskan.cvcrm.com.br/*
@@ -12,6 +12,7 @@
 // @match        https://mundoapto.dommus2.com.br/*
 // @match        https://painel.dommus.com.br/*
 // @match        https://app.liorassociados.com.br/*
+// @match        https://metrocasa.anapro.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
@@ -26,9 +27,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.12.0';
+  const VERSAO = '1.13.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
@@ -349,6 +350,57 @@
         const l = montarLior(esp, a, fator);
         if (!Object.keys(l.status).length) { out.push({ projeto: a.projeto, erro: 'espelho vazio' }); continue; }
         out.push({ projeto: a.projeto, status: l.status, precos: l.precos });
+      }
+    }
+    return out;
+  }
+
+  // ---------- leitura Anapro (painel de vendas da Metrocasa) ----------
+  // Só lê (GET no painel dinâmico) com o login que já está aberto nesta aba. Da resposta só usa bloco, número, situação e valor
+  // das unidades; o resto (equipes, comissão etc.) é ignorado e não sai da aba. Nunca reserva nem clica em nada.
+  function stAnapro(s) {
+    const t = String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').toLowerCase();
+    if (t === 'disponivel') return 'disponivel';
+    if (t.indexOf('reserv') === 0 || t.indexOf('negocia') >= 0) return 'reservada';
+    if (t.indexOf('emaprovacao') >= 0 || t.indexOf('analise') >= 0) return 'processo_final';
+    return 'vendida';                               // vendida, permuta, venda suspensa, fora de venda
+  }
+  const numAnapro = n => String(n || '').trim().replace(/^[^-]{1,8}-/, '');   // "1-0901" -> "0901" (o bloco sai do número)
+  function valorAnapro(v) {
+    let s = String(v || '').replace(/[^\d.,-]/g, '');
+    if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+    const x = Number(s); return isFinite(x) ? x : 0;
+  }
+  async function lerAnapro() {
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas)) ? cfgFonte.mapas : [];
+    if (!mapas.length) throw new Error('sem a lista de projetos do servidor');
+    const out = [];
+    for (const m of mapas) {
+      const alvos = Array.isArray(m.alvos) ? m.alvos : [];
+      let us = null, r = null;
+      try {
+        const q = new URLSearchParams({ construtora: cfgFonte.construtora || '', empreendimento: m.enc || '', andarInicio: '', andarFim: '', numero: '',
+          equipe: cfgFonte.equipe || '', tipoResposta: 'disponibilidade', obraTipo: 'I', _: String(Date.now()) });
+        r = await fetch('/anapro/ws/painelDinamico.aspx?' + q.toString(), { credentials: 'include', cache: 'no-store' });
+        const t = await r.text();
+        const caminho = new URL(r.url || location.href, location.href).pathname;
+        if (r.status === 401 || r.status === 403 || (r.redirected && !/painelDinamico/i.test(caminho)) || /type=["']?password/i.test(t)) throw new Sessao('login');
+        if (r.ok && t.indexOf('<Unidade') >= 0) us = [...new DOMParser().parseFromString(t, 'text/xml').getElementsByTagName('Unidade')];
+      } catch (e) { if (e instanceof Sessao) throw e; alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'rede' })); continue; }
+      if (!us || !us.length) { alvos.forEach(a => out.push({ projeto: a.projeto, erro: 'resposta ' + (r ? r.status : '?') })); continue; }
+      for (const a of alvos) {
+        const bl = new Set((a.blocos || []).map(String));
+        const status = {}, precos = {};
+        for (const u of us) {
+          if (bl.size && !bl.has(String(u.getAttribute('Bloco') || ''))) continue;
+          const n = numAnapro(u.getAttribute('Numero')); if (!n) continue;
+          const s = stAnapro(u.getAttribute('Status'));
+          status[n] = s;
+          const v = valorAnapro(u.getAttribute('ValorVenda'));
+          if ((s === 'disponivel' || s === 'reservada') && v > 0) precos[n] = { pp: Number(v.toFixed(2)) };
+        }
+        if (!Object.keys(status).length) { out.push({ projeto: a.projeto, erro: 'espelho vazio' }); continue; }
+        out.push({ projeto: a.projeto, status, precos });
       }
     }
     return out;
@@ -950,12 +1002,12 @@
       if (outroVivo()) { st.fase = 'espera'; return; }
       batimento(); st.fase = 'lendo';
       await lerConfigFonte();
-      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : FONTE === 'lior' ? await lerLior() : await lerCV();
+      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : FONTE === 'lior' ? await lerLior() : FONTE === 'anapro' ? await lerAnapro() : await lerCV();
       let m = 0; const falhas = [];
       for (const l of leituras) {
         if (l.erro) { falhas.push(l.projeto); continue; }
         try {
-          if (l.precos) {                         // Dommus e Lior: preço antes da situação (a unidade liberada já chega com preço)
+          if (l.precos) {                         // Dommus, Lior e Anapro: preço antes da situação (a unidade liberada já chega com preço)
             try { await rpc('precos_robo', { p_chave: chave(), p_projeto: l.projeto, p_precos: l.precos, p_fonte: FONTE }); }
             catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
           }
@@ -978,6 +1030,7 @@
                   : FONTE === 'cvcambur' ? 'A sessão do CV da Cambur expirou no Chrome do computador. Faça login de novo (painel Corretor) para os projetos da Cambur continuarem ao vivo.'
                   : FONTE === 'dommus' ? 'A sessão do Dommus da Mundo Apto expirou no Chrome do computador. Faça login de novo para os projetos da Mundo Apto continuarem ao vivo.'
                   : FONTE === 'lior' ? 'O login da Lior (espelho da Lavvi) venceu no Chrome do computador. Entre de novo na Lior para os projetos da Lavvi continuarem ao vivo (o login dura 24 horas).'
+                  : FONTE === 'anapro' ? 'O login do Anapro da Metrocasa venceu no Chrome do computador. Entre de novo no Anapro para os projetos da Metrocasa continuarem ao vivo.'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
