@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Escolha o seu próximo imóvel</title>
+<meta name="description" content="Lançamentos, obras e prontos em São Paulo, com fotos, planta, prazo e forma de pagamento. Vitrine preparada pelo seu corretor da Fortal.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#F6F3EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E0C09" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Escolha o seu próximo imóvel">
+<meta property="og:description" content="Lançamentos, obras e prontos que eu acompanho, com fotos, planta, prazo e forma de pagamento.">
+<meta property="og:image" content="https://luizmiguel08.github.io/espelhos/og-selecao.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon-64.png">
+<link rel="preload" href="fonts/mona-sans.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Mona Sans';src:url(fonts/mona-sans.woff2) format('woff2-variations'),url(fonts/mona-sans.woff2) format('woff2');font-weight:200 900;font-stretch:75% 125%;font-style:normal;font-display:swap}
+/* tokens do app dos Espelhos (tema claro como padrão; escuro pelo sistema) */
+:root{color-scheme:light;--papel:#F6F3EC;--cartao:#FFFCF6;--areia:#EFEAE0;--fio:#E2DBCC;--tinta:#1C1913;--apoio:#675F51;--ouro:#C8A24A;--ouro-t:#7E611A;--verde:#2F7536;--sobre-ouro:#1C1913;--sombra:0 12px 30px rgba(28,25,19,.12);--bg:var(--papel);--ink:var(--tinta);--ink-2:var(--apoio);--muted:var(--apoio);--surface:var(--cartao);--surface-2:var(--areia);--line:var(--fio);--accent:var(--ouro);--accent-ink:var(--sobre-ouro);--f:'Mona Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--curva:cubic-bezier(.22,1,.36,1)}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--papel:#0E0C09;--cartao:#18150F;--areia:#221E17;--fio:#2F2A21;--tinta:#F3EEE4;--apoio:#A89F8E;--ouro:#C8A24A;--ouro-t:#D7B663;--verde:#7BC47F;--sombra:0 12px 30px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font:400 16px/1.5 var(--f)}
+body.sem-rolagem{overflow:hidden}
+h1,h2,h3{margin:0;font-weight:640;font-stretch:112%;letter-spacing:-.01em;line-height:1.12}
+p{margin:0}
+img{display:block;max-width:100%}
+figure{margin:0}
+button,a,input{font:inherit;color:inherit}
+a{color:var(--ouro-t)}
+:focus-visible{outline:2px solid var(--ouro-t);outline-offset:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.miolo{max-width:1120px;margin:0 auto;padding:0 16px}
+@media (min-width:900px){.miolo{padding:0 32px}}
+
+/* carregando, erro e prévia */
+.load{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--apoio)}
+.erro-pg{min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;padding:24px;max-width:520px;margin:0 auto}
+.erro-pg h1{font-size:28px}
+.erro-pg p{color:var(--apoio)}
+.previa{position:sticky;top:0;z-index:70;background:var(--tinta);color:var(--papel);text-align:center;font-size:14px;padding:8px 12px}
+
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border-radius:12px;border:1px solid var(--fio);background:var(--cartao);color:var(--tinta);font-weight:560;text-decoration:none;cursor:pointer;transition:background-color .15s var(--curva),transform .15s var(--curva)}
+.btn:active{transform:scale(.98)}
+.btn.ouro{background:var(--ouro);border-color:var(--ouro);color:var(--sobre-ouro)}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.feito{background:var(--areia);border-color:var(--areia);color:var(--apoio)}
+.btn.feito::after{content:"Enviado";font-size:12px;font-weight:500;margin-left:2px}
+.btn.mini{min-height:40px;padding:8px 12px;font-size:14px;border-radius:10px}
+
+/* o corretor (na capa e no recado) */
+.cor{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--tinta);min-height:44px}
+.cor-ini{width:36px;height:36px;flex:none;border-radius:50%;background:var(--areia);display:flex;align-items:center;justify-content:center;font-weight:640;font-size:14px;color:var(--ouro-t)}
+.cor-txt{display:flex;flex-direction:column;line-height:1.2;font-size:14px}
+.cor-txt small{color:var(--apoio);font-size:12px}
+
+/* capa: os destaques passando em tela cheia */
+.capa{--lado:16px;position:relative;height:72vh;height:72svh;min-height:500px;max-height:700px;background:#14110D;color:#F6F1E7;overflow:hidden}
+@media (min-width:900px){.capa{--lado:max(32px,calc((100vw - 1120px) / 2 + 32px));height:min(78vh,720px);min-height:540px}}
+.capa-trilho{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.capa-trilho::-webkit-scrollbar{display:none}
+.cs{position:relative;flex:0 0 100%;height:100%;margin:0;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden}
+.cs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cs::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(14,12,9,.6) 0,rgba(14,12,9,0) 22%,rgba(14,12,9,0) 38%,rgba(14,12,9,.74) 66%,rgba(14,12,9,.93) 100%)}
+.cs-txt{position:absolute;z-index:1;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:0 var(--lado) 24px}
+.cs-etq{margin-bottom:6px;padding:5px 11px;border-radius:999px;background:rgba(246,243,236,.17);font-size:13px;font-weight:560;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.cs h2{max-width:15ch;font-size:38px;font-weight:680;font-stretch:118%;line-height:1;letter-spacing:-.02em;text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cs-local{margin-top:6px;font-size:16px;font-weight:540}
+.cs-sub{font-size:15px;color:rgba(246,241,231,.84)}
+.cs-pe{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;width:100%;margin-top:14px}
+.cs-preco{font-size:13px;color:rgba(246,241,231,.84);line-height:1.2}
+.cs-preco b{display:block;margin-top:2px;font-size:24px;font-weight:660;font-stretch:108%;color:#F6F1E7}
+.cs .btn.ouro{flex:none;min-height:48px;padding:12px 20px;border-radius:14px}
+.capa-barras{position:absolute;z-index:2;top:max(10px,env(safe-area-inset-top));left:var(--lado);right:var(--lado);display:flex;gap:4px;pointer-events:none}
+.capa-barras i{flex:1;height:3px;border-radius:2px;background:rgba(246,243,236,.3);transition:background-color .3s var(--curva)}
+.capa-barras i.on,.capa-barras i.ja{background:#F6F3EC}
+.capa-topo{position:absolute;z-index:2;left:var(--lado);right:var(--lado);top:calc(max(10px,env(safe-area-inset-top)) + 14px);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.selo-logo{height:52px;width:auto;padding:5px;border-radius:14px;background:rgba(246,243,236,.95);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.capa .cor{padding:4px 14px 4px 4px;border-radius:999px;background:rgba(14,12,9,.5);color:#F6F1E7;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.capa .cor-ini{background:#F6F3EC;color:#7E611A}
+.capa .cor-txt small{color:rgba(246,241,231,.8)}
+.capa-setas{display:none}
+@media (min-width:900px){
+  .capa-setas{position:absolute;z-index:2;right:var(--lado);bottom:30px;display:flex;gap:10px}
+  .capa-setas button{width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(246,243,236,.36);background:rgba(14,12,9,.42);color:#F6F1E7;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:background-color .15s var(--curva)}
+  .capa-setas button:hover{background:rgba(14,12,9,.7)}
+  .capa-setas svg{width:22px;height:22px}
+  .cs-txt{padding-bottom:36px}
+  .cs h2{font-size:64px;max-width:14ch}
+  .cs-local{font-size:18px}
+  .cs-sub{font-size:16px}
+  .cs-pe{width:auto;justify-content:flex-start;gap:28px;margin-top:18px}
+  .cs-preco b{font-size:28px}
+}
+.capa.sem{height:auto;min-height:0;max-height:none;background:none;color:var(--tinta)}
+.capa.sem .capa-topo{position:static;padding:12px 0}
+.capa.sem .cor{background:var(--cartao);color:var(--tinta);border:1px solid var(--fio)}
+.capa.sem .capa-trilho,.capa.sem .capa-barras,.capa.sem .capa-setas{display:none}
+
+/* abertura: a saudação, o recado do corretor e o perfil */
+.abre{max-width:1120px;margin:0 auto;padding:26px 16px 0}
+.ola h1{font-size:30px;font-weight:660;font-stretch:114%;letter-spacing:-.015em;text-wrap:balance}
+.ola > p{margin-top:10px;color:var(--apoio);max-width:620px}
+.recado{display:grid;grid-template-columns:40px 1fr;gap:6px 12px;margin-top:18px;padding:16px;border-radius:16px;background:var(--cartao);border:1px solid var(--fio)}
+.recado .cor-ini{grid-row:span 2;width:40px;height:40px}
+.recado blockquote{margin:0;font-size:16px;line-height:1.5;white-space:pre-line}
+.recado figcaption{font-size:13px;color:var(--apoio)}
+.perfil{margin-top:24px}
+.perfil h2{font-size:17px;font-weight:600;font-stretch:104%}
+.perfil .lnk{margin-top:2px}
+@media (min-width:900px){
+  .abre{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;align-items:start;padding:44px 32px 0}
+  .ola h1{font-size:44px}
+  .perfil{margin-top:6px;padding:20px;border-radius:20px;background:var(--cartao);border:1px solid var(--fio)}
+}
+.modos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.modo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:76px;padding:12px 14px;border-radius:14px;border:1px solid var(--fio);background:var(--cartao);text-align:left;cursor:pointer;transition:border-color .15s var(--curva),background-color .15s var(--curva)}
+@media (min-width:900px){.modo{background:var(--papel)}}
+.modo b{font-size:18px;font-weight:640;font-stretch:112%}
+.modo span{font-size:13px;color:var(--apoio);line-height:1.35}
+.modo[aria-pressed="true"]{border-color:var(--ouro);background:var(--ouro);color:var(--sobre-ouro)}
+.modo[aria-pressed="true"] span{color:var(--sobre-ouro)}
+.nota-modo{margin-top:8px;font-size:13px;color:var(--apoio)}
+
+/* coleções: por onde começar */
+.colecoes{padding-top:8px}
+.col{margin-top:26px}
+.col-cab{display:flex;align-items:center;gap:8px;max-width:1120px;margin:0 auto;padding:0 16px}
+.col-cab h3{flex:1;min-width:0;font-size:21px}
+.col-cab .lnk{flex:none}
+.col-setas{display:none}
+.col-trilho{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding:0 16px;padding:6px 16px 4px;scrollbar-width:none;overscroll-behavior-x:contain}
+.col-trilho::-webkit-scrollbar{display:none}
+.mc{position:relative;flex:0 0 172px;aspect-ratio:3/4;padding:0;border:0;border-radius:16px;overflow:hidden;background:var(--areia);color:#F6F1E7;text-align:left;cursor:pointer;scroll-snap-align:start}
+.mc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .45s var(--curva)}
+.mc::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,12,9,.32) 0,rgba(14,12,9,0) 22%,rgba(14,12,9,0) 40%,rgba(14,12,9,.88) 100%)}
+.mc:hover img{transform:scale(1.04)}
+.mc.sem-foto{background:#2B251C}
+.mc.sem-foto::after{background:none}
+.mc-etq{position:absolute;z-index:1;left:8px;top:8px;max-width:calc(100% - 16px);padding:3px 8px;border-radius:8px;background:rgba(14,12,9,.62);font-size:12px;font-weight:560;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-txt{position:absolute;z-index:1;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px}
+.mc-txt b{font-size:16px;font-weight:640;font-stretch:108%;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-txt span{font-size:13px;line-height:1.3;color:rgba(246,241,231,.86)}
+.mc-txt .mc-v{margin-top:4px;font-weight:600;color:#F6F1E7}
+@media (min-width:900px){
+  .col{margin-top:34px}
+  .col-cab{padding:0 32px}
+  .col-cab h3{font-size:24px}
+  .col-setas{display:flex;gap:8px;order:2}
+  .col-cab .lnk{order:1;margin-right:8px}
+  .col-seta{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--fio);background:var(--cartao);color:var(--tinta);cursor:pointer}
+  .col-seta svg{width:20px;height:20px}
+  .col-trilho{gap:16px;padding:8px var(--lado-d) 6px;scroll-padding:0 var(--lado-d)}
+  .mc{flex-basis:212px}
+}
+:root{--lado-d:max(32px,calc((100vw - 1120px) / 2 + 32px))}
+
+/* o que você procura */
+.busca{margin-top:22px;padding:18px 16px 6px;border-top:1px solid var(--fio)}
+@media (min-width:900px){.busca{padding:22px 32px 6px;max-width:1120px;margin:28px auto 0}}
+.busca h2{font-size:22px}
+.lf{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--fio)}
+.lf:last-of-type{border-bottom:0}
+.lf > span{font-size:14px;color:var(--apoio)}
+@media (min-width:900px){.lf{grid-template-columns:160px 1fr;align-items:center}}
+.opcs{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--fio);background:var(--cartao);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background-color .15s var(--curva),border-color .15s var(--curva)}
+.chip small{color:var(--apoio);font-size:12px}
+.chip[aria-pressed="true"]{background:var(--ouro);border-color:var(--ouro);color:var(--sobre-ouro)}
+.chip[aria-pressed="true"] small{color:var(--sobre-ouro)}
+.busca-pe{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 0 6px}
+.lnk{border:0;background:none;padding:10px 2px;min-height:44px;color:var(--ouro-t);font-weight:560;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* barra fixa com o resumo da busca */
+.fixa{position:fixed;top:0;left:0;right:0;z-index:30;background:var(--papel);border-bottom:1px solid var(--fio);transform:translateY(-100%);opacity:0;pointer-events:none;transition:transform .25s var(--curva),opacity .25s var(--curva)}
+.fixa.ver{transform:none;opacity:1;pointer-events:auto}
+.fixa .miolo{display:flex;align-items:center;gap:10px;min-height:56px}
+.fixa p{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixa p b{font-weight:600}
+
+/* lista */
+.lista-cab{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-top:18px;padding-bottom:6px}
+.lista-cab h2{font-size:22px;flex:1 1 220px}
+.q{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--fio);border-radius:12px;background:var(--cartao);flex:1 1 260px;max-width:420px}
+.q svg{width:17px;height:17px;color:var(--apoio);flex:none}
+.q input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:15px}
+.grade{display:grid;grid-template-columns:1fr;gap:28px 20px;padding-top:12px;padding-bottom:40px}
+@media (min-width:680px){.grade{grid-template-columns:1fr 1fr}}
+@media (min-width:1040px){.grade{grid-template-columns:repeat(3,1fr)}}
+.card{position:relative;display:flex;flex-direction:column;min-width:0}
+.card-abre{display:flex;flex-direction:column;text-align:left;border:0;padding:0;background:none;cursor:pointer;color:inherit}
+.card-foto{position:relative;display:block;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:var(--areia)}
+.card-foto img{width:100%;height:100%;object-fit:cover;transition:transform .45s var(--curva)}
+.card-abre:hover .card-foto img{transform:scale(1.03)}
+.card-foto .ph,.ph-g{position:absolute;inset:0;background:var(--areia)}
+.selo{position:absolute;left:10px;bottom:10px;padding:4px 10px;border-radius:8px;background:rgba(14,12,9,.7);color:#F3EEE4;font-size:12px;font-weight:560}
+.selo.pronto{background:#2F7536;color:#F3F7EF}
+.card-txt{display:flex;flex-direction:column;gap:3px;padding:12px 2px 0}
+.card-nome{font-size:20px;font-weight:640;font-stretch:112%;line-height:1.15}
+.card-local{font-size:14px;color:var(--apoio)}
+.card-fato{font-size:15px}
+.card-fato.curto{font-size:14px;color:var(--apoio);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-preco{margin-top:4px;font-size:16px;font-weight:600}
+.card-preco small{font-size:13px;font-weight:400;color:var(--apoio)}
+.card-preco.cons{font-weight:500;color:var(--ouro-t)}
+.coracao{position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,252,246,.92);color:#1C1913;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.coracao svg{width:22px;height:22px}
+.coracao[aria-pressed="true"]{color:#B23F2B}
+.coracao[aria-pressed="true"] svg{fill:currentColor}
+.mais{display:block;margin:0 auto 32px}
+.vazio{grid-column:1/-1;max-width:560px;padding:24px 0}
+.vazio h3{font-size:22px}
+.vazio p{color:var(--apoio);margin:8px 0 16px}
+.vazio-bts{display:flex;flex-wrap:wrap;gap:10px}
+
+/* favoritos */
+.fav-barra{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:35;display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:560px;margin:0 auto;padding:8px 8px 8px 16px;border-radius:16px;background:var(--tinta);color:var(--papel);box-shadow:var(--sombra)}
+.fav-barra p{font-size:14px}
+.fav-barra .btn{min-height:40px}
+.wa-fixo{position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:34;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:56px;height:56px;border-radius:999px;background:#1fa855;color:#fff;text-decoration:none;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.wa-fixo svg{width:26px;height:26px}
+.wa-fixo span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (min-width:900px){.wa-fixo{width:auto;height:52px;padding:0 20px;right:24px;bottom:24px}.wa-fixo svg{width:22px;height:22px}.wa-fixo span{position:static;width:auto;height:auto;clip:auto}}
+body.com-fav .wa-fixo{display:none}
+
+/* folhas (filtros, bairros, favoritos) */
+.folha{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgba(14,12,9,.5)}
+.fv{width:100%;max-width:620px;max-height:88vh;max-height:88svh;display:flex;flex-direction:column;background:var(--cartao);border-radius:20px 20px 0 0;box-shadow:var(--sombra);animation:sobe .3s var(--curva)}
+@media (min-width:700px){.folha{align-items:center}.fv{border-radius:20px}}
+@keyframes sobe{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.fv-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 8px}
+.fv-cab h3{font-size:20px}
+.fv-x{width:44px;height:44px;border-radius:50%;border:1px solid var(--fio);background:var(--papel);font-size:22px;line-height:1;cursor:pointer}
+.fv-corpo{overflow:auto;padding:0 18px 16px;overscroll-behavior:contain}
+.fv-corpo .lf > span{font-weight:560;color:var(--tinta)}
+.fv-pe{display:flex;gap:10px;padding:12px 18px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--fio)}
+.fv-pe .btn{flex:1}
+.fv-nota{font-size:13px;color:var(--apoio);margin-top:6px}
+.campo-b{display:block;width:100%;min-height:44px;margin:6px 0 10px;padding:0 12px;border:1px solid var(--fio);border-radius:10px;background:var(--papel);outline:none}
+.fav-lista{display:grid;gap:12px;padding-top:6px}
+.fav-item{display:grid;grid-template-columns:84px 1fr auto;gap:12px;align-items:center}
+.fav-item img,.fav-item .ph-m{width:84px;height:64px;border-radius:10px;object-fit:cover;background:var(--areia)}
+.fav-item b{display:block;font-weight:600;line-height:1.2}
+.fav-item .lnk{display:block;padding:0;min-height:0;text-align:left;font-weight:600}
+.fav-item small{display:block;margin-top:2px}
+.fav-item small{color:var(--apoio)}
+
+/* ficha do empreendimento */
+.ficha{position:fixed;inset:0;z-index:45;background:var(--papel);overflow-y:auto;overscroll-behavior:contain}
+.fi-topo{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--papel);border-bottom:1px solid var(--fio)}
+.fi-voltar{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--fio);background:var(--cartao);font-size:24px;line-height:1;cursor:pointer;padding-bottom:3px}
+.fi-t{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-corpo{max-width:1120px;margin:0 auto;padding-bottom:120px}
+.gal{position:relative}
+.trilho{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:var(--areia)}
+.trilho::-webkit-scrollbar{display:none}
+@media (min-width:900px){.gal{padding:16px 32px 0}.trilho{grid-auto-columns:calc((100% - 12px) / 2);gap:12px;background:none}.sl{border-radius:16px}}
+.sl{position:relative;scroll-snap-align:start;aspect-ratio:4/3;border:0;padding:0;background:var(--areia);overflow:hidden;cursor:zoom-in}
+.sl img{width:100%;height:100%;object-fit:cover}
+.sl figcaption,.sl .leg{position:absolute;left:12px;bottom:12px;background:rgba(14,12,9,.66);color:#F3EEE4;font-size:12px;padding:4px 10px;border-radius:8px}
+.gal-n{position:absolute;right:12px;top:12px;background:rgba(14,12,9,.66);color:#F3EEE4;font-size:12px;padding:4px 10px;border-radius:999px;pointer-events:none}
+@media (min-width:900px){.gal-n{right:44px;top:28px}}
+.fi-cab{padding:18px 16px 0}
+@media (min-width:900px){.fi-cab{padding:24px 32px 0}}
+.fi-cab h2{font-size:30px}
+.fi-cab .local{margin-top:6px;color:var(--apoio)}
+.fatos{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;margin-top:16px;border-top:1px solid var(--fio)}
+@media (min-width:700px){.fatos{grid-template-columns:repeat(3,1fr)}}
+.fatos div{padding:10px 0;border-bottom:1px solid var(--fio)}
+.fatos div.largo{grid-column:1/-1}
+.fatos dt{font-size:13px;color:var(--apoio)}
+.fatos dd{margin:2px 0 0;font-weight:560}
+.dest{margin-top:14px;max-width:680px}
+.sec{padding:30px 16px 0}
+@media (min-width:900px){.sec{padding:36px 32px 0}}
+.sec > h3{font-size:22px}
+.sec > .sub{margin-top:4px;color:var(--apoio);font-size:14px;max-width:640px}
+/* plantas por tipologia */
+.tps{display:grid;grid-auto-flow:column;grid-auto-columns:82%;gap:12px;overflow-x:auto;margin:14px -16px 0;padding:0 16px 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.tps::-webkit-scrollbar{display:none}
+@media (min-width:700px){.tps{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin:14px 0 0;padding:0}}
+.tp{scroll-snap-align:start;display:flex;flex-direction:column;border:1px solid var(--fio);border-radius:16px;background:var(--cartao);overflow:hidden}
+.tp-pl{position:relative;aspect-ratio:4/3;background:#FBF9F4;border:0;padding:8px;cursor:zoom-in}
+.tp-pl img{width:100%;height:100%;object-fit:contain}
+.tp-pl .sem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;color:#675F51;font-size:14px}
+.tp-pl small{position:absolute;right:8px;bottom:8px;background:rgba(14,12,9,.66);color:#F3EEE4;font-size:12px;padding:2px 8px;border-radius:8px}
+.tp-pl.pedir{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;text-decoration:none;color:var(--ouro-t);background:var(--areia);font-size:14px;font-weight:560;cursor:pointer}
+.tp-pl.pedir svg{width:24px;height:24px}
+.tps > .tp.tp-pl{padding:8px;cursor:zoom-in}
+.sl.sem-fotos{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;color:var(--apoio);cursor:default}
+.sl.sem-fotos p{max-width:320px;font-size:15px}
+.sec > .sub + .btn{margin-top:12px}
+.tp-txt{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px;flex:1}
+.tp-txt b{font-size:17px;font-weight:620}
+.tp-txt .m2{color:var(--apoio);font-size:14px}
+.tp-txt .v{font-weight:600}
+.tp-txt .v small{font-weight:400;color:var(--apoio);font-size:13px}
+.tp-txt .btn{margin-top:auto;align-self:flex-start}
+.etq{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--areia);color:var(--tinta);font-size:12px;font-weight:600;vertical-align:2px}
+.ult{color:#B23F2B;font-size:13px;font-weight:560}
+@media (prefers-color-scheme:dark){.ult{color:#EC7A66}}
+.cls{margin-top:12px;font-size:13px;color:var(--apoio);max-width:680px}
+/* como pagar */
+.seg{display:flex;gap:8px;overflow-x:auto;margin-top:14px;padding-bottom:2px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.fluxo{margin-top:12px;border:1px solid var(--fio);border-radius:16px;background:var(--cartao);overflow:hidden}
+.fl-l{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 14px;border-bottom:1px solid var(--fio)}
+.fl-l:last-child{border-bottom:0}
+.fl-l b{font-weight:560}
+.fl-l .val{grid-column:2;grid-row:1 / span 2;align-self:center;text-align:right;font-weight:600;white-space:nowrap}
+.fl-l small{color:var(--apoio);font-size:13px}
+.fl-l.fin{background:var(--areia)}
+.fl-tot{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--areia);font-size:14px}
+.fl-nota{margin-top:10px;font-size:13px;color:var(--apoio);max-width:680px}
+/* para quem investe */
+.inv{display:grid;gap:0;margin-top:12px;border-top:1px solid var(--fio)}
+@media (min-width:700px){.inv{grid-template-columns:repeat(3,1fr);gap:0 20px}}
+.inv div{padding:12px 0;border-bottom:1px solid var(--fio)}
+.inv b{display:block;font-size:20px;font-weight:620;font-stretch:108%}
+.inv span{font-size:14px;color:var(--apoio)}
+/* onde fica */
+.mapa{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid var(--fio);aspect-ratio:16/10;background:var(--areia)}
+.mapa iframe{width:100%;height:100%;border:0}
+.perto{display:grid;gap:0;margin-top:12px}
+@media (min-width:700px){.perto{grid-template-columns:1fr 1fr;column-gap:24px}}
+.perto div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--fio);font-size:15px}
+.perto b{font-weight:560;white-space:nowrap}
+.lazer{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lazer span{padding:6px 12px;border-radius:999px;background:var(--areia);font-size:14px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.visita{margin:30px 16px 0;padding:18px;border-radius:16px;background:var(--areia);display:grid;gap:12px}
+@media (min-width:900px){.visita{margin:36px 32px 0}}
+.visita .cor{min-height:0}
+.visita p{color:var(--tinta)}
+.visita .bts{display:flex;flex-wrap:wrap;gap:10px}
+.parecidos{display:grid;grid-auto-flow:column;grid-auto-columns:74%;gap:14px;overflow-x:auto;margin:14px -16px 0;padding:0 16px 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.parecidos::-webkit-scrollbar{display:none}
+@media (min-width:700px){.parecidos{grid-auto-columns:calc((100% - 28px) / 3);margin:14px 0 0;padding:0}}
+.parecidos .card{scroll-snap-align:start}
+.parecidos .card-nome{font-size:17px}
+.legal{padding:24px 16px 0;font-size:12px;color:var(--apoio);max-width:760px}
+@media (min-width:900px){.legal{padding:28px 32px 0}}
+.carregando{padding:16px;color:var(--apoio);font-size:14px}
+.fi-pe{position:fixed;left:0;right:0;bottom:0;z-index:7;display:flex;gap:10px;justify-content:center;padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--papel);border-top:1px solid var(--fio)}
+.fi-pe .btn.ouro{flex:1;max-width:460px;min-height:50px}
+.fi-pe .coracao{position:static;box-shadow:none;border:1px solid var(--fio);background:var(--cartao);color:var(--tinta);width:50px;height:50px}
+.fi-pe .coracao[aria-pressed="true"]{color:#B23F2B}
+@media (prefers-color-scheme:dark){.fi-pe .coracao[aria-pressed="true"]{color:#EC7A66}}
+
+footer{max-width:1120px;margin:0 auto;padding:24px 16px 120px;color:var(--apoio);font-size:12px;border-top:1px solid var(--fio)}
+footer p{margin:0 0 8px}
+@media (min-width:900px){footer{padding:28px 32px 120px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fixa{transform:none}}
+
+/* visualizador de fotos e aviso (do s.html) */
+.vis{position:fixed;inset:0;z-index:80;background:rgba(6,7,9,.97);display:flex;flex-direction:column;color:#fff}.vis-top{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}.vis-t{flex:1;font-size:14px;min-width:0}.vis-acoes{display:flex;gap:6px}.vis-x{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:22px;cursor:pointer}.vis-area{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;cursor:zoom-in;-webkit-overflow-scrolling:touch}.vis-area img{max-width:100%;max-height:100%;object-fit:contain}.vis-area.zoom{display:block;cursor:zoom-out}.vis-area.zoom img{max-width:none;max-height:none;width:220%}.vis-ant,.vis-prox{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:34px;border-radius:10px;cursor:pointer}.vis-ant{left:6px}.vis-prox{right:6px}.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:11px;font-size:14px;z-index:90;max-width:calc(100% - 32px)}
+</style>
+</head>
+<body>
+<div class="load" id="load">Abrindo a sua vitrine…</div>
+<div class="erro-pg" id="erro" hidden>
+  <h1 id="erro-t">Link não encontrado</h1>
+  <p id="erro-p">Este link não existe ou foi apagado. Peça um novo ao seu corretor.</p>
+  <button class="btn" id="erro-de-novo" type="button" hidden>Tentar de novo</button>
+  <a class="btn ouro" id="erro-wa" hidden target="_blank" rel="noopener">Falar com o corretor</a>
+</div>
+<div class="previa" id="previa" hidden>Prévia do corretor: esta visita não conta como abertura do cliente.</div>
+<main id="pg" hidden>
+  <section class="capa" id="capa" aria-roledescription="carrossel" aria-label="Destaques da vitrine">
+    <div class="capa-trilho" id="capa-trilho" tabindex="0" aria-label="Deslize para ver os destaques"></div>
+    <div class="capa-barras" id="capa-barras" aria-hidden="true"></div>
+    <div class="capa-topo"><img class="selo-logo" src="img/logo-fortal.png" alt="Fortal Inteligência Imobiliária" width="42" height="43"><a class="cor" id="cor"></a></div>
+    <div class="capa-setas"><button type="button" id="capa-ant" aria-label="Destaque anterior"></button><button type="button" id="capa-prox" aria-label="Próximo destaque"></button></div>
+  </section>
+  <div class="abre">
+    <div class="ola">
+      <h1 id="ola"></h1>
+      <p id="intro"></p>
+      <figure class="recado" id="recado" hidden><span class="cor-ini" id="recado-ini" aria-hidden="true"></span><blockquote id="recado-t"></blockquote><figcaption id="recado-c"></figcaption></figure>
+    </div>
+    <section class="perfil" aria-labelledby="perfil-t">
+      <h2 id="perfil-t">O imóvel é para</h2>
+      <div class="modos" role="group" aria-labelledby="perfil-t">
+        <button type="button" class="modo" data-m="morar" aria-pressed="false"><b>Morar</b><span>Quartos, vaga, lazer e quando fica pronto</span></button>
+        <button type="button" class="modo" data-m="investir" aria-pressed="false"><b>Investir</b><span>Entrada, parcela na obra e valor do m²</span></button>
+      </div>
+      <p class="nota-modo" id="nota-modo"></p>
+      <button type="button" class="lnk" id="ir-filtros">Prefiro filtrar do meu jeito</button>
+    </section>
+  </div>
+  <div class="colecoes" id="colecoes"></div>
+  <section class="busca" id="busca" aria-labelledby="busca-t">
+    <h2 id="busca-t">O que você procura</h2>
+    <div id="filtros"></div>
+    <div class="busca-pe"><button type="button" class="btn" id="mais-f">Mais filtros<span id="mais-n"></span></button><button type="button" class="lnk" id="limpar" hidden>Limpar tudo</button></div>
+  </section>
+  <div class="fixa" id="fixa"><div class="miolo"><p id="fixa-t"></p><button type="button" class="btn mini" id="fixa-f">Filtros</button></div></div>
+  <div class="miolo">
+    <div class="lista-cab"><h2 id="n" aria-live="polite"></h2><label class="q"><span class="sr">Buscar pelo nome ou bairro</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Nome ou bairro" autocomplete="off" enterkeyhint="search"></label></div>
+    <div class="grade" id="grade"></div>
+    <button type="button" class="btn mais" id="mais" hidden>Ver mais</button>
+  </div>
+  <footer><p id="rodape-valores"></p><p id="rodape-cor"></p></footer>
+</main>
+<div class="fav-barra" id="fav" hidden><p id="fav-t"></p><button type="button" class="btn ouro" id="fav-ver">Ver e mandar</button></div>
+<div class="folha" id="folha" hidden>
+  <div class="fv" role="dialog" aria-modal="true" aria-labelledby="fv-t">
+    <div class="fv-cab"><h3 id="fv-t"></h3><button type="button" class="fv-x" aria-label="Fechar">×</button></div>
+    <div class="fv-corpo" id="fv-corpo"></div>
+    <div class="fv-pe" id="fv-pe"></div>
+  </div>
+</div>
+<div class="ficha" id="ficha" hidden role="dialog" aria-modal="true" aria-labelledby="fi-t">
+  <div class="fi-topo"><button type="button" class="fi-voltar" aria-label="Voltar para a lista">‹</button><span class="fi-t" id="fi-t"></span></div>
+  <div class="fi-corpo" id="fi-corpo"></div>
+  <div class="fi-pe" id="fi-pe"></div>
+</div>
+<a class="wa-fixo" id="wa" hidden target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg><span id="wa-t">Falar com o corretor</span></a>
+<script>
+// versão 202610081944
+// Central de produto — utilidades comuns (corretor e cliente)
+window.NEX = (function(){
+  'use strict';
+  const CFG = {
+    url: 'https://dptchfjbotmddaniuzvr.supabase.co',
+    key: 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP',
+    vapid: 'BI8mWAmkgfYL1lUm7gPdQ3JYK-YmFS_drWs7PfvbsU50oBFJKtbULXwWKp3BSE0cnWyAeBBIlXErynB_oQ6QmZo'
+  };
+  const $ = id => document.getElementById(id);
+  const LS = {
+    get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const BRLc = v => 'R$ ' + (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const m2 = v => (+v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' m²';
+  const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const mesAno = ym => { const [a, m] = String(ym).split('-').map(Number); return MESES[m - 1] + '/' + a; };
+  const somaMeses = (ym, k) => { let [a, m] = String(ym).split('-').map(Number); m += k; while(m > 12){ m -= 12; a++; } return a + '-' + String(m).padStart(2, '0'); };
+
+  async function rpc(fn, args){
+    const r = await fetch(CFG.url + '/rest/v1/rpc/' + fn, {method: 'POST', headers: {'apikey': CFG.key, 'Content-Type': 'application/json'}, body: JSON.stringify(args || {}), cache: 'no-store'});
+    const t = await r.text(); let j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+    if(!r.ok){ const e = new Error((j && (j.message || j.hint)) || ('http_' + r.status)); e.status = r.status; throw e; }
+    return j;
+  }
+
+  // ---------- unidades (formato do espelho: [n, tipo, m2, cat, andar, col, situação, extras]) ----------
+  const andarN = a => (a === 'T' || a === 0 || a === '0') ? 0 : (+a || 0);
+  const andarTxt = a => andarN(a) === 0 ? 'Térreo' : andarN(a) + 'º andar';
+  const andarCurto = a => andarN(a) === 0 ? 'térreo' : andarN(a) + 'º';
+  const areaU = u => (u[7] && u[7].a != null) ? +u[7].a : +u[2];
+  const finalU = u => (+u[5]) + 1;
+  const pad2 = n => String(n).padStart(2, '0');
+  const normTipo = t => String(t || '').toUpperCase().replace(/\s+/g, ' ').trim();
+  // unidade normalizada a partir da linha do espelho
+  function un(u){
+    const col = +u[5], ex = (u[7] && typeof u[7] === 'object') ? u[7] : {};
+    return {n: String(u[0]), u, andar: u[4], an: andarN(u[4]), col, fin: col + 1, tipo: u[1] || null,
+            a: ex.a != null ? +ex.a : (u[2] != null ? +u[2] : null), cat: u[3], st: u[6], ex};
+  }
+  // unidade vinda do link do cliente: {n, andar, col, tipo, a, cat, livre}
+  const unLink = v => ({n: String(v.n), andar: v.andar, an: andarN(v.andar), col: +v.col, fin: (+v.col) + 1, tipo: v.tipo || null, a: v.a != null ? +v.a : null, cat: v.cat, st: v.livre ? 'disponivel' : 'indisponivel', ex: {}});
+  const tipoTxt = t => t ? normTipo(t).replace(/^TIPO\s*/, 'tipo ') : '';
+  const posTxt = x => x.tipo ? tipoTxt(x.tipo) : 'final ' + pad2(x.fin);
+
+  function face(P, x){ return (P.faces || []).find(f => (f.finais && f.finais.indexOf(x.fin) >= 0) || (f.cols && f.cols.indexOf(x.col) >= 0)) || null; }
+  function planta(P, x){
+    const n = x.an, tipo = normTipo(x.tipo), ok = p => (p.de == null || n >= p.de) && (p.ate == null || n <= p.ate);
+    let ex = tipo ? (P.plantas || []).find(p => p.tipos && p.tipos.map(normTipo).indexOf(tipo) >= 0 && ok(p)) : null;
+    if(!ex) ex = (P.plantas || []).find(p => p.finais && p.finais.indexOf(x.fin) >= 0 && ok(p));
+    if(ex) return {p: ex, exata: true};
+    // referências: mesma tipologia em outro andar ou final (podem depender do andar)
+    const rf = (P.refs || []).find(q => ((q.finais && q.finais.indexOf(x.fin) >= 0) || (q.tipos && tipo && q.tipos.map(normTipo).indexOf(tipo) >= 0)) && ok(q));
+    const r = (rf && rf.id) || (tipo && (P.planta_ref_tipo || {})[tipo]) || (P.planta_ref || {})[String(x.fin)];
+    const p = r && (P.plantas || []).find(q => q.id === r);
+    return p ? {p, exata: false, nota: rf && rf.nota ? String(rf.nota) : ''} : null;   // nota: por que esta planta (ex.: o material não traz a do andar)
+  }
+  function vista(P, x){
+    const f = face(P, x); if(!f) return null;
+    if(!f.vistas) return {face: f, img: null, andar: null, sem: true};
+    const alts = Object.keys(f.vistas).map(Number).filter(a => a <= x.an).sort((a, b) => b - a);
+    return alts.length ? {face: f, img: f.vistas[alts[0]], andar: alts[0]} : {face: f, img: null, andar: null};
+  }
+  // imagem da ficha: arquivo da pasta do projeto (id) ou foto com endereço completo (ficha automática)
+  const ehUrl = s => /^https?:\/\//i.test(String(s || ''));
+  const img = (P, id) => ehUrl(id) ? String(id) : (P.pasta || '') + id + '.jpg';
+  const dim = (P, id) => { const d = P.dim && P.dim[id]; return d ? ' width="' + d[0] + '" height="' + d[1] + '"' : ''; };
+  // miniatura: foto do Drive (lh3) no tamanho pequeno; outras fotos com endereço completo vão como estão
+  const thumb = (P, id) => ehUrl(id) ? String(id).replace(/(googleusercontent\.com\/d\/[A-Za-z0-9_-]+)=w\d+$/, '$1=w480') : (P.pasta || '') + 't' + id + '.jpg';
+  // fotos e arquivos das pastas do Drive (revenda One): endereço público do Google, sem copiar arquivo
+  const fotoDrive = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + (w || 1600);
+  const arquivoDrive = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const nomeImg = (id, k) => ehUrl(id) ? 'foto-' + ((k || 0) + 1) + '.jpg' : id + '.jpg';
+  // material oficial da construtora (arquivos do Linktree no Google Drive): {c: categoria, n: nome, id: arquivo no Drive, mb, ext}
+  // metragem nominal da planta (do título: "Studio 21 m²", "1 dormitório 26 a 27 m²"); a metragem final é a do espelho de vendas
+  const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
+  const difArea = (pl, a) => { const r = pl && areaPlanta(pl.p); return !!(r && a != null && isFinite(a) && (a < r[0] - 1 || a > r[1] + 1)); };
+  const driveUrl = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
+  const bookOficial = P => ((P && P.material_oficial) || []).find(d => d.c === 'Book do cliente' && d.ext === 'pdf') || null;
+  const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
+
+  // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
+  function fluxo(T, preco){
+    if(!T || !preco) return null;
+    const r = T.arredonda || 10; let soma = 0; const out = [];
+    for(const p of T.partes){
+      if(p.resto) continue;
+      const num = preco * Math.round(p.pct * 10), den = 1000 * p.q * r;     // inteiros: arredonda metade para cima
+      const v = Math.floor((2 * num + den) / (2 * den)) * r;
+      soma += v * p.q; out.push(Object.assign({}, p, {v}));
+    }
+    const f = T.partes.find(p => p.resto);
+    if(f) out.push(Object.assign({}, f, {v: preco - soma}));
+    return out;
+  }
+  // linhas prontas para mostrar: {t, v, s}
+  function linhasFluxo(T, preco){
+    const fx = fluxo(T, preco); if(!fx) return [];
+    return fx.map(p => {
+      if(p.k === 'ato') return {t: 'Ato', v: BRL(p.v), s: 'no fechamento'};
+      if(p.resto) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.q === 1) return {t: cap(p.lbl), v: BRL(p.v), s: mesAno(p.ini)};
+      if(p.lbl === 'anuais'){ const ds = []; for(let i = 0; i < p.q; i++) ds.push(mesAno(somaMeses(p.ini, 12 * i))); return {t: p.q + ' anuais', v: BRL(p.v), s: ds.join(' e ')}; }
+      return {t: p.q + ' ' + p.lbl, v: BRL(p.v), s: 'a partir de ' + mesAno(p.ini)};
+    });
+  }
+  const cap = s => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
+
+  // ---------- opções de valores de uma unidade: tabela (com fluxo) e preços do espelho ----------
+  function precosCampos(P, E){
+    if(P.precos && P.precos.length) return P.precos;
+    if(E && E.precos_campos && E.precos_campos.length) return E.precos_campos;
+    return [{k: 'pp', label: 'Parcelado'}, {k: 'pv', label: 'À vista'}];
+  }
+  function opcoesPreco(P, E, T, x){
+    const out = [];
+    const chave = String(x.n).toUpperCase();
+    if(T && T.u){
+      const t = T.u[chave] != null ? T.u[chave] : T.u[x.n];
+      if(t != null){
+        if(T.tipo === 'lista'){
+          // tabela da incorporadora com o fluxo pronto por unidade: [total, parcela1, parcela2, ...] na ordem de T.colunas
+          if(Array.isArray(t)) out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t[0], linhas: (T.colunas || []).map((c, i) => ({t: c.t, v: BRLc(t[i + 1]), s: c.s || ''})).filter((l, i) => t[i + 1] != null && +t[i + 1] > 0)});
+          else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t.total, linhas: t.linhas || []});
+        }
+        else out.push({k: 'tabela', rotulo: T.curto || 'Tabela', total: +t, linhas: linhasFluxo(T, +t)});
+      }
+    }
+    for(const c of precosCampos(P, E)){
+      const v = x.ex ? x.ex[c.k] : null; if(v == null || !isFinite(+v) || +v <= 0) continue;
+      out.push({k: c.k, rotulo: c.label, total: +v, linhas: (c.fluxo && T && T.partes) ? linhasFluxo(T, +v) : null, envio: c.envio !== false});
+    }
+    return out;
+  }
+
+  // ---------- planta do andar (esquema) com a unidade em destaque e o sol do estudo de insolação ----------
+  function svgAndar(P, x, opt){
+    opt = opt || {};
+    if(!P.andar_tipo) return P.andar_img ? svgImagemAndar(P, x, opt) : svgFaixa(P, x, opt);
+    const andar = x.andar, fin = x.fin;
+    const n = andarN(andar);
+    const tipo = (P.andar_tipo && (n >= P.andar_tipo.alto.de ? P.andar_tipo.alto : P.andar_tipo.baixo)) || null;
+    if(!tipo) return '';
+    const existe = opt.existe || null;            // Set de finais que existem neste andar (se souber)
+    const sit = opt.sit || {};                     // final -> situação (só para o corretor)
+    const W = 50, H = 58;
+    const cel = [];
+    const base = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5];
+    base.forEach((f, i) => { if(tipo.baixo.indexOf(f) >= 0) cel.push({f, x: i * W, y: 92, w: W, h: H}); });
+    const topo = [15, 16, 17, 18, 19, 20, 21, 22];
+    topo.forEach((f, i) => { if(tipo.cima.indexOf(f) >= 0) cel.push({f, x: i * W, y: f >= 20 ? 0 : 12, w: W, h: f >= 20 ? 70 : 58}); });
+    const lx = 10 * W + 22;
+    [[1, 4, 37], [2, 41, 37], [3, 78, 36], [4, 114, 36]].forEach(([f, y, h]) => { if(tipo.lado.indexOf(f) >= 0) cel.push({f, x: f === 4 ? lx - 22 : lx, y, w: f === 4 ? 92 : 70, h}); });
+    const larg = lx + 70;
+    const cor = f => {
+      if(+f === +fin) return 'var(--svg-alvo)';
+      const st = sit[f]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)';
+      return 'var(--svg-cel)';
+    };
+    const sol = opt.sol !== false;
+    const x0 = sol ? -78 : -8, y0 = -34, w = larg + 30 - x0, hh = (sol ? 238 : 190) - y0;
+    let s = '<svg class="svg-andar" viewBox="' + x0 + ' ' + y0 + ' ' + w + ' ' + hh + '" role="img" aria-label="Posição da unidade ' + String(fin).padStart(2, '0') + ' no andar">';
+    s += '<rect x="0" y="70" width="' + (10 * W) + '" height="22" class="corr"/>';
+    s += '<rect x="' + (8 * W) + '" y="12" width="' + (2 * W + 22) + '" height="58" class="core"/>';
+    for(const c of cel){
+      const ok = !existe || existe.has(c.f);
+      s += '<g class="c' + (+c.f === +fin ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + c.x + '" y="' + c.y + '" width="' + c.w + '" height="' + c.h + '" rx="4" style="fill:' + (ok ? cor(c.f) : 'transparent') + '"/>' +
+           '<text x="' + (c.x + c.w / 2) + '" y="' + (c.y + c.h / 2 + 7) + '" text-anchor="middle">' + String(c.f).padStart(2, '0') + '</text></g>';
+    }
+    s += '<text class="rua" x="' + (larg + 18) + '" y="75" transform="rotate(90 ' + (larg + 18) + ' 75)" text-anchor="middle">R. PEDRO TAQUES</text>';
+    s += '<text class="rua" x="' + (4 * W) + '" y="-12" text-anchor="middle">SENTIDO R. BELA CINTRA</text>';
+    s += '<text class="rua" x="' + (5 * W) + '" y="176" text-anchor="middle">SENTIDO R. DA CONSOLAÇÃO</text>';
+    if(sol){
+      // posições relativas do estudo de insolação da incorporadora (nascente à esquerda, poente embaixo)
+      const ps = [[-52, -14, '6h'], [-58, 116, '10h'], [30, 214, '14h'], [300, 214, '18h']];
+      s += '<path class="arco" d="M-52 -14 Q -80 70 -58 116 Q -34 196 30 214 Q 165 232 300 214" />';
+      for(const [x, y, t] of ps) s += '<g class="sol"><circle cx="' + x + '" cy="' + y + '" r="10"/><text x="' + (x + (x < 0 ? -4 : 15)) + '" y="' + (y + (x < 0 ? 28 : 5)) + '"' + (x < 0 ? ' text-anchor="middle"' : '') + '>' + t + '</text></g>';
+    }
+    return s + '</svg>';
+  }
+
+  // planta real do andar (imagem da incorporadora) com a unidade marcada por cima
+  function svgImagemAndar(P, x, opt){
+    const L = (P.andar_img || []).find(l => x.an >= l.de && x.an <= l.ate); if(!L) return svgFaixa(P, x, opt);
+    const sit = opt.sit || {};
+    const cor = st => st === 'disponivel' ? 'var(--svg-disp)' : (st === 'reservada' || st === 'processo_final') ? 'var(--svg-res)' : st === 'vendida' ? 'var(--svg-vend)' : null;
+    const rects = v => Array.isArray(v[0]) ? v : [v];            // uma unidade pode ter mais de um retângulo (planta em L)
+    const fs = Math.round(L.w / 34), sw = Math.max(4, Math.round(L.w / 300)), rx = Math.round(L.w / 250);
+    const larga = L.w / L.h > 2.2;                               // planta comprida: no celular fica rolável, com altura mínima
+    let s = '<svg class="svg-img" viewBox="0 0 ' + L.w + ' ' + L.h + '"' + (larga ? ' style="min-width:' + Math.round(200 * L.w / L.h) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na planta do andar"><image href="' + esc(img(P, L.img)) + '" x="0" y="0" width="' + L.w + '" height="' + L.h + '"/>';
+    let txt = '', cx0 = null;
+    for(const f of Object.keys(L.cells)){
+      const rs = rects(L.cells[f]), alvo = +f === x.fin, c = alvo ? null : cor(sit[+f]);
+      if(!alvo && !c) continue;
+      for(const [cx, cy, cw, ch] of rs) s += '<rect x="' + cx + '" y="' + cy + '" width="' + cw + '" height="' + ch + '" rx="' + rx + '" class="' + (alvo ? 'alvo' : 'st') + '" style="' + (c ? 'fill:' + c + ';' : '') + 'stroke-width:' + sw + '"/>';
+      // 5º número opcional: altura do rótulo dentro da unidade (0 = topo, 1 = base), para não cobrir o número da planta
+      if(alvo){ const [cx, cy, cw, ch, fy] = rs[0]; cx0 = cx + cw / 2; txt = '<text x="' + cx0 + '" y="' + (cy + ch * (fy != null ? fy : 0.5) + fs * 0.35) + '" text-anchor="middle" class="alvo-t" style="font-size:' + fs + 'px;stroke-width:' + Math.round(fs / 5) + 'px">' + esc(x.n) + '</text>'; }
+    }
+    s += txt;
+    if(L.rua) s += '<text class="rua-img" x="' + L.rua[1] + '" y="' + L.rua[2] + '" text-anchor="middle" style="font-size:' + Math.round(fs * 0.7) + 'px"' + (L.rua[3] ? ' transform="rotate(' + L.rua[3] + ' ' + L.rua[1] + ' ' + L.rua[2] + ')"' : '') + '>' + esc(L.rua[0]) + '</text>';
+    return '<div class="andar-img' + (larga ? ' larga' : '') + '"' + (cx0 != null ? ' data-cx="' + (cx0 / L.w).toFixed(3) + '"' : '') + '>' + s + '</svg></div>';
+  }
+  // planta do andar larga: rola até a unidade em destaque
+  function centrarAndar(root){
+    (root || document).querySelectorAll('.andar-img[data-cx]').forEach(el => {
+      if(el.scrollWidth <= el.clientWidth + 2) return;
+      el.scrollLeft = Math.max(0, (+el.dataset.cx) * el.scrollWidth - el.clientWidth / 2);
+    });
+  }
+  // faixa do espelho: a linha do andar com a unidade em destaque e os lados (vistas) marcados
+  function svgFaixa(P, x, opt){
+    const nc = P.colunas || 0; if(!nc) return '';
+    const sit = opt.sitCol || {}, existe = opt.existeCol || null, nums = opt.numCol || null;
+    const W = 40, H = 54, gap = 4, top = (P.faces || []).some(f => f.cols) ? 36 : 6;
+    const largura = nc * (W + gap) - gap, larga = nc > 12;
+    const cor = c => { if(c === x.col) return 'var(--svg-alvo)'; const st = sit[c]; if(st === 'disponivel') return 'var(--svg-disp)'; if(st === 'reservada' || st === 'processo_final') return 'var(--svg-res)'; if(st === 'vendida') return 'var(--svg-vend)'; return 'var(--svg-cel)'; };
+    let s = '<svg class="svg-andar faixa" viewBox="-4 0 ' + (largura + 8) + ' ' + (top + H + 40) + '"' + (larga ? ' style="min-width:' + (nc * 30) + 'px"' : '') + ' role="img" aria-label="Posição da unidade ' + esc(x.n) + ' na linha do andar">';
+    for(const f of (P.faces || [])){
+      if(!f.cols || !f.cols.length) continue;
+      const a = Math.min.apply(null, f.cols), b = Math.max.apply(null, f.cols), x0 = a * (W + gap), x1 = b * (W + gap) + W;
+      s += '<rect x="' + x0 + '" y="4" width="' + (x1 - x0) + '" height="26" rx="5" class="banda"/><text x="' + ((x0 + x1) / 2) + '" y="22.5" text-anchor="middle" class="banda-t">' + esc(f.curto || f.nome).toUpperCase() + '</text>';
+    }
+    for(let c = 0; c < nc; c++){
+      const ok = !existe || existe.has(c), alvo = c === x.col, n = nums && nums[c];
+      s += '<g class="c' + (alvo ? ' alvo' : '') + (ok ? '' : ' nao') + '"><rect x="' + (c * (W + gap)) + '" y="' + top + '" width="' + W + '" height="' + H + '" rx="5" style="fill:' + (ok ? cor(c) : 'transparent') + '"/>' +
+           (ok && n != null && String(n).length <= 4 ? '<text x="' + (c * (W + gap) + W / 2) + '" y="' + (top + H / 2 + 5) + '" text-anchor="middle" class="num-c' + (alvo ? ' alvo' : '') + '">' + esc(n) + '</text>' : '') + '</g>';
+    }
+    const cx = x.col * (W + gap) + W / 2;
+    s += '<path d="M' + cx + ' ' + (top + H + 5) + ' l-8 11 h16 z" class="seta"/><text x="' + Math.max(50, Math.min(largura - 50, cx)) + '" y="' + (top + H + 36) + '" text-anchor="middle" class="faixa-t">' + esc(x.n) + '</text></svg>';
+    return larga ? '<div class="andar-img larga faixa-w" data-cx="' + ((cx + 4) / (largura + 8)).toFixed(3) + '">' + s + '</div>' : s;
+  }
+
+
+  // ---------- visualizador de imagens (tocar para ampliar) ----------
+  let vis = null;
+  function visualizador(itens, i, opt){
+    opt = opt || {};
+    if(!vis){
+      vis = document.createElement('div'); vis.className = 'vis'; vis.hidden = true;
+      vis.innerHTML = '<div class="vis-top"><span class="vis-t"></span><span class="vis-acoes"></span><button type="button" class="vis-x" aria-label="Fechar">×</button></div>' +
+        '<div class="vis-area"><img alt="" referrerpolicy="no-referrer"></div><button type="button" class="vis-ant" aria-label="Anterior">‹</button><button type="button" class="vis-prox" aria-label="Próxima">›</button>';
+      document.body.appendChild(vis);
+      const area = vis.querySelector('.vis-area');
+      vis.querySelector('.vis-x').onclick = () => fechar();
+      area.addEventListener('click', e => { if(e.target.tagName === 'IMG') area.classList.toggle('zoom'); else fechar(); });
+      document.addEventListener('keydown', e => { if(vis.hidden) return; if(e.key === 'Escape') fechar(); if(e.key === 'ArrowRight') mover(1); if(e.key === 'ArrowLeft') mover(-1); });
+      vis.querySelector('.vis-ant').onclick = () => mover(-1);
+      vis.querySelector('.vis-prox').onclick = () => mover(1);
+      let x0 = null; area.addEventListener('touchstart', e => { x0 = e.touches.length === 1 && !area.classList.contains('zoom') ? e.touches[0].clientX : null; }, {passive: true});
+      area.addEventListener('touchend', e => { if(x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if(Math.abs(dx) > 60) mover(dx < 0 ? 1 : -1); x0 = null; });
+    }
+    function fechar(){ vis.hidden = true; document.body.classList.remove('sem-rolagem'); }
+    function mover(d){ if(vis._itens.length < 2) return; vis._i = (vis._i + d + vis._itens.length) % vis._itens.length; mostrar(); }
+    function mostrar(){
+      const it = vis._itens[vis._i]; const area = vis.querySelector('.vis-area'); area.classList.remove('zoom'); area.scrollTo(0, 0);
+      vis.querySelector('img').src = it.src; vis.querySelector('.vis-t').textContent = it.t || '';
+      const ac = vis.querySelector('.vis-acoes'); ac.innerHTML = '';
+      if(vis._opt.acoes) vis._opt.acoes(it, ac);
+      vis.querySelector('.vis-ant').hidden = vis.querySelector('.vis-prox').hidden = vis._itens.length < 2;
+      if(vis._opt.aoVer) vis._opt.aoVer(it);
+    }
+    vis._itens = itens; vis._i = i || 0; vis._opt = opt;
+    vis.hidden = false; document.body.classList.add('sem-rolagem'); mostrar();
+  }
+
+  // ---------- compartilhar arquivos (WhatsApp etc.) com alternativa de baixar ----------
+  // foto de outro site que não deixa baixar (ficha automática): vai o link no lugar do arquivo
+  async function arquivos(lista){
+    const fs = await Promise.all(lista.map(async it => {
+      try{ const r = await fetch(it.src); if(!r.ok) return null; const b = await r.blob(); return new File([b], it.nome || it.src.split('/').pop(), {type: b.type || 'image/jpeg'}); }
+      catch(e){ return null; }
+    }));
+    return fs.filter(Boolean);
+  }
+  async function compartilhar(lista, texto){
+    try{
+      const fs = await arquivos(lista);
+      if(!fs.length){
+        const t = (texto ? texto + '\n' : '') + lista.map(it => it.src).join('\n');
+        if(navigator.share){ await navigator.share({text: t}); return 'links'; }
+        await navigator.clipboard.writeText(t); return 'copiado';
+      }
+      if(navigator.canShare && navigator.canShare({files: fs})){ await navigator.share({files: fs, text: texto || undefined}); return 'ok'; }
+      for(const f of fs){ const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+      return 'baixado';
+    }catch(e){ if(e && e.name === 'AbortError') return 'cancelado'; throw e; }
+  }
+  function toast(t){
+    let el = $('toast'); if(!el){ el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = t; el.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+  const quando = iso => {
+    if(!iso) return '';
+    const d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+    if(s < 60) return 'agora há pouco';
+    if(s < 3600) return 'há ' + Math.floor(s / 60) + ' min';
+    if(s < 86400) return 'há ' + Math.floor(s / 3600) + ' h';
+    return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo'}) + ' às ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'});
+  };
+  const soDigitos = s => String(s || '').replace(/\D/g, '');
+  const waNum = tel => { let d = soDigitos(tel); if(!d) return ''; if(d.length <= 11) d = '55' + d; return d; };
+
+  // ---------- ficha automática: projeto sem ficha montada, feita com o que o app já tem ----------
+  // fotos (capa e fotos do projeto), unidades e valores do espelho, endereço, mapa e as distâncias do destaque.
+  // E: projeto do espelho ({id, nome, info, unidades, grade, faixas, endereco}); extra: {capa, fotos, tipologias, pagina}
+  const MESES_EXT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const FAIXAS_AUTO = [[30, 'até 30 m²'], [45, '30 a 45 m²'], [70, '45 a 70 m²'], [100, '70 a 100 m²'], [9999, 'acima de 100 m²']];
+  // "A 500 m do Shopping Frei Caneca e a 450 m do Mackenzie" -> [{nome: 'Shopping Frei Caneca', m: 500}, {nome: 'Mackenzie', m: 450}]
+  function pertoDe(txt){
+    const out = [];
+    for(const fr of String(txt || '').split(/;\s*|,\s+|\s+e\s+(?=(?:a|à)\s+\d)/i)){
+      const m = /(?:^|\s)(?:a|à)\s+(\d+(?:[.,]\d+)?)\s*(km|metros?|minutos?|min|m)(?![\p{L}\d])\.?\s*(a pé|de carro|de bicicleta|de bike)?\s+(?:d[aeo]s?|até)\s+(.+)$/iu.exec(' ' + fr.trim());
+      if(!m) continue;
+      let nome = m[4].split(/\s+e\s+(?:ao lado|perto|a poucos|entre)\b|\s+com\s+|\s*\(/i)[0].trim().replace(/[.;:]+$/, '');
+      if(nome.length < 3 || nome.length > 70) continue;
+      const v = parseFloat(m[1].replace(',', '.')), u = m[2].toLowerCase(), modo = (m[3] || '').toLowerCase();
+      const it = {nome: cap(nome)};
+      if(u === 'km') it.m = Math.round(v * 1000);
+      else if(u === 'm' || /^metro/.test(u)) it.m = Math.round(v);
+      else if(/pé/.test(modo)) it.pe = v; else if(/carro/.test(modo)) it.carro = v; else if(/bic|bike/.test(modo)) it.bike = v; else it.min = v;
+      out.push(it);
+    }
+    return out.slice(0, 6);
+  }
+  function fichaAuto(E, extra){
+    E = E || {}; extra = extra || {};
+    const i = E.info || {}, nome = String(E.nome || i.nome || E.id || '');
+    const revenda = /^rev-/.test(E.id || '') || /\(revenda\)/i.test(nome);
+    const fotos = [];
+    const add = (u, t) => { if(ehUrl(u) && !fotos.some(f => f.id === String(u))) fotos.push({id: String(u), t: String(t || '').slice(0, 80)}); };
+    add(extra.capa || i.capa, 'Fachada');
+    for(const f of (Array.isArray(extra.fotos) ? extra.fotos : Array.isArray(i.fotos) ? i.fotos : [])) if(f) add(f.u, f.t);
+    const mat = (Array.isArray(i.material) ? i.material : []).filter(x => x && ehUrl(x.u));
+    mat.filter(x => x.tipo === 'foto').forEach(x => add(x.u, x.t));
+    const plantas = mat.filter(x => x.tipo === 'planta').map((x, k) => ({id: String(x.u), t: String(x.t || 'Planta ' + (k + 1)).slice(0, 80)}));
+    // metragens e unidades do espelho
+    const areas = (Array.isArray(E.unidades) ? E.unidades : []).map(areaU).filter(a => a > 0);
+    const fmtA = v => (Math.round(v * 10) / 10).toLocaleString('pt-BR');
+    const aMin = areas.length ? Math.min.apply(null, areas) : null, aMax = areas.length ? Math.max.apply(null, areas) : null;
+    const me = /^(\d{4})-(\d{2})/.exec(i.entrega || '');
+    const entrega = i.fase === 'pronto' ? 'Pronto para morar' : me ? 'Entrega prevista em ' + MESES_EXT[+me[2] - 1] + ' de ' + me[1] : i.fase === 'breve' ? 'Lançamento em breve' : '';
+    const tip = String(extra.tipologias || i.tipologias || '').trim();
+    const cidade = i.cidade && !/^s[aã]o paulo$/i.test(i.cidade) ? i.cidade : '';
+    const end = String(i.endereco || E.endereco || [i.bairro, i.cidade].filter(Boolean).join(', ')).replace(/\s*·\s*/g, ', ').trim();
+    const fatos = [];
+    if(tip) fatos.push(['Tipologias', tip]);
+    if(aMin) fatos.push(['Metragens', aMin === aMax || fmtA(aMin) === fmtA(aMax) ? fmtA(aMin) + ' m²' : 'de ' + fmtA(aMin) + ' a ' + fmtA(aMax) + ' m²']);
+    if(entrega) fatos.push([i.fase === 'pronto' ? 'Fase' : 'Entrega', entrega.replace(/^Entrega prevista em /, '')]);
+    if(i.construtora) fatos.push(['Construtora', String(i.construtora)]);
+    if(i.bairro) fatos.push(['Bairro', i.bairro + (cidade ? ', ' + cidade : '')]);
+    const vg = i.vagas && typeof i.vagas === 'object' && i.vagas.t ? String(i.vagas.t).replace(/[.]$/, '') : '';
+    if(vg) fatos.push(['Vaga de garagem', vg]);
+    const perto = pertoDe(i.destaque);
+    const temGeo = i.lat != null && i.lng != null && isFinite(+i.lat) && isFinite(+i.lng);
+    const pagina = ehUrl(extra.pagina || i.pagina) ? String(extra.pagina || i.pagina) : null;
+    return {
+      id: E.id, nome, auto: true, revenda, pasta: '', pagina: 'ver.html', dim: {},
+      hero: fotos.length ? fotos[0].id : null, renders: fotos, plantas, faces: [],
+      colunas: revenda ? 0 : (+((E.grade || {}).colunas) || +E.colunas || 0),
+      faixas: Array.isArray(E.faixas) && E.faixas.length ? E.faixas : FAIXAS_AUTO,
+      endereco: end, entrega, chamada: String(i.destaque || ''),
+      intro: (tip ? tip + (i.bairro ? ', no bairro ' + i.bairro : '') + '. ' : i.bairro ? 'No bairro ' + i.bairro + '. ' : '') + (entrega ? entrega + '.' : ''),
+      fatos, perto, perto_fonte: perto.length ? 'Distâncias divulgadas pela construtora.' : '',
+      mapa: temGeo ? 'https://www.google.com/maps/search/?api=1&query=' + (+i.lat) + ',' + (+i.lng) : end ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(end) : null,
+      legal: 'Imagens e informações de divulgação da construtora, sujeitas a alteração. Valores e disponibilidade na data do envio.',
+      cat_info: {}, lazer: [], entregue: [], diferenciais: [], pagina_oficial: pagina
+    };
+  }
+
+  return {CFG, $, LS, esc, BRL, BRLc, m2, mesAno, rpc, andarN, andarTxt, andarCurto, areaU, finalU, pad2, un, unLink, tipoTxt, posTxt, face, planta, vista, ehUrl, img, dim, thumb, nomeImg, driveUrl, bookOficial, difArea, faixaDe, precosCampos, opcoesPreco, fluxo, linhasFluxo, svgAndar, centrarAndar, visualizador, compartilhar, toast, quando, waNum, cap, fichaAuto, pertoDe, fotoDrive, arquivoDrive};
+})();
+
+// Vitrine do cliente: os empreendimentos completos do app num link só, para morar ou investir.
+// Fotos, plantas, prazo, como pagar e onde fica; cada pedido abre o WhatsApp do corretor que mandou o link.
+(function(){
+  'use strict';
+  const {$, esc, rpc, visualizador, toast, waNum, driveUrl, bookOficial, pertoDe} = NEX;
+  const q = new URLSearchParams(location.search);
+  const ID = (q.get('v') || '').trim(), PREVIA = q.get('previa') === '1';
+  const LOTE = 16, LSK = 'vit-' + ID;
+  let S = null, L = [], VIS = [], mostrando = 0, FI = null, MODO = '', FOLHA = null;
+  const DET = new Map(), CEN = {}, feitos = new Set();
+  let cenIdx = null;
+  const F = {zonas: new Set(), bairros: new Set(), vmin: 0, vmax: 0, ent: 0, men: 0, dorms: new Set(), prazo: '', amin: 0, vaga: false, mob: false, semRenda: false, nr: false, fase: '', q: '', ordem: ''};
+  const LS = {get(k){ try{ return localStorage.getItem(LSK + k); }catch(e){ return null; } }, set(k, v){ try{ localStorage.setItem(LSK + k, v); }catch(e){} }};
+  let FAV = new Set(); try{ FAV = new Set(JSON.parse(LS.get('-fav') || '[]')); }catch(e){}
+
+  // ---------- textos e números ----------
+  const primeiro = s => String(s || '').trim().split(/\s+/)[0] || '';
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  const semAc = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const mesAno = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); return m ? MES[+m[2] - 1] + '/' + m[1] : ''; };
+  const hojeYM = () => (S && S.hoje ? S.hoje : new Date().toISOString()).slice(0, 7);
+  function mesesAte(ym){ const a = /^(\d{4})-(\d{2})/.exec(ym || ''), b = /^(\d{4})-(\d{2})/.exec(hojeYM()); return a && b ? (+a[1] - +b[1]) * 12 + (+a[2] - +b[2]) : null; }
+  const ZONAS = [['oeste', 'Zona Oeste'], ['sul', 'Zona Sul'], ['centro', 'Centro'], ['leste', 'Zona Leste'], ['norte', 'Zona Norte'], ['outras', 'Outras cidades']];
+  const ZN = Object.fromEntries(ZONAS);
+  const FAIXAS = [['ate300', 'Até R$ 300 mil', 0, 300e3], ['300a500', 'R$ 300 a 500 mil', 300e3, 500e3], ['500a1m', 'R$ 500 mil a 1 mi', 500e3, 1e6], ['1a2m', 'R$ 1 a 2 mi', 1e6, 2e6], ['2m', 'Acima de R$ 2 mi', 2e6, 0]];
+  const PRAZOS = [['pronto', 'Pronto para morar'], ['2027', 'Até 2027'], ['2028', 'Até 2028'], ['2029', 'Até 2029']];
+  const ENTRADAS = [[30e3, 'Até R$ 30 mil'], [60e3, 'Até R$ 60 mil'], [100e3, 'Até R$ 100 mil'], [200e3, 'Até R$ 200 mil']];
+  const PARCELAS = [[1500, 'Até R$ 1.500/mês'], [3000, 'Até R$ 3 mil/mês'], [5000, 'Até R$ 5 mil/mês']];
+  const ORDENS = [['rec', 'Recomendados'], ['valor', 'Menor valor'], ['entrada', 'Menor entrada'], ['entrega', 'Entrega mais próxima']];
+  function reais(v){
+    if(v == null || !isFinite(v)) return '';
+    if(v >= 1e6){ const n = Math.floor(v / 1e4) / 100; return 'R$ ' + n.toLocaleString('pt-BR', {maximumFractionDigits: 2}) + (n < 2 ? ' milhão' : ' milhões'); }
+    if(v >= 100e3) return 'R$ ' + Math.round(v / 1000).toLocaleString('pt-BR') + ' mil';
+    if(v >= 10e3) return 'R$ ' + (Math.round(v / 100) / 10).toLocaleString('pt-BR') + ' mil';
+    return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  }
+  const partir = v => { if(v == null) return ''; if(v >= 1e6) return reais(v); return 'R$ ' + Math.floor(v / 1000).toLocaleString('pt-BR') + ' mil'; };
+  const exato = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const faixaM2 = (a, b) => a == null || !isFinite(a) || a <= 0 ? '' : Math.round(a) === Math.round(b) ? Math.round(a) + ' m²' : Math.round(a) + ' a ' + Math.round(b) + ' m²';
+  const areasDe = ts => { const v = ts.filter(t => t.amin > 0); return v.length ? faixaM2(Math.min.apply(null, v.map(t => t.amin)), Math.max.apply(null, v.map(t => t.amax))) : ''; };
+  function dormsDe(t){
+    t = String(t || '');
+    const m = /(\d+)\s*(?:dorm|su[ií]te|quarto)/i.exec(t);
+    if(m) return Math.min(+m[1], 4);
+    if(/studio|st[uú]dio|flat|kitnet|loft/i.test(t)) return 0;
+    return null;
+  }
+  const rotulo = t => { t = String(t || '').trim(); return t ? cap(t.replace(/\bDorms?\b/g, x => x.toLowerCase())) : 'Apartamento'; };
+  function dormsResumo(ds){
+    const v = [...new Set(ds.filter(d => d != null))].sort((a, b) => a - b);
+    if(!v.length) return 'Apartamentos';
+    const t = d => d === 0 ? 'Studio' : d === 4 ? '4 ou mais' : String(d);
+    if(v.length === 1) return v[0] === 0 ? 'Studio' : v[0] === 4 ? '4 dorms ou mais' : v[0] + (v[0] === 1 ? ' dorm' : ' dorms');
+    if(v.length === 2) return t(v[0]) + ' e ' + t(v[1]) + (v[1] > 0 ? (v[1] === 1 ? ' dorm' : ' dorms') : '');
+    return t(v[0]) + ' a ' + t(v[v.length - 1]) + ' dorms';
+  }
+  function tiposResumo(ts, tip){
+    if(!ts.length) return tip || '';
+    if(ts.some(t => t.d != null)) return dormsResumo(ts.map(t => t.d));
+    const com = [...new Set(ts.map(t => /laje/i.test(t.tl) ? 'Lajes corporativas' : /loja/i.test(t.tl) ? 'Lojas' : /sala/i.test(t.tl) ? 'Salas' : null).filter(Boolean))];
+    return com.length ? com.map((x, i) => i ? x.toLowerCase() : x).join(' e ') : 'Apartamentos';
+  }
+  const CLS = {HIS: 'HIS', HMP: 'HMP', NR: 'NR'};
+  const rotuloTp = t => t.tl + (t.cl && !new RegExp('\\b' + t.cl + '\\b', 'i').test(t.tl) ? ' ' + t.cl : '');
+
+  // ---------- servidor ----------
+  function evento(e, d){
+    if(PREVIA || !S) return;
+    const k = e + '|' + (d || ''); if(!/^(filtro|perfil|favoritos)$/.test(e) && feitos.has(k)) return; feitos.add(k);
+    try{ fetch(NEX.CFG.url + '/rest/v1/rpc/vitrine_ver', {method: 'POST', keepalive: true, headers: {'apikey': NEX.CFG.key, 'Content-Type': 'application/json'}, body: JSON.stringify({p_id: ID, p_evento: e, p_detalhe: d || null})}).catch(() => {}); }catch(x){}
+  }
+  function erro(tipo, dados){
+    $('load').hidden = true; $('pg').hidden = true; $('erro').hidden = false;
+    if(tipo === 'expirado'){
+      $('erro-t').textContent = 'Este link expirou';
+      $('erro-p').textContent = 'A vitrine vale 90 dias. Peça ao seu corretor um link novo, com os valores de hoje.';
+      if(dados && dados.whats){ const w = $('erro-wa'); w.hidden = false; w.href = 'https://wa.me/' + waNum(dados.whats); w.textContent = 'Falar com ' + (primeiro(dados.corretor) || 'o corretor'); }
+    }else if(tipo === 'rede'){
+      $('erro-t').textContent = 'Sem conexão';
+      $('erro-p').textContent = 'Não consegui carregar agora. Confira a internet e tente de novo.';
+      const b = $('erro-de-novo'); b.hidden = false; b.onclick = () => location.reload();
+    }
+  }
+  async function iniciar(){
+    if(PREVIA) $('previa').hidden = false;
+    if(!/^[A-Za-z0-9_-]{8,20}$/.test(ID)) return erro('link_invalido');
+    let r;
+    try{ r = await rpc('vitrine_ver', {p_id: ID, p_evento: PREVIA ? 'previa' : 'abriu'}); }catch(e){ return erro('rede'); }
+    if(!r || !r.ok) return erro(r && r.erro, r);
+    S = r;
+    L = (r.projetos || []).map(normProj);
+    ordenarRec();
+    FAV = new Set([...FAV].filter(id => L.some(p => p.id === id)));
+    MODO = /^(morar|investir)$/.test(LS.get('-modo') || '') ? LS.get('-modo') : '';
+    montar();
+    const m = /^#e-(.+)$/.exec(location.hash || '');
+    if(m){ const p = L.find(x => x.id === decodeURIComponent(m[1])); if(p) abrirFicha(p, true); }
+  }
+
+  // ---------- empreendimentos ----------
+  function zonaDe(p){
+    if(p.cidade && !/^s[aã]o paulo$/i.test(p.cidade)) return 'outras';
+    return ZN[p.zona] && p.zona !== 'outras' ? p.zona : 'outras';
+  }
+  function normProj(p){
+    const tps = (p.tps || []).map(t => ({tl: rotulo(t[0]), d: dormsDe(t[0]), amin: t[1] != null ? +t[1] : null, amax: t[2] != null ? +t[2] : null,
+      p: t[3] != null ? +t[3] : null, teto: t[4] != null ? +t[4] : null, piso: t[3] != null ? +t[3] : (t[5] != null ? +t[5] : null), cl: t[6] || null, pm2: t[7] != null ? +t[7] : null}));
+    const ano = p.fase === 'pronto' ? 0 : (/^(\d{4})/.exec(p.entrega || '') || [])[1];
+    const fal = Array.isArray(p.fal) ? p.fal : [], PESO = {disp: 20, capa: 4, planta: 2, fotos: 1, fluxo: 1, prazo: 1, local: 1};
+    return Object.assign({}, p, {tps, fx: p.fx || null, zk: zonaDe(p), ano: ano === 0 ? 0 : ano ? +ano : 9999, txt: semAc([p.nome, p.bairro, p.cons, p.cidade].join(' ')),
+      ok: !fal.length, semDisp: fal.includes('disp'), peso: fal.reduce((s, k) => s + (PESO[k] || 1), 0)});
+  }
+  function ordenarRec(){
+    const alterna = arr => { const g = new Map(); arr.forEach(p => { const k = p.cons || p.id; if(!g.has(k)) g.set(k, []); g.get(k).push(p); });
+      const filas = [...g.values()], out = []; for(let i = 0; out.length < arr.length; i++) filas.forEach(f => { if(f[i]) out.push(f[i]); }); return out; };
+    const pesos = [...new Set(L.map(p => p.peso))].sort((a, b) => a - b);
+    pesos.flatMap(w => alterna(L.filter(p => p.peso === w))).forEach((p, i) => { p.rec = i; });
+  }
+  const local = p => [p.bairro, p.zk === 'outras' ? p.cidade : ZN[p.zk]].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join(', ');
+  function entregaTxt(p, longo){
+    if(p.fase === 'pronto') return 'Pronto para morar';
+    if(p.entrega){ const m = mesesAte(p.entrega); return 'Entrega em ' + mesAno(p.entrega) + (longo && m != null && m > 0 ? ', daqui a ' + m + (m === 1 ? ' mês' : ' meses') : ''); }
+    return p.fase === 'lanc' || p.fase === 'breve' ? 'Lançamento' : p.fase === 'obras' ? 'Em obras' : 'Prazo a confirmar';
+  }
+  const faseTxt = p => p.fase === 'pronto' ? 'Pronto para morar' : p.fase === 'lanc' || p.fase === 'breve' ? 'Lançamento' : p.fase === 'obras' ? 'Em obras' : '';
+
+  // ---------- filtros ----------
+  const faixaTxt = () => F.vmin && F.vmax ? reais(F.vmin) + ' a ' + reais(F.vmax).replace('R$ ', '') : F.vmax ? 'até ' + reais(F.vmax) : F.vmin ? 'acima de ' + reais(F.vmin) : '';
+  const okDorm = t => !F.dorms.size || (t.d != null && F.dorms.has(t.d));
+  const okArea = t => !F.amin || (t.amin != null && t.amax >= F.amin - 0.5);
+  const okClasse = t => (!F.semRenda || (t.cl !== 'HIS' && t.cl !== 'HMP')) && (!F.nr || t.cl === 'NR');
+  function okValor(t){
+    if(!F.vmin && !F.vmax) return true;
+    if(t.piso == null) return false;
+    if(F.vmax && t.piso > F.vmax) return false;
+    if(F.vmin && (t.teto || t.piso) < F.vmin) return false;
+    return true;
+  }
+  function okPrazo(p){
+    if(!F.prazo) return true;
+    if(F.prazo === 'pronto') return p.fase === 'pronto';
+    return p.ano <= +F.prazo;
+  }
+  function casa(p, sem){
+    sem = sem || '';
+    if(F.q && sem !== 'q'){ const t = semAc(F.q).trim(); if(t && !t.split(/\s+/).every(w => p.txt.includes(w))) return null; }
+    if(sem !== 'regiao'){ if(F.bairros.size){ if(!F.bairros.has(p.bairro)) return null; } else if(F.zonas.size && !F.zonas.has(p.zk)) return null; }
+    if(sem !== 'prazo' && !okPrazo(p)) return null;
+    if(F.fase && p.fase !== F.fase && !(F.fase === 'lanc' && p.fase === 'breve')) return null;
+    if(F.vaga && !(p.vaga === 'todas' || p.vaga === 'algumas')) return null;
+    if(F.mob && p.mob !== 'todas' && p.mob !== 'algumas') return null;
+    if(sem !== 'ent' && F.ent && !(p.fx && p.fx.ent != null && p.fx.ent <= F.ent)) return null;
+    if(sem !== 'men' && F.men && !(p.fx && p.fx.men != null && p.fx.men <= F.men)) return null;
+    if(!p.tps.length) return (sem !== 'dorms' && F.dorms.size) || F.amin || (sem !== 'valor' && (F.vmin || F.vmax)) || F.semRenda || F.nr ? null : [];
+    const ts = p.tps.filter(t => (sem === 'dorms' || okDorm(t)) && okArea(t) && (sem === 'valor' || okValor(t)) && okClasse(t));
+    return ts.length ? ts : null;
+  }
+  const filtrosAtivos = () => !!(F.zonas.size || F.bairros.size || F.vmin || F.vmax || F.ent || F.men || F.dorms.size || F.prazo || F.amin || F.vaga || F.mob || F.semRenda || F.nr || F.fase || F.q.trim());
+  const precoMin = ts => { const v = ts.map(t => t.p).filter(x => x != null); return v.length ? Math.min.apply(null, v) : null; };
+  const pisoMin = ts => { const v = ts.map(t => t.piso).filter(x => x != null); return v.length ? Math.min.apply(null, v) : Infinity; };
+  const ordemPadrao = () => MODO === 'investir' && S.precos === 'apartir' ? 'entrada' : 'rec';
+  function filtrar(){
+    VIS = [];
+    for(const p of L){ const ts = casa(p); if(ts) VIS.push({p, ts}); }
+    const o = F.ordem || ordemPadrao();
+    const ent = p => p.fx && p.fx.ent != null ? p.fx.ent : Infinity;
+    VIS.sort((a, b) => o === 'valor' ? (pisoMin(a.ts) - pisoMin(b.ts)) || (a.p.rec - b.p.rec)
+      : o === 'entrada' ? (ent(a.p) - ent(b.p)) || (a.p.rec - b.p.rec)
+      : o === 'entrega' ? (a.p.ano - b.p.ano) || (a.p.rec - b.p.rec)
+      : a.p.rec - b.p.rec);
+  }
+  function resumoBusca(){
+    const v = [];
+    if(F.bairros.size) v.push([...F.bairros].join(', ')); else if(F.zonas.size) v.push([...F.zonas].map(k => ZN[k]).join(', '));
+    if(F.vmin || F.vmax) v.push(faixaTxt());
+    if(F.ent) v.push('entrada até ' + reais(F.ent));
+    if(F.men) v.push('parcela até ' + reais(F.men) + ' por mês');
+    if(F.dorms.size){ const d = [...F.dorms].sort(); v.push(d.map(x => x === 0 ? 'studio' : x === 4 ? '4+' : x).join(', ').replace(/, ([^,]*)$/, ' e $1') + (d.some(x => x > 0) ? ' dorms' : '')); }
+    if(F.prazo) v.push(PRAZOS.find(x => x[0] === F.prazo)[1].toLowerCase());
+    if(F.amin) v.push('a partir de ' + F.amin + ' m²');
+    if(F.vaga) v.push('com vaga');
+    if(F.mob) v.push('mobiliado');
+    if(F.semRenda) v.push('sem exigência de renda');
+    if(F.nr) v.push('NR');
+    if(F.fase) v.push({lanc: 'lançamento', obras: 'em obras', pronto: 'pronto'}[F.fase]);
+    if(F.q.trim()) v.push('"' + F.q.trim() + '"');
+    return v.join(', ');
+  }
+
+  // ---------- página ----------
+  const ICO = {
+    wa: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.1-1.2-.2-.2-.5-.3z"/></svg>',
+    cor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>',
+    lupa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
+  };
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; };
+  function linkWa(txt, rot, aoTocar, cls){
+    const a = el('a', 'btn' + (cls ? ' ' + cls : '')); a.target = '_blank'; a.rel = 'noopener';
+    a.href = S.whats ? 'https://wa.me/' + waNum(S.whats) + '?text=' + encodeURIComponent(txt) : '#';
+    a.innerHTML = ICO.wa; a.appendChild(document.createTextNode(rot));
+    a.addEventListener('click', ev => { if(aoTocar) aoTocar(); if(!S.whats){ ev.preventDefault(); toast('Pronto. ' + (primeiro(S.corretor) || 'Seu corretor') + ' recebeu o seu pedido.'); } a.classList.add('feito'); });
+    return a;
+  }
+  const iniciais = n => String(n || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+  function corretorHtml(){
+    const nome = S.corretor || 'Seu corretor', ini = iniciais(nome);
+    return '<span class="cor-ini" aria-hidden="true">' + esc(ini) + '</span><span class="cor-txt">' + esc(nome) + '<small>seu corretor na Fortal</small></span>';
+  }
+  function montar(){
+    const nome = primeiro(S.cliente), cor = primeiro(S.corretor) || 'o corretor';
+    document.title = (nome ? nome + ', ' : '') + 'escolha o seu próximo imóvel';
+    const c = $('cor'); c.innerHTML = corretorHtml();
+    if(S.whats){ c.href = 'https://wa.me/' + waNum(S.whats) + '?text=' + encodeURIComponent('Oi, ' + cor + '. Estou vendo a vitrine que você me mandou.'); c.target = '_blank'; c.rel = 'noopener'; c.addEventListener('click', () => evento('whatsapp')); }
+    // capa com os destaques, recado do corretor e coleções
+    $('ola').textContent = (nome ? nome + ', escolha' : 'Escolha') + ' o seu próximo imóvel';
+    $('intro').textContent = 'Aqui estão os ' + L.length + ' empreendimentos que eu acompanho, do lançamento ao pronto para morar. Deslize os destaques ou escolha por onde começar.';
+    $('ir-filtros').addEventListener('click', () => irPara('busca'));
+    if(S.recado){ $('recado').hidden = false; $('recado-ini').textContent = iniciais(S.corretor); $('recado-t').textContent = S.recado; $('recado-c').textContent = (S.corretor || 'Seu corretor') + ', seu corretor na Fortal'; }
+    montarCapa();
+    document.querySelectorAll('.modo').forEach(b => b.addEventListener('click', () => trocarModo(b.dataset.m)));
+    marcarModo(); montarColecoes();
+    // rodapé e WhatsApp
+    $('rodape-valores').textContent = (S.precos === 'apartir' ? 'Valores de partida e exemplos de pagamento pela tabela das construtoras de ' + mesAno(hojeYM()) + ', na unidade de entrada de cada planta. Mudam por andar e posição e podem mudar sem aviso; a disponibilidade é confirmada na reserva. ' : '') +
+      'Imagens e plantas ilustrativas, divulgadas pelas construtoras. Metragens privativas.';
+    $('rodape-cor').textContent = S.corretor ? 'Corretor: ' + S.corretor + (S.whats ? ', ' + S.whats : '') : '';
+    if(S.whats){
+      const w = $('wa'); w.hidden = false;
+      w.href = 'https://wa.me/' + waNum(S.whats) + '?text=' + encodeURIComponent('Oi, ' + cor + '. Estou vendo a vitrine que você me mandou.');
+      $('wa-t').textContent = 'Falar com ' + cor; w.addEventListener('click', () => evento('whatsapp'));
+    }
+    const qi = $('q'); let qt = null;
+    qi.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { F.q = qi.value; aplicar(); }, 160); });
+    $('fixa-f').addEventListener('click', () => { const t = $('busca').getBoundingClientRect().top + scrollY - 8; scrollTo({top: t, behavior: 'smooth'}); });
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(es => { es.forEach(e => $('fixa').classList.toggle('ver', !e.isIntersecting && e.boundingClientRect.top < 0)); }).observe($('busca'));
+    }
+    $('load').hidden = true; $('pg').hidden = false;
+    desenharBusca(); aplicar(true); barraFav();
+  }
+  function marcarModo(){
+    document.querySelectorAll('.modo').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === MODO)));
+    $('nota-modo').textContent = MODO === 'investir' ? 'Os cartões mostram a entrada, a parcela durante a obra e o valor do m².' : MODO === 'morar' ? 'Os cartões mostram quartos, vaga e quando fica pronto.' : 'Dá para trocar quando quiser.';
+  }
+  function trocarModo(m){
+    MODO = MODO === m ? '' : m; LS.set('-modo', MODO); marcarModo();
+    if(MODO) evento('perfil', MODO);
+    montarColecoes(); desenharBusca(); aplicar();
+  }
+
+  // ---------- capa: os destaques passando, um por construtora ----------
+  let capaI = 0, capaN = 0, capaParou = false, capaSobre = false;
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SETA = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (d < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '"/></svg>';
+  function destaques(){
+    const ord = L.slice().sort((a, b) => a.rec - b.rec), out = [], cons = new Set();
+    const boa = p => p.capa && !/googleusercontent/.test(p.capa);
+    for(const p of ord){ if(out.length >= 8) break; if(!p.ok || !boa(p) || cons.has(p.cons)) continue; cons.add(p.cons); out.push(p); }
+    for(const p of ord){ if(out.length >= 8) break; if(p.ok && boa(p) && !out.includes(p)) out.push(p); }
+    for(const p of ord){ if(out.length >= 8) break; if(!p.semDisp && boa(p) && !out.includes(p)) out.push(p); }
+    return out;
+  }
+  function montarCapa(){
+    const tr = $('capa-trilho'), br = $('capa-barras'); tr.replaceChildren(); br.replaceChildren();
+    const ds = destaques(); capaN = ds.length;
+    ds.forEach((p, i) => {
+      const a = el('article', 'cs'); a.setAttribute('aria-roledescription', 'destaque'); a.setAttribute('aria-label', (i + 1) + ' de ' + ds.length + ': ' + p.nome);
+      const im = el('img'); im.alt = ''; im.loading = i < 2 ? 'eager' : 'lazy'; im.decoding = 'async'; im.src = p.capa;
+      im.addEventListener('error', () => { const k = [...tr.children].indexOf(a); a.remove(); if(br.children[k]) br.children[k].remove(); capaN = tr.children.length; if(capaI >= capaN) capaI = 0; marcarBarras(); if(!capaN) $('capa').classList.add('sem'); });
+      a.appendChild(im);
+      const tx = el('div', 'cs-txt');
+      tx.appendChild(el('p', 'cs-etq', p.fase === 'pronto' ? 'Pronto para morar' : cap([faseTxt(p), p.entrega ? 'entrega em ' + mesAno(p.entrega) : ''].filter(Boolean).join(', ')) || entregaTxt(p)));
+      tx.appendChild(el('h2', null, p.nome));
+      tx.appendChild(el('p', 'cs-local', local(p)));
+      const ar = areasDe(p.tps);
+      tx.appendChild(el('p', 'cs-sub', tiposResumo(p.tps) + (ar ? ' de ' + ar : '')));
+      const pe = el('div', 'cs-pe'), pr = el('p', 'cs-preco');
+      const pm = S.precos === 'apartir' ? precoMin(p.tps) : null;
+      if(pm != null){ pr.appendChild(document.createTextNode('a partir de')); pr.appendChild(el('b', null, partir(pm))); }
+      else { pr.appendChild(document.createTextNode('valores e condições')); pr.appendChild(el('b', null, 'com ' + (primeiro(S.corretor) || 'o corretor'))); }
+      const bt = el('button', 'btn ouro', 'Ver o projeto'); bt.type = 'button'; bt.addEventListener('click', () => { capaParou = true; abrirFicha(p); });
+      pe.append(pr, bt); tx.appendChild(pe); a.appendChild(tx);
+      tr.appendChild(a); br.appendChild(el('i'));
+    });
+    if(!capaN){ $('capa').classList.add('sem'); return; }
+    let rt = null;
+    tr.addEventListener('scroll', () => { clearTimeout(rt); rt = setTimeout(() => { const i = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth)); if(i !== capaI){ capaI = i; marcarBarras(); } }, 80); }, {passive: true});
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(t => tr.addEventListener(t, () => { capaParou = true; }, {passive: true}));
+    const cp = $('capa');
+    if(matchMedia('(hover: hover) and (pointer: fine)').matches){ cp.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') capaSobre = true; }); cp.addEventListener('pointerleave', () => { capaSobre = false; }); }
+    const ant = $('capa-ant'), prox = $('capa-prox'); ant.innerHTML = SETA(-1); prox.innerHTML = SETA(1);
+    ant.addEventListener('click', () => irCapa(capaI - 1, true)); prox.addEventListener('click', () => irCapa(capaI + 1, true));
+    marcarBarras();
+    if(!reduz && capaN > 1){
+      let visivel = true;
+      if('IntersectionObserver' in window) new IntersectionObserver(es => { visivel = es[0].isIntersecting; }, {threshold: .35}).observe(cp);
+      const t = setInterval(() => {
+        if(capaParou || capaI >= capaN - 1){ clearInterval(t); return; }
+        if(!visivel || capaSobre || FI || FOLHA || document.hidden) return;
+        irCapa(capaI + 1);
+      }, 6000);
+    }
+  }
+  function irCapa(i, manual){
+    const tr = $('capa-trilho'); if(!capaN) return;
+    if(manual) capaParou = true;
+    const k = (i + capaN) % capaN, salto = Math.abs(k - capaI) > 1;
+    capaI = k; tr.scrollTo({left: k * tr.clientWidth, behavior: reduz || salto ? 'auto' : 'smooth'}); marcarBarras();
+  }
+  function marcarBarras(){
+    $('capa-barras').querySelectorAll('i').forEach((b, k) => { b.classList.toggle('on', k === capaI); b.classList.toggle('ja', k < capaI); });
+    // as duas próximas fotos já começam a carregar (se uma falhar, o destaque sai antes de aparecer)
+    const tr = $('capa-trilho');
+    [1, 2].forEach(d => { const c = tr.children[capaI + d], im = c && c.querySelector('img'); if(im && im.loading === 'lazy') im.loading = 'eager'; });
+  }
+
+  // ---------- coleções: por onde começar ----------
+  function colecoes(){
+    const ap = S.precos === 'apartir', C = [], ja = new Set();
+    const add = (id, titulo, fn, acao, ordem) => { if(ja.has(id)) return; const ps = L.filter(fn); if(ps.length < 3) return; ja.add(id); const o = ordem || ((a, b) => a.rec - b.rec); C.push({titulo, ps: ps.sort((a, b) => (b.ok - a.ok) || (a.semDisp - b.semDisp) || o(a, b)), acao}); };
+    const min = p => pisoMin(p.tps);
+    const defs = {
+      prontos: () => add('prontos', 'Prontos para morar', p => p.fase === 'pronto', () => { F.prazo = 'pronto'; }),
+      ate2027: () => add('ate2027', 'Ficam prontos até 2027', p => p.fase !== 'pronto' && p.ano <= 2027, () => { F.prazo = '2027'; }, (a, b) => a.ano - b.ano || a.rec - b.rec),
+      lanc: () => add('lanc', 'Lançamentos', p => p.fase === 'lanc' || p.fase === 'breve', () => { F.fase = 'lanc'; }),
+      ate400: () => add('ate400', 'Até R$ 400 mil', p => min(p) <= 400e3, () => { F.vmax = 400e3; }, (a, b) => min(a) - min(b)),
+      entrada: () => { if(ap) add('entrada', 'Entrada até R$ 30 mil', p => p.fx && p.fx.ent != null && p.fx.ent <= 30e3, () => { F.ent = 30e3; }, (a, b) => a.fx.ent - b.fx.ent); },
+      alto: () => add('alto', 'A partir de R$ 1 milhão', p => min(p) >= 1e6 && isFinite(min(p)), () => { F.vmin = 1e6; }, (a, b) => min(a) - min(b)),
+      zonas: () => ZONAS.map(z => z[0]).filter(z => z !== 'outras').map(z => ({z, n: L.filter(p => p.zk === z).length})).sort((a, b) => b.n - a.n)
+        .forEach(({z}) => add('z-' + z, ZN[z], p => p.zk === z, () => { F.zonas = new Set([z]); }))
+    };
+    (MODO === 'investir' ? ['entrada', 'lanc', 'ate400', 'zonas', 'prontos', 'alto'] : MODO === 'morar' ? ['prontos', 'ate2027', 'zonas', 'ate400', 'alto', 'lanc'] : ['prontos', 'ate2027', 'lanc', 'ate400', 'zonas', 'alto']).forEach(k => defs[k]());
+    return C;
+  }
+  function montarColecoes(){
+    const box = $('colecoes'); box.replaceChildren(el('h2', 'sr', 'Por onde começar'));
+    colecoes().forEach(c => {
+      const s = el('section', 'col'), cab = el('div', 'col-cab');
+      cab.appendChild(el('h3', null, c.titulo));
+      const b = el('button', 'lnk', 'Ver os ' + c.ps.length); b.type = 'button';
+      b.addEventListener('click', () => { zerar(); c.acao(); desenharBusca(); aplicar(); irPara('n'); });
+      const tr = el('div', 'col-trilho');
+      const sts = el('div', 'col-setas');
+      [-1, 1].forEach(d => { const x = el('button', 'col-seta'); x.type = 'button'; x.innerHTML = SETA(d); x.setAttribute('aria-label', (d < 0 ? 'Voltar em ' : 'Mais em ') + c.titulo); x.addEventListener('click', () => tr.scrollBy({left: d * tr.clientWidth * .8, behavior: reduz ? 'auto' : 'smooth'})); sts.appendChild(x); });
+      cab.append(sts, b); s.appendChild(cab);
+      c.ps.slice(0, 12).forEach(p => tr.appendChild(mini(p)));
+      s.appendChild(tr); box.appendChild(s);
+    });
+  }
+  function mini(p){
+    const b = el('button', 'mc'); b.type = 'button';
+    if(p.capa){ const im = el('img'); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.src = p.capa; im.addEventListener('error', () => { im.remove(); b.classList.add('sem-foto'); }); b.appendChild(im); }
+    else b.classList.add('sem-foto');
+    b.appendChild(el('span', 'mc-etq', entregaTxt(p)));
+    const tx = el('span', 'mc-txt');
+    tx.appendChild(el('b', null, p.nome));
+    tx.appendChild(el('span', null, local(p)));
+    const pm = S.precos === 'apartir' ? precoMin(p.tps) : null;
+    tx.appendChild(el('span', 'mc-v', p.semDisp ? 'Disponibilidade com ' + (primeiro(S.corretor) || 'o corretor') : pm != null ? 'a partir de ' + partir(pm) : tiposResumo(p.tps)));
+    b.appendChild(tx);
+    b.setAttribute('aria-label', p.nome + ', ' + local(p) + ', ' + entregaTxt(p));
+    b.addEventListener('click', () => abrirFicha(p));
+    return b;
+  }
+
+  // ---------- o que você procura (filtros à vista) ----------
+  function chip(rot, on, fn, extra){
+    const b = el('button', 'chip'); b.type = 'button'; b.setAttribute('aria-pressed', String(!!on));
+    b.appendChild(document.createTextNode(rot)); if(extra != null){ b.appendChild(el('small', null, String(extra))); }
+    b.addEventListener('click', () => { fn(); desenharBusca(); aplicar(); });
+    return b;
+  }
+  function linha(rot, chips){ const d = el('div', 'lf'); d.appendChild(el('span', null, rot)); const o = el('div', 'opcs'); chips.forEach(x => o.appendChild(x)); d.appendChild(o); return d; }
+  function desenharBusca(){
+    const box = $('filtros'); box.replaceChildren();
+    const zs = ZONAS.filter(z => L.some(p => p.zk === z[0])).map(([z, t]) => chip(t, F.zonas.has(z), () => { if(F.zonas.has(z)) F.zonas.delete(z); else F.zonas.add(z); F.bairros.clear(); }, L.filter(p => p.zk === z && casa(p, 'regiao')).length));
+    const bb = el('button', 'chip'); bb.type = 'button'; bb.setAttribute('aria-pressed', String(F.bairros.size > 0));
+    bb.textContent = F.bairros.size ? (F.bairros.size === 1 ? [...F.bairros][0] : F.bairros.size + ' bairros') : 'Escolher bairros';
+    bb.addEventListener('click', () => abrirFolha('bairros'));
+    box.appendChild(linha('Região', zs.concat(bb)));
+    box.appendChild(linha('Até quanto', FAIXAS.map(f => chip(f[1], F.vmin === f[2] && F.vmax === f[3], () => { if(F.vmin === f[2] && F.vmax === f[3]){ F.vmin = F.vmax = 0; } else { F.vmin = f[2]; F.vmax = f[3]; } }))));
+    if(MODO === 'investir' && S.precos === 'apartir'){
+      box.appendChild(linha('Entrada', ENTRADAS.map(([v, t]) => chip(t, F.ent === v, () => { F.ent = F.ent === v ? 0 : v; }))));
+      box.appendChild(linha('Parcela na obra', PARCELAS.map(([v, t]) => chip(t, F.men === v, () => { F.men = F.men === v ? 0 : v; }))));
+    }
+    box.appendChild(linha('Quartos', [0, 1, 2, 3, 4].map(d => chip(d === 0 ? 'Studio' : d === 4 ? '4 ou mais' : d + (d === 1 ? ' dorm' : ' dorms'), F.dorms.has(d), () => { if(F.dorms.has(d)) F.dorms.delete(d); else F.dorms.add(d); }))));
+    box.appendChild(linha('Quando quer as chaves', PRAZOS.map(([v, t]) => chip(t, F.prazo === v, () => { F.prazo = F.prazo === v ? '' : v; }))));
+    const n = $('mais-n'), extras = [F.amin, F.vaga, F.mob, F.semRenda, F.nr, F.fase, F.ordem].filter(Boolean).length;
+    n.textContent = extras ? ' (' + extras + ')' : '';
+    $('limpar').hidden = !filtrosAtivos() && !F.ordem;
+  }
+  let tFiltro = null;
+  function aplicar(inicio){
+    filtrar();
+    const t = VIS.length === L.length ? 'Todos os ' + L.length + ' empreendimentos' : VIS.length ? VIS.length + (VIS.length === 1 ? ' empreendimento combina' : ' empreendimentos combinam') + ' com a sua busca' : 'Nenhum combina com tudo isso';
+    $('n').textContent = t;
+    $('fixa-t').innerHTML = '<b>' + esc(VIS.length + (VIS.length === 1 ? ' empreendimento' : ' empreendimentos')) + '</b>' + (resumoBusca() ? ', ' + esc(resumoBusca()) : '');
+    const g = $('grade'); g.replaceChildren(); mostrando = 0;
+    if(!VIS.length) vazio(g); else mais();
+    if(!inicio){ clearTimeout(tFiltro); const r = resumoBusca(); if(r) tFiltro = setTimeout(() => evento('filtro', (MODO ? MODO + ': ' : '') + r), 3500); }
+  }
+  function vazio(g){
+    const cor = primeiro(S.corretor) || 'seu corretor', r = resumoBusca();
+    const d = el('div', 'vazio');
+    d.appendChild(el('h3', null, 'Nada com tudo isso agora'));
+    d.appendChild(el('p', null, 'Tire um dos filtros ou me diga o que procura. Eu acompanho outros lançamentos e aviso quando aparecer.'));
+    const b = el('button', 'btn', 'Limpar os filtros'); b.type = 'button'; b.onclick = limpar;
+    const a = linkWa('Oi, ' + cor + '. Procurei na vitrine e não achei: ' + r + '. Consegue me ajudar?', 'Pedir ajuda para ' + cor, () => evento('interesse', '|busca|' + r), 'ouro');
+    const l = el('div', 'vazio-bts'); l.append(b, a); d.appendChild(l); g.appendChild(d);
+  }
+  function zerar(){ F.zonas.clear(); F.bairros.clear(); F.dorms.clear(); F.vmin = F.vmax = F.ent = F.men = F.amin = 0; F.prazo = F.fase = F.ordem = ''; F.vaga = F.mob = F.semRenda = F.nr = false; F.q = ''; $('q').value = ''; }
+  function limpar(){ zerar(); desenharBusca(); aplicar(); }
+  function irPara(id){ const e = $(id); if(e) scrollTo({top: e.getBoundingClientRect().top + scrollY - 64, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  let io = null;
+  function mais(){
+    const g = $('grade'), fim = Math.min(VIS.length, mostrando + LOTE);
+    for(let i = mostrando; i < fim; i++) g.appendChild(card(VIS[i].p, VIS[i].ts));
+    mostrando = fim;
+    const sen = $('mais'); sen.hidden = mostrando >= VIS.length;
+    if(!io && 'IntersectionObserver' in window){ io = new IntersectionObserver(es => { if(es.some(e => e.isIntersecting) && mostrando < VIS.length) mais(); }, {rootMargin: '900px 0px'}); io.observe(sen); }
+    sen.onclick = mais;
+  }
+  function coracao(p){
+    const b = el('button', 'coracao'); b.type = 'button'; b.dataset.fav = p.id; b.innerHTML = ICO.cor;
+    const marca = () => { const on = FAV.has(p.id); b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', (on ? 'Tirar ' : 'Guardar ') + p.nome + (on ? ' dos favoritos' : ' nos favoritos')); };
+    marca(); b.addEventListener('click', ev => { ev.stopPropagation(); favoritar(p); });
+    return b;
+  }
+  function card(p, ts){
+    const art = el('article', 'card');
+    const b = el('button', 'card-abre'); b.type = 'button';
+    const fo = el('span', 'card-foto');
+    if(p.capa){ const im = el('img'); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.src = p.capa; im.addEventListener('error', () => im.replaceWith(el('span', 'ph'))); fo.appendChild(im); }
+    else fo.appendChild(el('span', 'ph'));
+    const et = entregaTxt(p); fo.appendChild(el('span', 'selo' + (p.fase === 'pronto' ? ' pronto' : ''), et));
+    const tx = el('span', 'card-txt');
+    tx.appendChild(el('span', 'card-nome', p.nome));
+    tx.appendChild(el('span', 'card-local', local(p)));
+    const tf = ts.length ? [tiposResumo(ts), areasDe(ts)].filter(Boolean).join(', ') : p.tip || '';
+    if(tf) tx.appendChild(el('span', 'card-fato' + (ts.length ? '' : ' curto'), tf));
+    const fx = p.fx || {};
+    if(MODO === 'investir'){
+      if(S.precos === 'apartir' && fx.ent != null) tx.appendChild(el('span', 'card-fato', 'Entrada de ' + reais(fx.ent) + (fx.men != null && fx.nm ? ' e ' + fx.nm + ' mensais de ' + reais(fx.men) : '')));
+      else if(fx.po != null) tx.appendChild(el('span', 'card-fato', fx.po >= 100 ? 'Tudo pago direto à construtora, sem banco' : fx.po + '% pago até a entrega, o resto financiado'));
+      const pm = S.precos === 'apartir' ? Math.min.apply(null, ts.map(t => t.pm2).filter(x => x)) : null;
+      if(pm && isFinite(pm)) tx.appendChild(el('span', 'card-local', reais(pm) + ' o m², na unidade de entrada'));
+    }else{
+      const vg = p.vaga === 'todas' ? 'Com vaga' : p.vaga === 'algumas' ? 'Unidades com e sem vaga' : p.vaga === 'nenhuma' ? 'Sem vaga de garagem' : '';
+      if(vg) tx.appendChild(el('span', 'card-local', vg));
+    }
+    const pm = S.precos === 'apartir' ? precoMin(ts) : null;
+    const pr = el('span', 'card-preco');
+    if(pm != null){ pr.appendChild(el('small', null, 'a partir de ')); pr.appendChild(document.createTextNode(partir(pm))); }
+    else { pr.classList.add('cons'); pr.textContent = (p.semDisp ? 'Disponibilidade com ' : 'Valores com ') + (primeiro(S.corretor) || 'o corretor'); }
+    tx.appendChild(pr);
+    b.append(fo, tx);
+    b.setAttribute('aria-label', p.nome + ', ' + local(p) + ', ' + et);
+    b.addEventListener('click', () => abrirFicha(p));
+    art.append(b, coracao(p));
+    return art;
+  }
+
+  // ---------- favoritos ----------
+  let tFav = null;
+  function favoritar(p){
+    if(FAV.has(p.id)) FAV.delete(p.id); else { FAV.add(p.id); toast(p.nome + ' foi para os seus favoritos.'); }
+    LS.set('-fav', JSON.stringify([...FAV]));
+    document.querySelectorAll('[data-fav="' + CSS.escape(p.id) + '"]').forEach(b => { const on = FAV.has(p.id); b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', (on ? 'Tirar ' : 'Guardar ') + p.nome + (on ? ' dos favoritos' : ' nos favoritos')); });
+    barraFav();
+    clearTimeout(tFav); tFav = setTimeout(() => evento('favoritos', [...FAV].slice(0, 12).join(',')), 2000);
+    if(FOLHA === 'favoritos') desenharFolha();
+  }
+  function barraFav(){
+    const b = $('fav'); const n = FAV.size;
+    b.hidden = !n || !!FI; document.body.classList.toggle('com-fav', n > 0 && !FI);
+    $('fav-t').textContent = n === 1 ? '1 favorito guardado' : n + ' favoritos guardados';
+  }
+
+  // ---------- folhas (bairros, mais filtros, favoritos) ----------
+  function abrirFolha(k){
+    FOLHA = k;
+    $('folha').hidden = false; document.body.classList.add('sem-rolagem');
+    $('fv-t').textContent = {bairros: 'Bairros', mais: 'Mais filtros', favoritos: 'Seus favoritos'}[k];
+    desenharFolha();
+    if(!(history.state && history.state.folha)) history.pushState({folha: 1, f: FI ? FI.id : null}, '');
+    setTimeout(() => { const x = document.querySelector('.fv-x'); if(x) x.focus(); }, 30);
+  }
+  function fecharFolha(){ if(!FOLHA) return; if(history.state && history.state.folha){ history.back(); return; } fecharFolhaJa(); }
+  function fecharFolhaJa(){ if(!FOLHA) return; FOLHA = null; $('folha').hidden = true; if(!FI) document.body.classList.remove('sem-rolagem'); desenharBusca(); aplicar(); }
+  function desenharFolha(){
+    const c = $('fv-corpo'), pe = $('fv-pe'), st = c.scrollTop; c.replaceChildren(); pe.replaceChildren();
+    const ok = el('button', 'btn ouro'); ok.type = 'button'; ok.addEventListener('click', fecharFolha);
+    if(FOLHA === 'bairros'){
+      const cont = new Map();
+      L.forEach(p => { if(!p.bairro || (F.zonas.size && !F.zonas.has(p.zk))) return; if(!casa(p, 'regiao') && !F.bairros.has(p.bairro)) return; cont.set(p.bairro, (cont.get(p.bairro) || 0) + 1); });
+      F.bairros.forEach(b => { if(!cont.has(b)) cont.set(b, 0); });
+      const bq = el('input', 'campo-b'); bq.type = 'search'; bq.placeholder = 'Procurar bairro'; bq.value = desenharFolha.bq || ''; bq.setAttribute('aria-label', 'Procurar bairro');
+      c.appendChild(bq);
+      const o = el('div', 'opcs');
+      [...cont.entries()].sort((a, b) => (F.bairros.has(b[0]) - F.bairros.has(a[0])) || b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([b, n]) => {
+        const x = el('button', 'chip'); x.type = 'button'; x.setAttribute('aria-pressed', String(F.bairros.has(b))); x.dataset.b = semAc(b);
+        x.appendChild(document.createTextNode(b)); x.appendChild(el('small', null, String(n)));
+        x.addEventListener('click', () => { if(F.bairros.has(b)) F.bairros.delete(b); else F.bairros.add(b); desenharFolha(); });
+        o.appendChild(x);
+      });
+      c.appendChild(o);
+      const filtraB = () => { const t = semAc(bq.value).trim(); desenharFolha.bq = bq.value; o.querySelectorAll('.chip').forEach(x => { x.hidden = !!t && !x.dataset.b.includes(t); }); };
+      bq.addEventListener('input', filtraB); filtraB();
+      if(F.zonas.size) c.appendChild(el('p', 'fv-nota', 'Mostrando os bairros de ' + [...F.zonas].map(k => ZN[k]).join(', ') + '.'));
+    }else if(FOLHA === 'mais'){
+      const ch = (rot, on, fn) => { const b = el('button', 'chip'); b.type = 'button'; b.setAttribute('aria-pressed', String(!!on)); b.textContent = rot; b.addEventListener('click', () => { fn(); desenharFolha(); }); return b; };
+      c.appendChild(linha('Metragem', [20, 30, 40, 50, 70, 100, 150].map(v => ch('A partir de ' + v + ' m²', F.amin === v, () => { F.amin = F.amin === v ? 0 : v; }))));
+      c.appendChild(linha('Fase', [['lanc', 'Lançamento'], ['obras', 'Em obras'], ['pronto', 'Pronto']].map(([v, t]) => ch(t, F.fase === v, () => { F.fase = F.fase === v ? '' : v; }))));
+      c.appendChild(linha('No prédio', [ch('Com vaga de garagem', F.vaga, () => { F.vaga = !F.vaga; }), ch('Entregue mobiliado', F.mob, () => { F.mob = !F.mob; })]));
+      c.appendChild(linha('Tipo de unidade', [ch('Sem exigência de renda', F.semRenda, () => { F.semRenda = !F.semRenda; }), ch('Só unidades NR', F.nr, () => { F.nr = !F.nr; })]));
+      c.appendChild(el('p', 'fv-nota', 'HIS e HMP têm preço controlado pela Prefeitura e a compra exige comprovar renda familiar dentro do limite. NR é unidade não residencial.'));
+      const ords = ORDENS.filter(o => o[0] !== 'entrada' || S.precos === 'apartir');
+      c.appendChild(linha('Ordem da lista', ords.map(([v, t]) => ch(t, (F.ordem || ordemPadrao()) === v, () => { F.ordem = v === ordemPadrao() ? '' : v; }))));
+      if(S.precos === 'apartir' && MODO !== 'investir'){
+        c.appendChild(linha('Entrada', ENTRADAS.map(([v, t]) => ch(t, F.ent === v, () => { F.ent = F.ent === v ? 0 : v; }))));
+        c.appendChild(linha('Parcela na obra', PARCELAS.map(([v, t]) => ch(t, F.men === v, () => { F.men = F.men === v ? 0 : v; }))));
+      }
+    }else if(FOLHA === 'favoritos'){
+      const ps = L.filter(p => FAV.has(p.id));
+      if(!ps.length) c.appendChild(el('p', 'fv-nota', 'Toque no coração dos empreendimentos que você gostar. Eles ficam guardados aqui.'));
+      const lista = el('div', 'fav-lista');
+      ps.forEach(p => {
+        const it = el('div', 'fav-item');
+        if(p.capa){ const im = el('img'); im.alt = ''; im.src = p.capa; im.addEventListener('error', () => im.replaceWith(el('span', 'ph-m'))); it.appendChild(im); } else it.appendChild(el('span', 'ph-m'));
+        const t = el('div'); const bt = el('button', 'lnk', p.nome); bt.type = 'button';
+        bt.addEventListener('click', () => { fecharFolhaJa(); history.replaceState(null, ''); abrirFicha(p); });
+        t.appendChild(bt); t.appendChild(el('small', null, local(p) + ', ' + entregaTxt(p).toLowerCase())); it.appendChild(t);
+        const x = el('button', 'fv-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Tirar ' + p.nome); x.addEventListener('click', () => favoritar(p)); it.appendChild(x);
+        lista.appendChild(it);
+      });
+      c.appendChild(lista);
+      if(ps.length){
+        const cor = primeiro(S.corretor) || 'você', nomes = ps.map(p => p.nome);
+        const a = linkWa('Oi, ' + cor + '. Estes são os meus favoritos da vitrine: ' + nomes.join(', ') + '. Pode me passar mais detalhes?', 'Mandar para ' + (primeiro(S.corretor) || 'o corretor'),
+          () => evento('interesse', '|favoritos|' + nomes.join(', ').slice(0, 300)), 'ouro');
+        pe.appendChild(a);
+      }
+      c.scrollTop = st; return;
+    }
+    c.scrollTop = st;
+    const n = L.reduce((s, p) => s + (casa(p) ? 1 : 0), 0);
+    ok.textContent = n ? 'Ver ' + n + (n === 1 ? ' empreendimento' : ' empreendimentos') : 'Nenhum com esses filtros';
+    pe.appendChild(ok);
+  }
+
+  // ---------- ficha do empreendimento ----------
+  async function carregarCentral(id){
+    try{
+      if(!cenIdx) cenIdx = fetch('nex/p/index.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : []).then(a => new Set(a.map(x => x.id))).catch(() => new Set());
+      const ids = await cenIdx;
+      if(!ids.has(id)) return null;
+      if(CEN[id] === undefined) CEN[id] = await fetch('nex/p/' + encodeURIComponent(id) + '.json').then(r => r.ok ? r.json() : null).catch(() => null);
+      return CEN[id];
+    }catch(e){ return null; }
+  }
+  function abrirFicha(p, semHist){
+    FI = p;
+    const f = $('ficha'); f.hidden = false; f.scrollTop = 0; document.body.classList.add('sem-rolagem');
+    $('fi-t').textContent = p.nome; $('wa').hidden = true; barraFav();
+    if(!semHist) history.pushState({f: p.id}, '', '#e-' + encodeURIComponent(p.id));
+    desenharFicha(p, null, null);
+    const pd = DET.has(p.id) ? Promise.resolve(DET.get(p.id)) : rpc('vitrine_ver', {p_id: ID, p_evento: PREVIA ? 'ver' : 'projeto', p_detalhe: p.id}).then(r => { const d = r && r.ok ? r.p : null; if(d) DET.set(p.id, d); return d; }).catch(() => null);
+    Promise.all([pd, Promise.race([carregarCentral(p.id), new Promise(r => setTimeout(r, 1800))])]).then(([d, P]) => { if(FI === p) desenharFicha(p, d, P || CEN[p.id] || null); });
+  }
+  function fecharFicha(){
+    if(!FI) return; FI = null; $('ficha').hidden = true; document.body.classList.remove('sem-rolagem');
+    if(S && S.whats) $('wa').hidden = false;
+    barraFav();
+  }
+  addEventListener('popstate', ev => {
+    if(FOLHA){ fecharFolhaJa(); return; }
+    if(!(ev.state && ev.state.f)) fecharFicha();
+    else if(!FI || FI.id !== ev.state.f){ const p = L.find(x => x.id === ev.state.f); if(p) abrirFicha(p, true); }
+  });
+  function voltar(){ if(history.state && history.state.f) history.back(); else { fecharFicha(); history.replaceState(null, '', location.pathname + location.search); } }
+
+  function galeria(p, d, P){
+    let itens = [];
+    if(P && P.renders && P.renders.length) itens = P.renders.map(r => ({src: 'nex/' + NEX.img(P, r.id), t: r.t}));
+    else {
+      const capa = (d && d.capa) || p.capa; if(capa) itens.push({src: capa, t: 'Fachada'});
+      ((d && d.fotos) || []).forEach(x => { if(x.u && x.u !== capa) itens.push({src: x.u, t: x.t || ''}); });
+    }
+    itens = itens.slice(0, 40);
+    const g = el('div', 'gal'), tr = el('div', 'trilho'), cont = el('span', 'gal-n');
+    const atual = () => { const sl = tr.querySelectorAll('.sl'); if(sl.length < 2){ cont.hidden = true; return; } const w = sl[0].getBoundingClientRect().width + (innerWidth >= 900 ? 12 : 0); cont.hidden = false; cont.textContent = Math.min(sl.length, Math.round(tr.scrollLeft / w) + 1) + ' de ' + sl.length; };
+    itens.forEach((it, k) => {
+      const b = el('button', 'sl'); b.type = 'button';
+      const im = el('img'); im.alt = it.t ? p.nome + ', ' + it.t : p.nome; im.loading = k < 2 ? 'eager' : 'lazy'; im.src = it.src;
+      b.appendChild(im); if(it.t) b.appendChild(el('span', 'leg', it.t));
+      im.addEventListener('error', () => { b.remove(); if(!tr.querySelector('.sl')) tr.appendChild(semFotos(p)); atual(); });
+      b.addEventListener('click', () => { evento('fotos', p.id); const vs = [...tr.querySelectorAll('button.sl')]; visualizador(vs.map(x => ({src: x.querySelector('img').src, t: x.querySelector('img').alt})), Math.max(0, vs.indexOf(b))); });
+      tr.appendChild(b);
+    });
+    if(!itens.length) tr.appendChild(semFotos(p));
+    let rolou = false;
+    tr.addEventListener('scroll', () => { atual(); if(!rolou && tr.scrollLeft > 60){ rolou = true; evento('fotos', p.id); } }, {passive: true});
+    g.append(tr, cont); requestAnimationFrame(atual);
+    return g;
+  }
+  function semFotos(p){
+    const d = el('div', 'sl sem-fotos');
+    d.appendChild(el('p', null, 'A construtora ainda não mandou as fotos deste. Eu te mando pelo WhatsApp.'));
+    d.appendChild(pedido(p, 'fotos', '', 'Pedir as fotos', 'mini'));
+    return d;
+  }
+  // plantas: as do servidor (com metragem) e as da ficha da central (metragem no título)
+  const areaTit = t => { const m = /(\d+(?:[.,]\d+)?)\s*m²/.exec(t || ''); return m ? parseFloat(m[1].replace(',', '.')) : null; };
+  function plantasDe(d, P){
+    const out = [], vistos = new Set();
+    ((d && d.plantas) || []).forEach(x => { if(!x.u || vistos.has(x.u)) return; vistos.add(x.u); out.push({src: x.u, t: x.t || 'Planta', a: Array.isArray(x.a) && x.a.length ? x.a.map(Number) : (areaTit(x.t) != null ? [areaTit(x.t)] : null)}); });
+    if(P && Array.isArray(P.plantas)) P.plantas.forEach(x => { if(!x || !x.id) return; const src = 'nex/' + NEX.img(P, x.id); if(vistos.has(src)) return; vistos.add(src); const a = areaTit(x.t); out.push({src, t: x.t || 'Planta', a: a != null ? [a] : null}); });
+    return out;
+  }
+  function plantasDaTp(pls, t){
+    const mesmoTipo = x => { const d = dormsDe(x.t); return d == null || t.d == null || d === t.d; };
+    let r = pls.filter(x => x.a && t.amin != null && x.a.some(a => a >= t.amin - 1 && a <= t.amax + 1) && mesmoTipo(x));
+    if(!r.length) r = pls.filter(x => !x.a && dormsDe(x.t) != null && dormsDe(x.t) === t.d);
+    const vistos = new Set();
+    return r.filter(x => { const k = semAc(x.t).replace(/\s*·?\s*nr\s*$/, '').trim(); if(vistos.has(k)) return false; vistos.add(k); return true; }).slice(0, 8);
+  }
+  // fluxo: rótulo de cada linha
+  const TIPO = {ato: 'Entrada', sinal: 'Sinal', entrada: 'Entrada', parc: 'Complemento da entrada', mensal: 'Mensais', semestral: 'Semestrais', inter: 'Intermediárias', anual: 'Anuais', unica: 'Parcela única', chaves: 'Chaves', fin: 'Financiamento', pos: 'Depois das chaves'};
+  function rotLinha(r){ const can = TIPO[r.t] || 'Parcela', rot = String(r.rot || '').trim(); if(!rot || semAc(can).startsWith(semAc(rot))) return can; return rot; }
+  function desenharFluxo(box, p, t){
+    box.replaceChildren();
+    const fl = t && t.fl; if(!fl || !Array.isArray(fl.rows) || !fl.rows.length){ box.appendChild(el('p', 'fl-nota', 'A condição desta planta eu passo pelo WhatsApp.')); return; }
+    const comV = S.precos === 'apartir';
+    const tab = el('div', 'fluxo'); let obra = 0, obraP = 0;
+    fl.rows.forEach(r => {
+      const fin = r.t === 'fin', depois = fin || r.t === 'pos';
+      const li = el('div', 'fl-l' + (fin ? ' fin' : ''));
+      li.appendChild(el('b', null, rotLinha(r)));
+      const val = el('span', 'val');
+      if(comV && r.v != null) val.textContent = (r.n > 1 ? r.n + 'x de ' : '') + exato(r.v);
+      else val.textContent = (r.n > 1 ? r.n + 'x, ' : '') + String(r.p).replace('.', ',') + '%';
+      li.appendChild(val);
+      const quando = r.d ? (r.n > 1 ? 'a partir de ' : 'em ') + mesAno(r.d) : (fin ? 'na entrega' : r.t === 'ato' || r.t === 'sinal' ? 'na assinatura' : '');
+      const sub = [quando, comV && r.v != null && r.p != null ? String(r.p).replace('.', ',') + '% do valor' : ''].filter(Boolean).join(', ');
+      if(sub) li.appendChild(el('small', null, sub + (fin ? '. Depende da aprovação do banco' : '')));
+      tab.appendChild(li);
+      if(!depois){ obra += (r.v || 0) * r.n; obraP += r.p || 0; }
+    });
+    const tot = el('div', 'fl-tot');
+    tot.appendChild(el('span', null, p.fase === 'pronto' ? 'Antes do financiamento' : 'Até a entrega das chaves'));
+    tot.appendChild(el('b', null, comV ? exato(obra) + ' (' + Math.round(obraP) + '%)' : Math.round(obraP) + '% do valor'));
+    tab.appendChild(tot);
+    box.appendChild(tab);
+    const fonte = String(fl.fonte || fl.nome || 'tabela da construtora').replace(/\s*·\s*/g, ', ');
+    const nota = [comV ? 'Exemplo na unidade de entrada desta planta, que sai a partir de ' + partir(t.p) + '. Outras unidades mudam os valores.' : 'Proporções da condição da construtora. Os valores eu passo pelo WhatsApp.',
+      'Fonte: ' + cap(fonte) + '.', fl.obs || ''].filter(Boolean).join(' ');
+    box.appendChild(el('p', 'fl-nota', nota));
+  }
+  function desenharFicha(p, d, P){
+    const c = $('fi-corpo'); c.replaceChildren();
+    c.appendChild(galeria(p, d, P));
+    const cor = primeiro(S.corretor) || 'o corretor';
+    // cabeçalho e fatos
+    const cab = el('div', 'fi-cab');
+    cab.appendChild(el('h2', null, p.nome));
+    cab.appendChild(el('p', 'local', local(p)));
+    const ts = d && Array.isArray(d.tps) ? d.tps.map(t => ({tl: rotulo(t.tl), d: dormsDe(t.tl), amin: t.amin != null ? +t.amin : null, amax: t.amax != null ? +t.amax : null, p: t.p != null ? +t.p : null, pm2: t.pm2 || null, cl: t.cl || null, n: t.n, fl: t.fl || null})) : p.tps;
+    const fatos = el('dl', 'fatos');
+    const longos = [], fato = (k, v) => { if(!v) return; const lg = String(v).length > 34, x = el('div', lg ? 'largo' : null); x.appendChild(el('dt', null, k)); x.appendChild(el('dd', null, v)); if(lg) longos.push(x); else fatos.appendChild(x); };
+    fato(p.fase === 'pronto' ? 'Situação' : 'Entrega', entregaTxt(p, true).replace(/^Entrega em /, ''));
+    fato(ts.length ? 'Plantas' : 'Tipologias', ts.length ? tiposResumo(ts) : (d && d.tipologias) || p.tip);
+    fato('Metragens', areasDe(ts));
+    const vg = (d && d.vagas_t) || (p.vaga === 'todas' ? 'Todas com vaga' : p.vaga === 'algumas' ? 'Algumas com vaga' : p.vaga === 'nenhuma' ? 'Sem vaga' : '');
+    fato('Vaga', vg);
+    if(S.precos === 'apartir'){ const pm = precoMin(ts); if(pm != null) fato('A partir de', partir(pm)); }
+    fato('Construtora', p.cons);
+    longos.forEach(x => fatos.appendChild(x));
+    cab.appendChild(fatos);
+    const dest = (P && P.chamada) || (d && d.destaque);
+    if(dest) cab.appendChild(el('p', 'dest', dest));
+    c.appendChild(cab);
+    // plantas por tipologia
+    const pls = plantasDe(d, P);
+    const s1 = el('section', 'sec'); s1.appendChild(el('h3', null, ts.length === 1 ? 'A planta à venda' : 'As plantas à venda'));
+    s1.appendChild(el('p', 'sub', 'Toque na planta para ampliar. ' + (S.precos === 'apartir' ? 'O valor é o da unidade de entrada de cada uma.' : 'Os valores eu passo pelo WhatsApp.')));
+    const grade = el('div', 'tps');
+    ts.forEach(t => {
+      const cardTp = el('div', 'tp'), mp = plantasDaTp(pls, t);
+      const bpl = el('button', 'tp-pl'); bpl.type = 'button';
+      if(mp.length){ const im = el('img'); im.alt = 'Planta ' + rotuloTp(t); im.loading = 'lazy'; im.src = mp[0].src; im.addEventListener('error', () => { im.remove(); bpl.appendChild(el('span', 'sem', 'Planta com ' + cor)); }); bpl.appendChild(im); if(mp.length > 1) bpl.appendChild(el('small', null, mp.length + ' plantas')); }
+      bpl.addEventListener('click', () => { if(!mp.length) return; evento('plantas', p.id); visualizador(mp.map(x => ({src: x.src, t: x.t})), 0, {acoes: (it, ac) => ac.appendChild(pedido(p, 'planta', it.t, 'Gostei desta planta', 'ouro mini'))}); });
+      if(mp.length) cardTp.appendChild(bpl);
+      else { const pp = pedido(p, 'plantas', rotuloTp(t) + (t.amin ? ' de ' + faixaM2(t.amin, t.amax) : ''), 'Pedir esta planta'); pp.className = 'tp-pl pedir'; cardTp.appendChild(pp); }
+      const tx = el('div', 'tp-txt');
+      const nm = el('b', null, t.tl); if(t.cl) nm.appendChild(el('span', 'etq', t.cl)); tx.appendChild(nm);
+      tx.appendChild(el('span', 'm2', faixaM2(t.amin, t.amax) || 'Metragem com ' + cor));
+      if(S.precos === 'apartir' && t.p != null){ const v = el('span', 'v'); v.appendChild(el('small', null, 'a partir de ')); v.appendChild(document.createTextNode(partir(t.p))); tx.appendChild(v); }
+      if(t.n != null && t.n <= 3) tx.appendChild(el('span', 'ult', t.n === 1 ? 'Última unidade desta planta' : 'Últimas ' + t.n + ' unidades desta planta'));
+      tx.appendChild(pedido(p, 'tipologia', rotuloTp(t) + (t.amin ? ' de ' + faixaM2(t.amin, t.amax) : ''), 'Quero esta', 'mini'));
+      cardTp.appendChild(tx); grade.appendChild(cardTp);
+    });
+    s1.appendChild(grade);
+    if(!ts.length){
+      s1.replaceChildren(el('h3', null, 'Disponibilidade'));
+      s1.appendChild(el('p', 'sub', 'Hoje a tabela da construtora está sem unidade disponível. Eu vejo com a construtora se volta alguma unidade ou se tem outra opção parecida.'));
+      if(pls.length){
+        const tr = el('div', 'tps');
+        pls.slice(0, 8).forEach((x, k) => { const b = el('button', 'tp tp-pl'); b.type = 'button'; const im = el('img'); im.alt = x.t; im.loading = 'lazy'; im.src = x.src; im.addEventListener('error', () => b.remove()); b.appendChild(im); b.addEventListener('click', () => { evento('plantas', p.id); visualizador(pls.slice(0, 8).map(y => ({src: y.src, t: y.t})), k); }); tr.appendChild(b); });
+        s1.appendChild(tr);
+      }
+      s1.appendChild(pedido(p, 'disponibilidade', '', 'Perguntar se ainda tem unidade', 'ouro'));
+    }
+    const cls = [...new Set(ts.map(t => t.cl).filter(Boolean))];
+    if(cls.length){
+      const txt = [];
+      if(cls.includes('HIS') || cls.includes('HMP')) txt.push('HIS e HMP têm preço controlado pela Prefeitura: a compra exige comprovar renda familiar dentro do limite.');
+      if(cls.includes('NR')) txt.push('NR é unidade não residencial. Se a ideia é alugar por temporada, eu confirmo as regras do condomínio com a construtora.');
+      s1.appendChild(el('p', 'cls', txt.join(' ')));
+    }
+    // para quem investe (só dados da tabela e do espelho)
+    const sInv = el('section', 'sec'); sInv.appendChild(el('h3', null, 'Para quem investe'));
+    const inv = el('div', 'inv'), iv = (b, s) => { const x = el('div'); x.appendChild(el('b', null, b)); x.appendChild(el('span', null, s)); inv.appendChild(x); };
+    const pm2 = S.precos === 'apartir' ? Math.min.apply(null, ts.map(t => t.pm2).filter(x => x)) : null;
+    if(pm2 && isFinite(pm2)) iv(reais(pm2) + ' o m²', 'na unidade de entrada');
+    const tb = ts.filter(t => t.fl && t.fl.rows).sort((a, b) => (a.p || 0) - (b.p || 0))[0];
+    if(tb){ const po = 100 - tb.fl.rows.filter(r => r.t === 'fin' || r.t === 'pos').reduce((s, r) => s + (+r.p || 0), 0); iv(Math.round(po) + '% até as chaves', po >= 99.5 ? 'pago direto à construtora, sem financiamento' : 'o resto no financiamento, na entrega'); }
+    const m = p.fase === 'pronto' ? 0 : mesesAte(p.entrega);
+    if(p.fase === 'pronto') iv('Pronto', 'sem espera de obra');
+    else if(p.entrega) iv(m != null && m > 0 ? m + (m === 1 ? ' mês' : ' meses') : entregaTxt(p), 'até a entrega, em ' + mesAno(p.entrega));
+    if(inv.childNodes.length){ sInv.appendChild(inv); }
+    // como pagar
+    const sPg = el('section', 'sec'); sPg.appendChild(el('h3', null, 'Como pagar'));
+    const comFl = ts.filter(t => t.fl);
+    if(d){
+      if(comFl.length){
+        sPg.appendChild(el('p', 'sub', 'Escolha a planta para ver a condição da construtora.'));
+        const seg = el('div', 'seg'), box = el('div');
+        let sel = comFl.find(t => okDorm(t) && okValor(Object.assign({piso: t.p, teto: t.p}, t))) || comFl.slice().sort((a, b) => (a.p || 0) - (b.p || 0))[0];
+        const marca = () => seg.querySelectorAll('.chip').forEach((b, i) => b.setAttribute('aria-pressed', String(comFl[i] === sel)));
+        comFl.forEach(t => { const b = el('button', 'chip', rotuloTp(t) + (t.amin ? ', ' + faixaM2(t.amin, t.amax) : '')); b.type = 'button'; b.addEventListener('click', () => { sel = t; marca(); desenharFluxo(box, p, sel); }); seg.appendChild(b); });
+        if(comFl.length > 1) sPg.appendChild(seg);
+        marca(); desenharFluxo(box, p, sel); sPg.appendChild(box);
+        sPg.appendChild(pedido(p, 'condicoes', '', 'Quero simular outra unidade'));
+      }else{ sPg.appendChild(el('p', 'sub', 'A construtora ainda não mandou o fluxo de pagamento deste. Eu monto a condição e te passo pelo WhatsApp.')); sPg.appendChild(pedido(p, 'condicoes', '', 'Pedir a condição de pagamento')); }
+    }else sPg.appendChild(el('p', 'carregando', 'Carregando a condição de pagamento…'));
+    if(!ts.length && (d || p.semDisp)) c.appendChild(s1);
+    else if(MODO === 'investir'){ c.appendChild(sInv); c.appendChild(s1); c.appendChild(sPg); }
+    else { c.appendChild(s1); c.appendChild(sPg); c.appendChild(sInv); }
+    // onde fica
+    const end = (d && d.endereco) || '', lat = d && d.lat != null ? +d.lat : null, lng = d && d.lng != null ? +d.lng : null;
+    if(end || (lat != null && isFinite(lat))){
+      const s = el('section', 'sec'); s.appendChild(el('h3', null, 'Onde fica'));
+      s.appendChild(el('p', 'sub', [end.replace(/\s*·\s*/g, ', '), end.indexOf(p.bairro || '§') < 0 ? p.bairro : ''].filter(Boolean).join(', ')));
+      const qy = lat != null && isFinite(lat) && lng != null && isFinite(lng) ? lat + ',' + lng : encodeURIComponent(end.replace(/\s*·\s*/g, ', ') + ', ' + (p.cidade || 'São Paulo'));
+      const mp = el('div', 'mapa'), fr = document.createElement('iframe'); fr.loading = 'lazy'; fr.title = 'Mapa do ' + p.nome; fr.src = 'https://maps.google.com/maps?q=' + qy + '&z=15&output=embed'; fr.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+      mp.appendChild(fr); s.appendChild(mp);
+      const am = el('a', 'lnk', 'Abrir no Google Maps'); am.href = (P && P.mapa) || 'https://www.google.com/maps/search/?api=1&query=' + qy; am.target = '_blank'; am.rel = 'noopener'; am.style.display = 'inline-block';
+      am.addEventListener('click', () => evento('mapa', p.id)); s.appendChild(am);
+      const perto = ((P && P.perto) || pertoDe(d && d.destaque) || []).slice(0, 8);
+      if(perto.length){
+        const pt = el('div', 'perto');
+        perto.forEach(x => { const r = el('div'); r.appendChild(el('span', null, x.nome));
+          r.appendChild(el('b', null, x.m != null ? (x.m >= 1000 ? (x.m / 1000).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' km' : x.m + ' m') : [x.pe != null ? x.pe + ' min a pé' : null, x.bike != null ? x.bike + ' min de bicicleta' : null, x.carro != null ? x.carro + ' min de carro' : null, x.min != null ? x.min + ' min' : null].filter(Boolean).join(', ')));
+          pt.appendChild(r); });
+        s.appendChild(pt);
+      }
+      c.appendChild(s);
+    }
+    // lazer
+    let lz = [];
+    if(P && Array.isArray(P.lazer)) P.lazer.forEach(l => (l.itens || []).forEach(x => { if(lz.length < 18 && !lz.includes(x)) lz.push(x); }));
+    if(!lz.length && d && Array.isArray(d.lazer)) lz = d.lazer.filter(x => typeof x === 'string').slice(0, 18);
+    if(lz.length){ const s = el('section', 'sec'); s.appendChild(el('h3', null, 'Lazer')); const z = el('div', 'lazer'); lz.forEach(x => z.appendChild(el('span', null, String(x).replace(/\s*\(.*\)\s*$/, '')))); s.appendChild(z); c.appendChild(s); }
+    // material da construtora
+    const mats = [];
+    if(P && P.book) mats.push({t: 'Book do empreendimento', u: 'nex/' + P.pasta + P.book});
+    else { const bo = P ? bookOficial(P) : null; if(bo) mats.push({t: 'Book do empreendimento', u: driveUrl(bo.id)}); }
+    ((d && d.material) || []).forEach(x => { if(!mats.some(y => y.u === x.u)) mats.push({t: x.t, u: x.u}); });
+    ((P && P.tours) || []).filter(z => z && z.u).forEach(z => mats.push({t: z.cli || z.t || 'Tour 360°', u: z.u}));
+    if(mats.length){
+      const s = el('section', 'sec'); s.appendChild(el('h3', null, 'Material da construtora'));
+      const ml = el('div', 'links');
+      mats.slice(0, 8).forEach(x => { const a = el('a', 'btn', x.t); a.href = x.u; a.target = '_blank'; a.rel = 'noopener'; a.addEventListener('click', () => evento('material', p.id)); ml.appendChild(a); });
+      s.appendChild(ml); c.appendChild(s);
+    }
+    // visita com o corretor
+    const vi = el('div', 'visita');
+    const cr = el('div', 'cor'); cr.innerHTML = corretorHtml(); vi.appendChild(cr);
+    vi.appendChild(el('p', null, p.fase === 'pronto' ? 'Quer ver pessoalmente? Eu marco a visita e vou com você.' : 'Quer conhecer o decorado e a região? Eu marco a visita e vou com você.'));
+    const bts = el('div', 'bts'); bts.appendChild(pedido(p, 'visita', '', 'Agendar uma visita', 'ouro')); vi.appendChild(bts);
+    c.appendChild(vi);
+    // parecidos
+    const par = parecidos(p);
+    if(par.length){ const s = el('section', 'sec'); s.appendChild(el('h3', null, p.tps.length ? 'Parecidos com este' : 'Com unidade disponível perto deste')); const pg = el('div', 'parecidos'); par.forEach(x => pg.appendChild(card(x.p, x.ts))); s.appendChild(pg); c.appendChild(s); }
+    if(P && P.legal) c.appendChild(el('p', 'legal', P.legal));
+    // barra de baixo
+    const pe = $('fi-pe'); pe.replaceChildren();
+    const cf = coracao(p); pe.appendChild(cf);
+    pe.appendChild(pedido(p, 'saber', '', 'Falar com ' + cor + ' sobre este', 'ouro'));
+  }
+  function pedido(p, mot, tl, rot, cls){
+    const cor = primeiro(S.corretor), oi = 'Oi' + (cor ? ', ' + cor : '') + '. ';
+    const txt = mot === 'condicoes' ? oi + 'Quero simular a condição de pagamento do ' + p.nome + '.'
+      : mot === 'visita' ? oi + 'Quero agendar uma visita ao ' + p.nome + '.'
+      : mot === 'tipologia' ? oi + 'Tenho interesse no ' + tl + ' do ' + p.nome + '. Pode me passar os detalhes?'
+      : mot === 'planta' ? oi + 'Gostei desta planta do ' + p.nome + (tl ? ' (' + tl + ')' : '') + '. Pode me passar os detalhes?'
+      : mot === 'plantas' ? oi + 'Pode me mandar a planta ' + (tl ? 'do ' + tl + ' ' : '') + 'do ' + p.nome + '?'
+      : mot === 'fotos' ? oi + 'Pode me mandar fotos do ' + p.nome + '?'
+      : mot === 'disponibilidade' ? oi + 'Vi o ' + p.nome + ' na vitrine. Ainda tem unidade disponível?'
+      : oi + 'Vi o ' + p.nome + ' na vitrine que você me mandou e quero saber mais.';
+    return linkWa(txt, rot, () => evento('interesse', p.id + '|' + mot + (tl ? '|' + tl : '')), cls);
+  }
+  function parecidos(p){
+    if(!p.tps.length) return L.filter(x => x !== p && x.zk === p.zk && x.capa && x.tps.length)
+      .sort((a, b) => ((b.bairro === p.bairro) - (a.bairro === p.bairro)) || (a.peso - b.peso) || (a.rec - b.rec)).slice(0, 4).map(x => ({p: x, ts: x.tps}));
+    const base = pisoMin(p.tps), ds = new Set(p.tps.map(t => t.d));
+    return L.filter(x => x !== p && x.zk === p.zk && x.capa).map(x => {
+      const ts = x.tps.filter(t => ds.has(t.d)); if(!ts.length) return null;
+      const v = pisoMin(ts); const dif = isFinite(base) && isFinite(v) ? Math.abs(v - base) / base : 1;
+      return dif <= 0.35 ? {p: x, ts, dif: dif + (x.bairro === p.bairro ? -0.2 : 0)} : null;
+    }).filter(Boolean).sort((a, b) => a.dif - b.dif).slice(0, 4);
+  }
+
+  // ---------- eventos da página ----------
+  document.addEventListener('click', ev => {
+    const t = ev.target;
+    if(t.closest('.fv-x') && !t.closest('.fav-item') || t.id === 'folha') fecharFolha();
+    else if(t.closest('.fi-voltar')) voltar();
+    else if(t.closest('#mais-f')) abrirFolha('mais');
+    else if(t.closest('#fav-ver')) abrirFolha('favoritos');
+    else if(t.closest('#limpar')) limpar();
+  });
+  document.addEventListener('keydown', ev => { if(ev.key !== 'Escape') return; if(document.querySelector('.vis:not([hidden])')) return; if(FOLHA) fecharFolha(); else if(FI) voltar(); });
+
+  iniciar();
+})();
+</script>
+</body>
+</html>

@@ -3973,7 +3973,7 @@
   const AV_CODIGO = 'Esse código não vale mais. Digite o código novo do time.';
   const AV = {reg: null, epAtivo: null, epPr: null, ep: null, st: null, buscas: null, buscasEm: 0, carregando: null, erroBuscas: false, resumo8: null,
     admin: false, excluir: null, msg: null, novo: null, marc: null, marcQ: '', memo: null, descBase: null};
-  const EN = {sel: [], fic: [], mer: [], em: 0, carregando: null, erro: false, excluir: null, q: '', genio: null, vinc: null};
+  const EN = {sel: [], fic: [], mer: [], vit: [], em: 0, carregando: null, erro: false, excluir: null, q: '', genio: null, vinc: null};
   const RS = {cache: new Map(), f: 'tudo', dia: null};
   const avEsq = (...hs) => '<div class="esqueleto" aria-busy="true">' + hs.map(h => '<div class="brilho" style="height:' + h + 'px"></div>').join('') + '</div>';
   const avListaE = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' e ' + a[a.length - 1];
@@ -4051,6 +4051,7 @@
     const d = dono();
     rpc('minhas_selecoes', {p_codigo: S.cod, p_dono: d, p_endpoint: ep}).catch(() => {});
     rpc('meus_links', {p_codigo: S.cod, p_dono: d, p_endpoint: ep}).catch(() => {});
+    rpc('minhas_vitrines', {p_codigo: S.cod, p_dono: d, p_endpoint: ep}).catch(() => {});
     AV.buscasEm = 0; EN.em = 0;
     return {sub, ep, res};
   }
@@ -4620,7 +4621,8 @@
   function enTela(){
     EN.excluir = null;
     pos.push(() => enCarregar());
-    return '<header class="pg-cab"><div><h1 class="t-1">Enviadas</h1><p class="sub">O que você mandou deste aparelho e quem abriu.</p></div></header>' +
+    return '<header class="pg-cab"><div><h1 class="t-1">Enviadas</h1><p class="sub">O que você mandou deste aparelho e quem abriu.</p></div>' +
+      '<button type="button" class="btn btn-peq btn-pri" data-acao="vit-abrir">' + ICO.enviar + 'Mandar a vitrine</button></header>' +
       '<div id="en-push"></div><div id="en-genio">' + enGenioHtml() + '</div>' +
       '<div class="busca-linha" id="en-busca"' + (enItens().length > 5 || EN.q ? '' : ' hidden') + '><label class="busca"><span class="sr">Buscar cliente ou projeto</span>' + ICO.lupa +
       '<input id="en-q" type="search" autocomplete="off" placeholder="Cliente ou projeto" value="' + esc(EN.q) + '" data-input="en-q"></label></div>' +
@@ -4633,9 +4635,11 @@
     EN.carregando = (async () => {
       try{
         const ep = await avAte(avEndpoint(), 1600), d = dono();
-        const [s, l, m] = await Promise.all([rpc('minhas_selecoes', {p_codigo: S.cod, p_dono: d, p_endpoint: ep || null}),
+        const [s, l, m, vt] = await Promise.all([rpc('minhas_selecoes', {p_codigo: S.cod, p_dono: d, p_endpoint: ep || null}),
           rpc('meus_links', {p_codigo: S.cod, p_dono: d, p_endpoint: ep || null}).catch(() => null),
-          rpc('meus_links_mercado', {p_codigo: S.cod, p_dono: d}).catch(() => null)]);
+          rpc('meus_links_mercado', {p_codigo: S.cod, p_dono: d}).catch(() => null),
+          rpc('minhas_vitrines', {p_codigo: S.cod, p_dono: d, p_endpoint: ep || null}).catch(() => null)]);
+        if(Array.isArray(vt)) EN.vit = vt;
         EN.sel = Array.isArray(s) ? s : []; if(Array.isArray(l)) EN.fic = l; if(Array.isArray(m)) EN.mer = m;
         EN.em = Date.now(); EN.erro = false;
         if(EN.sel.concat(EN.fic).some(x => x && x.origem === 'genio')) LS.set(AV_K.genio, '1');
@@ -4661,12 +4665,13 @@
   }
   function enItens(){
     const L = [], add = (arr, tipo) => { for(const s of arr) if(s && s.id != null) L.push({k: tipo + ':' + s.id, tipo, em: s.criado_em, s}); };
-    add(EN.sel, 'sel'); add(EN.fic, 'fic'); add(EN.mer, 'mer');
+    add(EN.sel, 'sel'); add(EN.fic, 'fic'); add(EN.mer, 'mer'); add(EN.vit, 'vit');
     return L.sort((x, y) => String(y.em || '').localeCompare(String(x.em || '')));
   }
   const enNomeProj = id => { const p = S.byId.get(id); return p ? p.nome : String(id || 'empreendimento'); };
   function enOque(it){
     const s = it.s, us = Array.isArray(s.unidades) ? s.unidades : [];
+    if(it.tipo === 'vit') return 'Vitrine com todos os empreendimentos, ' + (s.precos === 'consulta' ? 'sem mostrar valores' : 'mostrando o valor de partida');
     if(it.tipo === 'mer') return 'Ficha do ' + (s.nome || 'empreendimento') + ', do Mercado' + (+s.tipos ? ', ' + plural(+s.tipos, 'opção', 'opções') : '');
     if(it.tipo === 'fic') return 'Ficha do ' + enNomeProj(s.projeto) + (us.length ? ', ' + (us.length === 1 ? 'unidade ' + us[0] : 'unidades ' + us.join(', ')) : '');
     const nu = +s.unidades || 0, np = +s.projetos || 0;
@@ -4674,8 +4679,9 @@
   }
   function enStatus(it){
     const s = it.s, link = it.tipo !== 'sel', ab = +s.aberturas || 0;
-    if(s.expirado) return {cls: 'exp', t: 'Link vencido. Cada ' + (link ? 'ficha vale 90 dias.' : 'seleção vale 60 dias.')};
+    if(s.expirado) return {cls: 'exp', t: 'Link vencido. Cada ' + (it.tipo === 'vit' ? 'vitrine vale 90 dias.' : link ? 'ficha vale 90 dias.' : 'seleção vale 60 dias.')};
     if(!ab) return {cls: '', t: 'Ainda não abriu.'};
+    if(it.tipo === 'vit') return {cls: 'abriu', t: enStatusVit(s, ab)};
     const ui = Date.parse(s.ultimo_acesso || ''), vs = s.vistos && typeof s.vistos === 'object' ? s.vistos : {};
     const viu = link ? Object.keys(vs).map(k => (it.tipo === 'mer' ? EN_VIU_MERC : EN_VIU)[k]).filter(Boolean) : [];
     let t = 'Abriu ' + (ab === 1 ? '1 vez' : ab + ' vezes') + (isFinite(ui) ? ', a última ' + quandoMontado(ui) : '') + '.';
@@ -4688,13 +4694,13 @@
   const enPagina = pid => { const c = S.centralV.get(pid), pg = c && c.pagina; return /^[A-Za-z0-9_-]+\.html$/.test(String(pg || '')) ? pg : 'ver.html'; };
   function enUrl(it){
     const id = encodeURIComponent(it.s.id);
-    return it.tipo === 'mer' ? enAbs('nex/m.html?l=' + id) : it.tipo === 'fic' ? enAbs('nex/' + enPagina(it.s.projeto) + '?l=' + id) : enAbs('s.html?s=' + id);
+    return it.tipo === 'vit' ? enAbs('v.html?v=' + id) : it.tipo === 'mer' ? enAbs('nex/m.html?l=' + id) : it.tipo === 'fic' ? enAbs('nex/' + enPagina(it.s.projeto) + '?l=' + id) : enAbs('s.html?s=' + id);
   }
   function enItemHtml(it){
     const s = it.s, st = enStatus(it), url = enUrl(it), link = it.tipo !== 'sel', conf = EN.excluir === it.k;
     const em = Date.parse(it.em || ''), cli = String(s.cliente || '').trim() || 'Cliente sem nome';
     const nome = it.tipo === 'mer' ? (s.nome || 'empreendimento') : enNomeProj(s.projeto);
-    const msg = 'Oi, ' + primeiroNome(cli) + '. Segue de novo ' + (link ? 'a apresentação do ' + nome : 'a seleção de imóveis') + ' que separei para você: ' + url;
+    const msg = 'Oi, ' + primeiroNome(cli) + '. Segue de novo ' + (it.tipo === 'vit' ? 'a vitrine de imóveis' : link ? 'a apresentação do ' + nome : 'a seleção de imóveis') + ' que separei para você: ' + url;
     return '<li class="en-item' + (st.cls === 'exp' ? ' exp' : '') + '"><div class="en-cab"><b>' + esc(cli) + (s.origem === 'genio' ? '<span class="en-tag" title="Mandado pelo Gênio no WhatsApp">Gênio</span>' : '') + '</b>' +
       (isFinite(em) ? '<span class="sub">enviada ' + esc(quandoMontado(em)) + '</span>' : '') + '</div>' +
       '<p class="en-oque">' + esc(enOque(it)) + '</p><p class="en-st' + (st.cls ? ' ' + st.cls : '') + '">' + esc(st.t) + '</p><div class="en-acoes">' +
@@ -4715,6 +4721,72 @@
     if(!todos.length){ box.innerHTML = '<div class="vazio"><h2 class="t-3">Nada mandado deste aparelho ainda</h2><p class="texto-2">No Imóveis ou na tabela do projeto, marque as unidades e toque em Mandar pro cliente. O link aparece aqui, com o aviso de quando o cliente abrir.</p><a class="btn" href="#/imoveis">Abrir o Imóveis</a></div>'; return; }
     box.innerHTML = vis.length ? '<ul class="en-lista">' + vis.map(enItemHtml).join('') + '</ul>' : '<p class="texto-2 vazio-txt">Nenhum envio com esse nome.</p>';
   }
+  // Vitrine do cliente (v.html): um link com todos os empreendimentos, filtros e só o valor de partida (ou nenhum valor).
+  // Cada pedido do cliente abre o WhatsApp do corretor e avisa este aparelho; o que ele viu aparece aqui em Enviadas.
+  const VIT_MOT = {condicoes: 'condições de pagamento', visita: 'visita', planta: 'planta', plantas: 'pediu a planta', fotos: 'pediu fotos', disponibilidade: 'perguntou se ainda tem unidade', tipologia: '', saber: ''};
+  function enStatusVit(s, ab){
+    const ui = Date.parse(s.ultimo_acesso || '');
+    let t = 'Abriu ' + (ab === 1 ? '1 vez' : ab + ' vezes') + (isFinite(ui) ? ', a última ' + quandoMontado(ui) : '') + '.';
+    if(s.perfil === 'investir' || s.perfil === 'morar') t += ' Procura para ' + s.perfil + '.';
+    const viu = Array.isArray(s.viu) ? s.viu.filter(Boolean) : [];
+    if(viu.length) t += ' Viu ' + plural(viu.length, 'empreendimento', 'empreendimentos') + ': ' + (viu.length > 4 ? viu.slice(0, 4).join(', ') + ' e mais ' + (viu.length - 4) : avListaE(viu)) + '.';
+    const pd = Array.isArray(s.pediu) ? s.pediu : [];
+    if(pd.length) t += ' Pediu informação: ' + pd.slice(0, 4).map(x => x.o === 'busca' ? 'ajuda para achar' + (x.tl ? ' (' + x.tl + ')' : '') : x.o === 'favoritos' ? 'mandou os favoritos'
+      : (x.nome || 'empreendimento') + (x.o === 'tipologia' && x.tl ? ' (' + x.tl + ')' : VIT_MOT[x.o] ? ' (' + VIT_MOT[x.o] + ')' : '')).join('; ') + '.';
+    const fav = Array.isArray(s.favoritos) ? s.favoritos.filter(Boolean) : [];
+    if(fav.length) t += ' Favoritos: ' + (fav.length > 4 ? fav.slice(0, 4).join(', ') + ' e mais ' + (fav.length - 4) : avListaE(fav)) + '.';
+    if(s.busca) t += ' Última busca: ' + s.busca.replace(/^(morar|investir): /, '') + '.';
+    return t;
+  }
+  function abrirVitrine(){
+    S.vitPrecos = 'apartir';
+    abrirFolha('envio', 'Mandar a vitrine',
+      '<p class="texto-2">O cliente recebe um link com todos os empreendimentos do app. Os completos (fotos, planta, prazo e forma de pagamento) aparecem primeiro; quando falta alguma coisa, a ficha mostra um botão para o cliente pedir a você. Ele escolhe se é para morar ou investir, filtra, guarda favoritos e cada pedido abre o seu WhatsApp. Você recebe o aviso aqui.</p>' +
+      '<label class="campo">Nome do cliente<input id="env-cli" maxlength="60" autocomplete="off" placeholder="Ex.: Maria" required></label>' +
+      '<label class="campo">Recado para o cliente<textarea id="vit-recado" rows="3" maxlength="300" placeholder="Opcional. Ex.: Maria, separei o que eu acompanho de perto. Se algum chamar a sua atenção, me chama."></textarea><small>Aparece na abertura da vitrine, com o seu nome. Bom para quem já comprou com você.</small></label>' +
+      '<fieldset><legend>Valores na vitrine</legend><div class="seg" role="group">' +
+      '<button type="button" data-acao="vit-precos" data-v="apartir" aria-pressed="true">A partir de</button>' +
+      '<button type="button" data-acao="vit-precos" data-v="consulta" aria-pressed="false">Sem valores</button></div>' +
+      '<p class="nota" id="vit-precos-nota">Mostra só o valor de entrada de cada tipologia. Nada de tabela, unidade, andar ou condição.</p></fieldset>' +
+      camposAssinatura() + '<p class="erro-txt" id="env-erro" role="alert"></p>',
+      '<button type="button" class="btn btn-pri btn-alto" data-acao="vit-criar" id="env-ok">' + ICO.enviar + 'Criar o link</button>');
+    setTimeout(() => { const i = $('#env-cli'); if(i) i.focus(); }, 80);
+  }
+  async function criarVitrine(){
+    const cli = $('#env-cli').value.trim(), cor = $('#env-cor').value.trim(), tel = $('#env-tel').value.trim();
+    const erro = m => { $('#env-erro').textContent = m; };
+    if(!cli){ erro('Digite o nome do cliente.'); $('#env-cli').focus(); return; }
+    if(tel.replace(/\D/g, '').length < 10){ erro('Coloque o seu WhatsApp com DDD: os pedidos do cliente chegam nele.'); $('#env-tel').focus(); return; }
+    salvarPerfil({nome: cor, tel});
+    const b = $('#env-ok'); b.disabled = true; b.textContent = 'Criando o link…'; erro('');
+    try{
+      const ep = await avAte(avEndpoint(), 1600);
+      const r = await rpc('vitrine_criar', {p_codigo: S.cod, p_dono: dono(), p_endpoint: ep || null, p_cliente: cli, p_corretor: cor, p_whats: tel, p_opcoes: {precos: S.vitPrecos === 'consulta' ? 'consulta' : 'apartir', recado: ($('#vit-recado') ? $('#vit-recado').value.trim() : '') || undefined}});
+      const url = new URL(ESP + 'v.html?v=' + encodeURIComponent(r.id), location.href).href, nome1 = primeiroNome(cli);
+      const msg = 'Oi, ' + nome1 + ', tudo bem? Montei uma vitrine só para você com os lançamentos e prontos que eu acompanho. Tem fotos, plantas, prazos e formas de pagamento, dá para filtrar do seu jeito e guardar os favoritos: ' + url;
+      S.envioPronto = {url, msg}; EN.em = 0;
+      const dlg = $('#folha-envio'); if(!dlg) return;
+      corpoFolha('<div class="aviso ok" role="status">' + ICO.ok + '<p>Vitrine pronta para ' + esc(nome1) + '.' + (r.avisos ? ' Você recebe um aviso neste aparelho quando ' + esc(nome1) + ' abrir e quando pedir informação de um empreendimento.' : ' Ligue os avisos para saber quando ' + esc(nome1) + ' abrir e pedir informação.') + '</p></div>' +
+        '<label class="campo">Mensagem<textarea id="env-msg" rows="5">' + esc(msg) + '</textarea><small>Dá para mudar o texto antes de mandar.</small></label>' +
+        '<label class="campo">WhatsApp do cliente<input id="env-tel-cli" type="tel" inputmode="tel" autocomplete="off" maxlength="20" placeholder="Opcional"><small>Com o número, o botão do WhatsApp abre a conversa do cliente direto. O número não fica salvo.</small></label>' +
+        '<p class="link-pronto">' + esc(url) + '</p>' +
+        '<a class="btn" href="' + esc(url + '&previa=1') + '" target="_blank" rel="noopener">Ver como o cliente vê ' + ICO.seta + '</a>',
+        '<button type="button" class="btn" data-acao="env-copiar">' + ICO.copiar + 'Copiar</button><a class="btn btn-pri" id="env-wa" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-acao="env-wa">' + ICO.zap + 'WhatsApp</a>', dlg);
+      if(avNaTela('#/enviadas')) enCarregar(true);
+    }catch(e){
+      b.disabled = false; b.innerHTML = ICO.enviar + 'Criar o link';
+      const t = (e && e.body) || '';
+      erro(codigoInvalido(e) ? 'O código do time mudou. Entre de novo.' : /limite_/.test(t) ? 'Limite de links por dia atingido neste aparelho. Tente amanhã.' : 'Não consegui criar o link agora. Confira a internet e tente de novo.');
+    }
+  }
+  ACOES_X['vit-abrir'] = () => abrirVitrine();
+  ACOES_X['vit-criar'] = () => criarVitrine();
+  ACOES_X['vit-precos'] = el => {
+    S.vitPrecos = el.dataset.v === 'consulta' ? 'consulta' : 'apartir';
+    $$('[data-acao="vit-precos"]').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === S.vitPrecos));
+    const n = $('#vit-precos-nota');
+    if(n) n.textContent = S.vitPrecos === 'consulta' ? 'Nenhum valor aparece. O filtro de valor continua funcionando por faixa, sem mostrar número.' : 'Mostra só o valor de entrada de cada tipologia. Nada de tabela, unidade, andar ou condição.';
+  };
   ACOES_X['en-copiar'] = el => { if(el.dataset.u) copiar(el.dataset.u, 'Link copiado.'); };
   ACOES_X['en-apagar'] = async el => {
     const k = el.dataset.k || '';
@@ -4722,9 +4794,9 @@
     const it = enItens().find(x => x.k === k); if(!it){ EN.excluir = null; enPintar(); return; }
     el.disabled = true;
     try{
-      await rpc(it.tipo === 'mer' ? 'mercado_link_apagar' : it.tipo === 'fic' ? 'link_apagar' : 'selecao_apagar', {p_codigo: S.cod, p_dono: dono(), p_id: it.s.id});
-      if(it.tipo === 'mer') EN.mer = EN.mer.filter(x => x !== it.s); else if(it.tipo === 'fic') EN.fic = EN.fic.filter(x => x !== it.s); else EN.sel = EN.sel.filter(x => x !== it.s);
-      toast((it.tipo === 'sel' ? 'Seleção' : 'Ficha') + ' de ' + (it.s.cliente || 'cliente') + ' apagada. O link para de funcionar.');
+      await rpc(it.tipo === 'vit' ? 'vitrine_apagar' : it.tipo === 'mer' ? 'mercado_link_apagar' : it.tipo === 'fic' ? 'link_apagar' : 'selecao_apagar', {p_codigo: S.cod, p_dono: dono(), p_id: it.s.id});
+      if(it.tipo === 'vit') EN.vit = EN.vit.filter(x => x !== it.s); else if(it.tipo === 'mer') EN.mer = EN.mer.filter(x => x !== it.s); else if(it.tipo === 'fic') EN.fic = EN.fic.filter(x => x !== it.s); else EN.sel = EN.sel.filter(x => x !== it.s);
+      toast((it.tipo === 'sel' ? 'Seleção' : it.tipo === 'vit' ? 'Vitrine' : 'Ficha') + ' de ' + (it.s.cliente || 'cliente') + ' apagada. O link para de funcionar.');
     }catch(e){ if(codigoInvalido(e)){ sair(AV_CODIGO); return; } toast('Não consegui apagar agora.'); }
     EN.excluir = null; enPintar();
   };
