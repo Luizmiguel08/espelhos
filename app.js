@@ -1049,10 +1049,14 @@
   const driveBaixar = id => 'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id);
   const idDrive = id => !!id && /^[A-Za-z0-9_-]{10,}$/.test(String(id)) && !/^[a-z]+-/.test(String(id));
   const idPasta = u => { const m = /\/folders\/([A-Za-z0-9_-]{10,})/.exec(String(u || '')); return m ? m[1] : null; };
+  const ehReprint = m => /reprint/i.test(String((m && m.n) || ''));
+  const rotuloOficial = m => ehReprint(m) ? 'Reprint do lançamento' : (m.c || m.n);
   function bookDe(det, c){
     if(c && c.book && c.pasta && /^[A-Za-z0-9_.-]+\.pdf$/i.test(c.book)) return {u: ESP + 'nex/' + c.pasta + c.book, t: 'Book do empreendimento', s: 'PDF', arq: true, mesmo: true};
-    const mo = c && Array.isArray(c.material_oficial) ? c.material_oficial.filter(m => m && idDrive(m.id) && /book/i.test((m.c || '') + ' ' + (m.n || ''))) : [];
-    const m = mo.find(x => /cliente/i.test(x.c || '')) || mo.find(x => !/vista/i.test(x.c || '')) || mo[0];
+    // o reprint (anúncio do lançamento) às vezes vem como "Book do cliente" (Caiubi, Bandeira Paulista): não é book.
+    // Sem book do cliente de verdade, vale o material técnico, como no Capote Valente; o book de vistas fica por último
+    const mo = c && Array.isArray(c.material_oficial) ? c.material_oficial.filter(m => m && idDrive(m.id) && !ehReprint(m) && /book|t[eé]cnico/i.test((m.c || '') + ' ' + (m.n || ''))) : [];
+    const m = mo.find(x => /cliente/i.test(x.c || '')) || mo.find(x => /t[eé]cnico/i.test(x.c || '')) || mo.find(x => !/vista/i.test(x.c || '')) || mo[0];
     if(m) return {u: driveBaixar(m.id), t: m.c || 'Book', s: m.mb ? String(m.mb).replace('.', ',') + ' MB' : 'PDF', arq: true};
     const dp = det.docs && det.docs.projeto;
     const d = dp && Array.isArray(dp.docs) ? dp.docs.find(x => x && x.c === 'book' && (urlSegura(x.u) || (x.x !== 'link' && idDrive(x.id)))) : null;
@@ -1311,7 +1315,7 @@
     if(fatos.length) corpo += '<section class="sec" aria-labelledby="fic-t"><h2 class="t-2" id="fic-t">Ficha técnica</h2><dl class="ficha">' + fatos.map(f => '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>').join('') + '</dl></section>';
     if(c && Array.isArray(c.diferenciais) && c.diferenciais.length) corpo += '<section class="sec" aria-labelledby="dif-t"><h2 class="t-2" id="dif-t">Diferenciais</h2><ul class="lista-txt">' + c.diferenciais.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></section>';
     const docs = [];
-    if(c && Array.isArray(c.material_oficial)) c.material_oficial.forEach(m => { if(m && m.id) docs.push({t: m.c || m.n, s: (m.n || '') + (m.mb ? ', ' + String(m.mb).replace('.', ',') + ' MB' : ''), u: driveArq(m.id), x: m.ext || 'pdf'}); });
+    if(c && Array.isArray(c.material_oficial)) c.material_oficial.forEach(m => { if(m && m.id) docs.push({t: rotuloOficial(m), s: (m.n || '') + (m.mb ? ', ' + String(m.mb).replace('.', ',') + ' MB' : ''), u: driveArq(m.id), x: m.ext || 'pdf'}); });
     const dp = det.docs && det.docs.projeto;
     if(dp && Array.isArray(dp.docs)) dp.docs.forEach(x => { const u = urlSegura(x.u) || (x.id && x.x !== 'link' && !/^[a-z]+-/.test(x.id) ? driveArq(x.id) : null); if(u) docs.push({t: x.t || x.a, s: [x.a, x.d].filter(Boolean).join(', '), u, x: x.x || 'pdf'}); });
     if(dp && Array.isArray(dp.pastas)) dp.pastas.forEach(x => { if(x && x.id) docs.push({t: x.c || 'Pasta', s: 'Pasta no Google Drive', u: drivePasta(x.id), x: 'pasta'}); });
@@ -3718,7 +3722,7 @@
       if(!m) continue;
       const u = m.id ? driveArq(m.id) : urlSegura(m.u); if(!u) continue;
       const nome = m.n && m.n !== m.c ? String(m.n) : '';
-      add(m.id, u, m.c || m.n || 'Material da construtora', [nome, m.id ? String(m.ext || 'pdf').toUpperCase() : (/folders/.test(u) ? 'Pasta no Drive' : 'Link'), m.mb ? String(m.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(', '), m.id ? (m.ext || 'pdf') : (/folders/.test(u) ? 'pasta' : 'link'));
+      add(m.id, u, rotuloOficial(m) || 'Material da construtora', [nome, m.id ? String(m.ext || 'pdf').toUpperCase() : (/folders/.test(u) ? 'Pasta no Drive' : 'Link'), m.mb ? String(m.mb).replace('.', ',') + ' MB' : ''].filter(Boolean).join(', '), m.id ? (m.ext || 'pdf') : (/folders/.test(u) ? 'pasta' : 'link'));
     }
     const dp = det.docs && det.docs.projeto && det.docs.projeto.id === p.id ? det.docs.projeto : null;
     for(const x of ((dp && Array.isArray(dp.docs)) ? dp.docs : [])){

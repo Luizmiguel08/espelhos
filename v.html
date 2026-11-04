@@ -506,7 +506,8 @@ window.NEX = (function(){
   const areaPlanta = p => { const m = String((p && p.t) || '').match(/(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/); if(!m) return null; const lo = parseFloat(m[1].replace(',', '.')); return [lo, m[2] ? parseFloat(m[2].replace(',', '.')) : lo]; };
   const difArea = (pl, a) => { const r = pl && areaPlanta(pl.p); return !!(r && a != null && isFinite(a) && (a < r[0] - 1 || a > r[1] + 1)); };
   const driveUrl = id => 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view';
-  const bookOficial = P => ((P && P.material_oficial) || []).find(d => d.c === 'Book do cliente' && d.ext === 'pdf') || null;
+  // book para o cliente: o "Book do cliente" de verdade; se o que veio com esse nome é o reprint do lançamento, o material técnico
+  const bookOficial = P => { const L = ((P && P.material_oficial) || []).filter(d => d && d.ext === 'pdf' && !/reprint/i.test(d.n || '')); return L.find(d => d.c === 'Book do cliente') || L.find(d => d.c === 'Material técnico') || null; };
   const faixaDe = (P, a) => { const f = (P.faixas || []).find(z => a != null && a <= z[0]); return f ? f[1] : null; };
 
   // ---------- fluxo da tabela (cada parcela arredondada para R$ 10; o financiamento fecha a conta) ----------
