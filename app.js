@@ -406,7 +406,7 @@
     pos.length = 0;
     const html = achou.fn(achou.arg);
     if(html == null) return;
-    const ROLOS = '.promo-faixa,.faixa-cards,.pilulas.rola,.escolha-fotos,.miniaturas,.fotos-linha,#gal,.mosaico-movel';
+    const ROLOS = '.bf-faixa,.faixa-cards,.pilulas.rola,.escolha-fotos,.miniaturas,.fotos-linha,#gal,.mosaico-movel';
     const lados = mesma ? $$(ROLOS, app).map(e => e.scrollLeft) : [];
     app.innerHTML = (S.offline ? faixaOffline() : '') + '<div class="pagina pg-' + achou.aba + (mesma ? '' : ' vista') + '">' + html + '</div>';
     depoisDeRender();
@@ -500,7 +500,7 @@
     const selos = [];
     if(p.vh) selos.push('<span class="selo ouro">' + esc(plural(p.vh, 'venda', 'vendas')) + ' hoje</span>');
     else if(p.v7) selos.push('<span class="selo ouro">' + esc(plural(p.v7, 'venda', 'vendas')) + ' na semana</span>');
-    if(S.promoP.has(p.id)) selos.unshift('<span class="selo promo">Promoção</span>');
+    if(S.promoP.has(p.id)) selos.unshift('<span class="selo promo">Black Fortal</span>');
     if(p.fase && !o.semFase) selos.push('<span class="selo">' + esc(FASE_CURTA[p.fase] || p.fase) + '</span>');
     const info = [tiposTxt(p.tipos, p.amin, p.amax), maiusc1(entregaTxt(p))].filter(Boolean).join('. ');
     return '<a class="card' + (o.cls ? ' ' + o.cls : '') + '" href="#/p/' + esc(p.id) + '">' +
@@ -598,49 +598,119 @@
     }
     for(const pid of S.promoP.keys()){ const p = S.byId.get(pid); if(p && !String(p.flags || '').includes('o')) p.flags = String(p.flags || '') + 'o'; }
   }
+  const tagPromo = a => '<span class="tag-promo">' + (exDe(a)._promo ? 'Black Fortal' : 'Promoção') + '</span>';
   const emPromo = a => { const ex = exDe(a); return !!(ex._promo || ex.pr == 1 || ex.pr === true || /promo/i.test(String(a[3] || ''))); };
   const dePromo = (a, v) => { const t = +exDe(a).pt; return t > 0 && v && t > v ? t : null; };
   const pctPromo = it => it.de > it.por ? Math.round((1 - it.por / it.de) * 100) : 0;
   const nbsp = t => String(t).replace(/ /g, ' ');
   const semRevenda = s => String(s || '').replace(/\s*\(revenda\)\s*$/i, '');
-  const SIZES_PROMO = '(min-width: 1280px) 300px, (min-width: 1024px) 24vw, 78vw';
-  function promoGrupos(){
+  const SIZES_PROMO = '(min-width: 1280px) 360px, (min-width: 1024px) 40vw, 86vw';
+  function promoGrupos(){   // campanhas na ordem do banco; dentro de cada uma, maior desconto e depois menor preço
     const g = new Map();
-    for(const it of S.promoP.values()){ if(!S.byId.has(it.p)) continue; const k = it.c || 'Promoção'; if(!g.has(k)) g.set(k, []); g.get(k).push(it); }
+    for(const it of S.promoP.values()){ if(!S.byId.has(it.p)) continue; const k = it.c || 'Ofertas'; if(!g.has(k)) g.set(k, []); g.get(k).push(it); }
     for(const l of g.values()) l.sort((a, b) => (pctPromo(b) - pctPromo(a)) || (a.por - b.por));
     return [...g.entries()].sort((a, b) => ((promoCamp(a[0]).ordem || 99) - (promoCamp(b[0]).ordem || 99)));
   }
+  // ================= Black Fortal: vitrine no topo do Início =================
+  // A vitrine passa sozinha a cada 5 s (o anel em volta do botão de pausa mostra o tempo) e segura quando a pessoa
+  // toca, rola, passa o mouse ou foca um card. O relógio conta até o fim da campanha. Com movimento reduzido, não passa sozinha.
+  S.bfFiltro = ''; S.bfPausa = false;
+  const bfMov = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function bfFim(f){   // término: o da campanha filtrada; em "Todas", o mais tarde entre as campanhas ou o fim do mês da referência
+    const [ano, mes] = String(S.promo.ref || '').split('-').map(Number); if(!ano || !mes) return 0;
+    const ini = new Date(ano, mes - 1, 1).getTime();
+    const dt = t => { const m = String(t || '').match(/^(\d{1,2})\/(\d{1,2})/); if(!m) return 0; let d = new Date(ano, +m[2] - 1, +m[1], 23, 59, 59).getTime(); if(d < ini) d = new Date(ano + 1, +m[2] - 1, +m[1], 23, 59, 59).getTime(); return d; };
+    if(f) return dt(promoCamp(f).ate);
+    const ds = Object.values(S.promo.campanhas || {}).map(c => dt(c.ate)).filter(Boolean);
+    return ds.length ? Math.max(...ds) : new Date(ano, mes, 0, 23, 59, 59).getTime();
+  }
+  function bfRelTxt(fim){
+    let s = Math.max(0, Math.floor((fim - Date.now()) / 1000));
+    const d = Math.floor(s / 86400); s %= 86400; const h = Math.floor(s / 3600); s %= 3600; const m = Math.floor(s / 60); s %= 60;
+    const dd = (n, u) => '<b>' + String(n).padStart(2, '0') + '</b><i>' + u + '</i>';
+    return (d ? '<b>' + d + '</b><i>' + (d === 1 ? 'dia' : 'dias') + '</i>' : '') + dd(h, 'h') + dd(m, 'min') + dd(s, 's');
+  }
+  setInterval(() => { if(document.hidden) return; const el = document.querySelector('.bf-rel-n'); if(el) el.innerHTML = bfRelTxt(+el.dataset.fim); }, 1000);
   function promoHtml(){
     if(!S.promo || !S.promoP.size) return '';
     const gs = promoGrupos(); if(!gs.length) return '';
     const tot = gs.reduce((s, x) => s + x[1].length, 0);
-    return '<section class="sec promo-sec" aria-labelledby="promo-t"><h2 class="t-2" id="promo-t">Promoção ' + esc(S.promo.mes ? 'de ' + S.promo.mes : 'do mês') + ' <span class="q">' + tot + '</span></h2>' +
-      gs.map(([k, l], i) => {
-        const cp = promoCamp(k), idf = 'promo-f' + i;
-        return '<div class="promo-grupo" role="group" aria-labelledby="' + idf + '-t"><div class="promo-gcab"><div><h3 class="t-3" id="' + idf + '-t">' + esc(k) + ' <span class="q">' + l.length + '</span></h3>' +
-          (cp.sub ? '<p class="promo-gsub">' + esc(cp.sub) + '</p>' : '') + '</div>' +
-          (l.length > 4 ? '<div class="promo-setas"><button type="button" class="promo-seta" data-acao="promo-rolar" data-alvo="' + idf + '" data-v="-1" aria-label="' + esc('Voltar em ' + k) + '">' + ICO.voltar + '</button>' +
-            '<button type="button" class="promo-seta" data-acao="promo-rolar" data-alvo="' + idf + '" data-v="1" aria-label="' + esc('Ver mais em ' + k) + '">' + ICO.seta + '</button></div>' : '') +
-          '</div><div class="promo-faixa" id="' + idf + '">' + l.map(it => promoCard(it, cp)).join('') + '</div></div>';
-      }).join('') + '</section>';
+    const f = gs.some(g => g[0] === S.bfFiltro) ? S.bfFiltro : '';
+    const atual = f ? gs.find(g => g[0] === f)[1] : gs.flatMap(g => g[1]);
+    const cp = f ? promoCamp(f) : {}, fim = bfFim(f), mov = bfMov() && atual.length > 1;
+    const chip = (k, rot, n, on) => '<button type="button" class="bf-chip" data-acao="bf-filtro" data-c="' + esc(k) + '" aria-pressed="' + on + '">' + esc(rot) + '<span class="num">' + n + '</span></button>';
+    const rel = fim > Date.now() ? '<p class="bf-relogio"><span class="sr">' + esc('Acaba em ' + new Date(fim).toLocaleDateString('pt-BR', {day: 'numeric', month: 'long'}) + ', às 23h59.') + '</span>' +
+      '<span class="bf-rel-rot" aria-hidden="true">Acaba em</span><span class="bf-rel-n num" aria-hidden="true" data-fim="' + fim + '">' + bfRelTxt(fim) + '</span></p>' : (cp.selo ? '<p class="bf-relogio"><span class="bf-rel-rot">' + esc(cp.selo) + '</span></p>' : '');
+    return '<section class="bf' + (S.bfPausa || !mov ? ' parado' : '') + '" aria-labelledby="bf-t">' +
+      '<div class="bf-cabeca"><div class="bf-topo"><h2 class="bf-marca" id="bf-t">Black Fortal</h2>' + rel + '</div>' +
+      '<div class="bf-chips" role="group" aria-label="Ofertas por construtora">' + chip('', 'Todas', tot, !f) + gs.map(([k, l]) => chip(k, k, l.length, f === k)).join('') + '</div>' +
+      (f && cp.sub ? '<p class="bf-sub">' + esc(cp.sub) + '</p>' : '') + '</div>' +
+      '<div class="bf-palco"><div class="bf-faixa" id="bf-faixa">' + atual.map((it, i) => bfCard(it, promoCamp(it.c), i)).join('') + '</div>' +
+      (atual.length > 1 ? '<div class="bf-ctrl"><span class="bf-trilho" aria-hidden="true"><i style="width:' + (100 / atual.length).toFixed(2) + '%"></i></span>' +
+        '<span class="bf-conta num" aria-hidden="true">1 de ' + atual.length + '</span>' +
+        '<button type="button" class="bf-seta" data-acao="promo-rolar" data-alvo="bf-faixa" data-v="-1" aria-label="Ofertas anteriores">' + ICO.voltar + '</button>' +
+        '<button type="button" class="bf-seta" data-acao="promo-rolar" data-alvo="bf-faixa" data-v="1" aria-label="Mais ofertas">' + ICO.seta + '</button>' +
+        (mov ? '<button type="button" class="bf-pausa" data-acao="bf-pausa" aria-pressed="' + S.bfPausa + '" aria-label="Pausar a vitrine"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="bf-anel-f" cx="22" cy="22" r="19"/><circle class="bf-anel" cx="22" cy="22" r="19" pathLength="100"/></svg><span class="bf-pausa-i" aria-hidden="true"></span></button>' : '') +
+        '</div>' : '') + '</div></section>';
   }
-  function promoCard(it, cp){
+  function bfTrocar(c){   // troca a construtora sem redesenhar a tela inteira
+    S.bfFiltro = c || '';
+    const sec = document.querySelector('.bf'); if(!sec) return;
+    const t = document.createElement('div'); t.innerHTML = promoHtml();
+    const novo = t.firstElementChild; if(!novo) return;
+    sec.replaceWith(novo);
+    const b = [...novo.querySelectorAll('.bf-chip')].find(x => x.dataset.c === S.bfFiltro); if(b) b.focus({preventScroll: true});
+  }
+  function bfAnelDeNovo(sec){ const a = sec && sec.querySelector('.bf-anel'); if(!a) return; a.style.animation = 'none'; void a.getBoundingClientRect(); a.style.animation = ''; }
+  function bfPausar(){
+    S.bfPausa = !S.bfPausa;
+    const sec = document.querySelector('.bf'); if(!sec) return;
+    sec.classList.toggle('parado', S.bfPausa);
+    const b = sec.querySelector('.bf-pausa'); if(b) b.setAttribute('aria-pressed', String(S.bfPausa));
+  }
+  function bfMexeu(){   // a pessoa mexeu na vitrine: segura a passagem e só volta a contar 6 s depois do último toque
+    const sec = document.querySelector('.bf'); if(!sec) return;
+    sec.classList.add('mexendo'); clearTimeout(S.bfMexT);
+    S.bfMexT = setTimeout(() => { const s2 = document.querySelector('.bf'); if(s2) s2.classList.remove('mexendo'); }, 6000);
+  }
+  function bfPassar(){   // o anel fechou: vai para a próxima oferta, ou volta ao começo no fim da fila
+    const f = document.getElementById('bf-faixa'), sec = f && f.closest('.bf');
+    if(!sec || S.bfPausa || sec.classList.contains('mexendo')) return;
+    const cs = f.children; if(cs.length < 2) return;
+    const passo = cs[1].offsetLeft - cs[0].offsetLeft, fim = f.scrollLeft >= f.scrollWidth - f.clientWidth - 4;
+    f.scrollTo({left: fim ? 0 : (Math.round(f.scrollLeft / passo) + 1) * passo, behavior: 'smooth'});
+    bfAnelDeNovo(sec);
+  }
+  function bfRolou(f){   // contador, trilho e card em destaque acompanham a rolagem
+    const cs = f.children, n = cs.length, sec = f.closest('.bf'); if(!n || !sec) return;
+    const passo = n > 1 ? cs[1].offsetLeft - cs[0].offsetLeft : f.clientWidth;
+    const vis = Math.max(1, Math.min(n, Math.round((f.clientWidth + 16) / passo)));
+    const fim = f.scrollLeft >= f.scrollWidth - f.clientWidth - 4, ini = Math.max(0, fim ? n - vis : Math.min(n - 1, Math.round(f.scrollLeft / passo)));
+    const c = sec.querySelector('.bf-conta'); if(c) c.textContent = (vis > 1 ? (ini + 1) + ' a ' + Math.min(n, ini + vis) : (ini + 1)) + ' de ' + n;
+    const t = sec.querySelector('.bf-trilho i'); if(t){ t.style.width = (vis / n * 100).toFixed(2) + '%'; t.style.transform = 'translateX(' + (ini / vis * 100).toFixed(2) + '%)'; }
+    for(let k = 0; k < n; k++) cs[k].classList.toggle('ativo', k >= ini && k < ini + vis);
+  }
+  document.addEventListener('animationend', e => { if(e.animationName === 'bf-anel') bfPassar(); });
+  document.addEventListener('animationstart', e => { if(e.animationName === 'bf-anel'){ const f = document.getElementById('bf-faixa'); if(f) bfRolou(f); } });
+  document.addEventListener('scroll', e => { const f = e.target; if(f && f.id === 'bf-faixa' && !S.bfRaf) S.bfRaf = requestAnimationFrame(() => { S.bfRaf = 0; bfRolou(f); }); }, true);
+  ['pointerdown', 'wheel', 'keydown'].forEach(tp => document.addEventListener(tp, e => { if(e.target && e.target.closest && e.target.closest('.bf-faixa')) bfMexeu(); }, {capture: true, passive: true}));
+  function bfCard(it, cp, i){
     const p = S.byId.get(it.p), id = esc(p.id), pct = pctPromo(it), nome = semRevenda(p.nome);
-    const un = [it.tl ? maiusc1(it.tl) + (it.a ? ' de ' + fmtM2(it.a) : '') : (it.a ? fmtM2(it.a) : ''), it.un ? 'unidade ' + it.un : ''].filter(Boolean).join(', ');
-    const extra = it.ov > 0 ? nbsp(BRL(it.ov)) + ' ' + (it.ob || '') : it.ent > 0 && it.ent < it.por ? 'Entrada de ' + nbsp(BRL(it.ent)) : '';
-    const nTxt = it.n > 1 ? plural(it.n, 'unidade', 'unidades') + ' ' + (cp.nrot || 'na promoção') + (it.ate > pct ? ', até ' + it.ate + '% de desconto' : '') + '.' : '';
-    const preco = it.de > it.por ? 'de ' + BRL(it.de) + ' por ' + BRL(it.por) : (cp.prot || 'a partir de').toLowerCase() + ' ' + BRL(it.por);
-    return '<article class="promo-card" aria-labelledby="pr-' + id + '">' +
-      '<a class="promo-cartaz' + (pct ? ' com-pct' : '') + '" href="#/p/' + id + '" aria-label="' + esc(nome + ', ' + [un, preco].filter(Boolean).join(', ') + '. Abrir o projeto') + '">' + capaProj(p, {w: 720, sizes: SIZES_PROMO, alt: ''}) + '<span class="promo-veu" aria-hidden="true"></span>' +
-      '<span class="promo-selo">' + esc(cp.selo || ('Promoção ' + (S.promo.mes ? 'de ' + S.promo.mes : 'do mês'))) + '</span>' +
-      (pct ? '<span class="promo-pct"><span class="sr">Desconto de </span>−' + pct + '%</span>' : '') +
-      '<span class="promo-txt"><span class="promo-quem">' + esc([quemDe(p), p.bairro].filter(Boolean).join(', ')) + '</span>' +
-      '<span class="promo-nome" id="pr-' + id + '">' + esc(nome) + '</span>' + (un ? '<span class="promo-un">' + esc(un) + '</span>' : '') +
-      '<span class="promo-preco">' + (it.de > it.por ? '<span class="promo-de">De <s>' + esc(nbsp(BRL(it.de))) + '</s> por</span>' : '<span class="promo-de">' + esc(cp.prot || 'A partir de') + '</span>') +
-      '<b class="num">' + esc(nbsp(BRL(it.por))) + '</b></span></span></a>' +
-      (extra || nTxt ? '<p class="promo-n">' + (extra ? '<span class="promo-extra">' + esc(extra) + '.</span> ' : '') + esc(nTxt) + '</p>' : '') +
-      '<div class="promo-btns"><a class="btn btn-pri" href="#/p/' + id + '">Ver projeto</a>' +
-      '<button type="button" class="btn" data-acao="enviar" data-id="' + id + '" aria-label="' + esc('Mandar o ' + nome + ' pro cliente') + '">' + ICO.enviar + 'Mandar</button></div></article>';
+    const tl = it.tl ? it.tl.charAt(0).toLowerCase() + it.tl.slice(1) : '';
+    const un = [p.bairro || '', tl ? tl + (it.a ? ' de ' + fmtM2(it.a) : '') : (it.a ? fmtM2(it.a) : ''), it.un ? 'unidade ' + it.un : ''].filter(Boolean).join(', ');
+    const extra = [it.ov > 0 ? nbsp(BRL(it.ov)) + ' ' + (it.ob || '') : it.ent > 0 && it.ent < it.por ? 'Entrada de ' + nbsp(BRL(it.ent)) : '',
+      it.n > 1 ? plural(it.n, 'unidade', 'unidades') + ' ' + (cp.nrot || 'na oferta') + (it.ate > pct ? ', até ' + it.ate + '% de desconto' : '') : ''].filter(Boolean).map(x => x + '.').join(' ');
+    const quem = /revenda/i.test(it.c || '') ? 'Revenda ' + quemDe(p) : quemDe(p), cai = it.de > it.por;
+    return '<article class="bf-card' + (i === 0 ? ' ativo' : '') + '" aria-labelledby="bf-' + id + '">' +
+      '<a class="bf-foto" href="#/p/' + id + '" tabindex="-1" aria-hidden="true">' + capaProj(p, {w: 720, sizes: SIZES_PROMO, alt: ''}) + '</a>' +
+      '<span class="bf-cons">' + esc(quem) + '</span>' + (pct ? '<span class="bf-pct" aria-hidden="true">−' + pct + '%</span>' : '') +
+      '<div class="bf-corpo">' + (un ? '<p class="bf-un">' + esc(un) + '</p>' : '') +
+      '<h3 class="bf-nome" id="bf-' + id + '"><a href="#/p/' + id + '">' + esc(nome) + '</a></h3>' +
+      '<p class="bf-preco">' + (cai ? '<span class="sr">De ' + esc(BRL(it.de)) + ' por </span>' : '<span class="bf-de">' + esc(cp.prot || 'A partir de') + '</span>') +
+      '<b class="num">' + esc(nbsp(BRL(it.por))) + '</b>' + (cai ? '<s aria-hidden="true">' + esc(nbsp(BRL(it.de))) + '</s>' : '') + (pct ? '<span class="sr">, ' + pct + '% de desconto</span>' : '') + '</p>' +
+      (extra ? '<p class="bf-extra">' + esc(extra) + '</p>' : '') +
+      '<div class="bf-btns"><a class="bf-btn bf-btn-pri" href="#/p/' + id + '">Ver projeto</a>' +
+      '<button type="button" class="bf-btn" data-acao="enviar" data-id="' + id + '" aria-label="' + esc('Mandar o ' + nome + ' pro cliente') + '">' + ICO.enviar + 'Mandar</button></div></div></article>';
   }
   function promoProjHtml(p, det){   // bloco na página do projeto: só para promoção com preço "de/por"
     const us = ((det && det.dados && det.dados.unidades) || []).filter(a => a[6] === 'disponivel' && exDe(a)._promo && dePromo(a, precoU(a, 'pp')));
@@ -648,8 +718,8 @@
     us.sort((x, y) => precoU(x, 'pp') - precoU(y, 'pp'));
     const a = us[0], ex = exDe(a), v = precoU(a, 'pp'), de = dePromo(a, v), cp = promoCamp(ex._promo.c);
     const tam = [tipologiaU(det, a), areaU(a) ? fmtM2(areaU(a)) : ''].filter(Boolean).join(' de ');
-    return '<div class="promo-proj"><p class="promo-proj-t"><span class="selo promo">' + esc(cp.selo || 'Promoção') + '</span>' + esc(ex._promo.c + (cp.ate ? ', até ' + cp.ate : '')) + '</p>' +
-      '<p class="promo-proj-v">' + esc(plural(us.length, 'unidade livre', 'unidades livres') + ' com preço de promoção. A mais barata é a ' + a[0] + (tam ? ' (' + tam.toLowerCase() + ')' : '') + ':') +
+    return '<div class="promo-proj"><p class="promo-proj-t"><span class="bf-mini">Black Fortal</span><span>' + esc(ex._promo.c + (cp.ate ? ', até ' + cp.ate : '')) + '</span></p>' +
+      '<p class="promo-proj-v">' + esc(plural(us.length, 'unidade livre', 'unidades livres') + ' com preço Black Fortal. A mais barata é a ' + a[0] + (tam ? ' (' + tam.toLowerCase() + ')' : '') + ':') +
       ' de <s>' + esc(nbsp(BRL(de))) + '</s> por <b class="num">' + esc(nbsp(BRL(v))) + '</b>.</p>' +
       (ex._promo.ov ? '<p class="nota">' + esc(BRL(ex._promo.ov) + ' ' + (ex._promo.ob || '') + '.') + '</p>' : '') +
       '<a class="link-mais" href="#/tabelas/' + esc(p.id) + '">Ver as unidades na tabela ' + ICO.seta + '</a></div>';
@@ -658,7 +728,7 @@
     const us = ((det && det.dados && det.dados.unidades) || []).filter(a => a[6] === 'disponivel' && emPromo(a));
     if(!us.length) return '';
     const c = (us.map(a => exDe(a)._promo).find(Boolean) || {}).c, cp = promoCamp(c);
-    return '<p class="promo-tab-nota"><span class="tag-promo">Promoção</span><span>' + esc(plural(us.length, 'unidade livre', 'unidades livres') + ' em promoção' + (c ? ' (' + c + (cp.ate ? ', até ' + cp.ate : '') + ')' : '') + ', marcadas em dourado.') + '</span></p>';
+    return '<p class="promo-tab-nota"><span class="tag-promo">' + (c ? 'Black Fortal' : 'Promoção') + '</span><span>' + esc(plural(us.length, 'unidade livre', 'unidades livres') + (c ? ' no Black Fortal (' + c + (cp.ate ? ', até ' + cp.ate : '') + ')' : ' em promoção') + ', marcadas em dourado.') + '</span></p>';
   }
   function telaInicio(){
     const pf = perfil(), st = stats(), nome = primeiroNome(pf.nome);
@@ -669,8 +739,8 @@
       '<h1 class="t-1">' + esc(saudacao() + (nome ? ', ' + nome : '')) + '</h1>' +
       '<p class="sub">Espelhos lidos às ' + esc(hora(S.lidoEm)) + (diaKey(S.lidoEm) !== S.hoje ? ' de ' + esc(fDM.format(S.lidoEm)) : '') + '. ' + esc(plural(S.P.filter(p => p.livres).length, 'projeto com unidade livre', 'projetos com unidade livre')) + '.</p></div>' +
       buscaAtalho() + '</header>';
-    h += fitaHtml();
     h += promoHtml();
+    h += fitaHtml();
     const rank = rankingDe('vendas');
     const top = rank[0] || S.P.filter(p => p.livres > 0 && (p.fase === 'lanc' || p.fase === 'breve'))[0] || S.P[0];
     h += '<div class="ini-grade">' + (top ? heroHtml(top, !!rank[0]) : '') + '<div class="ini-lado">' + placarHtml(st) + rankingHtml() + '</div></div>';
@@ -1628,7 +1698,7 @@
     const pr = st.livre && emPromo(a), de = pr ? dePromo(a, v) : null;
     return '<div class="tu2-bloco' + (mk ? ' marcada' : '') + (st.livre ? '' : ' indisp') + (m ? ' novo' : '') + (pr ? ' promo' : '') + '"><div class="tu2" role="row">' +
       '<span role="cell">' + (st.livre ? '<button type="button" class="ck-btn" data-acao="tab-ck" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-pressed="' + mk + '" aria-label="Marcar a unidade ' + esc(n) + '"><span class="ck">' + ICO.ok + '</span></button>' : '') + '</span>' +
-      '<span role="cell" class="num"><b>' + esc(n) + '</b>' + (pr ? '<span class="tag-promo">Promoção</span>' : '') + '</span><span role="cell">' + esc(andarTxt(a[4])) + '</span><span role="cell">' + esc(tipologiaU(det, a) || '') + '</span>' +
+      '<span role="cell" class="num"><b>' + esc(n) + '</b>' + (pr ? tagPromo(a) : '') + '</span><span role="cell">' + esc(andarTxt(a[4])) + '</span><span role="cell">' + esc(tipologiaU(det, a) || '') + '</span>' +
       '<span role="cell" class="dir num">' + esc(ar ? fmtM2(ar) : '') + '</span><span role="cell" class="pequeno">' + esc(cat) + '</span>' +
       '<span role="cell" class="' + st.cls + '">' + esc(st.txt) + '</span>' +
       '<span role="cell" class="dir num">' + (de ? '<s class="de-promo"><span class="sr">de </span>' + esc(BRL(de)) + '</s>' : '') + '<b>' + (v ? (de ? '<span class="sr">por </span>' : '') + esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</b></span>' +
@@ -1647,7 +1717,7 @@
       (st.livre ? '<button type="button" class="ck-btn" data-acao="tab-ck" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-pressed="' + mk + '" aria-label="Marcar a unidade ' + esc(n) + ' para mandar"><span class="ck">' + ICO.ok + '</span></button>' : '') +
       '<button type="button" class="u-lin" data-acao="tab-abrir" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-expanded="' + aberta + '">' +
       '<span class="n num">' + esc(n) + '<small>' + esc(sub) + '</small></span><span class="d">' + esc(desc) + '<small class="' + st.cls + '">' + esc(st.txt) + '</small></span>' +
-      '<span class="p num">' + (pr ? '<span class="tag-promo">Promoção</span>' : '') + (de ? '<s class="de-promo"><span class="sr">de </span>' + esc(BRL(de)) + '</s>' : '') + (v ? (de ? '<span class="sr">por </span>' : '') + esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</span></button></div>' +
+      '<span class="p num">' + (pr ? tagPromo(a) : '') + (de ? '<s class="de-promo"><span class="sr">de </span>' + esc(BRL(de)) + '</s>' : '') + (v ? (de ? '<span class="sr">por </span>' : '') + esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</span></button></div>' +
       (aberta ? '<div class="detalhe">' + (fluxoHtml(det, a) || '<p class="texto-2">Sem fluxo cadastrado para esta unidade.</p>') + '</div>' : '') + '</div>';
   }
 
@@ -3458,7 +3528,9 @@
       case 'cp-espelho': S.ui.tabQ = el.dataset.n || ''; if(S.ui.tabProj !== id){ S.ui.tabProj = id; S.ui.tabFiltro = 'livres'; S.ui.tabMostra = 150; S.ui.tabAberta = null; S.ui.ef = null; S.ui.efMais = false; } break;
       case 'luz-cp': { const it = (S.cpItens || [])[+el.dataset.k]; if(it && it.pl) abrirLuz([{src: it.pl.src, t: it.m.p.nome + ', ' + it.pl.t}], 0, it.m.p.nome); break; }
       // ---- envio
-      case 'promo-rolar': { const f = document.getElementById(el.dataset.alvo); if(f) f.scrollBy({left: (+el.dataset.v || 1) * Math.max(240, f.clientWidth * 0.9), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); break; }
+      case 'bf-filtro': bfTrocar(el.dataset.c); break;
+      case 'bf-pausa': bfPausar(); break;
+      case 'promo-rolar': { const f = document.getElementById(el.dataset.alvo); if(f) f.scrollBy({left: (+el.dataset.v || 1) * Math.max(240, f.clientWidth * 0.9), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); bfMexeu(); break; }
       case 'enviar': ev.preventDefault(); abrirEnvio(id, el.dataset.sel === '1'); break;
       case 'env-modo': if(S.envio){ S.envio.modo = v; $$('[data-acao="env-modo"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)); } break;
       case 'env-fmt': if(S.envio){ S.envio.formato = v; $$('[data-acao="env-fmt"]').forEach(b => b.setAttribute('aria-checked', b.dataset.v === v)); const md = $('#env-modo-f'); if(md) md.hidden = v === 'pers'; } break;
