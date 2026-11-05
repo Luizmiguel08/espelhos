@@ -582,7 +582,9 @@
       ex._promo = {c: c || '', ob: ob || '', ov: ov > 0 ? ov : null};
       if(por > 0 && de > 0 && por < de){
         for(const k of ['pp', 'pv', 'pt']) ex['_' + k + '0'] = ex[k] == null ? null : ex[k];
-        ex.pt = de; ex.pp = por; delete ex.pv;
+        ex.pt = de; ex.pp = por;
+        const pv = Number(ex.pv);   // o à vista da tabela continua valendo, mas nunca acima do preço da promoção (Luiz, 05/11)
+        if(pv > 0) ex.pv = Math.min(pv, por); else delete ex.pv;
       }
     }
   }
@@ -592,7 +594,7 @@
       for(const u of us){
         const it = m.get(String(u.n)); if(!it) continue;
         if(!('_p0' in u)){ u._p0 = u.p; u._pv0 = u.pv; }
-        if(it[1] > 0 && it[0] > 0 && it[1] < it[0]){ u.p = it[1]; u.pv = null; }
+        if(it[1] > 0 && it[0] > 0 && it[1] < it[0]){ u.p = it[1]; u.pv = u._pv0 > 0 ? Math.min(u._pv0, it[1]) : null; }
         u.f = (u.f || 0) | 16;
       }
     }
