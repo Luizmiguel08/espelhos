@@ -232,7 +232,7 @@
       const antes = S.carregado ? assinatura() : null;
       try{
         const r = await rpc('corretor_resumo', {p_codigo: S.cod});
-        aplicarResumo(r); S.offline = false; S.cacheEm = 0;
+        aplicarResumo(r); S.offline = false; S.cacheEm = 0; promoNoIndice(); carregarPromo();
         LS.set(K.cache, JSON.stringify({em: Date.now(), r}));
         const mudou = antes === null || assinatura() !== antes;
         if(motivo === 'auto'){ if(mudou) refrescar(); }
@@ -244,7 +244,7 @@
         const era = S.offline; S.offline = true;
         if(!S.carregado){
           const c = cacheLido();
-          if(c){ aplicarResumo(c.r); S.cacheEm = c.em; }
+          if(c){ aplicarResumo(c.r); S.cacheEm = c.em; promoDoCache(); }
           render();
         }else if(!era) refrescar();
       }finally{ S.carregando = null; }
@@ -275,7 +275,7 @@
     if(S.Ucarregando) return S.Ucarregando;
     if(S.U && !forcar && Date.now() - S.Uem < 120000) return S.U;
     S.Ucarregando = (async () => {
-      try{ const r = await rpc('corretor_unidades', {p_codigo: S.cod}, 40000); aplicarUnidades(r); }
+      try{ const r = await rpc('corretor_unidades', {p_codigo: S.cod}, 40000); aplicarUnidades(r); promoNoIndice(); }
       catch(e){ if(codigoInvalido(e)){ sair('Esse código não vale mais. Digite o código novo do time.'); return null; } S.Uerro = true; }
       finally{ S.Ucarregando = null; }
       if(location.hash === '#/imoveis' && !document.querySelector('dialog[open]:not(#folha-filtros)')) atualizarImoveis();
@@ -287,7 +287,7 @@
   async function detalhe(id, forcar){
     const c = S.det.get(id);
     if(c && !forcar && (c.pr || Date.now() - c.em < 60000)) return c.pr || c.v;
-    const pr = rpc('corretor_projeto', {p_codigo: S.cod, p_id: id}).then(v => { S.det.set(id, {v, em: Date.now()}); return v; })
+    const pr = rpc('corretor_projeto', {p_codigo: S.cod, p_id: id}).then(v => { promoNoDet(id, v); S.det.set(id, {v, em: Date.now()}); return v; })
       .catch(e => { if(c && c.v){ S.det.set(id, c); return c.v; } S.det.delete(id); throw e; });
     S.det.set(id, {pr, v: c && c.v, em: c ? c.em : 0});
     return pr;
@@ -406,7 +406,7 @@
     pos.length = 0;
     const html = achou.fn(achou.arg);
     if(html == null) return;
-    const ROLOS = '.faixa-cards,.pilulas.rola,.escolha-fotos,.miniaturas,.fotos-linha,#gal,.mosaico-movel';
+    const ROLOS = '.promo-faixa,.faixa-cards,.pilulas.rola,.escolha-fotos,.miniaturas,.fotos-linha,#gal,.mosaico-movel';
     const lados = mesma ? $$(ROLOS, app).map(e => e.scrollLeft) : [];
     app.innerHTML = (S.offline ? faixaOffline() : '') + '<div class="pagina pg-' + achou.aba + (mesma ? '' : ' vista') + '">' + html + '</div>';
     depoisDeRender();
@@ -500,6 +500,7 @@
     const selos = [];
     if(p.vh) selos.push('<span class="selo ouro">' + esc(plural(p.vh, 'venda', 'vendas')) + ' hoje</span>');
     else if(p.v7) selos.push('<span class="selo ouro">' + esc(plural(p.v7, 'venda', 'vendas')) + ' na semana</span>');
+    if(S.promoP.has(p.id)) selos.unshift('<span class="selo promo">Promoção</span>');
     if(p.fase && !o.semFase) selos.push('<span class="selo">' + esc(FASE_CURTA[p.fase] || p.fase) + '</span>');
     const info = [tiposTxt(p.tipos, p.amin, p.amax), maiusc1(entregaTxt(p))].filter(Boolean).join('. ');
     return '<a class="card' + (o.cls ? ' ' + o.cls : '') + '" href="#/p/' + esc(p.id) + '">' +
@@ -535,6 +536,130 @@
     return '<div class="busca-linha"><a class="busca" href="#/imoveis" data-acao="focar-busca">' + ICO.lupa + '<span>Projeto, bairro, rua ou metrô</span></a>' +
       '<a class="btn-filtro" href="#/imoveis" data-acao="abrir-filtros" aria-label="Filtro completo: preço, dormitórios, metragem, entrega, região e mais">' + ICO.filtro + '<span class="so-largo">Filtros</span></a></div>';
   }
+  // ================= promoção do mês =================
+  // corretor_promocoes: um card por projeto, as unidades em promoção e as campanhas; fica guardado para abrir sem internet
+  const K_PROMO = 'corretor-promo-v1';
+  S.promo = null; S.promoP = new Map(); S.promoUn = new Map(); S.promoVer = 0; S.promoEm = 0;
+  const promoCamp = c => (S.promo && S.promo.campanhas && S.promo.campanhas[c]) || {};
+  function aplicarPromo(r){
+    if(!r || !Array.isArray(r.itens)) return;
+    S.promo = r; S.promoVer++;
+    S.promoP = new Map();
+    for(const it of r.itens) if(it && it.p && it.por > 0 && !S.promoP.has(it.p)) S.promoP.set(it.p, it);
+    S.promoUn = new Map();
+    for(const pid in (r.un || {})){ const m = new Map(); for(const n in r.un[pid]) m.set(String(n), r.un[pid][n]); S.promoUn.set(pid, m); }
+    for(const [id, c] of S.det) if(c && c.v) promoNoDet(id, c.v);
+    promoNoIndice();
+  }
+  async function carregarPromo(){
+    if(S.promoCarregando || (S.promoEm && Date.now() - S.promoEm < 300000)) return;
+    S.promoCarregando = true;
+    try{
+      const r = await rpc('corretor_promocoes', {p_codigo: S.cod});
+      S.promoEm = Date.now(); aplicarPromo(r); LS.set(K_PROMO, JSON.stringify({em: Date.now(), r}));
+      if(document.querySelector('dialog[open]')) return;
+      const h = location.hash || '#/';
+      if(/^#\/tabelas\//.test(h)) atualizarTabela(); else if(/^#\/p\//.test(h)) render(); else if(h === '#/' || h === '#') refrescar();
+    }catch(e){ promoDoCache(); }
+    finally{ S.promoCarregando = false; }
+  }
+  function promoDoCache(){ if(S.promo) return; try{ const c = JSON.parse(LS.get(K_PROMO) || 'null'); if(c && c.r) aplicarPromo(c.r); }catch(e){} }
+  function promoNoDet(id, v){   // o preço da promoção entra no parcelado da unidade e a tabela fica como "de"
+    if(!v || !v.dados || !Array.isArray(v.dados.unidades) || v._promoVer === S.promoVer) return;
+    v._promoVer = S.promoVer;
+    const m = S.promoUn.get(id);
+    for(const a of v.dados.unidades){
+      if(!a) continue;
+      let ex = a[7] && typeof a[7] === 'object' ? a[7] : null;
+      if(ex && ex._promo){   // desfaz a anterior antes de pôr a nova
+        for(const k of ['pp', 'pv', 'pt']) if(('_' + k + '0') in ex){ if(ex['_' + k + '0'] == null) delete ex[k]; else ex[k] = ex['_' + k + '0']; delete ex['_' + k + '0']; }
+        delete ex._promo;
+      }
+      const it = m && m.get(String(a[0]));
+      if(!it) continue;
+      if(!ex){ ex = {}; a[7] = ex; }
+      const [de, por, ov, ob, c] = it;
+      ex._promo = {c: c || '', ob: ob || '', ov: ov > 0 ? ov : null};
+      if(por > 0 && de > 0 && por < de){
+        for(const k of ['pp', 'pv', 'pt']) ex['_' + k + '0'] = ex[k] == null ? null : ex[k];
+        ex.pt = de; ex.pp = por; delete ex.pv;
+      }
+    }
+  }
+  function promoNoIndice(){   // filtro "Em promoção" e preço da busca com a promoção
+    if(S.U) for(const [pid, m] of S.promoUn){
+      const us = S.U.get(pid); if(!us) continue;
+      for(const u of us){
+        const it = m.get(String(u.n)); if(!it) continue;
+        if(!('_p0' in u)){ u._p0 = u.p; u._pv0 = u.pv; }
+        if(it[1] > 0 && it[0] > 0 && it[1] < it[0]){ u.p = it[1]; u.pv = null; }
+        u.f = (u.f || 0) | 16;
+      }
+    }
+    for(const pid of S.promoP.keys()){ const p = S.byId.get(pid); if(p && !String(p.flags || '').includes('o')) p.flags = String(p.flags || '') + 'o'; }
+  }
+  const emPromo = a => { const ex = exDe(a); return !!(ex._promo || ex.pr == 1 || ex.pr === true || /promo/i.test(String(a[3] || ''))); };
+  const dePromo = (a, v) => { const t = +exDe(a).pt; return t > 0 && v && t > v ? t : null; };
+  const pctPromo = it => it.de > it.por ? Math.round((1 - it.por / it.de) * 100) : 0;
+  const nbsp = t => String(t).replace(/ /g, ' ');
+  const semRevenda = s => String(s || '').replace(/\s*\(revenda\)\s*$/i, '');
+  const SIZES_PROMO = '(min-width: 1280px) 300px, (min-width: 1024px) 24vw, 78vw';
+  function promoGrupos(){
+    const g = new Map();
+    for(const it of S.promoP.values()){ if(!S.byId.has(it.p)) continue; const k = it.c || 'Promoção'; if(!g.has(k)) g.set(k, []); g.get(k).push(it); }
+    for(const l of g.values()) l.sort((a, b) => (pctPromo(b) - pctPromo(a)) || (a.por - b.por));
+    return [...g.entries()].sort((a, b) => ((promoCamp(a[0]).ordem || 99) - (promoCamp(b[0]).ordem || 99)));
+  }
+  function promoHtml(){
+    if(!S.promo || !S.promoP.size) return '';
+    const gs = promoGrupos(); if(!gs.length) return '';
+    const tot = gs.reduce((s, x) => s + x[1].length, 0);
+    return '<section class="sec promo-sec" aria-labelledby="promo-t"><h2 class="t-2" id="promo-t">Promoção ' + esc(S.promo.mes ? 'de ' + S.promo.mes : 'do mês') + ' <span class="q">' + tot + '</span></h2>' +
+      gs.map(([k, l], i) => {
+        const cp = promoCamp(k), idf = 'promo-f' + i;
+        return '<div class="promo-grupo" role="group" aria-labelledby="' + idf + '-t"><div class="promo-gcab"><div><h3 class="t-3" id="' + idf + '-t">' + esc(k) + ' <span class="q">' + l.length + '</span></h3>' +
+          (cp.sub ? '<p class="promo-gsub">' + esc(cp.sub) + '</p>' : '') + '</div>' +
+          (l.length > 4 ? '<div class="promo-setas"><button type="button" class="promo-seta" data-acao="promo-rolar" data-alvo="' + idf + '" data-v="-1" aria-label="' + esc('Voltar em ' + k) + '">' + ICO.voltar + '</button>' +
+            '<button type="button" class="promo-seta" data-acao="promo-rolar" data-alvo="' + idf + '" data-v="1" aria-label="' + esc('Ver mais em ' + k) + '">' + ICO.seta + '</button></div>' : '') +
+          '</div><div class="promo-faixa" id="' + idf + '">' + l.map(it => promoCard(it, cp)).join('') + '</div></div>';
+      }).join('') + '</section>';
+  }
+  function promoCard(it, cp){
+    const p = S.byId.get(it.p), id = esc(p.id), pct = pctPromo(it), nome = semRevenda(p.nome);
+    const un = [it.tl ? maiusc1(it.tl) + (it.a ? ' de ' + fmtM2(it.a) : '') : (it.a ? fmtM2(it.a) : ''), it.un ? 'unidade ' + it.un : ''].filter(Boolean).join(', ');
+    const extra = it.ov > 0 ? nbsp(BRL(it.ov)) + ' ' + (it.ob || '') : it.ent > 0 && it.ent < it.por ? 'Entrada de ' + nbsp(BRL(it.ent)) : '';
+    const nTxt = it.n > 1 ? plural(it.n, 'unidade', 'unidades') + ' ' + (cp.nrot || 'na promoção') + (it.ate > pct ? ', até ' + it.ate + '% de desconto' : '') + '.' : '';
+    const preco = it.de > it.por ? 'de ' + BRL(it.de) + ' por ' + BRL(it.por) : (cp.prot || 'a partir de').toLowerCase() + ' ' + BRL(it.por);
+    return '<article class="promo-card" aria-labelledby="pr-' + id + '">' +
+      '<a class="promo-cartaz' + (pct ? ' com-pct' : '') + '" href="#/p/' + id + '" aria-label="' + esc(nome + ', ' + [un, preco].filter(Boolean).join(', ') + '. Abrir o projeto') + '">' + capaProj(p, {w: 720, sizes: SIZES_PROMO, alt: ''}) + '<span class="promo-veu" aria-hidden="true"></span>' +
+      '<span class="promo-selo">' + esc(cp.selo || ('Promoção ' + (S.promo.mes ? 'de ' + S.promo.mes : 'do mês'))) + '</span>' +
+      (pct ? '<span class="promo-pct"><span class="sr">Desconto de </span>−' + pct + '%</span>' : '') +
+      '<span class="promo-txt"><span class="promo-quem">' + esc([quemDe(p), p.bairro].filter(Boolean).join(', ')) + '</span>' +
+      '<span class="promo-nome" id="pr-' + id + '">' + esc(nome) + '</span>' + (un ? '<span class="promo-un">' + esc(un) + '</span>' : '') +
+      '<span class="promo-preco">' + (it.de > it.por ? '<span class="promo-de">De <s>' + esc(nbsp(BRL(it.de))) + '</s> por</span>' : '<span class="promo-de">' + esc(cp.prot || 'A partir de') + '</span>') +
+      '<b class="num">' + esc(nbsp(BRL(it.por))) + '</b></span></span></a>' +
+      (extra || nTxt ? '<p class="promo-n">' + (extra ? '<span class="promo-extra">' + esc(extra) + '.</span> ' : '') + esc(nTxt) + '</p>' : '') +
+      '<div class="promo-btns"><a class="btn btn-pri" href="#/p/' + id + '">Ver projeto</a>' +
+      '<button type="button" class="btn" data-acao="enviar" data-id="' + id + '" aria-label="' + esc('Mandar o ' + nome + ' pro cliente') + '">' + ICO.enviar + 'Mandar</button></div></article>';
+  }
+  function promoProjHtml(p, det){   // bloco na página do projeto: só para promoção com preço "de/por"
+    const us = ((det && det.dados && det.dados.unidades) || []).filter(a => a[6] === 'disponivel' && exDe(a)._promo && dePromo(a, precoU(a, 'pp')));
+    if(!us.length) return '';
+    us.sort((x, y) => precoU(x, 'pp') - precoU(y, 'pp'));
+    const a = us[0], ex = exDe(a), v = precoU(a, 'pp'), de = dePromo(a, v), cp = promoCamp(ex._promo.c);
+    const tam = [tipologiaU(det, a), areaU(a) ? fmtM2(areaU(a)) : ''].filter(Boolean).join(' de ');
+    return '<div class="promo-proj"><p class="promo-proj-t"><span class="selo promo">' + esc(cp.selo || 'Promoção') + '</span>' + esc(ex._promo.c + (cp.ate ? ', até ' + cp.ate : '')) + '</p>' +
+      '<p class="promo-proj-v">' + esc(plural(us.length, 'unidade livre', 'unidades livres') + ' com preço de promoção. A mais barata é a ' + a[0] + (tam ? ' (' + tam.toLowerCase() + ')' : '') + ':') +
+      ' de <s>' + esc(nbsp(BRL(de))) + '</s> por <b class="num">' + esc(nbsp(BRL(v))) + '</b>.</p>' +
+      (ex._promo.ov ? '<p class="nota">' + esc(BRL(ex._promo.ov) + ' ' + (ex._promo.ob || '') + '.') + '</p>' : '') +
+      '<a class="link-mais" href="#/tabelas/' + esc(p.id) + '">Ver as unidades na tabela ' + ICO.seta + '</a></div>';
+  }
+  function promoTabNota(p, det){
+    const us = ((det && det.dados && det.dados.unidades) || []).filter(a => a[6] === 'disponivel' && emPromo(a));
+    if(!us.length) return '';
+    const c = (us.map(a => exDe(a)._promo).find(Boolean) || {}).c, cp = promoCamp(c);
+    return '<p class="promo-tab-nota"><span class="tag-promo">Promoção</span><span>' + esc(plural(us.length, 'unidade livre', 'unidades livres') + ' em promoção' + (c ? ' (' + c + (cp.ate ? ', até ' + cp.ate : '') + ')' : '') + ', marcadas em dourado.') + '</span></p>';
+  }
   function telaInicio(){
     const pf = perfil(), st = stats(), nome = primeiroNome(pf.nome);
     let h = '<header class="ini-cab">' +
@@ -545,6 +670,7 @@
       '<p class="sub">Espelhos lidos às ' + esc(hora(S.lidoEm)) + (diaKey(S.lidoEm) !== S.hoje ? ' de ' + esc(fDM.format(S.lidoEm)) : '') + '. ' + esc(plural(S.P.filter(p => p.livres).length, 'projeto com unidade livre', 'projetos com unidade livre')) + '.</p></div>' +
       buscaAtalho() + '</header>';
     h += fitaHtml();
+    h += promoHtml();
     const rank = rankingDe('vendas');
     const top = rank[0] || S.P.filter(p => p.livres > 0 && (p.fase === 'lanc' || p.fase === 'breve'))[0] || S.P[0];
     h += '<div class="ini-grade">' + (top ? heroHtml(top, !!rank[0]) : '') + '<div class="ini-lado">' + placarHtml(st) + rankingHtml() + '</div></div>';
@@ -1239,7 +1365,7 @@
       '<div class="estoque"><div class="l1"><b>' + esc(pctTxt(pct(tot - liv, tot))) + ' do estoque já saiu</b><span class="num">' + esc(liv + ' livres de ' + tot) + '</span></div>' +
       '<div class="barra" role="img" aria-label="' + esc(vend + ' vendidas, ' + (res + proc) + ' reservadas ou em processo e ' + liv + ' livres') + '"><i class="vd" style="width:' + pct(vend, tot) + '%"></i><i class="rs" style="width:' + pct(res + proc, tot) + '%"></i></div>' +
       '<div class="legenda num"><span><i class="c-vd"></i>' + vend + ' vendidas</span><span><i class="c-rs"></i>' + (res + proc) + ' reservadas</span><span><i class="c-lv"></i>' + liv + ' livres</span></div></div>' +
-      '<div class="acoes-proj"><button type="button" class="btn btn-pri btn-alto" data-acao="enviar" data-id="' + esc(p.id) + '">' + ICO.enviar + 'Mandar pro cliente</button>' +
+      promoProjHtml(p, det) + '<div class="acoes-proj"><button type="button" class="btn btn-pri btn-alto" data-acao="enviar" data-id="' + esc(p.id) + '">' + ICO.enviar + 'Mandar pro cliente</button>' +
       '<div class="btn-linha' + (bk ? ' tres' : '') + '"><a class="btn" href="#/tabelas/' + esc(p.id) + '">' + ICO.planilha + 'Tabela</a>' +
       (bk ? '<a class="btn" href="' + esc(bk.u) + '" target="_blank" rel="noopener"' + (bk.mesmo ? ' download' : '') + ' title="' + esc(bk.arq ? 'Baixar o book (' + bk.t + ')' : 'Abrir a pasta do book no Google Drive') + '">' + ICO.livro + 'Book</a>' : '') +
       '<button type="button" class="btn" data-acao="menu-baixar" data-id="' + esc(p.id) + '">' + ICO.baixar + 'Baixar</button></div>' +
@@ -1452,7 +1578,7 @@
     if(!S.centralV.has(p.id)) pos.push(() => fichaCentral(p.id).then(c => { if(c && location.hash === '#/tabelas/' + p.id) atualizarTabela(); }).catch(() => {}));
     if(S.ui.tabQ && vista === 'espelho') pos.push(() => setTimeout(espRolarAchada, 60));
     return '<div class="tab-ctl">' +
-      '<p class="sub">' + esc([tab.nome ? nomeTabela(tab.nome) : 'Sem tabela publicada', tabEm ? 'atualizada ' + tabEm : ''].filter(Boolean).join(', ')) + '. Espelho lido ' + esc(lido || 'hoje') + '.</p>' +
+      '<p class="sub">' + esc([tab.nome ? nomeTabela(tab.nome) : 'Sem tabela publicada', tabEm ? 'atualizada ' + tabEm : ''].filter(Boolean).join(', ')) + '. Espelho lido ' + esc(lido || 'hoje') + '.</p>' + promoTabNota(p, det) +
       '<div class="tab-ctl-lin">' +
       (espTemGrade(det) ? '<div class="seg seg-vista" role="group" aria-label="Como ver as unidades"><button type="button" data-acao="tab-vista" data-v="espelho" aria-pressed="' + (vista === 'espelho') + '">' + ICO.predio + 'Espelho</button><button type="button" data-acao="tab-vista" data-v="lista" aria-pressed="' + (vista === 'lista') + '">' + ICO.lista + 'Lista</button></div>' : '') +
       (pc.length > 1 ? '<div class="seg" role="group" aria-label="Pagamento">' + pc.map(x => '<button type="button" data-acao="tab-modo" data-id="' + esc(p.id) + '" data-v="' + esc(x.k) + '" aria-pressed="' + (modo === x.k) + '">' + esc(pagRot(x)) + '</button>').join('') + '</div>' : '') +
@@ -1499,12 +1625,13 @@
   function linhaTabela(p, det, a, modo, sel, recentes, temPv){
     const n = String(a[0]), v = precoU(a, modo), pv = temPv ? precoU(a, 'pv') : null, mk = sel.has(n), m = recentes.get(n), ar = areaU(a), aberta = S.ui.tabAberta === p.id + ':' + n;
     const st = stDe(det, a, m), cat = (det.dados.cat_nome && det.dados.cat_nome[a[3]]) || a[3] || '';
-    return '<div class="tu2-bloco' + (mk ? ' marcada' : '') + (st.livre ? '' : ' indisp') + (m ? ' novo' : '') + '"><div class="tu2" role="row">' +
+    const pr = st.livre && emPromo(a), de = pr ? dePromo(a, v) : null;
+    return '<div class="tu2-bloco' + (mk ? ' marcada' : '') + (st.livre ? '' : ' indisp') + (m ? ' novo' : '') + (pr ? ' promo' : '') + '"><div class="tu2" role="row">' +
       '<span role="cell">' + (st.livre ? '<button type="button" class="ck-btn" data-acao="tab-ck" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-pressed="' + mk + '" aria-label="Marcar a unidade ' + esc(n) + '"><span class="ck">' + ICO.ok + '</span></button>' : '') + '</span>' +
-      '<span role="cell" class="num"><b>' + esc(n) + '</b></span><span role="cell">' + esc(andarTxt(a[4])) + '</span><span role="cell">' + esc(tipologiaU(det, a) || '') + '</span>' +
+      '<span role="cell" class="num"><b>' + esc(n) + '</b>' + (pr ? '<span class="tag-promo">Promoção</span>' : '') + '</span><span role="cell">' + esc(andarTxt(a[4])) + '</span><span role="cell">' + esc(tipologiaU(det, a) || '') + '</span>' +
       '<span role="cell" class="dir num">' + esc(ar ? fmtM2(ar) : '') + '</span><span role="cell" class="pequeno">' + esc(cat) + '</span>' +
       '<span role="cell" class="' + st.cls + '">' + esc(st.txt) + '</span>' +
-      '<span role="cell" class="dir num"><b>' + (v ? esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</b></span>' +
+      '<span role="cell" class="dir num">' + (de ? '<s class="de-promo"><span class="sr">de </span>' + esc(BRL(de)) + '</s>' : '') + '<b>' + (v ? (de ? '<span class="sr">por </span>' : '') + esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</b></span>' +
       '<span role="cell" class="dir num">' + (pv ? esc(BRL(pv)) : '') + '</span>' +
       '<span role="cell" class="dir num apoio">' + (v && ar ? esc(BRL(v / ar)) : '') + '</span>' +
       '<span role="cell"><button type="button" class="link-mais" data-acao="tab-abrir" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-expanded="' + aberta + '">Fluxo ' + ICO.baixo + '</button></span></div>' +
@@ -1515,11 +1642,12 @@
     const st = stDe(det, a, m);
     const desc = [tipologiaU(det, a), areaU(a) ? fmtM2(areaU(a)) : ''].filter(Boolean).join(', ');
     const sub = [andarTxt(a[4]), a[3] && a[3] !== 'R2V' ? a[3] : ''].filter(Boolean).join(', ');
-    return '<div class="u' + (mk ? ' marcada' : '') + (st.livre ? '' : ' indisp') + (m ? ' novo' : '') + '" role="listitem"><div class="u-grade' + (st.livre ? '' : ' sem-ck') + '">' +
+    const pr = st.livre && emPromo(a), de = pr ? dePromo(a, v) : null;
+    return '<div class="u' + (mk ? ' marcada' : '') + (st.livre ? '' : ' indisp') + (m ? ' novo' : '') + (pr ? ' promo' : '') + '" role="listitem"><div class="u-grade' + (st.livre ? '' : ' sem-ck') + '">' +
       (st.livre ? '<button type="button" class="ck-btn" data-acao="tab-ck" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-pressed="' + mk + '" aria-label="Marcar a unidade ' + esc(n) + ' para mandar"><span class="ck">' + ICO.ok + '</span></button>' : '') +
       '<button type="button" class="u-lin" data-acao="tab-abrir" data-id="' + esc(p.id) + '" data-n="' + esc(n) + '" aria-expanded="' + aberta + '">' +
       '<span class="n num">' + esc(n) + '<small>' + esc(sub) + '</small></span><span class="d">' + esc(desc) + '<small class="' + st.cls + '">' + esc(st.txt) + '</small></span>' +
-      '<span class="p num">' + (v ? esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</span></button></div>' +
+      '<span class="p num">' + (pr ? '<span class="tag-promo">Promoção</span>' : '') + (de ? '<s class="de-promo"><span class="sr">de </span>' + esc(BRL(de)) + '</s>' : '') + (v ? (de ? '<span class="sr">por </span>' : '') + esc(BRL(v)) : '<span class="apoio">sem preço</span>') + '</span></button></div>' +
       (aberta ? '<div class="detalhe">' + (fluxoHtml(det, a) || '<p class="texto-2">Sem fluxo cadastrado para esta unidade.</p>') + '</div>' : '') + '</div>';
   }
 
@@ -1970,8 +2098,8 @@
   function espCelula(u, rr, ok, modo, sel, recentes, q, multiCat, det){
     const v = precoU(u.a, modo), mk = sel.has(u.n), mv = recentes.get(u.n), achou = q && norm(u.n) === q;
     const vend = u.st === 'vendida', tag = '';   // o enquadramento fica no filtro e na ficha da unidade: na célula não cabe
-    const desc = ['Unidade ' + u.n, andarTxt(u.andar), u.tl, u.ar ? m2c(u.ar) : '', u.cat ? catNomeDe(det, u.cat) : '', v && !vend ? BRL(v) : '', stLabel(det, u.st)].filter(Boolean).join(', ');
-    return '<button type="button" class="ep-u s-' + esc(u.st) + (ok ? '' : ' off') + (mk ? ' marc' : '') + (mv ? ' mov' : '') + (achou ? ' achou' : '') + '" data-acao="esp-u" data-n="' + esc(u.n) + '" style="grid-row:' + rr + ';grid-column:' + (u.col + 2) + '" aria-label="' + esc(desc) + '" title="' + esc(desc) + '">' +
+    const desc = ['Unidade ' + u.n, !vend && emPromo(u.a) ? 'em promoção' : '', andarTxt(u.andar), u.tl, u.ar ? m2c(u.ar) : '', u.cat ? catNomeDe(det, u.cat) : '', v && !vend ? BRL(v) : '', stLabel(det, u.st)].filter(Boolean).join(', ');
+    return '<button type="button" class="ep-u s-' + esc(u.st) + (ok ? '' : ' off') + (mk ? ' marc' : '') + (mv ? ' mov' : '') + (achou ? ' achou' : '') + (!vend && emPromo(u.a) ? ' promo' : '') + '" data-acao="esp-u" data-n="' + esc(u.n) + '" style="grid-row:' + rr + ';grid-column:' + (u.col + 2) + '" aria-label="' + esc(desc) + '" title="' + esc(desc) + '">' +
       '<b>' + esc(u.n) + (tag ? '<i>' + esc(String(tag).slice(0, 6)) + '</i>' : '') + '</b>' +
       (vend ? '' : '<span>' + esc(u.ar ? m2c(u.ar) : (u.tl || '')) + '</span>' + (v && S.ui.espPreco !== false ? '<span class="pr">' + esc(kmil(v)) + '</span>' : '')) +
       (mk ? '<em class="ep-ok" aria-hidden="true">' + ICO.ok + '</em>' : '') + '</button>';
@@ -3330,6 +3458,7 @@
       case 'cp-espelho': S.ui.tabQ = el.dataset.n || ''; if(S.ui.tabProj !== id){ S.ui.tabProj = id; S.ui.tabFiltro = 'livres'; S.ui.tabMostra = 150; S.ui.tabAberta = null; S.ui.ef = null; S.ui.efMais = false; } break;
       case 'luz-cp': { const it = (S.cpItens || [])[+el.dataset.k]; if(it && it.pl) abrirLuz([{src: it.pl.src, t: it.m.p.nome + ', ' + it.pl.t}], 0, it.m.p.nome); break; }
       // ---- envio
+      case 'promo-rolar': { const f = document.getElementById(el.dataset.alvo); if(f) f.scrollBy({left: (+el.dataset.v || 1) * Math.max(240, f.clientWidth * 0.9), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); break; }
       case 'enviar': ev.preventDefault(); abrirEnvio(id, el.dataset.sel === '1'); break;
       case 'env-modo': if(S.envio){ S.envio.modo = v; $$('[data-acao="env-modo"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)); } break;
       case 'env-fmt': if(S.envio){ S.envio.formato = v; $$('[data-acao="env-fmt"]').forEach(b => b.setAttribute('aria-checked', b.dataset.v === v)); const md = $('#env-modo-f'); if(md) md.hidden = v === 'pers'; } break;
@@ -3660,6 +3789,7 @@
     if(livre && +ex.pp > 0 && +ex.pv > 0 && +ex.pv < +ex.pp){ const d = Math.round((1 - ex.pv / ex.pp) * 1000) / 10; if(d > 0) h = h.replace('<div><span>À vista</span>', '<div><span>À vista <small class="mt-desc">' + esc('−' + d.toLocaleString('pt-BR') + '%') + '</small></span>'); }
     const notas = [];
     if(livre && +ex.pt > 0) notas.push('Preço de tabela ' + BRL(+ex.pt) + '. Esta unidade está com condição promocional.');
+    if(livre && ex._promo){ const cp = promoCamp(ex._promo.c); const t = [ex._promo.c ? ex._promo.c + (cp.ate ? ', até ' + cp.ate : '') + '.' : '', ex._promo.ov ? BRL(ex._promo.ov) + ' ' + (ex._promo.ob || '') + '.' : ''].filter(Boolean).join(' '); if(t) notas.push(t); }
     if(ex.aj) notas.push('★ ' + String(ex.aj));
     const tab = det.dados.tabela || {};
     if(livre && ex.c != null && !tab.fluxos && Array.isArray(tab.condicoes) && tab.condicoes[ex.c]) notas.push('Condição desta unidade: ' + String(tab.condicoes[ex.c]));
@@ -7743,7 +7873,7 @@
     }, async e => {
       if(codigoInvalido(e)) throw e;
       const v = await ddLer('p-' + id);
-      if(v && v.dados){ S.det.set(id, {v, em: Date.now() - 50000}); return v; }
+      if(v && v.dados){ promoNoDet(id, v); S.det.set(id, {v, em: Date.now() - 50000}); return v; }
       throw e;
     });
   };
