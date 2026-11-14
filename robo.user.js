@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.13.0
+// @version      1.14.0
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto, no espelho da Lavvi na Lior e no Anapro da Metrocasa (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -13,6 +13,7 @@
 // @match        https://painel.dommus.com.br/*
 // @match        https://app.liorassociados.com.br/*
 // @match        https://metrocasa.anapro.com.br/*
+// @match        https://portal.sivez.com.br/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
@@ -27,9 +28,9 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.13.0';
+  const VERSAO = '1.14.0';
   const host = location.hostname;
-  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : null;
+  const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : host === 'portal.sivez.com.br' ? 'sivez' : null;
   if (!FONTE) return;
   const TOPO = window.top === window.self;
   if (FONTE !== 'one' && !TOPO) return;          // BLL, CV e Dommus: só a página principal
@@ -402,6 +403,115 @@
         if (!Object.keys(status).length) { out.push({ projeto: a.projeto, erro: 'espelho vazio' }); continue; }
         out.push({ projeto: a.projeto, status, precos });
       }
+    }
+    return out;
+  }
+
+  // ---------- leitura SIVEZ (EZTEC) ----------
+  // Lê a mesma tela que o corretor abre pelo mapa (espelhoSivez.do), uma torre por vez e sem clicar em nada
+  // (nunca em "Criar Proposta"). O endereço de cada torre sai do próprio mapa e fica só na memória desta aba.
+  // Verde = disponível; as outras cores = vendida (o SIVEZ não mostra ao corretor se está reservada). Vagas ficam de fora.
+  let linksSivez = null, linksSivezEm = 0;
+  const cruaSivez = {};                            // última leitura crua mandada de cada torre (para completar metragem)
+  const numSivez = s => Number(String(s).replace(/\./g, '').replace(',', '.'));
+  const pausaSivez = ms => new Promise(r => setTimeout(r, ms));
+  async function htmlSivez(url, re) {
+    const r = await fetch(url, { credentials: 'include', cache: 'no-store' });
+    const b = await r.arrayBuffer();
+    let t; try { t = new TextDecoder('windows-1252').decode(b); } catch (e) { t = new TextDecoder().decode(b); }
+    const caminho = new URL(r.url || location.href, location.href).pathname;
+    if (r.status === 401 || r.status === 403 || (r.redirected && !re.test(caminho)) || /type=["']?password/i.test(t)) throw new Sessao('login');
+    if (!r.ok) throw new Error('resposta ' + r.status);
+    return t;
+  }
+  async function mapaSivez() {                     // torre -> endereço do espelho, nome e contagem do mapa
+    if (linksSivez && Date.now() - linksSivezEm < 3600000) return linksSivez;
+    const t = await htmlSivez('/Crm/mapaSivez.do?mapa=1&busca=todos&tipo=VENDAS', /mapaSivez/i);
+    const doc = new DOMParser().parseFromString(t, 'text/html');
+    const tx = c => String(c && c.textContent || '').replace(/\s+/g, ' ').trim();
+    const nm = c => Number(tx(c).replace(/\D/g, '')) || 0;
+    const emps = {};
+    doc.querySelectorAll('tr.emp').forEach(tr => { emps[tr.getAttribute('rel')] = tx(tr.cells[1]); });
+    const links = {};
+    doc.querySelectorAll('tr.blocos').forEach(tr => {
+      const m = /window\.open\(\s*['"]([^'"]+)['"]/.exec(tr.getAttribute('onclick') || ''); if (!m) return;
+      let u; try { u = new URL(m[1].replace(/&amp;/g, '&'), location.href); } catch (e) { return; }
+      if (!/espelhoSivez/i.test(u.pathname)) return;
+      const rel = (/\bemp(\d+)\b/.exec(String(tr.className)) || [])[1];
+      links[u.searchParams.get('vEMPR_CODIGO') + ':' + u.searchParams.get('vBLC_CODIGO')] =
+        { url: u.pathname + u.search, emp: emps[rel] || '', torre: tx(tr.cells[1]), c: [3, 5, 7, 9, 11, 13].map(i => nm(tr.cells[i])) };
+    });
+    if (!Object.keys(links).length) { if (/senha|login/i.test(t)) throw new Sessao('login'); throw new Error('mapa do SIVEZ sem torres'); }
+    linksSivez = links; linksSivezEm = Date.now();
+    return links;
+  }
+  function vagaSivez(u) {
+    return /^\d+[A-Z]?[MGP]\//.test(u.n) || /\/\d*S{1,2}$/.test(u.n) || /COBERTA/i.test(u.n) || /^VAGA/i.test(u.ag || '') || /VAGA|GARAGEM|DEP[OÓ]SITO/i.test(u.mod || '');
+  }
+  function espelhoSivez(t) {                       // { us: [{ n, v, lin, col, a, mod, ag, p, tab }], cab }
+    const d = new DOMParser().parseFromString(t, 'text/html');
+    const us = [];
+    for (const td of d.querySelectorAll('td.undFormat')) {
+      const sp = td.querySelector('span.undDesc'); if (!sp) continue;
+      const cor = sp.getAttribute('data-color') || '';
+      const n = String(sp.textContent || '').trim();
+      if (!cor || !n || !/\d/.test(n)) continue;   // rótulos de andar (TER, SUB) e casas vazias
+      const tr = td.parentElement;
+      const u = { n, v: cor === 'verde', lin: tr ? tr.rowIndex : -1, col: td.cellIndex };
+      const fm = td.querySelector('.float-menu');
+      if (fm) for (const li of fm.querySelectorAll('li')) {
+        const x = String(li.textContent || '').replace(/\s+/g, ' ').trim(); let m;
+        if ((m = /^Agrupador:\s*(.*)$/i.exec(x))) u.ag = m[1].slice(0, 80);
+        else if ((m = /^Metragem:\s*([\d.]+(?:,\d+)?)/i.exec(x))) u.a = numSivez(m[1]);
+        else if ((m = /^Modalidade:\s*(.*)$/i.exec(x))) u.mod = m[1].slice(0, 30);
+        else if (u.p == null && (m = /^([A-Z0-9]{3,12})\s*R\$\s*([\d.]+,\d{2})/.exec(x))) { u.tab = m[1]; u.p = numSivez(m[2]); }
+      }
+      if (!vagaSivez(u)) us.push(u);
+    }
+    const corpo = d.body ? d.body.cloneNode(true) : null;
+    if (corpo) corpo.querySelectorAll('table,script,style').forEach(e => e.remove());
+    const cab = corpo ? String(corpo.textContent || '').replace(/\s+/g, ' ').replace(/Alerta do SIVEZ Mensagem de alerta\. Fechar/g, '').trim().slice(0, 300) : '';
+    return { us, cab };
+  }
+  async function cruaParaServidor(k, L, e, projeto) {
+    const cel = e.us.map(u => [u.n, u.v ? 1 : 0, u.lin, u.col, u.a == null ? null : u.a, u.mod || null, u.ag || null, u.p == null ? null : u.p, u.tab || null]);
+    try {
+      await rpc('leitura_robo', { p_chave: chave(), p_fonte: 'sivez', p_alvo: k, p_projeto: projeto || null, p_rotulo: (L.emp + ' | ' + L.torre).slice(0, 300), p_celulas: cel,
+        p_info: { versao: VERSAO, em: new Date().toISOString(), emp: L.emp, torre: L.torre, mapa: L.c, cab: e.cab } });
+      cruaSivez[k] = Date.now();
+    } catch (x) { if (x && (x.status === 401 || x.status === 403)) throw x; }
+  }
+  async function lerSivez() {
+    const mapas = (cfgFonte && Array.isArray(cfgFonte.mapas)) ? cfgFonte.mapas : [];
+    if (!mapas.length) throw new Error('sem a lista de projetos do servidor');
+    const links = await mapaSivez();
+    const out = [];
+    for (const m of mapas) {
+      const ks = (Array.isArray(m.blocos) && m.blocos.length ? m.blocos : [m.alvo]).map(x => String(x || '')).filter(Boolean);
+      const lidas = []; let falha = ks.length ? null : 'sem torre';
+      for (const k of ks) {
+        const L = links[k];
+        if (!L) { falha = 'torre fora do mapa'; break; }
+        try { lidas.push({ k, L, e: espelhoSivez(await htmlSivez(L.url, /espelhoSivez/i)) }); }
+        catch (e) { if (e instanceof Sessao) throw e; falha = 'rede'; break; }
+        await pausaSivez(300);
+      }
+      if (!m.projeto) {                            // descoberta: manda a leitura crua para montar o projeto no app
+        for (const x of lidas) await cruaParaServidor(x.k, x.L, x.e, null);
+        continue;
+      }
+      if (falha) { out.push({ projeto: m.projeto, erro: falha }); continue; }
+      const status = {}, precos = {};
+      for (const x of lidas) {
+        const pre = (m.prefixos && m.prefixos[x.k]) || '';
+        for (const u of x.e.us) {
+          status[pre + u.n] = u.v ? 'disponivel' : 'vendida';
+          if (u.v && u.p > 0) precos[pre + u.n] = { pp: Number(u.p.toFixed(2)) };
+        }
+        if (!cruaSivez[x.k] || Date.now() - cruaSivez[x.k] > 6 * 3600000) await cruaParaServidor(x.k, x.L, x.e, m.projeto);
+      }
+      if (!Object.keys(status).length) { out.push({ projeto: m.projeto, erro: 'espelho vazio' }); continue; }
+      out.push({ projeto: m.projeto, status, precos: Object.keys(precos).length ? precos : null });
     }
     return out;
   }
@@ -1002,12 +1112,12 @@
       if (outroVivo()) { st.fase = 'espera'; return; }
       batimento(); st.fase = 'lendo';
       await lerConfigFonte();
-      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : FONTE === 'lior' ? await lerLior() : FONTE === 'anapro' ? await lerAnapro() : await lerCV();
+      const leituras = FONTE === 'bll' ? await lerBLL() : FONTE === 'dommus' ? await lerDommus() : FONTE === 'lior' ? await lerLior() : FONTE === 'anapro' ? await lerAnapro() : FONTE === 'sivez' ? await lerSivez() : await lerCV();
       let m = 0; const falhas = [];
       for (const l of leituras) {
         if (l.erro) { falhas.push(l.projeto); continue; }
         try {
-          if (l.precos) {                         // Dommus, Lior e Anapro: preço antes da situação (a unidade liberada já chega com preço)
+          if (l.precos) {                         // Dommus, Lior, Anapro e SIVEZ: preço antes da situação (a unidade liberada já chega com preço)
             try { await rpc('precos_robo', { p_chave: chave(), p_projeto: l.projeto, p_precos: l.precos, p_fonte: FONTE }); }
             catch (e) { if (e && (e.status === 401 || e.status === 403)) throw e; }
           }
@@ -1031,6 +1141,7 @@
                   : FONTE === 'dommus' ? 'A sessão do Dommus da Mundo Apto expirou no Chrome do computador. Faça login de novo para os projetos da Mundo Apto continuarem ao vivo.'
                   : FONTE === 'lior' ? 'O login da Lior (espelho da Lavvi) venceu no Chrome do computador. Entre de novo na Lior para os projetos da Lavvi continuarem ao vivo (o login dura 24 horas).'
                   : FONTE === 'anapro' ? 'O login do Anapro da Metrocasa venceu no Chrome do computador. Entre de novo no Anapro para os projetos da Metrocasa continuarem ao vivo.'
+                  : FONTE === 'sivez' ? 'O login do SIVEZ (EZTEC) venceu no Chrome do computador. Entre de novo no SIVEZ para os projetos da EZTEC continuarem ao vivo.'
                                     : 'A sessão do CV CRM expirou no Chrome do computador — faça login de novo para os projetos do CV (Consolação, Sumaré e VitaUrbana) continuarem ao vivo.';
         rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE, p_msg: msg }).catch(() => {});
       } else if (e && (e.status === 401 || e.status === 403) && /chave_invalida/.test(e.message || '')) {
