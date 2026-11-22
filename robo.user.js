@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.14.0
+// @version      1.15.0
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto, no espelho da Lavvi na Lior e no Anapro da Metrocasa (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -28,7 +28,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.14.0';
+  const VERSAO = '1.15.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : host === 'portal.sivez.com.br' ? 'sivez' : null;
   if (!FONTE) return;
@@ -60,16 +60,19 @@
     .d{width:8px;height:8px;border-radius:50%;background:#8b94a6;flex:none}
     .ok .d{background:#34b233}.warn .d{background:#e0a100}.bad .d{background:#e8473a}
     .f{display:none;gap:6px}.aberto .f{display:flex}
+    .m{align-items:center;cursor:pointer;font-size:11px}.m input{flex:none;width:auto;margin:0}
     input{flex:1;min-width:0;border:0;border-radius:6px;padding:5px 7px;font:inherit;color:#182030}
     button{border:0;border-radius:6px;padding:5px 9px;font:inherit;font-weight:600;background:#7d97ff;color:#0b1230;cursor:pointer}
   </style><div class="b" id="b"><div class="l" id="l"><span class="d"></span><span id="t">Robô do Espelho</span></div>
-  <div class="f"><input id="k" type="password" placeholder="Cole a chave do robô (ROBO-...)" autocomplete="off"><button id="s">Salvar</button></div></div>`;
+  <div class="f"><input id="k" type="password" placeholder="Cole a chave do robô (ROBO-...)" autocomplete="off"><button id="s">Salvar</button></div>
+  <label class="f m"><input id="m24" type="checkbox"><span id="m24t">Robô 24h: entra sozinho quando a sessão cai</span></label></div>`;
   const $ = id => sh.getElementById(id);
   let mostrar = FONTE !== 'one' && FONTE !== 'dommusgu';   // na ONE, o selo só aparece no quadro do espelho; no painel do Dommus, só ao renovar
   const montar = () => { if (mostrar && document.body && document.body.tagName === 'BODY' && !host$.isConnected) document.body.appendChild(host$); };
   montar();
   $('l').addEventListener('click', () => $('b').classList.toggle('aberto'));
   $('s').addEventListener('click', () => { const v = $('k').value.trim(); if (!v) return; gset('chave', v); $('k').value = ''; $('b').classList.remove('aberto'); st.erro = null; ciclo(); });
+  try { $('m24').checked = !!gget('modo24h', false); $('m24').addEventListener('change', () => { gset('modo24h', !!$('m24').checked); pintar(); }); } catch (e) {}
   const hora = t => new Date(t).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   function pintar() {
     montar();
@@ -83,7 +86,8 @@
     else if (st.fase === 'mapeando') { b.classList.add('ok'); txt = 'Robô do Espelho · lendo o espelho da ONE (fase de teste) · ' + hora(st.ultimo || Date.now()); }
     else if (st.ultimo) { b.classList.add('ok'); txt = 'Robô do Espelho · ao vivo · ' + hora(st.ultimo) + (st.mudancas ? ' · ' + st.mudancas + ' mudança(s)' : ''); }
     else txt = 'Robô do Espelho · iniciando…';
-    $('t').textContent = txt;
+    $('t').textContent = gget('modo24h', false) ? txt.replace('Robô do Espelho', 'Robô 24h') : txt;
+    try { $('m24t').textContent = 'Robô 24h: entra sozinho quando a sessão cai' + (gget('login:' + location.hostname, null) ? ' · login guardado' : ''); } catch (e) {}
   }
 
   // ---------- servidor ----------
@@ -103,6 +107,103 @@
     return t ? JSON.parse(t) : null;
   }
 
+  // ---------- robô 24h: entra sozinho quando a sessão cai ----------
+  // Só vale no navegador marcado como "Robô 24h" (a VPS). O login de cada sistema fica guardado só neste navegador
+  // (armazenamento do Tampermonkey) e é gravado quando você entra uma vez à mão com o modo ligado. Nada disso sai daqui:
+  // para o servidor vão só o resultado ("tentou", "entrou", "pediu código"). Captcha ou código: não mexe, avisa.
+  const NOME_FONTE = { bll: 'BLL', cv: 'CV da VitaUrbana', cvmaskan: 'CV da Maskan', cvvitacon: 'CV da Vitacon', cvcambur: 'CV da Cambur',
+    dommus: 'Dommus da Mundo Apto', dommusgu: 'painel do Dommus', lior: 'Lior', anapro: 'Anapro da Metrocasa', sivez: 'SIVEZ', one: 'portal da ONE' };
+  const modo24h = () => !!gget('modo24h', false);
+  const loginDe = h => gget('login:' + h, null);
+  let entrandoAuto = false;
+  function visivel(el) {
+    if (!el || el.disabled) return false;
+    const r = el.getBoundingClientRect(); if (!(r.width > 0 && r.height > 0)) return false;
+    const cs = getComputedStyle(el); return cs.visibility !== 'hidden' && cs.display !== 'none';
+  }
+  function formLogin() {
+    const pw = [...document.querySelectorAll('input[type=password]')].find(visivel);
+    if (!pw) return null;
+    const escopo = pw.form || document;
+    const cands = [...escopo.querySelectorAll('input')].filter(i => i !== pw && visivel(i) && /^(text|email|tel|number|)$/i.test(i.getAttribute('type') || ''));
+    let user = null;
+    for (const c of cands) if (c.compareDocumentPosition(pw) & Node.DOCUMENT_POSITION_FOLLOWING) user = c;
+    if (!user) user = cands[0] || null;
+    const btns = [...escopo.querySelectorAll('button, input[type=submit], input[type=button], [role=button]')].filter(visivel);
+    const btn = btns.find(b => /entrar|acessar|login|logar|sign in/i.test(String(b.textContent || b.value || '').trim()))
+             || btns.find(b => /^submit$/i.test(b.getAttribute('type') || '')) || null;
+    return { pw, user, btn, form: pw.form || null };
+  }
+  function temDesafio() {                          // captcha ou código pedido pelo sistema: o robô não mexe
+    if (document.querySelector('iframe[src*="recaptcha"], iframe[src*="hcaptcha"], iframe[src*="turnstile"], .g-recaptcha, .h-captcha, input[autocomplete="one-time-code"]')) return true;
+    const t = String(document.body && document.body.innerText || '').slice(0, 5000);
+    return /c[óo]digo de (verifica|seguran|acesso|confirma)|enviamos um c[óo]digo|token (enviado|de acesso)|n[ãa]o sou um rob[ôo]|autentica[çc][ãa]o em dois/i.test(t);
+  }
+  function digitar(el, v) {
+    const d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value');
+    try { el.focus(); } catch (e) {}
+    if (d && d.set) d.set.call(el, v); else el.value = v;
+    el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function diag24(resultado, extra) {
+    if (!chave()) return;
+    rpc('diagnostico_robo', { p_chave: chave(), p_fonte: FONTE === 'dommusgu' ? 'dommus' : FONTE, p_caminho: '/robo24h/' + host,
+      p_info: Object.assign({ versao: VERSAO, em: new Date().toISOString(), resultado, pagina: location.pathname }, extra || {}) }).catch(() => {});
+  }
+  function avisar24(rotulo, motivo) {
+    if (!chave()) return;
+    rpc('alerta_robo', { p_chave: chave(), p_fonte: FONTE === 'dommusgu' ? 'dommus' : FONTE,
+      p_msg: 'O robô 24h não conseguiu entrar sozinho no ' + rotulo + ' (' + motivo + '). Abra a tela da VPS e entre à mão.' }).catch(() => {});
+  }
+  function guardarLoginAoEntrar() {               // modo 24h ligado e você entrando à mão: guarda o login deste sistema
+    const pegar = () => {
+      if (entrandoAuto || !modo24h()) return;
+      const f = formLogin(); if (!f || !f.user) return;
+      const u = String(f.user.value || '').trim(), sn = String(f.pw.value || '');
+      if (!u || !sn) return;
+      const ant = loginDe(host);
+      if (ant && ant.u === u && ant.s === sn) return;
+      gset('login:' + host, { u, s: sn, em: Date.now() });
+      gset('tentativa:' + host, { t: 0, n: 0 });
+      st.aviso = 'login deste sistema guardado no robô 24h'; pintar(); diag24('login_guardado');
+    };
+    document.addEventListener('submit', pegar, true);
+    document.addEventListener('click', e => { const el = e.target; if (el && el.closest && el.closest('button, input[type=submit], input[type=button], [role=button]')) pegar(); }, true);
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') pegar(); }, true);
+  }
+  function entrarSozinho(rotulo) {                 // true = tentou (ou está esperando para tentar de novo)
+    if (!modo24h() || FONTE === 'one') return false;
+    const cred = loginDe(host); if (!cred) return false;
+    const f = formLogin(); if (!f) return false;
+    const tent = gget('tentativa:' + host, { t: 0, n: 0 });
+    if (tent.n >= 3) { st.sessao = true; pintar(); avisar24(rotulo, 'três tentativas sem conseguir'); return false; }
+    if (Date.now() - tent.t < 10 * 60000) return true;
+    if (temDesafio()) { gset('tentativa:' + host, { t: Date.now(), n: 3 }); diag24('desafio'); avisar24(rotulo, 'pediu código ou captcha'); return false; }
+    gset('tentativa:' + host, { t: Date.now(), n: tent.n + 1 });
+    entrandoAuto = true;
+    if (f.user) digitar(f.user, cred.u);
+    digitar(f.pw, cred.s);
+    st.aviso = 'entrando sozinho no ' + rotulo; pintar(); diag24('tentou', { n: tent.n + 1 });
+    setTimeout(() => {
+      try {
+        if (f.btn) f.btn.click();
+        else if (f.form && f.form.requestSubmit) f.form.requestSubmit();
+        else f.pw.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+      } finally { setTimeout(() => { entrandoAuto = false; }, 3000); }
+    }, 800);
+    return true;
+  }
+  function voltarAoLogin() {                       // sessão caiu no robô 24h: abre de novo a página do sistema, que leva ao login
+    if (!modo24h() || FONTE === 'one' || !loginDe(host)) return false;
+    if (gget('tentativa:' + host, { t: 0, n: 0 }).n >= 3) return false;
+    if (Date.now() - gget('volta:' + host, 0) < 10 * 60000) return false;
+    gset('volta:' + host, Date.now());
+    st.aviso = 'a sessão caiu: entrando de novo'; pintar(); diag24('voltando');
+    const casa = String(gget('home:' + host, '/') || '/');
+    setTimeout(() => { location.href = location.origin + (casa.charAt(0) === '/' ? casa : '/'); }, 1500);
+    return true;
+  }
+
   // ---------- painel do Dommus: volta para o VENDE quando a entrada do espelho vence ----------
   // A entrada no VENDE (espelho da Mundo Apto) vence umas 3 h depois do login, mas o painel continua logado. Quando foi o robô
   // que mandou a aba para cá, ou quando a aba do robô caiu aqui sozinha, ele clica em "Acessar" no card VENDE. Nunca digita
@@ -111,6 +212,10 @@
     const agora = Date.now(), renov = gget('dommus:renov', 0), hbD = gget('hb:dommus', null);
     const pedido = agora - renov < 5 * 60000;
     const caiu = !!hbD && agora - hbD.t < 15 * 60000 && /dommus2\.com\.br/.test(document.referrer || '') && agora - renov > 30 * 60000;
+    if (modo24h()) {
+      guardarLoginAoEntrar();
+      if (loginDe(host) && formLogin()) { gset('dommus:renov', Date.now()); mostrar = true; pintar(); setTimeout(() => entrarSozinho('painel do Dommus'), 3000); return; }
+    }
     if (!pedido && !caiu) return;
     const avisar = msg => { if (chave()) rpc('alerta_robo', { p_chave: chave(), p_fonte: 'dommus', p_msg: msg }).catch(() => {}); };
     mostrar = true;
@@ -124,6 +229,7 @@
     const t0 = Date.now();
     const tentar = () => {
       if (/\/login/.test(location.pathname) || document.querySelector('input[type=password]')) {
+        if (modo24h() && loginDe(host) && entrarSozinho('painel do Dommus')) return;
         st.aviso = null; st.sessao = true; pintar();
         avisar('O painel do Dommus pediu login de novo no Chrome do computador. Entre com a senha para os projetos da Mundo Apto continuarem ao vivo.');
         return;
@@ -1128,11 +1234,13 @@
       }
       if (falhas.length === leituras.length && leituras.length) throw new Error('não consegui ler ' + falhas.join(', '));
       st.ultimo = Date.now(); st.mudancas = m; st.erro = null; st.sessao = false; st.fase = 'ok';
+      if (modo24h()) { gset('tentativa:' + host, { t: 0, n: 0 }); gset('home:' + host, location.pathname); }
       st.aviso = falhas.length ? 'não consegui ler ' + falhas.join(', ') : null;
       batimento();
     } catch (e) {
       if (e instanceof Sessao) {
         if (FONTE === 'dommus' && renovarDommus()) return;
+        if (voltarAoLogin()) return;
         st.sessao = true;
         const msg = FONTE === 'bll' ? 'A sessão da BLL expirou no Chrome do computador — faça login de novo para o espelho do RAJ MENDES continuar ao vivo.'
                   : FONTE === 'cvmaskan' ? 'A sessão do CV da Maskan expirou no Chrome do computador — faça login de novo (painel Corretor) para os projetos da Maskan continuarem ao vivo.'
@@ -1152,6 +1260,10 @@
     } finally { rodando = false; pintar(); }
   }
   pintar();
+  if (FONTE !== 'one' && modo24h()) {
+    guardarLoginAoEntrar();
+    setTimeout(() => { if (formLogin()) entrarSozinho(NOME_FONTE[FONTE] || FONTE); }, 4000);
+  }
   setTimeout(ciclo, FONTE === 'one' ? 4000 : 3000);
   if (FONTE === 'one' && document.body && document.body.tagName === 'BODY') {
     let tMut = null, ultMut = 0;
