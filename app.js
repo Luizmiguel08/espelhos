@@ -2237,31 +2237,35 @@
     if(c && Array.isArray(c.plantas) && c.plantas.length){
       const noAndar = x => an == null || x.de == null || (an >= +x.de && an <= +(x.ate != null ? x.ate : x.de));
       let pl = tipo ? c.plantas.find(x => Array.isArray(x.tipos) && x.tipos.map(String).includes(tipo)) : null;
-      if(!pl && fin != null) pl = c.plantas.find(x => Array.isArray(x.finais) && x.finais.map(Number).includes(fin) && noAndar(x)) || c.plantas.find(x => Array.isArray(x.finais) && x.finais.map(Number).includes(fin));
+      if(!pl && fin != null) pl = c.plantas.find(x => Array.isArray(x.finais) && x.finais.map(Number).includes(fin) && noAndar(x));
       if(pl) return {src: imgCentral(c, pl.id), t: pl.t ? 'Planta ' + pl.t : 'Planta', sub: pl.andares || '', exata: true};
       const ar = areaU(a), tk = tipoKDe(tl);
+      // o mesmo final em outro andar só vale com a mesma metragem e a mesma tipologia, e entra como planta da tipologia
+      if(fin != null && ar > 0){
+        const o = c.plantas.find(x => Array.isArray(x.finais) && x.finais.map(Number).includes(fin) && plAreaTit(x.t) != null && Math.abs(plAreaTit(x.t) - ar) <= 1 && (!tk || !tipoKDe(x.t) || tipoKDe(x.t) === tk));
+        if(o) return {src: imgCentral(c, o.id), t: o.t ? 'Planta ' + o.t : 'Planta', sub: o.andares || '', exata: false};
+      }
       const cands = c.plantas.map(x => { const m = /(\d+(?:[.,]\d+)?)\s*m²/.exec(String(x.t || '')); return {x, m: m ? +m[1].replace(',', '.') : null}; }).filter(o => o.m && (!tk || tipoKDe(o.x.t) === tk));
       if(ar > 0 && cands.length){ cands.sort((x, y) => Math.abs(x.m - ar) - Math.abs(y.m - ar)); if(Math.abs(cands[0].m - ar) <= 2) return {src: imgCentral(c, cands[0].x.id), t: 'Planta ' + cands[0].x.t, sub: cands[0].x.andares || '', exata: false}; }
     }
     // plantas que vieram junto das fotos (com metragens e finais): a do final da unidade, na metragem e no andar dela
     const pf = plantasFotos(det);
     if(pf.length){
-      const ar = areaU(a);
+      const ar = areaU(a), finU = fin != null ? fin : plFinalU(det, a), tk = tipoKDe(tl);
       const cands = pf.filter(x => !x.pav).map(x => {
-        const fOk = x.fins.length && fin != null ? x.fins.includes(fin) : null;   // true, false ou sem informação
+        const fOk = x.fins.length && finU != null ? x.fins.includes(finU) : null;   // true, false ou sem informação
         const d = ar > 0 && x.as.length ? Math.min(...x.as.map(v => Math.abs(v - ar))) : 99;
         const faixa = ar > 0 && x.as.length >= 2 && ar >= Math.min(...x.as) - 0.3 && ar <= Math.max(...x.as) + 0.3;
         const andarOk = !x.andares.length || an == null || x.andares.some(([de, ate]) => an >= de && an <= ate);
-        return {x, fOk, d, aOk: d <= 0.6 || faixa, andarOk};
-      }).filter(o => o.fOk !== false && o.andarOk && (o.aOk || (o.fOk && o.d <= 3)));
+        const xk = plTipoK(x.tt || x.t), tOk = !tk || !xk || xk === tk || (fOk === true && d <= 0.6);   // loja não recebe planta de apartamento
+        return {x, fOk, d, aOk: d <= 0.6 || faixa, andarOk, tOk};
+      }).filter(o => o.tOk && o.fOk !== false && o.andarOk && (o.aOk || (o.fOk && o.d <= 3)));
       if(!cands.length) return null;
       cands.sort((p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.d - q.d);
-      const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6);
-      return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: m.fOk === true || m.d <= 0.05, opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
+      const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6), dv = cands.find(o => o !== m && !o.x.opc && plEmpate(o, m, finU));
+      return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: !dv && (m.fOk === true || m.d <= 0.05), duvida: !!dv, opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
     }
-    const outras = plantasDoProjeto(det, c).filter(x => x.src), tn = norm(tl).replace(/\./g, '');
-    const hit = outras.find(x => tn && norm(x.t).replace(/\./g, '').includes(tn)) || (outras.length === 1 ? outras[0] : null);
-    return hit ? {src: hit.src, t: hit.t, sub: hit.sub || '', exata: false} : null;
+    return null;
   }
   function pavimentoDaUnidade(det, a){   // planta do andar inteiro que veio junto das fotos (sem a unidade marcada)
     const an = andarNum(a); if(an == null) return null;
@@ -2304,7 +2308,7 @@
     const pl = plantaDaUnidade(det, c, a), ad = andarDaUnidade(det, c, a), vs = vistaDaUnidade(det, c, a);
     const luz = [];
     let mid = '';
-    if(pl){ const ip = luz.push({src: pl.src, t: pl.t + (pl.sub ? ', ' + pl.sub : '')}) - 1; if(pl.opcao) luz.push(pl.opcao); mid += '<figure class="planta un-planta"><button type="button" class="mos-item" data-acao="luz-un" data-i="' + ip + '" aria-label="' + esc('Ampliar a ' + pl.t) + '">' + imgTag(pl.src, pl.t, '', {w: 900, semSet: true}) + '</button><figcaption>' + esc(pl.exata ? pl.t : pl.t + ' (da tipologia)') + (pl.sub ? '<small>' + esc(pl.sub) + '</small>' : '') + (pl.opcao ? '<small>Tem opção de planta: amplie para ver.</small>' : '') + '</figcaption></figure>'; }
+    if(pl){ const ip = luz.push({src: pl.src, t: pl.t + (pl.sub ? ', ' + pl.sub : '')}) - 1; if(pl.opcao) luz.push(pl.opcao); mid += '<figure class="planta un-planta"><button type="button" class="mos-item" data-acao="luz-un" data-i="' + ip + '" aria-label="' + esc('Ampliar a ' + pl.t) + '">' + imgTag(pl.src, pl.t, '', {w: 900, semSet: true}) + '</button><figcaption>' + esc(pl.exata ? pl.t : pl.t + ' (da tipologia)') + (pl.sub ? '<small>' + esc(pl.sub) + '</small>' : '') + (pl.duvida ? '<small>Há outra planta com essa metragem: confirme com a construtora.</small>' : '') + (pl.opcao ? '<small>Tem opção de planta: amplie para ver.</small>' : '') + '</figcaption></figure>'; }
     const pv = ad ? null : pavimentoDaUnidade(det, a);
     if(pv){ luz.push({src: pv.src, t: 'Planta do andar' + (pv.sub ? ', ' + pv.sub : '')}); mid += '<figure class="planta un-planta"><button type="button" class="mos-item" data-acao="luz-un" data-i="' + (luz.length - 1) + '" aria-label="Ampliar a planta do andar">' + imgTag(pv.src, 'Planta do ' + andarTxt(a[4]), '', {w: 1200, semSet: true}) + '</button><figcaption>Planta do andar' + (pv.sub ? '<small>' + esc(maiusc1(pv.sub)) + '</small>' : '') + '</figcaption></figure>'; }
     if(ad){ luz.push({src: ad.src, t: 'Posição no andar'}); mid += '<figure class="planta un-andar-f"><button type="button" class="un-andar" data-acao="luz-un" data-i="' + (luz.length - 1) + '" aria-label="Ampliar a planta do andar">' + imgTag(ad.src, 'Planta do ' + andarTxt(a[4]), '', {w: 1200, semSet: true}) + ad.rs.map(r => '<i style="left:' + r.x.toFixed(2) + '%;top:' + r.y.toFixed(2) + '%;width:' + r.w.toFixed(2) + '%;height:' + r.h.toFixed(2) + '%"></i>').join('') + '</button><figcaption>Posição no andar<small>Unidade ' + esc(n) + ' em destaque</small></figcaption></figure>'; }
@@ -2587,7 +2591,7 @@
       const box = $('.cp-pl[data-cpk="' + k + '"]');
       if(box){
         const pl = det && a ? plantaDaUnidade(det, c, a) : null;
-        if(pl){ it.pl = pl; box.innerHTML = '<figure class="planta"><button type="button" class="mos-item" data-acao="luz-cp" data-k="' + k + '" aria-label="' + esc('Ampliar a ' + pl.t) + '">' + imgTag(pl.src, pl.t, '', {w: 640, semSet: true}) + '</button><figcaption>' + esc(pl.t) + (pl.exata ? '' : '<small>Planta da tipologia</small>') + '</figcaption></figure>'; }
+        if(pl){ it.pl = pl; box.innerHTML = '<figure class="planta"><button type="button" class="mos-item" data-acao="luz-cp" data-k="' + k + '" aria-label="' + esc('Ampliar a ' + pl.t) + '">' + imgTag(pl.src, pl.t, '', {w: 640, semSet: true}) + '</button><figcaption>' + esc(pl.t) + (pl.exata ? '' : '<small>Planta da tipologia</small>') + (pl.duvida ? '<small>Há outra planta com essa metragem: confirme com a construtora.</small>' : '') + '</figcaption></figure>'; }
         else box.innerHTML = '<p class="nota">Planta não cadastrada.</p>';
       }
       const fb = $('.cp-fx[data-cpk="' + k + '"] dd');
@@ -8251,6 +8255,14 @@
     if(/^\d{3,5}$/.test(n) && /^\d{1,2}$/.test(an) && n.startsWith(an) && n.length - an.length >= 1 && n.length - an.length <= 2) return +n.slice(an.length);
     return null;
   }
+  const plLetra = t => { const r = /\btipo\s+([a-z])\b/.exec(norm(String(t || ''))); return r ? r[1] : null; };
+  function plEmpate(o, m, fin){
+    if(!o || !m || o === m || o.fOk !== m.fOk || o.andarOk === false || Math.abs(o.d - m.d) > 0.05 || o.x.opc !== m.x.opc || o.x.tec !== m.x.tec) return false;
+    const ta = o.x.tt || o.x.t, tb = m.x.tt || m.x.t, la = plLetra(ta), lb = plLetra(tb), ka = plTipoK(ta), kb = plTipoK(tb);
+    if(la && lb && la !== lb) return true;
+    if(ka && kb && ka !== kb) return true;
+    return fin == null && o.x.fins.length > 0 && m.x.fins.length > 0 && !o.x.fins.some(f => m.x.fins.includes(f));
+  }
   function plantaReserva(det, c, a){
     const ar = areaU(a), fin = plFinalU(det, a), an = andarNum(a), tk = tipoKDe(tipologiaU(det, a) || '');
     const todas = plantasTodas(det, c).filter(x => !x.pav).map(x => {
@@ -8273,13 +8285,30 @@
     if(!cands.length && !todas.some(o => o.fOk === true && o.andarOk)){ cands = todas.filter(o => o.fOk === false && o.andarOk && o.d <= 0.3); exataOk = false; }
     if(!cands.length) return null;
     cands.sort(ordem);
-    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6 && o.fOk === m.fOk && o.andarOk === m.andarOk);
-    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: exataOk && ((m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05)), opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
+    const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6 && o.fOk === m.fOk && o.andarOk === m.andarOk), dv = cands.find(o => o !== m && !o.x.opc && o.andarOk === m.andarOk && plEmpate(o, m, fin));
+    return {src: m.x.src, t: m.x.t, sub: m.x.sub, exata: !dv && exataOk && ((m.fOk === true && m.x.as.length > 0) || (m.fOk !== false && m.d <= 0.05)), duvida: !!dv, opcao: op ? {src: op.x.src, t: op.x.t + (op.x.sub ? ', ' + op.x.sub : '')} : null};
   }
   const _andaresDoTituloX = andaresDoTitulo;
   andaresDoTitulo = function(t){ const r = _andaresDoTituloX(t); if(/(^|\s|·)t[ée]rreo\b/i.test(String(t || ''))) r.push([0, 0]); return r; };
   const _plantaDaUnidadeX = plantaDaUnidade;
-  plantaDaUnidade = function(det, c, a){ return _plantaDaUnidadeX(det, c, a) || plantaReserva(det, c, a); };
+  // último recurso: planta da mesma tipologia e metragem próxima (até 1,5 m²); implantação nunca; planta única só se bater
+  function plantaOutras(det, c, a){
+    if(plantasFotos(det).length) return null;   // quem tem plantas marcadas por final e metragem fica só com elas
+    const arU = areaU(a), tkU = tipoKDe(tipologiaU(det, a) || '');
+    const outras = plantasDoProjeto(det, c).filter(x => x.src && !/implanta/i.test(String(x.t || '') + ' ' + String(x.sub || ''))).map(x => {
+      const txt = String(x.t || '') + ' ' + String(x.sub || ''), r = /(\d+(?:[.,]\d+)?)\s*(?:a\s*(\d+(?:[.,]\d+)?)\s*)?m²/.exec(txt);
+      const lo = r ? +r[1].replace(',', '.') : null, hi = r && r[2] ? +r[2].replace(',', '.') : lo;
+      return {x, xk: plTipoK(txt), fora: arU > 0 && lo != null ? (arU < lo ? lo - arU : arU > hi ? arU - hi : 0) : null};
+    });
+    const rot = outras.filter(o => (!tkU || !o.xk || o.xk === tkU) && o.fora != null && o.fora <= 1.5).sort((p, q) => p.fora - q.fora);
+    if(rot.length){
+      const m = rot[0], la = plLetra(m.x.t + ' ' + (m.x.sub || '')), dv = rot.find(o => { if(o === m || Math.abs(o.fora - m.fora) >= 0.05) return false; const lb = plLetra(o.x.t + ' ' + (o.x.sub || '')); return (o.xk && m.xk && o.xk !== m.xk) || (la && lb && la !== lb); });
+      return {src: m.x.src, t: m.x.t, sub: m.x.sub || '', exata: false, duvida: !!dv};
+    }
+    if(outras.length === 1){ const o = outras[0]; if((tkU && o.xk === tkU) || (o.fora != null && o.fora <= 0.6)) return {src: o.x.src, t: o.x.t, sub: o.x.sub || '', exata: false}; }
+    return null;
+  }
+  plantaDaUnidade = function(det, c, a){ return _plantaDaUnidadeX(det, c, a) || plantaReserva(det, c, a) || plantaOutras(det, c, a); };
   // planta do andar inteiro também pelos títulos ("Planta do 13º pavimento")
   const _pavimentoDaUnidadeX = pavimentoDaUnidade;
   pavimentoDaUnidade = function(det, a){
