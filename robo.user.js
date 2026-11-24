@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.15.0
+// @version      1.16.0
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto, no espelho da Lavvi na Lior e no Anapro da Metrocasa (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -28,7 +28,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.15.0';
+  const VERSAO = '1.16.0';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : host === 'portal.sivez.com.br' ? 'sivez' : null;
   if (!FONTE) return;
@@ -1019,7 +1019,7 @@
   // ---------- ONE: espelho completo de outros empreendimentos, lido em segundo plano (sem mexer na tela) ----------
   // Busca a mesma página que o portal abre no botão "Espelho completo do produto" (EspelhoEmpreendimento.aspx?Emp=...),
   // só leitura, e lê as unidades do HTML. Não navega, não abre aba e não clica em nada.
-  const LS_DONO = 'roboEspelho:dono:' + FONTE, LS_POSC = 'roboEspelho:posc:' + FONTE;
+  const LS_DONO = 'roboEspelho:dono:' + FONTE, LS_POSC = 'roboEspelho:posc:' + FONTE, LS_TODOS = 'roboEspelho:todos:' + FONTE;
   const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   async function souDono() {                      // se houver duas cópias do robô na mesma página, só uma trabalha
@@ -1116,17 +1116,20 @@
   let ultCompleto = 0, buscando = false;
   async function completosONE() {
     const lista = ((cfg && cfg.completos) || []).filter(a => a && a.alvo && (a.emp || a.url));
-    if (!lista.length || buscando) return;
-    if (Date.now() - ultCompleto < Math.max(20, cfg.completos_cada || 90) * 1000) return;
-    if (!(await souDono())) return;
-    buscando = true; ultCompleto = Date.now();
-    const k = Math.min(Math.max(1, cfg.completos_por_ciclo || 2), lista.length);
+    if (!lista.length || buscando) return false;
+    const todos = !!cfg.todos;                    // todos de uma vez (cfg.todos_cada entre uma rodada e outra) ou poucos por ciclo
+    const cada = Math.max(20, (todos ? cfg.todos_cada || 600 : cfg.completos_cada || 90)) * 1000;
+    if (Date.now() - (todos ? Math.max(ultCompleto, +lsGet(LS_TODOS) || 0) : ultCompleto) < cada) return false;
+    if (!(await souDono())) return false;
+    buscando = true; ultCompleto = Date.now(); if (todos) lsSet(LS_TODOS, ultCompleto);
+    const k = todos ? lista.length : Math.min(Math.max(1, cfg.completos_por_ciclo || 2), lista.length);
     let pos = (+lsGet(LS_POSC) || 0) % lista.length;
     try {
       for (let i = 0; i < k; i++) {
+        lsSet(LS_DONO, { id: ID, t: Date.now() }); if (todos) batimento();   // rodada longa: segue como dono
         const a = lista[pos]; pos = (pos + 1) % lista.length; lsSet(LS_POSC, pos);
         const r = await lerCompletoONE(a);
-        if (r.sessao) { st.aviso = 'o portal pediu login ao ler outro empreendimento; pausado'; ultCompleto = Date.now() + 600000; await enviarLeitura(a, null, null, r.info); break; }
+        if (r.sessao) { st.aviso = 'o portal pediu login ao ler outro empreendimento; pausado'; ultCompleto = Date.now() + 600000; if (todos) lsSet(LS_TODOS, 0); await enviarLeitura(a, null, null, r.info); break; }
         if (r.info && r.info.erro === 'rede') { await enviarLeitura(a, null, null, r.info); break; }   // falha de rede: tenta no próximo ciclo
         const l = r.leitura;
         await enviarLeitura(a, l ? { status: l.status, det: l.det, dup: l.dup, semNumero: [], hist: l.hist } : null, r.rotulo || null, r.info);
@@ -1137,6 +1140,7 @@
         await dormir(1500 + Math.random() * 1500);
       }
     } finally { buscando = false; }
+    return true;
   }
 
   let ultRetrato = 0, ultAssinatura = '';
@@ -1162,6 +1166,25 @@
     else if (cfg.recarregar === 'callback' && cfg.controle) { try { const c = W.ASPxClientControl.GetControlCollection().GetByName(cfg.controle); if (c && c.PerformCallback) { recarregado = true; c.PerformCallback(cfg.arg || ''); } } catch (e) {} }
     else if (cfg.recarregar === 'funcao' && cfg.funcao && typeof W[cfg.funcao] === 'function') { recarregado = true; try { W[cfg.funcao](); } catch (e) {} }
   }
+  // Com cfg.todos no servidor basta estar logado no portal, em qualquer página: lê todos os empreendimentos de uma vez
+  // (a mesma página do botão "Espelho completo do produto"), sem depender da janela estar no espelho do NEX Bela Cintra.
+  async function todosONE() {
+    if (/sair\.aspx|login/i.test(location.pathname) || !document.body || document.body.tagName !== 'BODY') return;
+    if (document.querySelector('input[type=password]')) return;   // tela de login
+    if (window.innerWidth * window.innerHeight < 150000) return;    // quadro pequeno do portal (menu, topo)
+    if (!cfg) await lerConfig();
+    if (!cfg || !cfg.todos) return;
+    if (outroVivo() || !(await souDono())) return;
+    batimento();
+    await lerConfig();
+    if (!cfg || !cfg.todos || !Array.isArray(cfg.completos) || !cfg.completos.length) return;
+    mostrar = true;
+    if (!st.ultimo) st.fase = 'lendo';
+    const leu = await completosONE();
+    if (leu) { st.ultimo = Date.now(); st.fase = 'ok'; if (!/pausado/.test(st.aviso || '')) st.aviso = null; }
+    batimento();
+  }
+
   async function cicloONE() {
     if (/Sair\.aspx/i.test(location.pathname)) {
       const m = new URLSearchParams(location.search).get('msg');
@@ -1184,12 +1207,13 @@
       try { await voltarCasa(); } finally { navegando = false; }
       return;
     }
-    if (n < 20) { mostrar = true; st.aviso = 'abra o espelho do NEX Bela Cintra nesta janela'; await enviarRetrato(document, leitura, false); if (cfg && cfg.descobrir !== false) await enviarDescoberta(document); return; }
+    if (n < 20) { mostrar = true; st.aviso = cfg && cfg.todos ? null : 'abra o espelho do NEX Bela Cintra nesta janela'; await enviarRetrato(document, leitura, false); if (cfg && cfg.descobrir !== false) await enviarDescoberta(document); return; }
     mostrar = true; st.aviso = null;
     const nex = naCasa === null ? ehNex(document) : naCasa;
     await enviarRetrato(document, leitura, false);
     if (cfg && cfg.descobrir !== false) await enviarDescoberta(document);
-    if (!nex) { st.aviso = 'este espelho não é o do NEX Bela Cintra'; return; }
+    if (cfg && cfg.todos) return;                 // com todos ligado, leitura e sincronização ficam com o todosONE
+    if (!nex) { st.aviso = cfg && cfg.todos ? null : 'este espelho não é o do NEX Bela Cintra'; return; }
     if (!cfg || !cfg.sincronizar) { st.fase = 'mapeando'; st.ultimo = Date.now(); return; }
     if (cfg.recarregar === 'nenhum' && jaSincronizado) return;   // sem recarregar, a tela não muda: não finge conferência nova
     if (outroVivo()) { st.fase = 'espera'; return; }
@@ -1212,6 +1236,7 @@
       if (!chave()) { st.fase = 'sem-chave'; return; }
       if (FONTE === 'one') {
         await cicloONE();
+        await todosONE();
         st.erro = null; st.sessao = false;
         return;
       }
