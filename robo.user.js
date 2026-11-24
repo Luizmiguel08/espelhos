@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Robô do Espelho de Vendas
 // @namespace    https://luizmiguel08.github.io/espelhos/
-// @version      1.16.0
+// @version      1.16.1
 // @description  Lê a disponibilidade na BLL, no CV CRM (VitaUrbana, Maskan e Vitacon), no portal da ONE no Dommus da Mundo Apto, no espelho da Lavvi na Lior e no Anapro da Metrocasa (a lista de projetos vem do servidor) e atualiza o app Espelhos de Vendas. Só lê; não altera nada nos sistemas (na ONE, lê os outros empreendimentos em segundo plano, sem mexer na tela).
 // @match        https://app.blladv.com.br/*
 // @match        https://vitaurbana.cvcrm.com.br/*
@@ -28,7 +28,7 @@
   'use strict';
   const API = 'https://dptchfjbotmddaniuzvr.supabase.co/rest/v1/rpc/';
   const KEY = 'sb_publishable_K9--vOhW8y5ldlbwzo6m_Q_g_gB9rYP';
-  const VERSAO = '1.16.0';
+  const VERSAO = '1.16.1';
   const host = location.hostname;
   const FONTE = host.includes('blladv') ? 'bll' : host.includes('maskan.cvcrm') ? 'cvmaskan' : host.includes('vitacon.cvcrm') ? 'cvvitacon' : host.includes('cambur.cvcrm') ? 'cvcambur' : host.includes('cvcrm') ? 'cv' : host.includes('oneinnovation') ? 'one' : host.includes('dommus2') ? 'dommus' : host === 'painel.dommus.com.br' ? 'dommusgu' : host === 'app.liorassociados.com.br' ? 'lior' : host === 'metrocasa.anapro.com.br' ? 'anapro' : host === 'portal.sivez.com.br' ? 'sivez' : null;
   if (!FONTE) return;
@@ -1047,14 +1047,21 @@
     opt = opt || {};
     const PAL = Object.assign({}, PALETA, (cfg && cfg.paleta) || {});
     const reNum = opt.num_re ? new RegExp(opt.num_re, 'i') : null;
-    const numDe = ls => { if (reNum) { for (const l of ls) { const m = l.match(reNum); if (m) return String(parseInt(m[1], 10)); } return null; } return acharNumero(ls); };
+    const reRot = opt.rotulo_re ? new RegExp(opt.rotulo_re, 'i') : null;   // rótulo com a torre: grupos nomeados (torre, num) ou (num2, torre2)
+    const minTxt = opt.min_texto != null ? +opt.min_texto : 4;
+    const numDe = ls => {
+      if (reRot) { for (const l of ls) { const m = l.match(reRot), g = m && m.groups; if (g && (g.num || g.num2)) { const t = (g.torre || g.torre2 || '').toUpperCase(); return (t ? t + '-' : '') + String(parseInt(g.num || g.num2, 10)); } } }
+      if (reNum) { for (const l of ls) { const m = l.match(reNum); if (m) return String(parseInt(m[1], 10)); } return null; }
+      return acharNumero(ls);
+    };
     const hist = {};
-    for (const el of doc.querySelectorAll('[style*="background"],[bgcolor]')) { const k = corInline(el); if (k) hist[k] = (hist[k] || 0) + 1; }
+    const coloridos = [];                          // quadros com cor de situação conhecida (para o diagnóstico do que não foi lido)
+    for (const el of doc.querySelectorAll('[style*="background"],[bgcolor]')) { const k = corInline(el); if (k) { hist[k] = (hist[k] || 0) + 1; if (PAL[k] && coloridos.length < 3000) coloridos.push({ el, k }); } }
     const base = opt.celula_sel ? [...doc.querySelectorAll(opt.celula_sel)] : [...doc.querySelectorAll('td,div,span,a,li,p,section,article')];
     const cand = new Map();
     for (const el of base) {
       const tl = (el.textContent || '').length;
-      if (!opt.celula_sel && (tl < 4 || tl > 400)) continue;
+      if (!opt.celula_sel && (tl < minTxt || tl > 400)) continue;
       const ls = linhas(el); if (!ls.length || ls.length > 25) continue;
       const num = numDe(ls); if (!num) continue;
       let stt = null; for (const l of ls) { stt = stTexto(l); if (stt) break; }
@@ -1080,12 +1087,23 @@
     for (const c of achados) { c.g = gDe(c.el); vistos[c.num] = (vistos[c.num] || 0) + 1; if (vistos[c.num] > 1) dup++; }
     const status = {}, det = {}; const porGrupo = dup > 0 || !!opt.grupo_sel;
     for (const c of achados) {
-      const key = porGrupo && grupos.size > 1 ? c.g + '|' + c.num : c.num;
+      let key = porGrupo && grupos.size > 1 ? c.g + '|' + c.num : c.num;
+      if (/^[A-Z]-\d/.test(c.num)) key = c.num;      // o rótulo já traz a torre (A-207)
+      else if (opt.grupo_letras && opt.grupo_sel) {   // torre pela caixa do espelho em que a unidade está, na ordem da página
+        const ge = c.el.closest(opt.grupo_sel), L = ge && grupos.has(ge) ? opt.grupo_letras[grupos.get(ge).i] : null;
+        if (L) key = L + '-' + c.num;
+      }
       if (status[key]) continue;
       status[key] = c.stt; det[key] = c.ls.filter(l => UTIL.test(l)).slice(0, 8).map(x => x.slice(0, 40));
       if (grupos.size) for (const g of grupos.values()) if (g.i === c.g) g.n++;
     }
-    return { status, det, dup, hist, achados, grupos: [...grupos.values()] };
+    let naoLidas = [];                             // muitos quadros coloridos e pouca unidade lida: guarda alguns para ajustar a leitura
+    if (coloridos.length >= 20 && achados.length < coloridos.length * 0.5) {
+      const acs = achados.map(c => c.el);
+      naoLidas = coloridos.filter(c => !acs.some(a => a === c.el || a.contains(c.el) || c.el.contains(a)))
+        .sort((x, y) => (PAL[y.k] === 'disponivel') - (PAL[x.k] === 'disponivel')).slice(0, 4);
+    }
+    return { status, det, dup, hist, achados, grupos: [...grupos.values()], naoLidas };
   }
   function diagCompleto(doc, html, r, l, ms) {    // retrato da página buscada (para ajustar a leitura pelo servidor)
     const anc = el => { const o = []; for (let q = el.parentElement, i = 0; q && i < 5; i++, q = q.parentElement) o.push(q.tagName + (q.id ? '#' + q.id.slice(-40) : '') + (q.className ? '.' + String(q.className).slice(0, 30) : '')); return o; };
@@ -1094,6 +1112,7 @@
     return { http: r.status, caminho: (r.url || '').replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''), tam: html.length, ms,
       titulo: limpa(doc.title).slice(0, 80), elementos: doc.getElementsByTagName('*').length, n: Object.keys(l.status).length, dup: l.dup, contagem: cont,
       cores: Object.entries(l.hist).sort((a, b) => b[1] - a[1]).slice(0, 12), grupos: l.grupos.slice(0, 20), cabecalhos: cab,
+      naoLidas: (l.naoLidas || []).map(c => ({ cor: c.k, linhas: linhas(c.el).slice(0, 6).map(x => x.slice(0, 40)), html: semValores(c.el.outerHTML).replace(/\s+/g, ' ').slice(0, 600), anc: anc(c.el) })),
       amostras: l.achados.filter(c => c.stt === 'disponivel').concat(l.achados.filter(c => c.stt !== 'disponivel')).slice(0, 3)
         .map(c => ({ st: c.stt, html: semValores(c.el.outerHTML).slice(0, 700), anc: anc(c.el), linhas: (c.stt === 'disponivel' ? c.ls : c.ls.filter(x => UTIL.test(x))).slice(0, 8).map(x => x.slice(0, 40)) })),
       inicio: l.achados.length ? undefined : limpa(doc.body ? doc.body.textContent : '').slice(0, 1200),
@@ -1108,7 +1127,7 @@
     if (/sair\.aspx|login/i.test(fim) || /type=["']?password/i.test(html)) return { sessao: true, info: { erro: 'sessao', caminho: fim.replace(/\?.*$/, ''), http: r.status } };
     if (!r.ok) return { info: { erro: 'http ' + r.status, ms: Date.now() - t0 } };
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const l = lerCelulasDoc(doc, (cfg && cfg.completo) || {});
+    const l = lerCelulasDoc(doc, Object.assign({}, (cfg && cfg.completo) || {}, a.completo || {}));   // a.completo: ajuste só deste empreendimento
     const info = diagCompleto(doc, html, r, l, Date.now() - t0);
     const rot = a.rotulo_sel ? limpa((doc.querySelector(a.rotulo_sel) || {}).textContent) : (info.cabecalhos[0] || info.titulo);
     return { leitura: Object.keys(l.status).length ? l : null, rotulo: rot, info };
