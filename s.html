@@ -919,7 +919,7 @@ window.NEX = (function(){
   }
   // final da unidade: o fim do número ("1507" no 15º andar é o final 07); sem isso, a coluna do espelho
   function finalUn(u){
-    const n = String(u.n || ''), an = String(u.an == null ? '' : u.an);
+    const n = String(u.n || '').replace(/^[A-Z]-(?=\d)/, ''), an = String(u.an == null ? '' : u.an);   // A-1701: torre na frente do número
     if(/^\d{3,5}$/.test(n) && /^\d{1,2}$/.test(an) && n.startsWith(an) && n.length - an.length >= 1 && n.length - an.length <= 2) return +n.slice(an.length);
     return u.col != null && u.col !== '' && !isNaN(+u.col) ? (+u.col) + 1 : null;
   }
@@ -942,7 +942,8 @@ window.NEX = (function(){
       const andarOk = !ands.length || an == null || ands.some(([de, ate]) => an >= de && an <= ate);
       const tOk = !tk || !tipoPl(tt) || tipoPl(tt) === tk;
       const aOk = d <= (inteira ? 1 : 0.6) || faixa;
-      if(!(andarOk && tOk && (fOk === false ? d <= 0.3 : (aOk || (fOk === true && (d <= 3 || !as.length)))))) continue;   // outro final com a mesma metragem: planta da tipologia
+      const oficial = !!f.oficial && fOk === true && !(ar > 0) && ands.length && an != null;   // planta oficial do final e do andar: vale sem a metragem
+      if(!(andarOk && tOk && (oficial || (fOk === false ? d <= 0.3 : (aOk || (fOk === true && (d <= 3 || !as.length))))))) continue;   // outro final com a mesma metragem: planta da tipologia
       cands.push({f, tt, fOk, d, nA: as.length, opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt)});
     }
     if(!cands.length) return null;

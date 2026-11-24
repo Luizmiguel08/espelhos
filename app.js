@@ -1356,7 +1356,7 @@
       if(fins.some(isNaN)) fins = [];
       if(!fins.length) fins = finaisDoTitulo(tt);
       out.push({src, t: partes[0], sub: partes.slice(1).join(', '), tt, as: (Array.isArray(f.a) ? f.a : []).map(Number).filter(x => x > 0), fins, andares: andaresDoTitulo(tt),
-        pav: /pavimento/i.test(tt), opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt)});
+        pav: /pavimento/i.test(tt), opc: /op[cç][aã]o|ampliad|outra vers/i.test(tt), tec: /t[eé]cnica/i.test(tt), oficial: !!f.oficial});
     }
     return out;
   }
@@ -2259,7 +2259,8 @@
         const andarOk = !x.andares.length || an == null || x.andares.some(([de, ate]) => an >= de && an <= ate);
         const xk = plTipoK(x.tt || x.t), tOk = !tk || !xk || xk === tk || (fOk === true && d <= 0.6);   // loja não recebe planta de apartamento
         return {x, fOk, d, aOk: d <= 0.6 || faixa, andarOk, tOk};
-      }).filter(o => o.tOk && o.fOk !== false && o.andarOk && (o.aOk || (o.fOk && o.d <= 3)));
+      }).filter(o => o.tOk && o.fOk !== false && o.andarOk && (o.aOk || (o.fOk && o.d <= 3)
+        || (o.x.oficial && o.fOk === true && !(ar > 0) && o.x.andares.length && an != null)));   // planta oficial do final e do andar (material da incorporadora): vale sem a metragem
       if(!cands.length) return null;
       cands.sort((p, q) => (q.fOk === true) - (p.fOk === true) || p.x.opc - q.x.opc || p.x.tec - q.x.tec || p.d - q.d);
       const m = cands[0], op = cands.find(o => o !== m && o.x.opc && !o.x.tec && Math.abs(o.d - m.d) < 0.6), dv = cands.find(o => o !== m && !o.x.opc && plEmpate(o, m, finU));
