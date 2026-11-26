@@ -1250,6 +1250,11 @@
   const ehReprint = m => /reprint/i.test(String((m && m.n) || ''));
   const rotuloOficial = m => ehReprint(m) ? 'Reprint do lançamento' : (m.c || m.n);
   function bookDe(det, c){
+    // Na ONE o book é o "material técnico": quando existe, é ele que abre no botão do book, antes do book.pdf da ficha (que às vezes é o reprint do lançamento)
+    const tecMo = c && Array.isArray(c.material_oficial) ? c.material_oficial.find(m => m && idDrive(m.id) && !ehReprint(m) && /t[eé]cnico/i.test((m.c || '') + ' ' + (m.n || ''))) : null;
+    if(tecMo) return {u: driveBaixar(tecMo.id), t: 'Book (material técnico)', s: tecMo.mb ? String(tecMo.mb).replace('.', ',') + ' MB' : 'PDF', arq: true};
+    const tecMat = det.info && Array.isArray(det.info.material) ? det.info.material.find(x => x && x.tipo === 'pdf' && /t[eé]cnico/i.test(x.t || '') && urlSegura(x.u)) : null;
+    if(tecMat) return {u: tecMat.u, t: tecMat.t, s: 'PDF', arq: true};
     if(c && c.book && c.pasta && /^[A-Za-z0-9_.-]+\.pdf$/i.test(c.book)) return {u: ESP + 'nex/' + c.pasta + c.book, t: 'Book do empreendimento', s: 'PDF', arq: true, mesmo: true};
     // o reprint (anúncio do lançamento) às vezes vem como "Book do cliente" (Caiubi, Bandeira Paulista): não é book.
     // Sem book do cliente de verdade, vale o material técnico, como no Capote Valente; o book de vistas fica por último

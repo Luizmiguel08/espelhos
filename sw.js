@@ -1,6 +1,6 @@
 /* Service worker dos Espelhos de Vendas 3.0: abre sem internet, guarda as fotos das fichas e mostra os avisos de venda,
    reserva e buscas salvas. A casca é a do app do corretor; os avisos são os mesmos do app anterior. */
-const VERSAO = 'espelhos-casca-466dc2c7ed';
+const VERSAO = 'espelhos-casca-5578d4bd5b';
 const FOTOS = 'espelhos-fotos';
 const MAX_FOTOS = 250;
 const CASCA = [
